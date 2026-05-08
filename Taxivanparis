@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taxi Van Paris | Chauffeur Privé Classe V</title>
+    <style>
+        :root { --gold: #c9a24a; --black: #000000; --grey: #121212; --white: #ffffff; }
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: var(--black); color: var(--white); margin: 0; padding: 0; overflow-x: hidden; }
+        
+        /* Design Header Uber-Style */
+        .hero { 
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), 
+                        url('https://images.unsplash.com/photo-1559416523-140ddc3d238c?auto=format&fit=crop&q=80&w=1000');
+            background-size: cover; background-position: center; height: 220px; display: flex; align-items: center; justify-content: center; text-align: center;
+        }
+
+        .container { max-width: 480px; margin: -40px auto 20px; padding: 15px; }
+        .card { background: var(--grey); border-radius: 12px; padding: 25px; border: 1px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        
+        h1 { color: var(--gold); font-size: 1.6rem; text-transform: uppercase; margin: 0; letter-spacing: 1px; }
+        .tagline { font-size: 0.7rem; opacity: 0.6; letter-spacing: 2px; margin-top: 5px; }
+
+        label { display: block; margin: 15px 0 5px; font-size: 0.75rem; color: var(--gold); font-weight: bold; letter-spacing: 1px; }
+        input, select { width: 100%; padding: 14px; border-radius: 8px; border: 1px solid #333; background: #222; color: white; box-sizing: border-box; font-size: 1rem; outline: none; }
+        input:focus { border-color: var(--gold); }
+
+        /* Emplacement Carte */
+        #map-area { width: 100%; height: 180px; border-radius: 8px; margin-top: 15px; background: #222; border: 1px solid #333; display: flex; align-items: center; justify-content: center; color: #444; font-size: 0.8rem; }
+
+        /* Affichage Prix Gold */
+        .price-box { background: linear-gradient(145deg, #c9a24a, #a6853a); color: var(--black); padding: 20px; border-radius: 10px; text-align: center; margin: 20px 0; display: none; transition: 0.5s; }
+        .price-label { font-size: 0.8rem; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; display: block; }
+        .price-val { font-size: 2.5rem; font-weight: 900; }
+
+        .btn { display: block; width: 100%; padding: 18px; border-radius: 8px; font-weight: bold; text-align: center; text-decoration: none; cursor: pointer; border: none; font-size: 1.1rem; transition: 0.3s; }
+        .btn-white { background: var(--white); color: var(--black); margin-bottom: 12px; }
+        .btn-gold { background: var(--gold); color: var(--black); box-shadow: 0 4px 15px rgba(201, 162, 74, 0.3); }
+        
+        .footer-info { display: flex; justify-content: space-around; margin-top: 25px; font-size: 0.7rem; opacity: 0.5; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="hero">
+    <div>
+        <h1>Taxi Van Paris</h1>
+        <div class="tagline">EXCELLENCE & SÉCURITÉ ENFANTS</div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="card">
+        <label>📍 POINT DE DÉPART</label>
+        <input type="text" id="start_point" placeholder="Adresse ou Gare">
+
+        <label>🏁 DESTINATION</label>
+        <input type="text" id="end_point" placeholder="Aéroport ou Adresse">
+
+        <div id="map-area">Visualisation du trajet activée...</div>
+
+        <label>👶 ÉQUIPEMENT ENFANT (OFFERT)</label>
+        <select id="kids_service">
+            <option value="Aucun">Pas besoin d'équipement</option>
+            <option value="1 Siège Bébé">1 Siège Bébé</option>
+            <option value="1 Réhausseur">1 Réhausseur</option>
+            <option value="Siège Bébé + Réhausseur">Siège Bébé + Réhausseur</option>
+        </select>
+
+        <label>📱 VOTRE TÉLÉPHONE</label>
+        <input type="tel" id="user_phone" placeholder="06 .. .. .. ..">
+
+        <button class="btn btn-white" style="margin-top: 25px;" onclick="calculerCourse()">VOIR LE PRIX</button>
+
+        <div id="priceDisplay" class="price-box">
+            <span class="price-label">Tarif Van Mercedes Tout Inclus</span>
+            <div class="price-val" id="total_val">-- €</div>
+            <span style="font-size: 0.7rem;">Capacité : 7 Passagers + Bagages</span>
+        </div>
+
+        <button id="wa_confirm" class="btn btn-gold" style="display:none;" onclick="ouvrirWhatsApp()">RÉSERVER SUR WHATSAPP</button>
+    </div>
+
+    <div class="footer-info">
+        <span>🚐 MERCEDES CLASSE V</span>
+        <span>🍼 SIÈGE BÉBÉ</span>
+        <span>💳 CB / AMEX / PAYPAL</span>
+    </div>
+</div>
+
+<script>
+    function calculerCourse() {
+        const depart = document.getElementById('start_point').value.toLowerCase();
+        const arrivee = document.getElementById('end_point').value.toLowerCase();
+        const phone = document.getElementById('user_phone').value;
+
+        if (depart.length < 3 || arrivee.length < 3 || phone.length < 8) {
+            alert("Veuillez saisir les adresses et votre numéro de téléphone.");
+            return;
+        }
+
+        let prixFinal = 0;
+
+        // Logique de calcul invisible (Prise en charge incluse + 2.80€/km)
+        if (arrivee.includes("roissy") || arrivee.includes("cdg") || depart.includes("roissy")) {
+            prixFinal = 90; // Forfait CDG
+        } else if (arrivee.includes("orly") || depart.includes("orly")) {
+            prixFinal = 80; // Forfait Orly
+        } else {
+            // Simulation d'une distance moyenne de 18km pour les trajets hors aéroport
+            // Formule : 15 (base) + (18km * 2.80) = 65.4
+            prixFinal = 15 + (18 * 2.80);
+        }
+
+        document.getElementById('total_val').innerText = Math.round(prixFinal) + " €";
+        document.getElementById('priceDisplay').style.display = "block";
+        document.getElementById('wa_confirm').style.display = "block";
+        
+        // Scroll automatique vers le prix
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }
+
+    function ouvrirWhatsApp() {
+        const dep = document.getElementById('start_point').value;
+        const arr = document.getElementById('end_point').value;
+        const kids = document.getElementById('kids_service').value;
+        const price = document.getElementById('total_val').innerText;
+        const tel = document.getElementById('user_phone').value;
+
+        const texte = `NOUVELLE RÉSERVATION TAXI VAN PARIS\n\n` +
+                      `📍 DÉPART : ${dep}\n` +
+                      `🏁 DESTINATION : ${arr}\n` +
+                      `👶 SIÈGE : ${kids}\n` +
+                      `💰 TARIF : ${price}\n` +
+                      `📱 CLIENT : ${tel}`;
+
+        window.location.href = "https://wa.me/33649553640?text=" + encodeURIComponent(texte);
+    }
+</script>
+
+</body>
+</html>
+
