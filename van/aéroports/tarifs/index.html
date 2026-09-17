@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tarifs Taxi Van Paris — Grille Complète Berline & Van | Taxis Van Paris</title>
+<meta name="description" content="Grille tarifaire complète Taxis Van Paris : berline et van vers tous les aéroports, gares et villes de France. Tarif 2,80€/km. Devis au 06 49 55 36 40.">
+<link rel="canonical" href="https://taxisvanparis.fr/tarifs/">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<nav>
+  <a href="/" class="logo-wrap" style="text-decoration:none"><div class="logo-text">TAXIS <span>VAN</span> PARIS</div><div class="logo-sub">Transferts · Toute la France</div></a>
+  <div class="nav-links">
+    <a href="/" class="nav-link">Accueil</a><a href="/berline/" class="nav-link">Berline</a><a href="/van/" class="nav-link">Van</a><a href="/aeroports/" class="nav-link">Aéroports</a><a href="/tarifs/" class="nav-link active">Tarifs</a><a href="/contact/" class="nav-link">Contact</a>
+  </div>
+  <div class="nav-btns">
+    <a href="https://wa.me/33649553640" target="_blank" class="nbtn nbtn-wa"><span>WhatsApp</span></a>
+    <a href="tel:+33649553640" class="nbtn nbtn-tel">📞 <span>06 49 55 36 40</span></a>
+  </div>
+</nav>
+<div class="breadcrumb"><a href="/">Accueil</a> › Tarifs</div>
+<section class="hero">
+  <div class="hero-grid"></div><div class="hero-glow"></div>
+  <div class="hero-inner">
+    <div class="hero-badge">💶 Transparence totale sur nos prix</div>
+    <h1>NOS <span>TARIFS</span></h1>
+    <p class="hero-sub">Grille tarifaire complète Berline & Van</p>
+    <p class="hero-sub2">Tarifs fixes région parisienne · 2,80 € / km longue distance</p>
+  </div>
+</section>
+<section class="section bg-white">
+  <div class="sec-hdr"><div class="sec-lbl">📍 Région parisienne</div><h2 class="sec-title">TARIFS <span>FIXES</span></h2></div>
+  <div class="tarifs-wrap">
+    <div class="tarif-note"><strong>Tarifs fixes garantis</strong> · Supplément : <strong>+5,50 € / pers.</strong> à partir du 4ème · Retour = même tarif</div>
+    <table>
+      <thead><tr><th>Destination</th><th>Berline</th><th style="text-align:right">Van</th></tr></thead>
+      <tbody>
+        <tr><td><div class="dest-cell"><span class="dest-icon">✈</span>Paris → CDG</div></td><td style="font-family:'Bebas Neue';font-size:1.2rem;color:#CC0000">70 €</td><td class="price">90 €</td></tr>
+        <tr><td><div class="dest-cell"><span class="dest-icon">✈</span>Paris → Orly</div></td><td style="font-family:'Bebas Neue';font-size:1.2rem;color:#CC0000">60 €</td><td class="price">80 €</td></tr>
+        <tr><td><div class="dest-cell"><span class="dest-icon">🚉</span>Paris → Gares parisiennes</div></td><td style="font-family:'Bebas Neue';font-size:1.2rem;color:#CC0000">50 €</td><td class="price">—</td></tr>
+        <tr><td><div class="dest-cell"><span class="dest-icon">🎡</span>Paris → Disneyland</div></td><td style="font-family:'Bebas Neue';font-size:1.2rem;color:#CC0000">—</td><td class="price">130 €</td></tr>
+        <tr><td><div class="dest-cell"><span class="dest-icon">✈</span>Paris → Beauvais</div></td><td style="font-family:'Bebas Neue';font-size:1.2rem;color:#CC0000">—</td><td class="price">190 €</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+<section class="section bg-light">
+  <div class="sec-hdr"><div class="sec-lbl">🗺 Longue distance</div><h2 class="sec-title">TOUTE LA <span>FRANCE</span></h2><p class="sec-sub">2,80 € / km · Tarifs indicatifs</p></div>
+  <div class="tarifs-wrap">
+    <table>
+      <thead><tr><th>Destination</th><th>Distance</th><th>Berline</th><th style="text-align:right">Van</th></tr></thead>
+      <tbody id="t"></tbody>
+    </table>
+  </div>
+</section>
+<div class="contact-ban"><h2>DEMANDER UN <span>DEVIS</span></h2><p>Destination non listée ? Contactez-nous !</p><div class="cbtns"><a href="https://wa.me/33649553640" target="_blank" class="ctbtn ctbtn-wa">📱 WhatsApp — 06 49 55 36 40</a><a href="tel:+33649553640" class="ctbtn ctbtn-tel">📞 Appeler — 06 49 55 36 40</a></div></div>
+<footer><div class="foot-logo">TAXIS <span>VAN</span> PARIS</div><div class="foot-links"><a href="/">Accueil</a><a href="/berline/">Berline</a><a href="/van/">Van</a><a href="/aeroports/">Aéroports</a><a href="/tarifs/">Tarifs</a><a href="/contact/">Contact</a></div><p>📞 <a href="tel:+33649553640">06 49 55 36 40</a> · <a href="https://wa.me/33649553640">WhatsApp</a></p><p style="margin-top:.5rem;">© 2025 Taxis Van Paris — AB Taxis Services · SIREN 912 763 013 · Nanterre (92)</p></footer>
+<script>
+const c=[['Chartres',95],['Amiens',145],['Reims',143],['Rouen',135],['Lille',225],['Caen',243],['Nantes',385],['Bordeaux',595],['Toulouse',700],['Lyon',470],['Marseille',775],['Nice',940]];
+const t=document.getElementById('t');
+c.forEach(([n,k])=>{const b=Math.round(11+k*2.8),v=Math.round(15+k*2.8);t.innerHTML+=`<tr><td>${n}</td><td class="km-cell">~${k} km</td><td style="font-family:'Bebas Neue';font-size:1.1rem;color:#CC0000">${b} €</td><td class="price">${v} €</td></tr>`;});
+</script>
+</body></html>
