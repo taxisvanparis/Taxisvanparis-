@@ -1709,5 +1709,21 @@ function demandeDevis(service) {
 window.initGooglePlaces = window.initGooglePlaces || function(){};
 </script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCotWtH67rWpOKRwxTGXtxj-oVcc0vwOVg&libraries=places&callback=initGooglePlaces&language=fr" async defer></script>
+<script>
+(function(){
+  var pageToHash = {home:'accueil', booking:'reserver', fleet:'flotte', services:'services', contact:'contact', faq:'faq'};
+  var hashToPage = {accueil:'home', reserver:'booking', flotte:'fleet', services:'services', contact:'contact', faq:'faq'};
+  var original = window.goPage;
+  window.goPage = function(page){
+    original(page);
+    if(pageToHash[page]){ history.replaceState(null, '', '#' + pageToHash[page]); }
+  };
+  window.addEventListener('DOMContentLoaded', function(){
+    var h = location.hash.replace('#','');
+    if(hashToPage[h]){ window.goPage(hashToPage[h]); }
+  });
+})();
+</script>
+
 </body>
 </html>
