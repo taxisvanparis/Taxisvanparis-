@@ -1593,7 +1593,14 @@ function calculer() {
     return false;
   }
 
-  let forfaitApplique = false;
+   function isGare(addr) {
+  if (!addr) return false;
+  const garesMots = ['gare du nord','gare de lyon',"gare de l'est",'gare montparnasse','gare saint-lazare',"gare d'austerlitz",'gare de bercy','gare'];
+  return garesMots.some(m => addr.includes(m));
+}
+
+
+let forfaitApplique = false;
 
   // Paris → Roissy
   // Type aéroport depuis coords arr si sélectionné via modal
@@ -1640,6 +1647,11 @@ function calculer() {
     else total = 215;
     forfaitApplique = true;
   }
+  else if ((depParis75 && isGare(arrAddr)) || (arrParis75 && isGare(depAddr)) || (isGare(depAddr) && isGare(arrAddr))) {
+total = 50;
+forfaitApplique = true;
+}
+
 
   // ── Plafonds zone taxi parisien (75, 92, 93, 94) hors forfait ──
   if (!forfaitApplique) {
