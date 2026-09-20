@@ -1776,5 +1776,32 @@ window.initGooglePlaces = window.initGooglePlaces || function(){};
 })();
 </script>
 
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+  import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBN8uBFONIt1tDTH9C-NIQKeulFdJ2m26Q",
+    authDomain: "taxis-van-paris-by-abts.firebaseapp.com",
+    projectId: "taxis-van-paris-by-abts",
+    storageBucket: "taxis-van-paris-by-abts.firebasestorage.app",
+    messagingSenderId: "53887245170",
+    appId: "1:53887245170:web:942537659f6de1041f9beb",
+    measurementId: "G-3ZET7NEXW4"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  window.enregistrerReservation = async function(data) {
+    try {
+      await addDoc(collection(db, "reservations"), data);
+      console.log("Réservation enregistrée dans Firebase");
+    } catch (e) {
+      console.error("Erreur Firebase:", e);
+    }
+  };
+</script>
+
 </body>
 </html>
