@@ -178,4 +178,608 @@
   .course-card .top-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
   .course-card .date-heure{font-weight:600;color:var(--ink);font-size:15px;}
   .route{margin-bottom:12px;}
-  .route .stop{display:flex;gap:10
+  .route .stop{display:flex;gap:10px;align-items:flex-start;font-size:14px;margin-bottom:6px;}
+  .route .stop .mark{color:var(--gold);font-weight:700;}
+  .course-meta{font-size:13px;color:var(--muted);margin-bottom:14px;}
+  .course-actions{display:flex;gap:8px;flex-wrap:wrap;}
+  .course-actions a,.course-actions button{
+    flex:1;text-align:center;padding:10px;border-radius:8px;font-size:13.5px;font-weight:600;
+    text-decoration:none;border:none;
+  }
+  .action-call{background:var(--amber-bg);color:var(--amber);}
+  .action-map{background:#E4EBF7;color:#2F5AA8;}
+  .action-done{background:var(--green);color:#fff;}
+
+  @media (max-width:820px){
+    #sidebar{position:fixed;left:-230px;top:0;bottom:0;z-index:40;transition:left .2s;}
+    #sidebar.mobile-open{left:0;}
+    #main{padding:20px 16px;}
+    #topbar{padding:16px 18px;}
+    .grid2{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ===================== LOGIN ===================== -->
+<div id="login-screen">
+  <div class="login-card">
+    <h1 class="brand">Taxis Van Paris</h1>
+    <span class="brand-sub"></span>
+    <p class="tag">Connexion au tableau de bord</p>
+    <div class="field">
+      <label for="login-email">Adresse e-mail</label>
+      <input id="login-email" type="email" autocomplete="username" placeholder="vous@exemple.fr">
+    </div>
+    <div class="field">
+      <label for="login-password">Mot de passe</label>
+      <input id="login-password" type="password" autocomplete="current-password" placeholder="••••••••">
+    </div>
+    <button class="btn-primary" id="btn-login">Se connecter</button>
+    <div id="login-error"></div>
+  </div>
+</div>
+
+<!-- ===================== ADMIN APP ===================== -->
+<div id="app">
+  <div id="sidebar">
+    <h2 class="brand">Taxis Van Paris</h2>
+    <span class="brand-sub" style="color:#8B93A7;font-size:12px;margin-bottom:28px;display:block;">Tableau de bord</span>
+    <button class="nav-item active" data-tab="reservations"><span class="dot"></span>Réservations</button>
+    <button class="nav-item" data-tab="facturation"><span class="dot"></span>Facturation</button>
+    <button class="nav-item" data-tab="chauffeurs"><span class="dot"></span>Chauffeurs</button>
+    <div id="sidebar-footer">
+      <div class="who"><strong id="admin-name">—</strong><span id="admin-email">—</span></div>
+      <button class="btn-logout" id="btn-logout-admin">Se déconnecter</button>
+    </div>
+  </div>
+
+  <div id="main-wrap">
+    <div id="topbar">
+      <div>
+        <h1 id="topbar-title">Réservations</h1>
+        <div class="topbar-sub" id="topbar-sub">Toutes les courses en cours et à venir</div>
+      </div>
+      <button class="btn-gold" id="btn-new-primary">+ Nouvelle réservation</button>
+    </div>
+
+    <div id="main">
+      <!-- RÉSERVATIONS -->
+      <div class="tab-panel active" id="tab-reservations">
+        <div class="stats-row">
+          <div class="stat-card"><div class="label">En attente</div><div class="value" id="stat-attente">0</div></div>
+          <div class="stat-card"><div class="label">Confirmées</div><div class="value" id="stat-confirmees">0</div></div>
+          <div class="stat-card"><div class="label">Aujourd'hui</div><div class="value" id="stat-aujourdhui">0</div></div>
+        </div>
+        <div class="panel-head">
+          <div class="filters">
+            <select id="filter-statut-resa">
+              <option value="">Tous les statuts</option>
+              <option value="en attente">En attente</option>
+              <option value="confirmée">Confirmée</option>
+              <option value="terminée">Terminée</option>
+              <option value="annulée">Annulée</option>
+            </select>
+          </div>
+        </div>
+        <table>
+          <thead><tr>
+            <th>Date / heure</th><th>Client</th><th>Trajet</th><th>Véhicule</th><th>Chauffeur</th><th>Prix</th><th>Statut</th><th></th>
+          </tr></thead>
+          <tbody id="resa-tbody"><tr class="empty-row"><td colspan="8">Chargement…</td></tr></tbody>
+        </table>
+      </div>
+
+      <!-- FACTURATION -->
+      <div class="tab-panel" id="tab-facturation">
+        <div class="stats-row">
+          <div class="stat-card"><div class="label">Encaissé ce mois-ci</div><div class="value" id="stat-encaisse">0 €</div></div>
+          <div class="stat-card"><div class="label">En attente de paiement</div><div class="value" id="stat-attente-paiement">0 €</div></div>
+          <div class="stat-card"><div class="label">Impayé</div><div class="value" id="stat-impaye">0 €</div></div>
+        </div>
+        <div class="panel-head">
+          <div class="filters">
+            <select id="filter-statut-facture">
+              <option value="">Tous les statuts</option>
+              <option value="payée">Payée</option>
+              <option value="en attente">En attente</option>
+              <option value="impayée">Impayée</option>
+            </select>
+          </div>
+        </div>
+        <table>
+          <thead><tr><th>Date</th><th>Client</th><th>Trajet</th><th>Montant</th><th>Statut</th><th></th></tr></thead>
+          <tbody id="facture-tbody"><tr class="empty-row"><td colspan="6">Chargement…</td></tr></tbody>
+        </table>
+      </div>
+
+      <!-- CHAUFFEURS -->
+      <div class="tab-panel" id="tab-chauffeurs">
+        <div class="panel-head">
+          <div></div>
+        </div>
+        <table>
+          <thead><tr><th>Nom</th><th>Téléphone</th><th>Véhicule</th><th>Statut</th><th>Compte app chauffeur</th><th></th></tr></thead>
+          <tbody id="chauffeur-tbody"><tr class="empty-row"><td colspan="6">Chargement…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== DRIVER VIEW ===================== -->
+<div id="driver-view">
+  <div id="driver-top">
+    <div class="who"><strong id="driver-name">—</strong><span>Mes courses</span></div>
+    <button class="btn-logout" id="btn-logout-driver">Déconnexion</button>
+  </div>
+  <div id="driver-list"></div>
+</div>
+
+<!-- ===================== MODAL RÉSERVATION ===================== -->
+<div class="modal-overlay" id="modal-reservation">
+  <div class="modal">
+    <h2>Nouvelle réservation</h2>
+    <div class="grid2">
+      <div class="field"><label>Client</label><input id="f-nom" type="text"></div>
+      <div class="field"><label>Téléphone</label><input id="f-tel" type="tel"></div>
+      <div class="field"><label>Départ</label><input id="f-dep" type="text"></div>
+      <div class="field"><label>Arrivée</label><input id="f-arr" type="text"></div>
+      <div class="field"><label>Date</label><input id="f-date" type="date"></div>
+      <div class="field"><label>Heure</label><input id="f-heure" type="time"></div>
+      <div class="field"><label>Passagers</label><input id="f-pax" type="number" min="1" value="1"></div>
+      <div class="field"><label>Véhicule</label>
+        <select id="f-vh"><option>Berline</option><option>Van</option></select>
+      </div>
+      <div class="field"><label>Prix estimé (€)</label><input id="f-prix" type="number" min="0" step="0.5"></div>
+      <div class="field"><label>Chauffeur assigné</label>
+        <select id="f-chauffeur"><option value="">Non assigné</option></select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" id="btn-cancel-resa">Annuler</button>
+      <button class="btn-gold" id="btn-save-resa">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== MODAL FACTURE ===================== -->
+<div class="modal-overlay" id="modal-facture">
+  <div class="modal">
+    <h2>Nouvelle facture</h2>
+    <div class="grid2">
+      <div class="field"><label>Client</label><input id="ff-client" type="text"></div>
+      <div class="field"><label>Trajet</label><input id="ff-trajet" type="text"></div>
+      <div class="field"><label>Montant (€)</label><input id="ff-montant" type="number" min="0" step="0.5"></div>
+      <div class="field"><label>Date</label><input id="ff-date" type="date"></div>
+      <div class="field"><label>Statut</label>
+        <select id="ff-statut"><option value="en attente">En attente</option><option value="payée">Payée</option><option value="impayée">Impayée</option></select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" id="btn-cancel-facture">Annuler</button>
+      <button class="btn-gold" id="btn-save-facture">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== MODAL CHAUFFEUR ===================== -->
+<div class="modal-overlay" id="modal-chauffeur">
+  <div class="modal">
+    <h2>Nouveau chauffeur</h2>
+    <div class="grid2">
+      <div class="field"><label>Nom</label><input id="fc-nom" type="text"></div>
+      <div class="field"><label>Téléphone</label><input id="fc-tel" type="tel"></div>
+      <div class="field"><label>Véhicule</label><input id="fc-vh" type="text" placeholder="Ex : Van Mercedes Classe V"></div>
+      <div class="field"><label>Statut</label>
+        <select id="fc-statut"><option value="disponible">Disponible</option><option value="en course">En course</option><option value="hors service">Hors service</option></select>
+      </div>
+      <div class="field" style="grid-column:1/-1;">
+        <label>UID compte app chauffeur (optionnel)</label>
+        <input id="fc-uid" type="text" placeholder="Voir instructions plus bas pour créer son accès">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" id="btn-cancel-chauffeur">Annuler</button>
+      <button class="btn-gold" id="btn-save-chauffeur">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+  import {
+    getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut
+  } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+  import {
+    getFirestore, collection, doc, addDoc, updateDoc, deleteDoc,
+    onSnapshot, query, where, orderBy, getDoc, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+  // ============================================================
+  // 1) COLLE ICI LA CONFIGURATION DE TON PROJET FIREBASE
+  //    Firebase Console > Paramètres du projet > Général >
+  //    "Vos applications" > icône Web (</>) > Config SDK
+  // ============================================================
+  const firebaseConfig = {
+    apiKey: "COLLE_TA_CLE_API_ICI",
+    authDomain: "COLLE_TON_AUTH_DOMAIN_ICI",
+    projectId: "COLLE_TON_PROJECT_ID_ICI",
+    storageBucket: "COLLE_TON_STORAGE_BUCKET_ICI",
+    messagingSenderId: "COLLE_TON_SENDER_ID_ICI",
+    appId: "COLLE_TON_APP_ID_ICI"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  let currentRole = null;
+  let currentUid = null;
+  let currentUnsubs = [];
+  let reservationsCache = [];
+  let facturesCache = [];
+  let chauffeursCache = [];
+
+  // ---------------- LOGIN ----------------
+  document.getElementById("btn-login").addEventListener("click", doLogin);
+  document.getElementById("login-password").addEventListener("keydown", e => { if (e.key === "Enter") doLogin(); });
+
+  function doLogin() {
+    const email = document.getElementById("login-email").value.trim();
+    const pass = document.getElementById("login-password").value;
+    const errBox = document.getElementById("login-error");
+    errBox.textContent = "";
+    if (!email || !pass) { errBox.textContent = "Merci de renseigner l'e-mail et le mot de passe."; return; }
+    signInWithEmailAndPassword(auth, email, pass).catch(err => {
+      errBox.textContent = "Connexion impossible : vérifiez l'e-mail et le mot de passe.";
+      console.error(err);
+    });
+  }
+
+  document.getElementById("btn-logout-admin").addEventListener("click", () => signOut(auth));
+  document.getElementById("btn-logout-driver").addEventListener("click", () => signOut(auth));
+
+  onAuthStateChanged(auth, async (user) => {
+    cleanupListeners();
+    if (!user) {
+      document.getElementById("login-screen").style.display = "flex";
+      document.getElementById("app").classList.remove("shown");
+      document.getElementById("driver-view").classList.remove("shown");
+      return;
+    }
+    currentUid = user.uid;
+    const userDocSnap = await getDoc(doc(db, "users", user.uid));
+    if (!userDocSnap.exists()) {
+      document.getElementById("login-error").textContent =
+        "Compte connecté mais aucun profil trouvé dans Firestore (collection 'users'). Contactez l'administrateur.";
+      signOut(auth);
+      return;
+    }
+    const profile = userDocSnap.data();
+    currentRole = profile.role;
+    document.getElementById("login-screen").style.display = "none";
+
+    if (currentRole === "admin") {
+      document.getElementById("admin-name").textContent = profile.nom || "Administrateur";
+      document.getElementById("admin-email").textContent = user.email;
+      document.getElementById("app").classList.add("shown");
+      startAdminListeners();
+    } else if (currentRole === "chauffeur") {
+      document.getElementById("driver-name").textContent = profile.nom || "Chauffeur";
+      document.getElementById("driver-view").classList.add("shown");
+      startDriverListener(user.uid);
+    } else {
+      document.getElementById("login-error").textContent = "Rôle inconnu pour ce compte.";
+      signOut(auth);
+    }
+  });
+
+  function cleanupListeners() {
+    currentUnsubs.forEach(fn => fn());
+    currentUnsubs = [];
+  }
+
+  // ---------------- NAV TABS ----------------
+  const tabTitles = {
+    reservations: ["Réservations", "Toutes les courses en cours et à venir"],
+    facturation: ["Facturation", "Suivi des paiements clients"],
+    chauffeurs: ["Chauffeurs", "Équipe et disponibilités"]
+  };
+  document.querySelectorAll(".nav-item").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".nav-item").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      const tab = btn.dataset.tab;
+      document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+      document.getElementById("tab-" + tab).classList.add("active");
+      document.getElementById("topbar-title").textContent = tabTitles[tab][0];
+      document.getElementById("topbar-sub").textContent = tabTitles[tab][1];
+      document.getElementById("btn-new-primary").textContent =
+        tab === "reservations" ? "+ Nouvelle réservation" :
+        tab === "facturation" ? "+ Nouvelle facture" : "+ Nouveau chauffeur";
+      document.getElementById("btn-new-primary").dataset.target = tab;
+    });
+  });
+  document.getElementById("btn-new-primary").dataset.target = "reservations";
+  document.getElementById("btn-new-primary").addEventListener("click", () => {
+    const target = document.getElementById("btn-new-primary").dataset.target;
+    if (target === "reservations") openResaModal();
+    else if (target === "facturation") openFactureModal();
+    else openChauffeurModal();
+  });
+
+  // ---------------- ADMIN: LISTENERS ----------------
+  function startAdminListeners() {
+    const qResa = query(collection(db, "reservations"), orderBy("date", "desc"));
+    currentUnsubs.push(onSnapshot(qResa, snap => {
+      reservationsCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderReservations();
+      renderStatsResa();
+    }));
+
+    const qFact = query(collection(db, "factures"), orderBy("date", "desc"));
+    currentUnsubs.push(onSnapshot(qFact, snap => {
+      facturesCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderFactures();
+      renderStatsFacture();
+    }));
+
+    const qChauf = query(collection(db, "chauffeurs"), orderBy("nom"));
+    currentUnsubs.push(onSnapshot(qChauf, snap => {
+      chauffeursCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderChauffeurs();
+      fillChauffeurDropdown();
+    }));
+  }
+
+  document.getElementById("filter-statut-resa").addEventListener("change", renderReservations);
+  document.getElementById("filter-statut-facture").addEventListener("change", renderFactures);
+
+  // ---------------- RENDER: RÉSERVATIONS ----------------
+  function badgeResa(statut) {
+    const map = { "en attente": "attente", "confirmée": "confirmee", "terminée": "terminee", "annulée": "annulee" };
+    return `<span class="badge ${map[statut] || "attente"}">${statut}</span>`;
+  }
+
+  function renderReservations() {
+    const filter = document.getElementById("filter-statut-resa").value;
+    const rows = reservationsCache.filter(r => !filter || r.statut === filter);
+    const tbody = document.getElementById("resa-tbody");
+    if (rows.length === 0) {
+      tbody.innerHTML = `<tr class="empty-row"><td colspan="8">Aucune réservation pour l'instant.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = rows.map(r => `
+      <tr>
+        <td>${r.date || ""} ${r.heure || ""}</td>
+        <td>${r.nom || ""}<br><span style="color:var(--muted);font-size:12.5px;">${r.tel || ""}</span></td>
+        <td>${r.dep || ""} → ${r.arr || ""}</td>
+        <td>${r.vehicule || ""} · ${r.pax || 1} pax</td>
+        <td>${r.chauffeurNom || "—"}</td>
+        <td>${r.prix ? r.prix + " €" : "—"}</td>
+        <td>
+          <select class="statut-select" data-id="${r.id}" data-kind="resa">
+            <option value="en attente" ${r.statut === "en attente" ? "selected" : ""}>En attente</option>
+            <option value="confirmée" ${r.statut === "confirmée" ? "selected" : ""}>Confirmée</option>
+            <option value="terminée" ${r.statut === "terminée" ? "selected" : ""}>Terminée</option>
+            <option value="annulée" ${r.statut === "annulée" ? "selected" : ""}>Annulée</option>
+          </select>
+        </td>
+        <td><button class="icon-btn danger" data-id="${r.id}" data-kind="del-resa">Suppr.</button></td>
+      </tr>
+    `).join("");
+
+    tbody.querySelectorAll('select[data-kind="resa"]').forEach(sel => {
+      sel.addEventListener("change", () => updateDoc(doc(db, "reservations", sel.dataset.id), { statut: sel.value }));
+    });
+    tbody.querySelectorAll('[data-kind="del-resa"]').forEach(btn => {
+      btn.addEventListener("click", () => {
+        if (confirm("Supprimer cette réservation ?")) deleteDoc(doc(db, "reservations", btn.dataset.id));
+      });
+    });
+  }
+
+  function renderStatsResa() {
+    const today = new Date().toISOString().slice(0, 10);
+    document.getElementById("stat-attente").textContent = reservationsCache.filter(r => r.statut === "en attente").length;
+    document.getElementById("stat-confirmees").textContent = reservationsCache.filter(r => r.statut === "confirmée").length;
+    document.getElementById("stat-aujourdhui").textContent = reservationsCache.filter(r => r.date === today).length;
+  }
+
+  // ---------------- RENDER: FACTURES ----------------
+  function badgeFacture(statut) {
+    const map = { "payée": "payee", "impayée": "impayee", "en attente": "attente" };
+    return `<span class="badge ${map[statut] || "attente"}">${statut}</span>`;
+  }
+
+  function renderFactures() {
+    const filter = document.getElementById("filter-statut-facture").value;
+    const rows = facturesCache.filter(f => !filter || f.statut === filter);
+    const tbody = document.getElementById("facture-tbody");
+    if (rows.length === 0) {
+      tbody.innerHTML = `<tr class="empty-row"><td colspan="6">Aucune facture pour l'instant.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = rows.map(f => `
+      <tr>
+        <td>${f.date || ""}</td>
+        <td>${f.client || ""}</td>
+        <td>${f.trajet || ""}</td>
+        <td>${f.montant ? f.montant + " €" : "—"}</td>
+        <td>
+          <select class="statut-select" data-id="${f.id}" data-kind="facture">
+            <option value="en attente" ${f.statut === "en attente" ? "selected" : ""}>En attente</option>
+            <option value="payée" ${f.statut === "payée" ? "selected" : ""}>Payée</option>
+            <option value="impayée" ${f.statut === "impayée" ? "selected" : ""}>Impayée</option>
+          </select>
+        </td>
+        <td><button class="icon-btn danger" data-id="${f.id}" data-kind="del-facture">Suppr.</button></td>
+      </tr>
+    `).join("");
+
+    tbody.querySelectorAll('select[data-kind="facture"]').forEach(sel => {
+      sel.addEventListener("change", () => updateDoc(doc(db, "factures", sel.dataset.id), { statut: sel.value }));
+    });
+    tbody.querySelectorAll('[data-kind="del-facture"]').forEach(btn => {
+      btn.addEventListener("click", () => {
+        if (confirm("Supprimer cette facture ?")) deleteDoc(doc(db, "factures", btn.dataset.id));
+      });
+    });
+  }
+
+  function renderStatsFacture() {
+    const thisMonth = new Date().toISOString().slice(0, 7);
+    const sum = (arr) => arr.reduce((a, f) => a + (Number(f.montant) || 0), 0);
+    const cetteAnnee = facturesCache.filter(f => (f.date || "").startsWith(thisMonth));
+    document.getElementById("stat-encaisse").textContent = sum(cetteAnnee.filter(f => f.statut === "payée")) + " €";
+    document.getElementById("stat-attente-paiement").textContent = sum(facturesCache.filter(f => f.statut === "en attente")) + " €";
+    document.getElementById("stat-impaye").textContent = sum(facturesCache.filter(f => f.statut === "impayée")) + " €";
+  }
+
+  // ---------------- RENDER: CHAUFFEURS ----------------
+  function badgeChauffeur(statut) {
+    const map = { "disponible": "dispo", "en course": "encourse", "hors service": "horsservice" };
+    return `<span class="badge ${map[statut] || "dispo"}">${statut}</span>`;
+  }
+
+  function renderChauffeurs() {
+    const tbody = document.getElementById("chauffeur-tbody");
+    if (chauffeursCache.length === 0) {
+      tbody.innerHTML = `<tr class="empty-row"><td colspan="6">Aucun chauffeur enregistré.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = chauffeursCache.map(c => `
+      <tr>
+        <td>${c.nom || ""}</td>
+        <td>${c.tel || ""}</td>
+        <td>${c.vehicule || ""}</td>
+        <td>${badgeChauffeur(c.statut || "disponible")}</td>
+        <td>${c.uid ? "Actif" : "Non créé"}</td>
+        <td><button class="icon-btn danger" data-id="${c.id}" data-kind="del-chauffeur">Suppr.</button></td>
+      </tr>
+    `).join("");
+    tbody.querySelectorAll('[data-kind="del-chauffeur"]').forEach(btn => {
+      btn.addEventListener("click", () => {
+        if (confirm("Supprimer ce chauffeur ?")) deleteDoc(doc(db, "chauffeurs", btn.dataset.id));
+      });
+    });
+  }
+
+  function fillChauffeurDropdown() {
+    const sel = document.getElementById("f-chauffeur");
+    sel.innerHTML = `<option value="">Non assigné</option>` +
+      chauffeursCache.map(c => `<option value="${c.uid || ""}" data-nom="${c.nom}">${c.nom}</option>`).join("");
+  }
+
+  // ---------------- MODALS: RÉSERVATION ----------------
+  function openResaModal() {
+    ["f-nom","f-tel","f-dep","f-arr","f-date","f-heure","f-prix"].forEach(id => document.getElementById(id).value = "");
+    document.getElementById("f-pax").value = 1;
+    document.getElementById("modal-reservation").classList.add("shown");
+  }
+  document.getElementById("btn-cancel-resa").addEventListener("click", () => document.getElementById("modal-reservation").classList.remove("shown"));
+  document.getElementById("btn-save-resa").addEventListener("click", async () => {
+    const chauffeurSel = document.getElementById("f-chauffeur");
+    const chauffeurUid = chauffeurSel.value;
+    const chauffeurNom = chauffeurUid ? chauffeurSel.selectedOptions[0].dataset.nom : "";
+    const data = {
+      nom: document.getElementById("f-nom").value.trim(),
+      tel: document.getElementById("f-tel").value.trim(),
+      dep: document.getElementById("f-dep").value.trim(),
+      arr: document.getElementById("f-arr").value.trim(),
+      date: document.getElementById("f-date").value,
+      heure: document.getElementById("f-heure").value,
+      pax: Number(document.getElementById("f-pax").value) || 1,
+      vehicule: document.getElementById("f-vh").value,
+      prix: Number(document.getElementById("f-prix").value) || 0,
+      chauffeurUid, chauffeurNom,
+      statut: "en attente",
+      createdAt: serverTimestamp()
+    };
+    if (!data.nom || !data.date) { alert("Merci de renseigner au moins le nom du client et la date."); return; }
+    await addDoc(collection(db, "reservations"), data);
+    document.getElementById("modal-reservation").classList.remove("shown");
+  });
+
+  // ---------------- MODALS: FACTURE ----------------
+  function openFactureModal() {
+    ["ff-client","ff-trajet","ff-montant","ff-date"].forEach(id => document.getElementById(id).value = "");
+    document.getElementById("modal-facture").classList.add("shown");
+  }
+  document.getElementById("btn-cancel-facture").addEventListener("click", () => document.getElementById("modal-facture").classList.remove("shown"));
+  document.getElementById("btn-save-facture").addEventListener("click", async () => {
+    const data = {
+      client: document.getElementById("ff-client").value.trim(),
+      trajet: document.getElementById("ff-trajet").value.trim(),
+      montant: Number(document.getElementById("ff-montant").value) || 0,
+      date: document.getElementById("ff-date").value,
+      statut: document.getElementById("ff-statut").value
+    };
+    if (!data.client || !data.date) { alert("Merci de renseigner au moins le client et la date."); return; }
+    await addDoc(collection(db, "factures"), data);
+    document.getElementById("modal-facture").classList.remove("shown");
+  });
+
+  // ---------------- MODALS: CHAUFFEUR ----------------
+  function openChauffeurModal() {
+    ["fc-nom","fc-tel","fc-vh","fc-uid"].forEach(id => document.getElementById(id).value = "");
+    document.getElementById("modal-chauffeur").classList.add("shown");
+  }
+  document.getElementById("btn-cancel-chauffeur").addEventListener("click", () => document.getElementById("modal-chauffeur").classList.remove("shown"));
+  document.getElementById("btn-save-chauffeur").addEventListener("click", async () => {
+    const data = {
+      nom: document.getElementById("fc-nom").value.trim(),
+      tel: document.getElementById("fc-tel").value.trim(),
+      vehicule: document.getElementById("fc-vh").value.trim(),
+      statut: document.getElementById("fc-statut").value,
+      uid: document.getElementById("fc-uid").value.trim() || null
+    };
+    if (!data.nom) { alert("Merci de renseigner au moins le nom du chauffeur."); return; }
+    await addDoc(collection(db, "chauffeurs"), data);
+    document.getElementById("modal-chauffeur").classList.remove("shown");
+  });
+
+  // ---------------- DRIVER VIEW ----------------
+  function startDriverListener(uid) {
+    const qMine = query(collection(db, "reservations"), where("chauffeurUid", "==", uid));
+    currentUnsubs.push(onSnapshot(qMine, snap => {
+      const courses = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+        .filter(c => c.statut !== "annulée")
+        .sort((a, b) => (a.date + a.heure).localeCompare(b.date + b.heure));
+      renderDriverList(courses);
+    }));
+  }
+
+  function renderDriverList(courses) {
+    const wrap = document.getElementById("driver-list");
+    if (courses.length === 0) {
+      wrap.innerHTML = `<p style="text-align:center;color:var(--muted);margin-top:40px;">Aucune course assignée pour l'instant.</p>`;
+      return;
+    }
+    wrap.innerHTML = courses.map(c => `
+      <div class="course-card">
+        <div class="top-row">
+          <div class="date-heure">${c.date || ""} · ${c.heure || ""}</div>
+          ${badgeResa(c.statut)}
+        </div>
+        <div class="route">
+          <div class="stop"><span class="mark">●</span> ${c.dep || ""}</div>
+          <div class="stop"><span class="mark">◆</span> ${c.arr || ""}</div>
+        </div>
+        <div class="course-meta">${c.nom || ""} · ${c.pax || 1} passager(s) · ${c.vehicule || ""}</div>
+        <div class="course-actions">
+          <a class="action-call" href="tel:${c.tel || ""}">Appeler</a>
+          <a class="action-map" target="_blank" href="https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(c.dep||"")}&destination=${encodeURIComponent(c.arr||"")}">Itinéraire</a>
+          ${c.statut !== "terminée" ? `<button class="action-done" data-id="${c.id}">Marquer terminée</button>` : ""}
+        </div>
+      </div>
+    `).join("");
+
+    wrap.querySelectorAll(".action-done").forEach(btn => {
+      btn.addEventListener("click", () => updateDoc(doc(db, "reservations", btn.dataset.id), { statut: "terminée" }));
+    });
+  }
+</script>
+</body>
+</html>
