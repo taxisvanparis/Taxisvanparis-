@@ -1747,7 +1747,8 @@ function reserverWA() {
 ━━━━━━━━━━━━━━━━━━━━━━
 _Envoyé depuis TaxiVanParis.fr_`;
 
-  window.open('https://wa.me/33649553640?text='+encodeURIComponent(msg),'_blank');
+  enregistrerReservation({dep, arr, pax, vh, siege, date, heure, prix, date_creation: new Date().toISOString()});
+window.open('https://wa.me/33649553640?text='+encodeURIComponent(msg),'_blank');
 }
 
 function demandeDevis(service) {
