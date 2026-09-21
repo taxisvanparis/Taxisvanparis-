@@ -1809,6 +1809,8 @@ _Envoyé depuis TaxiVanParis.fr_`;
 
   enregistrerReservation({nom, tel, dep, arr, pax, vh, siege, date, heure, prix, date_creation: new Date().toISOString()});
 window.open('https://wa.me/33649553640?text='+encodeURIComponent(msg),'_blank');
+window.location.href = '/merci/';
+
 }
 
 function demandeDevis(service) {
