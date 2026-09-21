@@ -1423,6 +1423,11 @@ function pickGare(id, name, addr, lat, lon) {
   if (coords.dep && coords.arr) calcDistance();
 }
 
+const aeroportCoords = {
+  'cdg-all': { lat: 49.0097, lon: 2.5479, type: 'Aéroport Roissy Charles de Gaulle' },
+  'orly-all': { lat: 48.7233, lon: 2.3794, type: 'Aéroport Orly' },
+  'beauvais': { lat: 49.4544, lon: 2.1128, type: 'Aéroport Beauvais-Tillé' }
+};
 function pickAeroport(id, key, name) {
   const info = aeroportCoords[key];
   if (!info) return;
