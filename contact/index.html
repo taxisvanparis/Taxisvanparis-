@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact - Taxis Van Paris | Réservation Van &amp; Berline</title>
+<meta name="description" content="Contactez Taxis Van Paris pour vos réservations de transferts en Berline ou Van : aéroports CDG, Orly, Beauvais, gares, Disneyland Paris. Réponse rapide.">
+<link rel="canonical" href="https://taxisvanparis.fr/contact/">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --gold:#c9a24b;
+    --gold-light:#e6c877;
+    --bg:#0d0d0d;
+    --bg-card:#161616;
+    --text:#f2f0ea;
+    --text-muted:#a8a8a8;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'DM Sans',sans-serif;
+    line-height:1.6;
+  }
+  header{
+    text-align:center;
+    padding:60px 20px 30px;
+  }
+  header h1{
+    font-family:'Playfair Display',serif;
+    font-size:2.2rem;
+    color:var(--gold-light);
+    margin-bottom:10px;
+  }
+  header p{
+    color:var(--text-muted);
+    font-size:1rem;
+  }
+  main{
+    max-width:900px;
+    margin:0 auto;
+    padding:0 20px 80px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:40px;
+  }
+  @media (max-width:768px){
+    main{grid-template-columns:1fr;}
+  }
+  .card{
+    background:var(--bg-card);
+    border:1px solid #2a2a2a;
+    border-radius:12px;
+    padding:32px;
+  }
+  .card h2{
+    font-family:'Playfair Display',serif;
+    color:var(--gold-light);
+    font-size:1.3rem;
+    margin-bottom:20px;
+  }
+  label{
+    display:block;
+    font-size:0.85rem;
+    color:var(--text-muted);
+    margin-bottom:6px;
+    margin-top:16px;
+  }
+  input, select, textarea{
+    width:100%;
+    padding:12px 14px;
+    background:#0d0d0d;
+    border:1px solid #333;
+    border-radius:8px;
+    color:var(--text);
+    font-family:'DM Sans',sans-serif;
+    font-size:0.95rem;
+  }
+  input:focus, select:focus, textarea:focus{
+    outline:none;
+    border-color:var(--gold);
+  }
+  textarea{resize:vertical;min-height:100px;}
+  button{
+    margin-top:24px;
+    width:100%;
+    padding:14px;
+    background:var(--gold);
+    color:#0d0d0d;
+    border:none;
+    border-radius:8px;
+    font-weight:700;
+    font-size:1rem;
+    cursor:pointer;
+    transition:background .2s;
+  }
+  button:hover{background:var(--gold-light);}
+  .info-item{
+    display:flex;
+    gap:14px;
+    margin-bottom:24px;
+    align-items:flex-start;
+  }
+  .info-item .icon{
+    color:var(--gold);
+    font-size:1.3rem;
+    line-height:1.4;
+  }
+  .info-item a{
+    color:var(--text);
+    text-decoration:none;
+  }
+  .info-item a:hover{color:var(--gold-light);}
+  .info-item .label{
+    color:var(--text-muted);
+    font-size:0.8rem;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+  }
+  .whatsapp-btn{
+    display:inline-block;
+    margin-top:10px;
+    padding:12px 20px;
+    background:#25D366;
+    color:#0d0d0d;
+    border-radius:8px;
+    text-decoration:none;
+    font-weight:700;
+    font-size:0.9rem;
+  }
+  #form-status{
+    margin-top:16px;
+    font-size:0.9rem;
+    display:none;
+  }
+  #form-status.success{color:#7ec97e;display:block;}
+  #form-status.error{color:#e07070;display:block;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Contactez Taxis Van Paris</h1>
+  <p>Réservation, devis, question — réponse rapide 7j/7</p>
+</header>
+
+<main>
+  <div class="card">
+    <h2>Envoyez-nous un message</h2>
+    <form id="contact-form" action="https://script.google.com/macros/s/AKfycbzwv-CyIwLKAyRT_IsnDeVM4kgcYlkQzAyKY8XayAdqvvNJN5dn0VAyINTJFgkDKN3L/exec" method="POST">
+      <label for="name">Nom complet</label>
+      <input type="text" id="name" name="name" required>
+
+      <label for="email">Adresse email</label>
+      <input type="email" id="email" name="email" required>
+
+      <label for="phone">Téléphone</label>
+      <input type="tel" id="phone" name="phone" placeholder="06 XX XX XX XX" required>
+
+      <label for="service">Type de trajet</label>
+      <select id="service" name="service">
+        <option value="Berline">Berline</option>
+        <option value="Van">Van (7 places)</option>
+        <option value="Aéroport CDG">Transfert CDG</option>
+        <option value="Aéroport Orly">Transfert Orly</option>
+        <option value="Beauvais">Transfert Beauvais</option>
+        <option value="Disneyland / Parc Astérix">Disneyland / Parc Astérix</option>
+        <option value="Autre">Autre</option>
+      </select>
+
+      <label for="date">Date souhaitée</label>
+      <input type="date" id="date" name="date">
+
+      <label for="message">Message</label>
+      <textarea id="message" name="message" placeholder="Adresse de départ, arrivée, nombre de personnes, bagages..."></textarea>
+
+      <input type="hidden" name="_subject" value="Nouvelle demande - Taxis Van Paris">
+
+      <button type="submit">Envoyer la demande</button>
+      <p id="form-status"></p>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2>Nos coordonnées</h2>
+
+    <div class="info-item">
+      <span class="icon">📞</span>
+      <div>
+        <div class="label">Téléphone</div>
+        <a href="tel:+33649553640">06 49 55 36 40</a>
+      </div>
+    </div>
+
+    <div class="info-item">
+      <span class="icon">✉️</span>
+      <div>
+        <div class="label">Email</div>
+        <a href="mailto:taxisvanparis@gmail.com">taxisvanparis@gmail.com</a>
+      </div>
+    </div>
+
+    <a class="whatsapp-btn" href="https://wa.me/33649553640" target="_blank" rel="noopener">💬 Réserver sur WhatsApp</a>
+  </div>
+</main>
+
+<script>
+  const form = document.getElementById('contact-form');
+  const status = document.getElementById('form-status');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const data = new FormData(form);
+
+    try {
+      // Apps Script en no-cors : la réponse est opaque (illisible),
+      // on considère l'envoi réussi si aucune exception réseau n'est levée.
+      await fetch(form.action, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: data
+      });
+
+      status.textContent = "Merci, votre demande a bien été envoyée. Nous vous répondons rapidement.";
+      status.className = "success";
+      form.reset();
+
+      // Suivi de conversion Google Analytics (si gtag est présent sur le site)
+      if (typeof gtag === 'function') {
+        gtag('event', 'generate_lead', {
+          'event_category': 'contact_form',
+          'event_label': 'formulaire_contact'
+        });
+      }
+    } catch (error) {
+      status.textContent = "Une erreur est survenue. Merci de réessayer ou de nous contacter par téléphone.";
+      status.className = "error";
+    }
+  });
+</script>
+
+</body>
+</html>
