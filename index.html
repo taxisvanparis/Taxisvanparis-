@@ -1383,13 +1383,15 @@ const gares = [
 
 let modalTargetId = 'arr';
 
+function escQ(str) { return str.replace(/'/g, "\\'"); }
 function openGareModal(id) {
   modalTargetId = id;
   const list = document.getElementById('gare-list');
   list.innerHTML = gares.map(g =>
     `<div class="modal-group">${g.group}</div>` +
     g.items.map(s =>
-      `<div class="modal-item" onclick="pickGare('${id}','${s.name}','${s.addr}',${s.lat},${s.lon})">
+    `<div class="modal-item" onclick="pickGare('${id}','${escQ(s.name)}','${escQ(s.addr)}',${s.lat},${s.lon})">
+
         🚉 ${s.name}
       </div>`
     ).join('')
