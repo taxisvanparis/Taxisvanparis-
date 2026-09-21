@@ -976,7 +976,65 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
       </div>
     </div>
+  </div><div class="section" style="background:var(--noir-2)">
+  <div class="section-label">+ Formulaire</div>
+  <h2 class="section-title">Envoyez une <span class="gold">demande</span></h2>
+  <div style="max-width:600px;margin:0 auto">
+    <form id="contact-form" action="https://script.google.com/macros/s/AKfycbzwv-CyIwLKAyRT_IsnDeVM4kgcYlkQzAyKY8XayAdqvvNJN5dn0VAyINTJFgkDKN3L/exec" method="POST">
+      <div style="margin-bottom:16px">
+        <label style="display:block;color:var(--gold);font-size:.85rem;margin-bottom:6px">Nom complet</label>
+        <input type="text" name="name" required style="width:100%;padding:12px 14px;background:var(--noir);border:1px solid #333;border-radius:8px;color:var(--blanc)">
+      </div>
+      <div style="margin-bottom:16px">
+        <label style="display:block;color:var(--gold);font-size:.85rem;margin-bottom:6px">Email</label>
+        <input type="email" name="email" required style="width:100%;padding:12px 14px;background:var(--noir);border:1px solid #333;border-radius:8px;color:var(--blanc)">
+      </div>
+      <div style="margin-bottom:16px">
+        <label style="display:block;color:var(--gold);font-size:.85rem;margin-bottom:6px">Téléphone</label>
+        <input type="tel" name="phone" required style="width:100%;padding:12px 14px;background:var(--noir);border:1px solid #333;border-radius:8px;color:var(--blanc)">
+      </div>
+      <div style="margin-bottom:16px">
+        <label style="display:block;color:var(--gold);font-size:.85rem;margin-bottom:6px">Type de trajet</label>
+        <select name="service" style="width:100%;padding:12px 14px;background:var(--noir);border:1px solid #333;border-radius:8px;color:var(--blanc)">
+          <option value="Berline">Berline</option>
+          <option value="Van">Van</option>
+          <option value="CDG">Transfert CDG</option>
+          <option value="Orly">Transfert Orly</option>
+          <option value="Beauvais">Transfert Beauvais</option>
+          <option value="Autre">Autre</option>
+        </select>
+      </div>
+      <div style="margin-bottom:16px">
+        <label style="display:block;color:var(--gold);font-size:.85rem;margin-bottom:6px">Date souhaitée</label>
+        <input type="date" name="date" style="width:100%;padding:12px 14px;background:var(--noir);border:1px solid #333;border-radius:8px;color:var(--blanc)">
+      </div>
+      <div style="margin-bottom:16px">
+        <label style="display:block;color:var(--gold);font-size:.85rem;margin-bottom:6px">Message</label>
+        <textarea name="message" rows="4" style="width:100%;padding:12px 14px;background:var(--noir);border:1px solid #333;border-radius:8px;color:var(--blanc)"></textarea>
+      </div>
+      <button type="submit" class="btn-primary" style="width:100%">Envoyer la demande</button>
+      <p id="form-status" style="margin-top:12px;font-size:.9rem"></p>
+    </form>
   </div>
+</div>
+<script>
+  document.getElementById('contact-form').addEventListener('submit', async function(e){
+    e.preventDefault();
+    var form = e.target;
+    var status = document.getElementById('form-status');
+    var data = new FormData(form);
+    try {
+      await fetch(form.action, { method:'POST', mode:'no-cors', body:data });
+      status.style.color = '#7ec97e';
+      status.textContent = "Merci, votre demande a bien été envoyée.";
+      form.reset();
+    } catch(err) {
+      status.style.color = '#e07070';
+      status.textContent = "Erreur, merci de réessayer ou de nous appeler.";
+    }
+  });
+</script>
+
   <footer class="site-footer">
     <div class="footer-logo" onclick="goPage('home')">Taxis <span>Van</span> Paris</div>
     <div class="footer-copy">© 2025 TaxiVanParis</div>
