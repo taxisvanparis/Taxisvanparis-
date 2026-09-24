@@ -400,6 +400,7 @@
   // 1) COLLE ICI LA CONFIGURATION DE TON PROJET FIREBASE
   //    Firebase Console > Paramètres du projet > Général >
   //    "Vos applications" > icône Web (</>) > Config SDK
+  //    Remplace TOUTES les valeurs "COLLE_..." ci-dessous.
   // ============================================================
   const firebaseConfig = {
     apiKey: "AIzaSyBN8uBFONIt1tDTH9C-NIQKeulFdJ2m26Q",
@@ -410,6 +411,16 @@
     appId: "1:53887245170:web:2a3b785d734c54e01f9beb",
     measurementId: "G-E89EF1X0RD"
   };
+
+  const loginError = (msg) => { document.getElementById("login-error").textContent = msg; };
+
+  // Garde-fou : la config n'a pas été remplie
+  const configIncomplete = Object.values(firebaseConfig).some(v => String(v).startsWith("COLLE_"));
+  if (configIncomplete) {
+    loginError("Configuration Firebase non renseignée : remplace les valeurs « COLLE_… » dans dashboard/index.html.");
+    document.getElementById("btn-login").disabled = true;
+    throw new Error("firebaseConfig contient encore des valeurs COLLE_…");
+  }
 
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
@@ -422,6 +433,40 @@
   let facturesCache = [];
   let chauffeursCache = [];
 
+  // Normalise les clés du profil (espaces, majuscules) : "Role " -> "role", "Nom" -> "nom"
+  function normalizeProfile(raw) {
+    const out = {};
+    Object.keys(raw || {}).forEach(k => {
+      const v = raw[k];
+      out[k.trim().toLowerCase()] = typeof v === "string" ? v.trim() : v;
+    });
+    return out;
+  }
+
+  // Messages d'erreur de connexion lisibles
+  function authErrorMessage(err) {
+    switch (err && err.code) {
+      case "auth/invalid-credential":
+      case "auth/wrong-password":
+      case "auth/user-not-found":
+      case "auth/invalid-email":
+        return "E-mail ou mot de passe incorrect.";
+      case "auth/too-many-requests":
+        return "Trop de tentatives. Réessaie dans quelques minutes.";
+      case "auth/network-request-failed":
+        return "Problème de réseau. Vérifie ta connexion.";
+      case "auth/api-key-not-valid.-please-pass-a-valid-api-key.":
+      case "auth/invalid-api-key":
+        return "Clé API Firebase invalide : vérifie firebaseConfig dans dashboard/index.html.";
+      case "auth/unauthorized-domain":
+        return "Domaine non autorisé : ajoute taxisvanparis.fr dans Firebase > Authentication > Paramètres > Domaines autorisés.";
+      case "auth/operation-not-allowed":
+        return "Connexion e-mail/mot de passe désactivée dans Firebase > Authentication > Sign-in method.";
+      default:
+        return "Connexion impossible (" + ((err && err.code) || "erreur inconnue") + ").";
+    }
+  }
+
   // ---------------- LOGIN ----------------
   document.getElementById("btn-login").addEventListener("click", doLogin);
   document.getElementById("login-password").addEventListener("keydown", e => { if (e.key === "Enter") doLogin(); });
@@ -429,11 +474,10 @@
   function doLogin() {
     const email = document.getElementById("login-email").value.trim();
     const pass = document.getElementById("login-password").value;
-    const errBox = document.getElementById("login-error");
-    errBox.textContent = "";
-    if (!email || !pass) { errBox.textContent = "Merci de renseigner l'e-mail et le mot de passe."; return; }
+    loginError("");
+    if (!email || !pass) { loginError("Merci de renseigner l'e-mail et le mot de passe."); return; }
     signInWithEmailAndPassword(auth, email, pass).catch(err => {
-      errBox.textContent = "Connexion impossible : vérifiez l'e-mail et le mot de passe.";
+      loginError(authErrorMessage(err));
       console.error(err);
     });
   }
@@ -450,18 +494,36 @@
       return;
     }
     currentUid = user.uid;
-    const userDocSnap = await getDoc(doc(db, "users", user.uid));
-    if (!userDocSnap.exists()) {
-      document.getElementById("login-error").textContent =
-        "Compte connecté mais aucun profil trouvé dans Firestore (collection 'users'). Contactez l'administrateur.";
+
+    let userDocSnap;
+    try {
+      userDocSnap = await getDoc(doc(db, "users", user.uid));
+    } catch (err) {
+      console.error(err);
+      loginError(
+        err && err.code === "permission-denied"
+          ? "Accès refusé à Firestore : vérifie les règles (onglet Règles) pour la collection 'users'."
+          : "Impossible de lire le profil Firestore (" + ((err && err.code) || "erreur") + ")."
+      );
       signOut(auth);
       return;
     }
-    const profile = userDocSnap.data();
-    currentRole = profile.role;
+
+    if (!userDocSnap.exists()) {
+      loginError(
+        "Compte connecté (UID : " + user.uid + ") mais aucun document portant cet ID dans la collection 'users'. " +
+        "Crée le document avec exactement cet ID."
+      );
+      signOut(auth);
+      return;
+    }
+
+    const profile = normalizeProfile(userDocSnap.data());
+    currentRole = String(profile.role || "").toLowerCase();
     document.getElementById("login-screen").style.display = "none";
 
-    if (currentRole === "admin") {
+    if (currentRole.startsWith("admin")) {
+      currentRole = "admin";
       document.getElementById("admin-name").textContent = profile.nom || "Administrateur";
       document.getElementById("admin-email").textContent = user.email;
       document.getElementById("app").classList.add("shown");
@@ -471,7 +533,8 @@
       document.getElementById("driver-view").classList.add("shown");
       startDriverListener(user.uid);
     } else {
-      document.getElementById("login-error").textContent = "Rôle inconnu pour ce compte.";
+      document.getElementById("login-screen").style.display = "flex";
+      loginError("Rôle inconnu pour ce compte (« " + (profile.role || "vide") + " »). Valeurs attendues : admin ou chauffeur.");
       signOut(auth);
     }
   });
@@ -512,26 +575,79 @@
 
   // ---------------- ADMIN: LISTENERS ----------------
   function startAdminListeners() {
-    const qResa = query(collection(db, "reservations"), orderBy("date", "desc"));
-    currentUnsubs.push(onSnapshot(qResa, snap => {
-      reservationsCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const onErr = (err) => console.error("Firestore:", err);
+
+    // Pas de orderBy côté Firestore : il masquerait les documents dont le champ
+    // est absent ou nommé autrement. On lit tout et on trie dans la page.
+    currentUnsubs.push(onSnapshot(collection(db, "reservations"), snap => {
+      reservationsCache = sortReservations(snap.docs.map(d => normResa({ id: d.id, ...d.data() })));
       renderReservations();
       renderStatsResa();
-    }));
+    }, onErr));
 
-    const qFact = query(collection(db, "factures"), orderBy("date", "desc"));
-    currentUnsubs.push(onSnapshot(qFact, snap => {
-      facturesCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    currentUnsubs.push(onSnapshot(collection(db, "factures"), snap => {
+      facturesCache = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+        .sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
       renderFactures();
       renderStatsFacture();
-    }));
+    }, onErr));
 
-    const qChauf = query(collection(db, "chauffeurs"), orderBy("nom"));
-    currentUnsubs.push(onSnapshot(qChauf, snap => {
-      chauffeursCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    currentUnsubs.push(onSnapshot(collection(db, "chauffeurs"), snap => {
+      chauffeursCache = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+        .sort((a, b) => String(a.nom || "").localeCompare(String(b.nom || ""), "fr"));
       renderChauffeurs();
       fillChauffeurDropdown();
-    }));
+    }, onErr));
+  }
+
+  // ---------------- RÉSERVATIONS : normalisation + tri ----------------
+  // Convertit un Timestamp Firestore ou une chaîne en "AAAA-MM-JJ" / "HH:MM"
+  function toDateStr(v) {
+    if (!v) return "";
+    if (typeof v.toDate === "function") {
+      const d = v.toDate();
+      return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+    }
+    const s = String(v).trim();
+    const m = s.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$/); // 25/09/2026 -> 2026-09-25
+    return m ? `${m[3]}-${m[2].padStart(2, "0")}-${m[1].padStart(2, "0")}` : s;
+  }
+  function toTimeStr(v) {
+    if (!v) return "";
+    if (typeof v.toDate === "function") {
+      const d = v.toDate();
+      return String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+    }
+    const m = String(v).trim().match(/^(\d{1,2})[:hH](\d{2})/); // 9h30 / 9:30 -> 09:30
+    return m ? m[1].padStart(2, "0") + ":" + m[2] : String(v).trim();
+  }
+  const pick = (d, ...keys) => { for (const k of keys) if (d[k] !== undefined && d[k] !== null && d[k] !== "") return d[k]; return ""; };
+
+  // Accepte les variantes de noms de champs écrites par le site
+  function normResa(d) {
+    return {
+      ...d,
+      nom: pick(d, "nom", "name", "client", "clientNom", "prenomNom"),
+      tel: pick(d, "tel", "telephone", "téléphone", "phone"),
+      dep: pick(d, "dep", "depart", "départ", "from", "pickup", "origine"),
+      arr: pick(d, "arr", "arrivee", "arrivée", "to", "dropoff", "destination"),
+      date: toDateStr(pick(d, "date", "dateCourse", "jour")),
+      heure: toTimeStr(pick(d, "heure", "time", "hour")),
+      pax: pick(d, "pax", "passagers", "passengers") || 1,
+      vehicule: pick(d, "vehicule", "véhicule", "vehicle", "type"),
+      prix: pick(d, "prix", "price", "tarif", "montant"),
+      statut: pick(d, "statut", "status") || "en attente"
+    };
+  }
+
+  // Courses à venir / en cours : de la plus proche à la plus lointaine.
+  // Courses terminées ou annulées : en bas, de la plus récente à la plus ancienne.
+  function sortReservations(list) {
+    const key = r => (r.date || "9999-12-31") + " " + (r.heure || "00:00");
+    const closed = r => r.statut === "terminée" || r.statut === "annulée";
+    const open = list.filter(r => !closed(r)).sort((a, b) => key(a).localeCompare(key(b)));
+    const done = list.filter(closed).sort((a, b) => key(b).localeCompare(key(a)));
+    return open.concat(done);
   }
 
   document.getElementById("filter-statut-resa").addEventListener("change", renderReservations);
@@ -632,8 +748,8 @@
   function renderStatsFacture() {
     const thisMonth = new Date().toISOString().slice(0, 7);
     const sum = (arr) => arr.reduce((a, f) => a + (Number(f.montant) || 0), 0);
-    const cetteAnnee = facturesCache.filter(f => (f.date || "").startsWith(thisMonth));
-    document.getElementById("stat-encaisse").textContent = sum(cetteAnnee.filter(f => f.statut === "payée")) + " €";
+    const ceMois = facturesCache.filter(f => (f.date || "").startsWith(thisMonth));
+    document.getElementById("stat-encaisse").textContent = sum(ceMois.filter(f => f.statut === "payée")) + " €";
     document.getElementById("stat-attente-paiement").textContent = sum(facturesCache.filter(f => f.statut === "en attente")) + " €";
     document.getElementById("stat-impaye").textContent = sum(facturesCache.filter(f => f.statut === "impayée")) + " €";
   }
@@ -745,11 +861,10 @@
   function startDriverListener(uid) {
     const qMine = query(collection(db, "reservations"), where("chauffeurUid", "==", uid));
     currentUnsubs.push(onSnapshot(qMine, snap => {
-      const courses = snap.docs.map(d => ({ id: d.id, ...d.data() }))
-        .filter(c => c.statut !== "annulée")
-        .sort((a, b) => (a.date + a.heure).localeCompare(b.date + b.heure));
+      const courses = sortReservations(snap.docs.map(d => normResa({ id: d.id, ...d.data() })))
+        .filter(c => c.statut !== "annulée");
       renderDriverList(courses);
-    }));
+    }, err => console.error("Firestore:", err)));
   }
 
   function renderDriverList(courses) {
