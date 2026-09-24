@@ -1814,9 +1814,17 @@ function reserverWA() {
 ━━━━━━━━━━━━━━━━━━━━━━
 _Envoyé depuis TaxiVanParis.fr_`;
 
-  enregistrerReservation({nom, tel, dep, arr, pax, vh, siege, date, heure, prix, date_creation: new Date().toISOString()});
-window.open('https://wa.me/33649553640?text='+encodeURIComponent(msg),'_blank');
-window.location.href = '/merci/';
+  // 1) WhatsApp s'ouvre tout de suite (obligatoire sur iPhone, sinon bloqué)
+  window.open('https://wa.me/33649553640?text='+encodeURIComponent(msg),'_blank');
+  // 2) On ATTEND que la réservation soit enregistrée dans Firebase
+  //    avant de passer à la page "merci" (sinon l'envoi est coupé)
+  const resa = {nom, tel, dep, arr, pax, vh, vehicule: vh, siege, date, heure, prix,
+                statut: 'en attente', source: 'site', date_creation: new Date().toISOString()};
+  const envoi = (typeof window.enregistrerReservation === 'function')
+    ? window.enregistrerReservation(resa)
+    : Promise.resolve();
+  Promise.race([envoi, new Promise(r => setTimeout(r, 5000))])
+    .then(() => { window.location.href = '/merci/'; });
 
 }
 
