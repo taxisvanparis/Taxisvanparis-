@@ -94,6 +94,10 @@
   #topbar h1{font-size:22px;margin:0;color:var(--ink);}
   #topbar .topbar-sub{color:var(--muted);font-size:13px;margin-top:2px;}
   #main{padding:28px 32px;flex:1;overflow-y:auto;}
+  #topbar{gap:12px;}
+  #btn-menu{display:none;background:none;border:1px solid var(--border);border-radius:8px;font-size:20px;padding:6px 11px;color:var(--ink);}
+  #menu-overlay{display:none;position:fixed;inset:0;background:rgba(20,25,40,.45);z-index:35;}
+  #menu-overlay.shown{display:block;}
 
   .tab-panel{display:none;}
   .tab-panel.active{display:block;}
@@ -190,9 +194,27 @@
   .action-map{background:#E4EBF7;color:#2F5AA8;}
   .action-done{background:var(--green);color:#fff;}
 
+  .group-row td{background:var(--bg);font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);padding:10px 14px;}
+  tr.past td{opacity:.7;}
   @media (max-width:820px){
+    #tab-reservations table, #tab-reservations tbody{display:block;border:none;background:none;}
+    #tab-reservations thead{display:none;}
+    #tab-reservations tr.resa-row{display:block;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:10px;}
+    #tab-reservations tr.group-row{display:block;}
+    #tab-reservations tr.group-row td{display:block;background:none;padding:14px 2px 6px;}
+    #tab-reservations tr.resa-row td{display:flex;gap:10px;justify-content:space-between;align-items:flex-start;border:none;padding:5px 0;font-size:14px;text-align:right;}
+    #tab-reservations tr.resa-row td::before{content:attr(data-label);color:var(--muted);font-size:12.5px;text-align:left;flex-shrink:0;}
+    #tab-reservations tr.resa-row td.cell-date{font-weight:600;color:var(--ink);font-size:15px;}
+    #tab-reservations tr.resa-row td.cell-actions::before{content:"";}
+    #tab-reservations tr.empty-row{display:block;}
+    #tab-reservations tr.empty-row td{display:block;}
+    .stats-row{gap:10px;}
+    .stat-card{min-width:0;flex:1 1 30%;padding:14px;}
+    .stat-card .value{font-size:20px;}
     #sidebar{position:fixed;left:-230px;top:0;bottom:0;z-index:40;transition:left .2s;}
     #sidebar.mobile-open{left:0;}
+    #btn-menu{display:block;}
+    #btn-new-primary{padding:9px 12px;font-size:13px;white-space:nowrap;}
     #main{padding:20px 16px;}
     #topbar{padding:16px 18px;}
     .grid2{grid-template-columns:1fr;}
@@ -234,9 +256,11 @@
     </div>
   </div>
 
+  <div id="menu-overlay"></div>
   <div id="main-wrap">
     <div id="topbar">
-      <div>
+      <button id="btn-menu" aria-label="Menu">☰</button>
+      <div style="flex:1;min-width:0;">
         <h1 id="topbar-title">Réservations</h1>
         <div class="topbar-sub" id="topbar-sub">Toutes les courses en cours et à venir</div>
       </div>
@@ -565,6 +589,16 @@
       document.getElementById("btn-new-primary").dataset.target = tab;
     });
   });
+  // Menu mobile
+  const sidebarEl = document.getElementById("sidebar");
+  const overlayEl = document.getElementById("menu-overlay");
+  const closeMenu = () => { sidebarEl.classList.remove("mobile-open"); overlayEl.classList.remove("shown"); };
+  document.getElementById("btn-menu").addEventListener("click", () => {
+    sidebarEl.classList.add("mobile-open"); overlayEl.classList.add("shown");
+  });
+  overlayEl.addEventListener("click", closeMenu);
+  document.querySelectorAll(".nav-item").forEach(b => b.addEventListener("click", closeMenu));
+
   document.getElementById("btn-new-primary").dataset.target = "reservations";
   document.getElementById("btn-new-primary").addEventListener("click", () => {
     const target = document.getElementById("btn-new-primary").dataset.target;
@@ -609,8 +643,18 @@
       return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
     }
     const s = String(v).trim();
-    const m = s.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$/); // 25/09/2026 -> 2026-09-25
-    return m ? `${m[3]}-${m[2].padStart(2, "0")}-${m[1].padStart(2, "0")}` : s;
+    const m = s.match(/(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})/); // 25/09/2026 -> 2026-09-25
+    if (m) return `${m[3]}-${m[2].padStart(2, "0")}-${m[1].padStart(2, "0")}`;
+    const iso = s.match(/(\d{4})-(\d{2})-(\d{2})/);
+    if (iso) return iso[0];
+    const MOIS = ["janv", "févr", "mars", "avr", "mai", "juin", "juil", "août", "sept", "oct", "nov", "déc"];
+    const fr = s.toLowerCase().replace("fevr", "févr").replace("aout", "août").replace("dec", "déc")
+      .match(/(\d{1,2})\s+([a-zéû]+)\.?\s+(\d{4})/);            // "26 septembre 2026"
+    if (fr) {
+      const mi = MOIS.findIndex(x => fr[2].startsWith(x));
+      if (mi >= 0) return `${fr[3]}-${String(mi + 1).padStart(2, "0")}-${fr[1].padStart(2, "0")}`;
+    }
+    return s;
   }
   function toTimeStr(v) {
     if (!v) return "";
@@ -621,20 +665,29 @@
     const m = String(v).trim().match(/^(\d{1,2})[:hH](\d{2})/); // 9h30 / 9:30 -> 09:30
     return m ? m[1].padStart(2, "0") + ":" + m[2] : String(v).trim();
   }
-  const pick = (d, ...keys) => { for (const k of keys) if (d[k] !== undefined && d[k] !== null && d[k] !== "") return d[k]; return ""; };
+  const EMPTY = ["", "non renseigné", "non renseigne", "undefined", "null", "-"];
+  const pick = (d, ...keys) => {
+    for (const k of keys) {
+      const v = d[k];
+      if (v === undefined || v === null) continue;
+      if (typeof v === "string" && EMPTY.includes(v.trim().toLowerCase())) continue;
+      return v;
+    }
+    return "";
+  };
 
   // Accepte les variantes de noms de champs écrites par le site
   function normResa(d) {
     return {
       ...d,
-      nom: pick(d, "nom", "name", "client", "clientNom", "prenomNom"),
-      tel: pick(d, "tel", "telephone", "téléphone", "phone"),
+      nom: pick(d, "nom", "name", "client", "clientNom", "nomClient", "nom_client", "client_nom", "prenomNom", "prenom", "fullName"),
+      tel: pick(d, "tel", "telephone", "téléphone", "phone", "tel_client", "telClient", "mobile", "whatsapp"),
       dep: pick(d, "dep", "depart", "départ", "from", "pickup", "origine"),
       arr: pick(d, "arr", "arrivee", "arrivée", "to", "dropoff", "destination"),
       date: toDateStr(pick(d, "date", "dateCourse", "jour")),
       heure: toTimeStr(pick(d, "heure", "time", "hour")),
-      pax: pick(d, "pax", "passagers", "passengers") || 1,
-      vehicule: pick(d, "vehicule", "véhicule", "vehicle", "type"),
+      pax: String(pick(d, "pax", "passagers", "passengers") || 1).replace(/[^\d]/g, "") || 1,
+      vehicule: pick(d, "vehicule", "véhicule", "vh", "vehicle", "vehiculeType", "typeVehicule", "type_vehicule", "vehicle_type", "car", "type"),
       prix: pick(d, "prix", "price", "tarif", "montant"),
       statut: pick(d, "statut", "status") || "en attente"
     };
@@ -642,12 +695,41 @@
 
   // Courses à venir / en cours : de la plus proche à la plus lointaine.
   // Courses terminées ou annulées : en bas, de la plus récente à la plus ancienne.
+  function todayStr() {
+    const d = new Date();
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
+  const isClosed = r => r.statut === "terminée" || r.statut === "annulée";
+  // Groupe : 0 = à venir (aujourd'hui inclus), 1 = passée non clôturée, 2 = terminée/annulée
+  function groupOf(r) {
+    if (isClosed(r)) return 2;
+    return (!r.date || r.date >= todayStr()) ? 0 : 1;
+  }
+  // À venir : de la plus proche à la plus lointaine.
+  // Passées non clôturées puis terminées/annulées : de la plus récente à la plus ancienne.
   function sortReservations(list) {
     const key = r => (r.date || "9999-12-31") + " " + (r.heure || "00:00");
-    const closed = r => r.statut === "terminée" || r.statut === "annulée";
-    const open = list.filter(r => !closed(r)).sort((a, b) => key(a).localeCompare(key(b)));
-    const done = list.filter(closed).sort((a, b) => key(b).localeCompare(key(a)));
-    return open.concat(done);
+    const g = [[], [], []];
+    list.forEach(r => g[groupOf(r)].push(r));
+    g[0].sort((a, b) => key(a).localeCompare(key(b)));
+    g[1].sort((a, b) => key(b).localeCompare(key(a)));
+    g[2].sort((a, b) => key(b).localeCompare(key(a)));
+    return g[0].concat(g[1], g[2]);
+  }
+  function fmtPrix(p) {
+    if (p === "" || p === null || p === undefined) return "—";
+    const n = parseFloat(String(p).replace(",", ".").replace(/[^\d.]/g, ""));
+    if (isNaN(n)) return String(p);
+    return (Number.isInteger(n) ? n : n.toFixed(2).replace(".", ",")) + " €";
+  }
+  const JOURS = ["dim.", "lun.", "mar.", "mer.", "jeu.", "ven.", "sam."];
+  function fmtDate(r) {
+    if (!r.date) return "Date non précisée";
+    const m = r.date.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!m) return r.date + (r.heure ? " · " + r.heure : "");
+    const d = new Date(+m[1], +m[2] - 1, +m[3]);
+    const label = r.date === todayStr() ? "Aujourd'hui" : JOURS[d.getDay()] + " " + m[3] + "/" + m[2];
+    return label + (r.heure ? " · " + r.heure : "");
   }
 
   document.getElementById("filter-statut-resa").addEventListener("change", renderReservations);
@@ -667,15 +749,21 @@
       tbody.innerHTML = `<tr class="empty-row"><td colspan="8">Aucune réservation pour l'instant.</td></tr>`;
       return;
     }
-    tbody.innerHTML = rows.map(r => `
-      <tr>
-        <td>${r.date || ""} ${r.heure || ""}</td>
-        <td>${r.nom || ""}<br><span style="color:var(--muted);font-size:12.5px;">${r.tel || ""}</span></td>
-        <td>${r.dep || ""} → ${r.arr || ""}</td>
-        <td>${r.vehicule || ""} · ${r.pax || 1} pax</td>
-        <td>${r.chauffeurNom || "—"}</td>
-        <td>${r.prix ? r.prix + " €" : "—"}</td>
-        <td>
+    const titres = ["À venir", "Passées — à clôturer", "Terminées / annulées"];
+    let lastGroup = -1;
+    tbody.innerHTML = rows.map(r => {
+      const grp = groupOf(r);
+      const head = grp !== lastGroup ? `<tr class="group-row"><td colspan="8">${titres[grp]}</td></tr>` : "";
+      lastGroup = grp;
+      return head + `
+      <tr class="resa-row${grp === 1 ? " past" : ""}">
+        <td data-label="Date" class="cell-date">${fmtDate(r)}</td>
+        <td data-label="Client"><span>${r.nom || "—"}${r.tel ? `<br><a href="tel:${r.tel}" style="color:var(--muted);font-size:12.5px;">${r.tel}</a>` : ""}</span></td>
+        <td data-label="Trajet">${r.dep || "?"} → ${r.arr || "?"}</td>
+        <td data-label="Véhicule">${r.vehicule ? r.vehicule + " · " : ""}${r.pax || 1} pax</td>
+        <td data-label="Chauffeur">${r.chauffeurNom || "—"}</td>
+        <td data-label="Prix">${fmtPrix(r.prix)}</td>
+        <td data-label="Statut">
           <select class="statut-select" data-id="${r.id}" data-kind="resa">
             <option value="en attente" ${r.statut === "en attente" ? "selected" : ""}>En attente</option>
             <option value="confirmée" ${r.statut === "confirmée" ? "selected" : ""}>Confirmée</option>
@@ -683,9 +771,9 @@
             <option value="annulée" ${r.statut === "annulée" ? "selected" : ""}>Annulée</option>
           </select>
         </td>
-        <td><button class="icon-btn danger" data-id="${r.id}" data-kind="del-resa">Suppr.</button></td>
-      </tr>
-    `).join("");
+        <td class="cell-actions"><button class="icon-btn danger" data-id="${r.id}" data-kind="del-resa">Supprimer</button></td>
+      </tr>`;
+    }).join("");
 
     tbody.querySelectorAll('select[data-kind="resa"]').forEach(sel => {
       sel.addEventListener("change", () => updateDoc(doc(db, "reservations", sel.dataset.id), { statut: sel.value }));
@@ -698,7 +786,7 @@
   }
 
   function renderStatsResa() {
-    const today = new Date().toISOString().slice(0, 10);
+    const today = todayStr();
     document.getElementById("stat-attente").textContent = reservationsCache.filter(r => r.statut === "en attente").length;
     document.getElementById("stat-confirmees").textContent = reservationsCache.filter(r => r.statut === "confirmée").length;
     document.getElementById("stat-aujourdhui").textContent = reservationsCache.filter(r => r.date === today).length;
