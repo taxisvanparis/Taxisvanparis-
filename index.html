@@ -700,8 +700,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
           <!-- N° DE VOL -->
           <div class="booking-field" style="border-top:1px solid rgba(201,168,76,.1)">
-            <div class="bf-header"><span class="bf-label">🛬 Aéroport d’arrivée</span></div>
-            <div class="sw" style="margin-bottom:12px"><select id="volarr" onchange="volArrChange(this)" style="width:100%;background:var(--noir-4);border:1px solid rgba(201,168,76,.2);border-radius:2px;color:var(--blanc);padding:12px 13px;font-size:.92rem;-webkit-appearance:none;appearance:none"><option value="">— Choisir —</option><option value="cdg-all">✈️ Roissy Charles de Gaulle</option><option value="orly-all">✈️ Orly (ORY)</option><option value="beauvais">✈️ Beauvais (BVA)</option></select></div>
             <div class="bf-header"><span class="bf-label">✈️ N° de vol</span></div>
             <div class="ac-wrap"><input type="text" id="vol" placeholder="Ex. : AF 1234 (facultatif)" autocapitalize="characters" autocomplete="off" style="direction:ltr"/></div>
           </div>
@@ -1853,7 +1851,7 @@ function reserverWA() {
   const heure=document.getElementById('rheure').value||'Non précisée';
   const vol=((document.getElementById('vol')||{}).value||'').trim().toUpperCase();
   const volprov=((document.getElementById('volprov')||{}).value||'').trim();
-  const va=document.getElementById('volarr'); const volarr=va&&va.value?va.options[va.selectedIndex].text.replace(/^✈️\s*/,''):'';
+  const volarr=dep.indexOf('✈️')===0?dep.replace(/^✈️\s*/,''):'';
   const volLine=(vol||volprov||volarr)?'\n✈️ *Vol :* '+[vol, volprov?'en provenance de '+volprov:'', volarr?'arrivée à '+volarr:''].filter(Boolean).join(' — '):'';
   const prix =document.getElementById('tprice').textContent;
   const nom  =document.getElementById('client-nom').value.trim()||'Non renseigné';
