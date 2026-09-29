@@ -687,6 +687,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
           </div>
 
+          <!-- N° DE VOL -->
+          <div class="booking-field" style="border-top:1px solid rgba(201,168,76,.1)">
+            <div class="bf-header"><span class="bf-label">🛬 Aeropuerto de llegada</span></div>
+            <div class="sw" style="margin-bottom:12px"><select id="volarr" onchange="volArrChange(this)" style="width:100%;background:var(--noir-4);border:1px solid rgba(201,168,76,.2);border-radius:2px;color:var(--blanc);padding:12px 13px;font-size:.92rem;-webkit-appearance:none;appearance:none"><option value="">— Elegir —</option><option value="cdg-all">✈️ Roissy Charles de Gaulle</option><option value="orly-all">✈️ Orly (ORY)</option><option value="beauvais">✈️ Beauvais (BVA)</option></select></div>
+            <div class="bf-header"><span class="bf-label">✈️ Número de vuelo</span></div>
+            <div class="ac-wrap"><input type="text" id="vol" placeholder="Ej.: IB 3402 (opcional)" autocapitalize="characters" autocomplete="off" style="direction:ltr"/></div>
+          </div>
+
           <!-- QUAND -->
           <div class="booking-field" style="border-top:1px solid rgba(201,168,76,.1)">
             <div class="bf-header"><span class="bf-label">🕐 Cuándo</span></div>
@@ -1348,6 +1356,7 @@ function pickItem(id, el) {
         } else {
           depts[id] = null;
         }
+        coords[id].zone = zoneFrom(cp, locality);
         // Log pour debug
         
         if (coords.dep && coords.arr) calcDistance();
@@ -1436,7 +1445,7 @@ function openAeroportModal(id) {
   modalTargetId = id;
   const list = document.getElementById('aeroport-list');
   const aeroportsModal = [
-      { name:'✈️ Roissy — Charles de Gaulle (CDG)', key:'cdg-all' },
+      { name:'✈️ Roissy Charles de Gaulle', key:'cdg-all' },
       { name:'✈️ Orly (ORY)', key:'orly-all' },
       { name:'✈️ Beauvais-Tillé (BVA)', key:'beauvais' },
     ];
@@ -1448,9 +1457,23 @@ function openAeroportModal(id) {
   document.getElementById('modal-aeroport').style.display = 'flex';
 }
 
+
+// Zone pour le partage anonyme : « Paris 6e » ou nom de la ville
+function zoneFrom(cp, loc) {
+  if (cp && /^75\d{3}$/.test(cp.long_name)) { const n = cp.long_name === '75116' ? 16 : +cp.long_name.slice(3); if (n >= 1 && n <= 20) return 'Paris ' + (n === 1 ? '1er' : n + 'e'); }
+  return loc ? loc.long_name : '';
+}
+
+// Aéroport d'arrivée du vol → remplit le départ (forfait aéroport appliqué au calcul)
+function volArrChange(sel) {
+  if (!sel.value) return;
+  const dep = document.getElementById('dep');
+  const cur = (dep.value || '').trim();
+  if (!cur || cur.indexOf('✈️') === 0) pickAeroport('dep', sel.value, sel.options[sel.selectedIndex].text);
+}
 function pickGare(id, name, addr, lat, lon) {
   document.getElementById(id).value = name;
-  coords[id] = { lat, lon, address: addr.toLowerCase() };
+  coords[id] = { lat, lon, address: addr.toLowerCase(), zone: name };
   depts[id] = null;
   closeModal('modal-gare');
   if (coords.dep && coords.arr) calcDistance();
@@ -1467,7 +1490,7 @@ function pickAeroport(id, key, name) {
   // Afficher le nom dans le champ input
   const input = document.getElementById(id);
   if (input) input.value = name;
-  coords[id] = { lat: info.lat, lon: info.lon, address: info.type };
+  coords[id] = { lat: info.lat, lon: info.lon, address: info.type, zone: info.type };
   depts[id] = null;
   closeModal('modal-aeroport');
   if (coords.dep && coords.arr) calcDistance();
@@ -1817,6 +1840,10 @@ function reserverWA() {
   const vh   =vehicule==='van'?'Van Mercedes Clase V 🚐':'Berlina 🚗';
   const date =document.getElementById('rdate').value||'No indicada';
   const heure=document.getElementById('rheure').value||'No indicada';
+  const vol=((document.getElementById('vol')||{}).value||'').trim().toUpperCase();
+  const volprov=((document.getElementById('volprov')||{}).value||'').trim();
+  const va=document.getElementById('volarr'); const volarr=va&&va.value?va.options[va.selectedIndex].text.replace(/^✈️\s*/,''):'';
+  const volLine=(vol||volprov||volarr)?'\n✈️ *Vuelo:* '+[vol, volprov?'desde '+volprov:'', volarr?'llegada a '+volarr:''].filter(Boolean).join(' — '):'';
   const prix =document.getElementById('tprice').textContent;
   const nom  =document.getElementById('client-nom').value.trim()||'No indicado';
   const tel  =document.getElementById('client-tel').value.trim()||'No indicado';
@@ -1842,7 +1869,7 @@ function reserverWA() {
 🚗 *Vehículo:* ${vh}
 🪑 *Silla infantil:* ${siege}
 📅 *Fecha:* ${date}
-⏰ *Hora:* ${heure}
+⏰ *Hora:* ${heure}${volLine}
 💰 *Tarifa estimada:* ${prix}
 ━━━━━━━━━━━━━━━━━━━━━━
 _Enviado desde TaxiVanParis.fr (web en español)_`;
@@ -1853,7 +1880,7 @@ _Enviado desde TaxiVanParis.fr (web en español)_`;
   //    avant de passer à la page "merci" (sinon l'envoi est coupé)
   const vhFR = vehicule==='van' ? 'Van Mercedes Classe V 🚐' : 'Berline 🚗';
   const siegeFR = (combi||(bebe&&reh)) ? 'Siège bébé + Rehausseur' : bebe ? 'Siège bébé' : reh ? 'Rehausseur' : 'Aucune';
-  const resa = {nom, tel, dep, arr, pax, vh: vhFR, vehicule: vhFR, siege: siegeFR, langue: 'es', date, heure, prix,
+  const resa = {nom, tel, dep, arr, vol, vol_provenance: volprov, vol_arrivee: volarr, dep_zone: (coords.dep && coords.dep.zone) || '', arr_zone: (coords.arr && coords.arr.zone) || '', pax, vh: vhFR, vehicule: vhFR, siege: siegeFR, langue: 'es', date, heure, prix,
                 statut: 'en attente', source: 'site', date_creation: new Date().toISOString()};
   const envoi = (typeof window.enregistrerReservation === 'function')
     ? window.enregistrerReservation(resa)

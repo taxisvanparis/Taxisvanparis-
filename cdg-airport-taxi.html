@@ -236,16 +236,19 @@ var TVP = (function(){
     if(cp) dept=cp.long_name.substring(0,2);
     else if(loc&&loc.long_name.toLowerCase()==='paris') dept='75';
     else if(adm&&adm.long_name.toLowerCase().indexOf('paris')>=0) dept='75';
-    return {lat:pl.geometry.location.lat(), lon:pl.geometry.location.lng(), address:((pl.name||'')+' '+(pl.formatted_address||'')).toLowerCase(), dept:dept, city:loc?loc.long_name.toLowerCase():''};
+    return {lat:pl.geometry.location.lat(), lon:pl.geometry.location.lng(), address:((pl.name||'')+' '+(pl.formatted_address||'')).toLowerCase(), dept:dept, city:loc?loc.long_name.toLowerCase():'', cp:cp?cp.long_name:'', cityName:loc?loc.long_name:''};
   }
-  return {AIR:AIR, price:price, fromPlace:fromPlace};
+  function zone(p){if(!p)return '';if(p.cp&&/^75\d{3}$/.test(p.cp)){var n=p.cp==='75116'?16:+p.cp.slice(3);if(n>=1&&n<=20)return 'Paris '+(n===1?'1er':n+'e');}return p.cityName||'';}
+  return {AIR:AIR, price:price, fromPlace:fromPlace, zone:zone};
 })();
 
 </script>
 <script>
 (function(){
-  var CFG={"dirs": [{"id": "from", "label": "CDG → Paris", "from": {"type": "flight", "place": "CDG Airport", "fr": "Aéroport CDG", "ap": "CDG"}, "to": {"type": "addr", "label": "Drop-off address or hotel in Paris"}, "p": [85, 95, 105], "thr": 5}, {"id": "to", "label": "Paris → CDG", "from": {"type": "addr", "label": "Pick-up address or hotel in Paris"}, "to": {"type": "terminal", "place": "CDG Airport", "fr": "Aéroport CDG", "ap": "CDG", "terms": ["Terminal 1", "Terminal 2A", "Terminal 2B", "Terminal 2C", "Terminal 2D", "Terminal 2E", "Terminal 2F", "Terminal 2G", "Terminal 3"]}, "p": [75, 85, 95], "thr": 5}]}, SRC="cdg";
+  var CFG={"dirs": [{"id": "from", "label": "✈️ Roissy Charles de Gaulle → 🗼 Paris", "from": {"type": "flight", "place": "Roissy Charles de Gaulle Airport", "fr": "Aéroport Roissy Charles de Gaulle", "ap": "CDG"}, "to": {"type": "addr", "label": "Drop-off address or hotel in Paris"}, "p": [85, 95, 105], "thr": 5}, {"id": "to", "label": "🗼 Paris → ✈️ Roissy Charles de Gaulle", "from": {"type": "addr", "label": "Pick-up address or hotel in Paris"}, "to": {"type": "terminal", "place": "Roissy Charles de Gaulle Airport", "fr": "Aéroport Roissy Charles de Gaulle", "ap": "CDG", "terms": ["Terminal 1", "Terminal 2A", "Terminal 2B", "Terminal 2C", "Terminal 2D", "Terminal 2E", "Terminal 2F", "Terminal 2G", "Terminal 3"]}, "p": [75, 85, 95], "thr": 5}]}, SRC="cdg";
   var dir=CFG.dirs[0], $=function(i){return document.getElementById(i)}, P={from:null,to:null}, typed={from:false,to:false};
+  var EIF='<svg class="eif" viewBox="0 0 24 32" width="0.8em" height="1.05em" fill="currentColor" aria-hidden="true" style="vertical-align:-0.15em;margin-right:3px"><path d="M11.4 0h1.2l.3 3.2h.5l.6 5.3-.4.1 1 5.4h.9v1.4h-.6l1.9 5.1h1v1.6h-.5l2.5 5.4 2.2 4.5h-5.4c-.8-3.3-2.4-5.3-4.6-5.3s-3.8 2-4.6 5.3H1.6l2.2-4.5 2.5-5.4h-.5v-1.6h1l1.9-5.1h-.6v-1.4h.9l1-5.4-.4-.1.6-5.3h.5z"/></svg>';
+  var APN={'CDG':'Roissy Charles de Gaulle','Orly':'Orly','Beauvais':'Beauvais'};
   function apKey(side){var c=dir[side];if(c.ap)return c.ap;var s=$('bk-'+side+(c.type==='flight'?'-ap':''));return s?s.value:null}
   function setFixed(side){var c=dir[side];P[side]=null;typed[side]=false;if(c.type!=='addr'){var k=apKey(side);P[side]=k&&TVP.AIR[k]?TVP.AIR[k]:null}}
   function attach(side){
@@ -265,12 +268,14 @@ var TVP = (function(){
   function field(side,cfg){
     var h='';
     if(cfg.type==='flight'){
-      if(cfg.airports) h+='<label>Arrival airport<select id="bk-'+side+'-ap">'+cfg.airports.map(function(a){return '<option>'+a+'</option>'}).join('')+'</select></label><div style="height:12px"></div>';
-      h+='<label>Flight number <small>— your driver waits at arrivals with a name sign</small><input type="text" id="bk-'+side+'" placeholder="e.g. BA 304, EZY 8411" autocapitalize="characters" required></label>';
+      if(cfg.airports) h+='<label>Arrival airport<select id="bk-'+side+'-ap">'+cfg.airports.map(function(a){return '<option value="'+a+'">✈️ '+(APN[a]||a)+'</option>'}).join('')+'</select></label><div style="height:12px"></div>';
+      h+='<div class="bk-grid"><label>Flight number <small>(optional)</small><input type="text" id="bk-'+side+'" placeholder="e.g. BA 304" autocapitalize="characters"></label>'+
+         '</div>'+
+         '<small style="display:block;margin-top:6px">Your driver monitors your flight and waits at arrivals with a name sign.</small>';
     } else if(cfg.type==='terminal'){
       h+='<label>'+esc(cfg.place)+' — terminal <small>(optional)</small><select id="bk-'+side+'"><option value="">I don’t know yet</option>'+cfg.terms.map(function(t){return '<option>'+t+'</option>'}).join('')+'</select></label>';
     } else if(cfg.type==='airport'){
-      h+='<label>Airport<select id="bk-'+side+'">'+cfg.airports.map(function(a){return '<option>'+a+'</option>'}).join('')+'</select></label>';
+      h+='<label>Airport<select id="bk-'+side+'">'+cfg.airports.map(function(a){return '<option value="'+a+'">✈️ '+(APN[a]||a)+'</option>'}).join('')+'</select></label>';
     } else {
       h+='<label>'+esc(cfg.label)+'<input type="text" id="bk-'+side+'" placeholder="'+esc(cfg.ph||'Street address or hotel name')+'" autocomplete="street-address" required></label>';
     }
@@ -289,7 +294,7 @@ var TVP = (function(){
     $('bk-time-l').textContent = d.from.type==='flight' ? 'Landing time' : 'Pick-up time';
     price();
   }
-  $('bk-dirs').innerHTML=CFG.dirs.map(function(d){return '<button type="button" data-id="'+d.id+'" aria-pressed="false">'+esc(d.label)+'</button>'}).join('');
+  $('bk-dirs').innerHTML=CFG.dirs.map(function(d){return '<button type="button" data-id="'+d.id+'" aria-pressed="false">'+esc(d.label).replace('🗼 Paris','<span style="white-space:nowrap">'+EIF+'Paris</span>')+'</button>'}).join('');
   [].forEach.call($('bk-dirs').children,function(b){b.onclick=function(){setDir(CFG.dirs.filter(function(x){return x.id===b.dataset.id})[0])}});
   function veh(){var p=+$('bk-pax').value; if(p>4&&$('bk-veh').value==='sedan'){$('bk-veh').value='van'} return $('bk-veh').value}
   var last=null;
@@ -315,10 +320,11 @@ var TVP = (function(){
   function val(id){var e=$(id);return e?e.value.trim():''}
   function place(side){
     var c=dir[side], v=val('bk-'+side);
-    if(c.type==='flight'){var ap=c.airports?val('bk-'+side+'-ap')+' Airport':c.place;return {en:ap+' — flight '+v, fr:(c.airports?'Aéroport '+val('bk-'+side+'-ap'):c.fr)+' — vol '+v, flight:v}}
-    if(c.type==='terminal'){return {en:c.place+(v?' — '+v:''), fr:c.fr+(v?' — '+v:'')}}
-    if(c.type==='airport'){return {en:v+' Airport', fr:'Aéroport '+v}}
-    return {en:v, fr:v};
+    if(c.type==='flight'){var ak=val('bk-'+side+'-ap'),ap=c.airports?(APN[ak]||ak)+' Airport':c.place;var frn=(c.airports?'Aéroport '+(APN[ak]||ak):c.fr);var o=val('bk-'+side+'-orig');v=v.toUpperCase();
+      return {en:ap+(v?' — flight '+v:'')+(o?' (from '+o+')':''), fr:frn+(v?' — vol '+v:'')+(o?' (provenance '+o+')':''), flight:v, orig:o, zone:frn}}
+    if(c.type==='terminal'){return {en:c.place+(v?' — '+v:''), fr:c.fr+(v?' — '+v:''), zone:c.fr}}
+    if(c.type==='airport'){var an=APN[v]||v;return {en:an+' Airport', fr:'Aéroport '+an, zone:'Aéroport '+an}}
+    return {en:v, fr:v, zone:(window.TVP&&P[side])?TVP.zone(P[side]):''};
   }
   var KIDS={'0':['None','Aucune'],'1b':['1 baby seat','Siège bébé'],'1r':['1 booster','Rehausseur'],'1b1r':['1 baby seat + 1 booster','Siège bébé + Rehausseur'],'2r':['2 boosters','2 rehausseurs'],'1b2r':['1 baby seat + 2 boosters','Siège bébé + 2 rehausseurs'],'2b':['2 baby seats','2 sièges bébé']};
   $('bk').addEventListener('submit',function(e){
@@ -336,9 +342,9 @@ var TVP = (function(){
     // 1) WhatsApp tout de suite (sinon bloqué sur iPhone)
     window.open('https://wa.me/33649553640?text='+encodeURIComponent(msg),'_blank');
     // 2) enregistrement dans le tableau de bord
-    var resa={nom:val('bk-name'), tel:val('bk-tel'), dep:f.fr, arr:t.fr, pax:+$('bk-pax').value, bagages:+$('bk-bags').value,
+    var resa={nom:val('bk-name'), tel:val('bk-tel'), dep:f.fr, arr:t.fr, dep_zone:f.zone||'', arr_zone:t.zone||'', pax:+$('bk-pax').value, bagages:+$('bk-bags').value,
       vh:vhFr, vehicule:vhFr, siege:k[1], date:val('bk-date'), heure:val('bk-time'), prix:a?(+a).toFixed(2)+' €':'Sur devis',
-      vol:f.flight||t.flight||'', notes:val('bk-notes'), statut:'en attente', source:'site-en-'+SRC, langue:'en', date_creation:new Date().toISOString()};
+      vol:f.flight||t.flight||'', vol_provenance:f.orig||t.orig||'', notes:val('bk-notes'), statut:'en attente', source:'site-en-'+SRC, langue:'en', date_creation:new Date().toISOString()};
     if(typeof window.enregistrerReservation==='function') window.enregistrerReservation(resa);
     $('bk-ok').style.display='block'; $('bk-ok').scrollIntoView({behavior:'smooth',block:'center'});
   });
