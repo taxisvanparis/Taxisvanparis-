@@ -770,6 +770,14 @@ function anonymise(title,location){
     }, onErr));
   }
 
+  // Vol : numéro + aéroport de provenance, sauf s'ils figurent déjà dans l'adresse de départ
+  function volInfo(r) {
+    const base = [r.vol ? "Vol " + r.vol : "", r.volFrom ? "de " + r.volFrom : ""].filter(Boolean).join(" ");
+    const dep = String(r.dep || "");
+    const dup = (r.vol && dep.includes(r.vol)) || (!r.vol && r.volFrom && dep.includes(r.volFrom));
+    const arrTxt = r.volArr ? "→ " + r.volArr.replace(/ \((CDG|ORY|BVA)\)$/, "").replace("Roissy – Charles de Gaulle", "Roissy Charles de Gaulle") : "";
+    return [dup ? "" : base, arrTxt].filter(Boolean).join(" ");
+  }
   // ---------------- RÉSERVATIONS : normalisation + tri ----------------
   // Convertit un Timestamp Firestore ou une chaîne en "AAAA-MM-JJ" / "HH:MM"
   function toDateStr(v) {
@@ -824,6 +832,11 @@ function anonymise(title,location){
       heure: toTimeStr(pick(d, "heure", "time", "hour")),
       pax: String(pick(d, "pax", "passagers", "passengers") || 1).replace(/[^\d]/g, "") || 1,
       bagages: String(pick(d, "bagages", "valises", "luggage", "bags") || "").replace(/[^\d]/g, ""),
+      depZone: String(pick(d, "dep_zone") || ""),
+      vol: String(pick(d, "vol", "flight", "numeroVol", "numero_vol") || ""),
+      volFrom: String(pick(d, "vol_provenance", "flight_from") || ""),
+      volArr: String(pick(d, "vol_arrivee") || ""),
+      arrZone: String(pick(d, "arr_zone") || ""),
       vehicule: pick(d, "vehicule", "véhicule", "vh", "vehicle", "vehiculeType", "typeVehicule", "type_vehicule", "vehicle_type", "car", "type"),
       prix: pick(d, "prix", "price", "tarif", "montant"),
       statut: pick(d, "statut", "status") || "en attente"
@@ -896,7 +909,7 @@ function anonymise(title,location){
       <tr class="resa-row${grp === 1 ? " past" : ""}">
         <td data-label="Date" class="cell-date">${fmtDate(r)}</td>
         <td data-label="Client"><span>${r.nom || "—"}${r.tel ? `<br><a href="tel:${r.tel}" style="color:var(--muted);font-size:12.5px;">${r.tel}</a>` : ""}</span></td>
-        <td data-label="Trajet">${r.dep || "?"} → ${r.arr || "?"}</td>
+        <td data-label="Trajet"><span>${r.dep || "?"} → ${r.arr || "?"}${volInfo(r) ? `<br><span style="color:var(--gold);font-weight:600">✈️ ${volInfo(r)}</span>` : ""}</span></td>
         <td data-label="Véhicule">${r.vehicule ? r.vehicule + " · " : ""}${r.pax || 1} pax${r.bagages ? " · " + r.bagages + " bag." : ""}</td>
         <td data-label="Chauffeur">${r.chauffeurNom || "—"}</td>
         <td data-label="Prix">${fmtPrix(r.prix)}</td>
@@ -1094,12 +1107,15 @@ function anonymise(title,location){
     const a = anonymise(String(r.dep || ""), ""), b = anonymise(String(r.arr || ""), "");
     const both = anonymise(String(r.dep || "") + " vers " + String(r.arr || ""), "");
     const w = x => parsePlaces(parseParisN(String(x || ""))).warn;
-    return { dep: a.dep || both.dep, arr: b.dep || both.arr, warnDep: w(r.dep), warnArr: w(r.arr) };
+    // Zone enregistrée par le site au moment de la réservation (ex. « Paris 6e », « Versailles ») : prioritaire
+    const z = x => x ? (anonymise(x, "").dep || x) : "";
+    const zd = z(r.depZone), za = z(r.arrZone);
+    return { dep: zd || a.dep || both.dep, arr: za || b.dep || both.arr, warnDep: zd ? false : w(r.dep), warnArr: za ? false : w(r.arr) };
   }
   function vevent(r) {
     const s = resaDate(r), e = new Date(s.getTime() + 3600000), an = anonPair(r);
     const title = ("Course " + (r.nom || "") + " " + (an.dep || r.dep || "?") + " → " + (an.arr || r.arr || "?")).replace(/\s+/g, " ").trim();
-    const desc = [r.nom && "Client : " + r.nom, r.tel && "Tél : " + r.tel, "Départ : " + (r.dep || "?"), "Arrivée : " + (r.arr || "?"),
+    const desc = [r.nom && "Client : " + r.nom, r.tel && "Tél : " + r.tel, "Départ : " + (r.dep || "?"), "Arrivée : " + (r.arr || "?"), volInfo(r) && "Vol : " + volInfo(r),
       r.pax && "Passagers : " + r.pax, r.bagages && "Bagages : " + r.bagages, r.vehicule && "Véhicule : " + r.vehicule,
       (r.prix !== "" && r.prix !== undefined && r.prix !== null) && "Prix : " + fmtPrix(r.prix), r.chauffeurNom && "Chauffeur : " + r.chauffeurNom].filter(Boolean).join("\n");
     const alarm = m => ["BEGIN:VALARM", "ACTION:DISPLAY", "DESCRIPTION:" + icsEsc(title), "TRIGGER:-PT" + m + "M", "END:VALARM"];
@@ -1231,6 +1247,7 @@ function anonymise(title,location){
           <div class="stop"><span class="mark">●</span> ${c.dep || ""}</div>
           <div class="stop"><span class="mark">◆</span> ${c.arr || ""}</div>
         </div>
+        ${volInfo(c) ? `<div class="course-meta" style="color:var(--amber);font-weight:600;margin-bottom:6px">✈️ ${volInfo(c)}</div>` : ""}
         <div class="course-meta">${c.nom || ""} · ${c.pax || 1} passager(s)${c.bagages ? " · " + c.bagages + " bagage(s)" : ""} · ${c.vehicule || ""}</div>
         <div class="course-actions">
           <a class="action-call" href="tel:${c.tel || ""}">Appeler</a>
