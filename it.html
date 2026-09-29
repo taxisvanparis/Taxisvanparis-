@@ -10,6 +10,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <!-- End Google Tag Manager -->
 
   <meta charset="UTF-8"/>
+<script>try{if(!localStorage.getItem("tvp_lang"))localStorage.setItem("tvp_lang","it");}catch(e){}</script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Taxi Van a Parigi con seggiolino — CDG, Orly, Disneyland | Taxis Van Paris</title>
   <!-- ═══ SEO ═══ -->
@@ -471,6 +472,19 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     .nav-links li.lang-sw a:hover{color:var(--gold)}
     .nav-links li.lang-sw a.cur{color:var(--gold);font-weight:700}
     @media(max-width:900px){.nav-links li.lang-sw{border-inline-start:none;margin:8px 0 0;padding:10px 16px;border-top:1px solid rgba(201,168,76,.15);justify-content:center;flex-wrap:wrap;gap:6px}.nav-links li.lang-sw a{display:inline-block!important;width:auto!important;padding:8px 12px!important;text-align:center!important;border:1px solid rgba(201,168,76,.2);border-radius:2px}.nav-links li.lang-sw a.cur{border-color:var(--gold)}}
+
+    .lang-top{display:none;position:relative}
+    .lang-top summary{list-style:none;cursor:pointer;border:1px solid rgba(201,168,76,.45);color:var(--blanc);border-radius:20px;padding:6px 12px;font-size:.85rem;font-weight:600;white-space:nowrap;direction:ltr}
+    .lang-top summary::-webkit-details-marker{display:none}
+    .lang-top[open] summary{border-color:var(--gold);color:var(--gold)}
+    .lang-menu{position:absolute;top:calc(100% + 8px);inset-inline-end:0;background:var(--noir-3);border:1px solid rgba(201,168,76,.3);border-radius:6px;min-width:170px;padding:6px;z-index:1200;box-shadow:0 10px 30px rgba(0,0,0,.6)}
+    .lang-menu a{display:block;padding:11px 12px;color:var(--blanc);text-decoration:none;font-size:.95rem;border-radius:4px}
+    .lang-menu a.cur{color:var(--gold);background:rgba(201,168,76,.08)}
+    .lang-menu a:hover{background:rgba(201,168,76,.12)}
+    #lang-suggest{position:fixed;left:12px;right:12px;top:calc(76px + env(safe-area-inset-top,0px));z-index:999;display:flex;gap:10px;align-items:center;background:var(--noir-3);border:1px solid var(--gold);border-radius:8px;padding:10px 12px;box-shadow:0 8px 24px rgba(0,0,0,.6);font-size:.9rem;color:var(--blanc);max-width:520px;margin:0 auto}
+    #lang-suggest a{background:var(--gold);color:var(--noir);font-weight:700;text-decoration:none;padding:7px 12px;border-radius:4px;white-space:nowrap}
+    #lang-suggest button{background:none;border:none;color:var(--gris);font-size:1.2rem;cursor:pointer;margin-inline-start:auto}
+    @media(max-width:900px){.lang-top{display:block;margin-inline-start:auto;margin-inline-end:12px}.nav-links li.lang-sw{display:none!important}}
   </style>
 </head>
 <body>
@@ -482,6 +496,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <nav>
   <div class="logo" onclick="goPage('home')">Taxis <span>Van</span> Paris</div>
+  <details class="lang-top"><summary aria-label="Langue / Language">🇮🇹 IT ▾</summary><div class="lang-menu"><a href="/" hreflang="fr" lang="fr">🇫🇷 Français</a><a href="/en.html" hreflang="en" lang="en">🇬🇧 English</a><a href="/es.html" hreflang="es" lang="es">🇪🇸 Español</a><a href="/it.html" hreflang="it" lang="it" class="cur">🇮🇹 Italiano</a><a href="/ar.html" hreflang="ar" lang="ar">🌐 العربية</a></div></details>
   <button class="nav-burger" onclick="toggleMenu()" id="burger">☰</button>
   <ul class="nav-links" id="navlinks">
     <li><button onclick="goPage('home')" id="nl-home" class="active-link">Home</button></li>
@@ -1902,7 +1917,23 @@ window.initGooglePlaces = window.initGooglePlaces || function(){};
 </script>
 
 <script>
-document.querySelectorAll('.lang-sw a').forEach(function(a){a.addEventListener('click',function(){if(location.hash){a.href=a.getAttribute('href')+location.hash;}});});
+(function(){
+  var PAGE="it", PATHS={"fr": "/", "en": "/en.html", "es": "/es.html", "it": "/it.html", "ar": "/ar.html"}, SUG={"fr": ["Voir ce site en français ?", "Français"], "en": ["View this site in English?", "English"], "es": ["¿Ver este sitio en español?", "Español"], "it": ["Vedere questo sito in italiano?", "Italiano"], "ar": ["هل تريد عرض الموقع بالعربية؟", "العربية"]};
+  var lt=document.querySelector('.lang-top'); if(lt) lt.addEventListener('toggle',function(){var s=document.getElementById('lang-suggest'); if(lt.open&&s) s.remove();});
+  document.querySelectorAll('.lang-sw a,.lang-menu a').forEach(function(a){a.addEventListener('click',function(){
+    try{sessionStorage.setItem('tvp_lang_ok','1');localStorage.setItem('tvp_lang',a.getAttribute('hreflang'));}catch(e){}
+    if(location.hash){a.href=a.getAttribute('href')+location.hash;}
+  });});
+  try{ if(sessionStorage.getItem('tvp_lang_ok')) return; }catch(e){}
+  var nav=(navigator.languages&&navigator.languages[0])||navigator.language||'';
+  var want=nav.slice(0,2).toLowerCase();
+  if(!PATHS[want]||want===PAGE) return;
+  var d=document.createElement('div'); d.id='lang-suggest'; d.lang=want; d.dir=(want==='ar')?'rtl':'ltr';
+  d.innerHTML='<span>'+SUG[want][0]+'</span><a href="'+PATHS[want]+location.hash+'">'+SUG[want][1]+'</a><button aria-label="Fermer / Close">✕</button>';
+  d.querySelector('button').onclick=function(){ d.remove(); try{sessionStorage.setItem('tvp_lang_ok','1');}catch(e){} };
+  document.body.appendChild(d);
+  setTimeout(function(){ if(d.parentNode) d.remove(); }, 15000);
+})();
 </script>
 </body>
 </html>
