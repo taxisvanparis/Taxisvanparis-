@@ -771,6 +771,14 @@ function anonymise(title,location){
   }
 
   // Vol : numéro + aéroport de provenance, sauf s'ils figurent déjà dans l'adresse de départ
+  function volCode(r) {
+    const v = String(r.vol || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+    return /^[A-Z0-9]{2,3}\d{1,4}[A-Z]?$/.test(v) ? v : "";
+  }
+  function volBtn(r) {
+    const v = volCode(r);
+    return v ? ` <a href="https://www.flightradar24.com/data/flights/${v.toLowerCase()}" target="_blank" rel="noopener" style="display:inline-block;margin-left:6px;padding:3px 9px;border:1px solid var(--gold);border-radius:12px;color:var(--gold);font-size:.8em;text-decoration:none;white-space:nowrap">🛰️ Suivre le vol</a>` : "";
+  }
   function volInfo(r) {
     const base = [r.vol ? "Vol " + r.vol : "", r.volFrom ? "de " + r.volFrom : ""].filter(Boolean).join(" ");
     const dep = String(r.dep || "");
@@ -909,7 +917,7 @@ function anonymise(title,location){
       <tr class="resa-row${grp === 1 ? " past" : ""}">
         <td data-label="Date" class="cell-date">${fmtDate(r)}</td>
         <td data-label="Client"><span>${r.nom || "—"}${r.tel ? `<br><a href="tel:${r.tel}" style="color:var(--muted);font-size:12.5px;">${r.tel}</a>` : ""}</span></td>
-        <td data-label="Trajet"><span>${r.dep || "?"} → ${r.arr || "?"}${volInfo(r) ? `<br><span style="color:var(--gold);font-weight:600">✈️ ${volInfo(r)}</span>` : ""}</span></td>
+        <td data-label="Trajet"><span>${r.dep || "?"} → ${r.arr || "?"}${volInfo(r) || volCode(r) ? `<br><span style="color:var(--gold);font-weight:600">✈️ ${volInfo(r) || "Vol " + volCode(r)}</span>${volBtn(r)}` : ""}</span></td>
         <td data-label="Véhicule">${r.vehicule ? r.vehicule + " · " : ""}${r.pax || 1} pax${r.bagages ? " · " + r.bagages + " bag." : ""}</td>
         <td data-label="Chauffeur">${r.chauffeurNom || "—"}</td>
         <td data-label="Prix">${fmtPrix(r.prix)}</td>
@@ -1115,7 +1123,7 @@ function anonymise(title,location){
   function vevent(r) {
     const s = resaDate(r), e = new Date(s.getTime() + 3600000), an = anonPair(r);
     const title = ("Course " + (r.nom || "") + " " + (an.dep || r.dep || "?") + " → " + (an.arr || r.arr || "?")).replace(/\s+/g, " ").trim();
-    const desc = [r.nom && "Client : " + r.nom, r.tel && "Tél : " + r.tel, "Départ : " + (r.dep || "?"), "Arrivée : " + (r.arr || "?"), volInfo(r) && "Vol : " + volInfo(r),
+    const desc = [r.nom && "Client : " + r.nom, r.tel && "Tél : " + r.tel, "Départ : " + (r.dep || "?"), "Arrivée : " + (r.arr || "?"), volInfo(r) && "Vol : " + volInfo(r), volCode(r) && "Suivre le vol : https://www.flightradar24.com/data/flights/" + volCode(r).toLowerCase(),
       r.pax && "Passagers : " + r.pax, r.bagages && "Bagages : " + r.bagages, r.vehicule && "Véhicule : " + r.vehicule,
       (r.prix !== "" && r.prix !== undefined && r.prix !== null) && "Prix : " + fmtPrix(r.prix), r.chauffeurNom && "Chauffeur : " + r.chauffeurNom].filter(Boolean).join("\n");
     const alarm = m => ["BEGIN:VALARM", "ACTION:DISPLAY", "DESCRIPTION:" + icsEsc(title), "TRIGGER:-PT" + m + "M", "END:VALARM"];
@@ -1247,7 +1255,7 @@ function anonymise(title,location){
           <div class="stop"><span class="mark">●</span> ${c.dep || ""}</div>
           <div class="stop"><span class="mark">◆</span> ${c.arr || ""}</div>
         </div>
-        ${volInfo(c) ? `<div class="course-meta" style="color:var(--amber);font-weight:600;margin-bottom:6px">✈️ ${volInfo(c)}</div>` : ""}
+        ${volInfo(c) || volCode(c) ? `<div class="course-meta" style="color:var(--amber);font-weight:600;margin-bottom:6px">✈️ ${volInfo(c) || "Vol " + volCode(c)}${volBtn(c)}</div>` : ""}
         <div class="course-meta">${c.nom || ""} · ${c.pax || 1} passager(s)${c.bagages ? " · " + c.bagages + " bagage(s)" : ""} · ${c.vehicule || ""}</div>
         <div class="course-actions">
           <a class="action-call" href="tel:${c.tel || ""}">Appeler</a>
