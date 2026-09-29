@@ -94,6 +94,10 @@ footer .wrap{display:grid;gap:8px}
 .bk-grid .full{grid-column:1/-1}
 .bk label{display:flex;flex-direction:column;gap:5px;font-size:.78rem;letter-spacing:.8px;text-transform:uppercase;color:var(--gold-light);font-weight:600;min-width:0}
 .bk input,.bk select,.bk textarea{width:100%;background:var(--noir);color:var(--blanc);border:1px solid rgba(248,245,238,.18);border-radius:4px;padding:12px;font:inherit;font-size:16px;text-transform:none;letter-spacing:0;font-weight:400}
+.bk input,.bk select,.bk textarea{box-sizing:border-box;max-width:100%}
+.bk input[type=date],.bk input[type=time]{-webkit-appearance:none;appearance:none;display:block;min-width:0;min-height:48px;text-align:left}
+.bk input::-webkit-date-and-time-value{text-align:left}
+.bk-fixed{background:var(--noir-4);border:1px solid rgba(201,168,76,.35);border-radius:4px;padding:12px;color:var(--blanc);font-size:16px;text-transform:none;letter-spacing:0;font-weight:600}
 .bk input:focus,.bk select:focus,.bk textarea:focus{outline:none;border-color:var(--gold)}
 .bk small{color:var(--gris);font-size:.78rem;text-transform:none;letter-spacing:0;font-weight:400}
 .bk-price{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:16px;padding:14px 16px;border:1px dashed rgba(201,168,76,.45);border-radius:6px}
@@ -268,7 +272,9 @@ var TVP = (function(){
   function field(side,cfg){
     var h='';
     if(cfg.type==='flight'){
-      if(cfg.airports) h+='<label>Arrival airport<select id="bk-'+side+'-ap">'+cfg.airports.map(function(a){return '<option value="'+a+'">✈️ '+(APN[a]||a)+'</option>'}).join('')+'</select></label><div style="height:12px"></div>';
+      if(!cfg.airports) h+='<label>Pick-up<div class="bk-fixed">✈️ '+esc(cfg.place)+'</div></label><div style="height:12px"></div>';
+      if(cfg.terms) h+='<label>Arrival terminal <small>(optional)</small><select id="bk-'+side+'-term"><option value="">I don’t know yet</option>'+cfg.terms.map(function(t){return '<option>'+t+'</option>'}).join('')+'</select></label><div style="height:12px"></div>';
+      if(cfg.airports) h+='<label>Pick-up airport<select id="bk-'+side+'-ap">'+cfg.airports.map(function(a){return '<option value="'+a+'">✈️ '+(APN[a]||a)+'</option>'}).join('')+'</select></label><div style="height:12px"></div>';
       h+='<div class="bk-grid"><label>Flight number <small>(optional)</small><input type="text" id="bk-'+side+'" placeholder="e.g. BA 304" autocapitalize="characters"></label>'+
          '</div>'+
          '<small style="display:block;margin-top:6px">Your driver monitors your flight and waits at arrivals with a name sign.</small>';
@@ -320,8 +326,8 @@ var TVP = (function(){
   function val(id){var e=$(id);return e?e.value.trim():''}
   function place(side){
     var c=dir[side], v=val('bk-'+side);
-    if(c.type==='flight'){var ak=val('bk-'+side+'-ap'),ap=c.airports?(APN[ak]||ak)+' Airport':c.place;var frn=(c.airports?'Aéroport '+(APN[ak]||ak):c.fr);var o=val('bk-'+side+'-orig');v=v.toUpperCase();
-      return {en:ap+(v?' — flight '+v:'')+(o?' (from '+o+')':''), fr:frn+(v?' — vol '+v:'')+(o?' (provenance '+o+')':''), flight:v, orig:o, zone:frn}}
+    if(c.type==='flight'){var ak=val('bk-'+side+'-ap'),ap=c.airports?(APN[ak]||ak)+' Airport':c.place;var frn=(c.airports?'Aéroport '+(APN[ak]||ak):c.fr);var o=val('bk-'+side+'-orig'),tm=val('bk-'+side+'-term');if(tm){ap+=' — '+tm;frn+=' — '+tm;}v=v.toUpperCase();
+      return {en:ap+(v?' — flight '+v:'')+(o?' (from '+o+')':''), fr:frn+(v?' — vol '+v:'')+(o?' (provenance '+o+')':''), flight:v, orig:o, zone:frn.split(' — ')[0]}}
     if(c.type==='terminal'){return {en:c.place+(v?' — '+v:''), fr:c.fr+(v?' — '+v:''), zone:c.fr}}
     if(c.type==='airport'){var an=APN[v]||v;return {en:an+' Airport', fr:'Aéroport '+an, zone:'Aéroport '+an}}
     return {en:v, fr:v, zone:(window.TVP&&P[side])?TVP.zone(P[side]):''};
