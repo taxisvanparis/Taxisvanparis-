@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Taxis Van Paris — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#16213A;
+    --ink-soft:#233150;
+    --gold:#C9974A;
+    --gold-soft:#E8D2A6;
+    --bg:#F4F5F7;
+    --card:#FFFFFF;
+    --border:#E3E5EA;
+    --text:#1D2433;
+    --muted:#6B7280;
+    --green:#3F7D58;
+    --green-bg:#E7F3EC;
+    --amber:#B4791F;
+    --amber-bg:#FBF0DD;
+    --red:#B23A32;
+    --red-bg:#FBEAE8;
+    --radius:10px;
+    --heading:#16213A;
+    --soft:#FAFAFB;
+    --hover:#EEEEEE;
+    --blue:#2F5AA8;
+    --blue-bg:#E4EBF7;
+    --wa:#1F9D55;
+    --bubble:#E3F6DA;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --bg:#0F141C; --card:#18202B; --border:#2A3442; --text:#E6E9EF; --muted:#9AA3B2;
+      --heading:#F1F3F7; --soft:#1D2632; --hover:#253041;
+      --green:#6CC08E; --green-bg:#1C3326; --amber:#E5AA55; --amber-bg:#3A2D19;
+      --red:#EE8A80; --red-bg:#3B1F1D; --blue:#8DB0F0; --blue-bg:#1E2B45;
+      --wa:#2DB26A; --bubble:#1E3325;
+      color-scheme:dark;
+    }
+    #login-screen{background:#0A0F18;}
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);}
+  h1,h2,.brand{font-family:'Fraunces',serif;}
+  button{font-family:inherit;cursor:pointer;}
+  input,select{font-family:inherit;}
+
+  /* ---------- LOGIN ---------- */
+  #login-screen{
+    min-height:100vh;display:flex;align-items:center;justify-content:center;
+    background:var(--ink);
+  }
+  .login-card{
+    background:var(--card);width:100%;max-width:380px;padding:40px 36px;
+    border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.35);
+  }
+  .login-card .brand{font-size:26px;color:var(--heading);margin:0 0 4px;}
+  .login-card .brand-sub{
+    display:block;width:36px;height:3px;background:var(--gold);margin:10px 0 24px;
+  }
+  .login-card p.tag{color:var(--muted);font-size:14px;margin:0 0 28px;}
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px;}
+  .field input{
+    width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:8px;
+    font-size:15px;background:var(--soft);
+  }
+  .field input:focus{outline:2px solid var(--gold);outline-offset:1px;border-color:var(--gold);}
+  .btn-primary{
+    width:100%;padding:12px;background:var(--ink);color:#fff;border:none;border-radius:8px;
+    font-size:15px;font-weight:600;margin-top:8px;transition:background .15s;
+  }
+  .btn-primary:hover{background:var(--ink-soft);}
+  #login-error{color:var(--red);font-size:13px;margin-top:14px;min-height:16px;}
+
+  /* ---------- APP SHELL ---------- */
+  #app{display:none;min-height:100vh;}
+  #app.shown{display:flex;}
+  #sidebar{
+    width:230px;flex-shrink:0;background:var(--ink);color:#fff;
+    display:flex;flex-direction:column;padding:26px 18px;
+  }
+  #sidebar .brand{color:#fff;font-size:20px;margin:0 0 2px;}
+  #sidebar .brand-sub{color:var(--gold-soft);font-size:12px;margin-bottom:32px;display:block;}
+  .nav-item{
+    display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:8px;
+    color:#C7CCDA;text-decoration:none;font-size:14px;margin-bottom:4px;background:none;
+    border:none;width:100%;text-align:left;
+  }
+  .nav-item:hover{background:rgba(255,255,255,.06);color:#fff;}
+  .nav-item.active{background:rgba(201,151,74,.18);color:#fff;}
+  .nav-item .dot{width:6px;height:6px;border-radius:50%;background:var(--gold);opacity:0;}
+  .nav-item.active .dot{opacity:1;}
+  #sidebar-footer{margin-top:auto;padding-top:16px;border-top:1px solid rgba(255,255,255,.1);}
+  #sidebar-footer .who{font-size:13px;color:#C7CCDA;margin-bottom:10px;}
+  #sidebar-footer .who strong{color:#fff;display:block;font-size:14px;}
+  .btn-logout{
+    background:none;border:1px solid rgba(255,255,255,.2);color:#C7CCDA;
+    padding:8px 12px;border-radius:7px;font-size:13px;width:100%;
+  }
+  .btn-logout:hover{border-color:var(--gold);color:#fff;}
+
+  #main-wrap{flex:1;display:flex;flex-direction:column;min-width:0;}
+  #topbar{
+    padding:20px 32px;background:var(--card);border-bottom:1px solid var(--border);
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  #topbar h1{font-size:22px;margin:0;color:var(--heading);}
+  #topbar .topbar-sub{color:var(--muted);font-size:13px;margin-top:2px;}
+  #main{padding:28px 32px;flex:1;overflow-y:auto;}
+  #topbar{gap:12px;}
+  #btn-menu{display:none;background:none;border:1px solid var(--border);border-radius:8px;font-size:20px;padding:6px 11px;color:var(--heading);}
+  #menu-overlay{display:none;position:fixed;inset:0;background:rgba(20,25,40,.45);z-index:35;}
+  #menu-overlay.shown{display:block;}
+
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;}
+
+  .stats-row{display:flex;gap:16px;margin-bottom:24px;flex-wrap:wrap;}
+  .stat-card{
+    background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+    padding:18px 20px;flex:1;min-width:160px;
+  }
+  .stat-card .label{font-size:12.5px;color:var(--muted);margin-bottom:8px;}
+  .stat-card .value{font-size:24px;font-weight:600;color:var(--heading);}
+
+  .panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:12px;flex-wrap:wrap;}
+  .filters{display:flex;gap:8px;}
+  .filters select{padding:8px 10px;border:1px solid var(--border);border-radius:7px;background:var(--card);color:var(--text);font-size:13.5px;}
+  .btn-gold{
+    background:var(--gold);color:#fff;border:none;padding:10px 18px;border-radius:8px;
+    font-size:14px;font-weight:600;
+  }
+  .btn-gold:hover{background:var(--amber);}
+
+  table{width:100%;border-collapse:collapse;background:var(--card);border-radius:var(--radius);overflow:hidden;border:1px solid var(--border);}
+  thead th{
+    text-align:left;font-size:12px;color:var(--muted);font-weight:600;padding:12px 14px;
+    background:var(--soft);border-bottom:1px solid var(--border);
+  }
+  tbody td{padding:13px 14px;font-size:14px;border-bottom:1px solid var(--border);vertical-align:middle;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:var(--soft);}
+  .empty-row td{text-align:center;color:var(--muted);padding:36px 14px;}
+
+  .badge{
+    display:inline-block;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600;
+  }
+  .badge.attente{background:var(--amber-bg);color:var(--amber);}
+  .badge.confirmee{background:var(--blue-bg);color:var(--blue);}
+  .badge.terminee{background:var(--green-bg);color:var(--green);}
+  .badge.annulee{background:var(--red-bg);color:var(--red);}
+  .badge.payee{background:var(--green-bg);color:var(--green);}
+  .badge.impayee{background:var(--red-bg);color:var(--red);}
+  .badge.dispo{background:var(--green-bg);color:var(--green);}
+  .badge.encourse{background:var(--blue-bg);color:var(--blue);}
+  .badge.horsservice{background:var(--hover);color:var(--muted);}
+
+  select.statut-select{
+    border:1px solid var(--border);border-radius:7px;padding:6px 8px;font-size:13px;background:var(--card);color:var(--text);
+  }
+  .icon-btn{
+    background:none;border:none;color:var(--muted);padding:5px 7px;border-radius:6px;font-size:13px;
+  }
+  .icon-btn:hover{background:var(--hover);color:var(--text);}
+  .icon-btn.danger:hover{background:var(--red-bg);color:var(--red);}
+
+  /* ---------- MODAL ---------- */
+  .modal-overlay{
+    display:none;position:fixed;inset:0;background:rgba(20,25,40,.5);
+    align-items:center;justify-content:center;z-index:50;padding:20px;
+  }
+  .modal-overlay.shown{display:flex;}
+  .modal{
+    background:var(--card);color:var(--text);border-radius:14px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;
+    padding:28px 30px;
+  }
+  .modal h2{font-size:19px;margin:0 0 20px;color:var(--heading);}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:22px;}
+  .btn-ghost{background:none;border:1px solid var(--border);padding:10px 16px;border-radius:8px;font-size:14px;color:var(--muted);}
+  .btn-ghost:hover{border-color:var(--muted);}
+
+  /* ---------- DRIVER VIEW ---------- */
+  #driver-view{display:none;min-height:100vh;background:var(--bg);}
+  #driver-view.shown{display:block;}
+  #driver-top{
+    background:var(--ink);color:#fff;padding:20px 22px;display:flex;justify-content:space-between;align-items:center;
+  }
+  #driver-top .who strong{display:block;font-size:16px;}
+  #driver-top .who span{font-size:12.5px;color:var(--gold-soft);}
+  #driver-list{padding:18px;display:flex;flex-direction:column;gap:14px;max-width:520px;margin:0 auto;}
+  .course-card{
+    background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:12px;padding:18px 20px;
+  }
+  .course-card .top-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+  .course-card .date-heure{font-weight:600;color:var(--heading);font-size:15px;}
+  .route{margin-bottom:12px;}
+  .route .stop{display:flex;gap:10px;align-items:flex-start;font-size:14px;margin-bottom:6px;}
+  .route .stop .mark{color:var(--gold);font-weight:700;}
+  .course-meta{font-size:13px;color:var(--muted);margin-bottom:14px;}
+  .course-actions{display:flex;gap:8px;flex-wrap:wrap;}
+  .course-actions a,.course-actions button{
+    flex:1;text-align:center;padding:10px;border-radius:8px;font-size:13.5px;font-weight:600;
+    text-decoration:none;border:none;
+  }
+  .action-call{background:var(--amber-bg);color:var(--amber);}
+  .action-map{background:var(--blue-bg);color:var(--blue);}
+  .action-done{background:var(--green);color:#fff;}
+
+  .group-row td{background:var(--bg);font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);padding:10px 14px;}
+  tr.past td{opacity:.7;}
+  @media (max-width:820px){
+    #tab-reservations table, #tab-reservations tbody{display:block;border:none;background:none;}
+    #tab-reservations thead{display:none;}
+    #tab-reservations tr.resa-row{display:block;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:10px;}
+    #tab-reservations tr.group-row{display:block;}
+    #tab-reservations tr.group-row td{display:block;background:none;padding:14px 2px 6px;}
+    #tab-reservations tr.resa-row td{display:flex;gap:10px;justify-content:space-between;align-items:flex-start;border:none;padding:5px 0;font-size:14px;text-align:right;}
+    #tab-reservations tr.resa-row td::before{content:attr(data-label);color:var(--muted);font-size:12.5px;text-align:left;flex-shrink:0;}
+    #tab-reservations tr.resa-row td.cell-date{font-weight:600;color:var(--heading);font-size:15px;}
+    #tab-reservations tr.resa-row td.cell-actions::before{content:"";}
+    #tab-reservations tr.empty-row{display:block;}
+    #tab-reservations tr.empty-row td{display:block;}
+    .stats-row{gap:10px;}
+    .stat-card{min-width:0;flex:1 1 30%;padding:14px;}
+    .stat-card .value{font-size:20px;}
+    #sidebar{position:fixed;left:-230px;top:0;bottom:0;z-index:40;transition:left .2s;}
+    #sidebar.mobile-open{left:0;}
+    #btn-menu{display:block;}
+    #btn-new-primary{padding:9px 12px;font-size:13px;white-space:nowrap;}
+    #main{padding:20px 16px;}
+    #topbar{padding:16px 18px;}
+    .grid2{grid-template-columns:1fr;}
+  }
+
+  /* ---------- PARTAGE WHATSAPP ---------- */
+  .share-settings{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+  .share-settings label,.share-fields label{display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:600;color:var(--muted);min-width:0;}
+  .share-settings input,.share-settings select,.share-fields input,.share-fields select{width:100%;padding:9px 10px;border:1px solid var(--border);border-radius:8px;background:var(--soft);color:var(--text);font-size:15px;font-family:inherit;}
+  .share-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+  .share-tab{border:1px solid var(--border);background:var(--card);color:var(--text);border-radius:999px;padding:6px 14px;font-size:13.5px;font-weight:600;}
+  .share-tab.on{background:var(--ink);color:#fff;border-color:var(--ink);}
+  .share-bulk{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+  .share-list{display:flex;flex-direction:column;gap:12px;max-width:640px;}
+  .share-day{font-family:'Fraunces',serif;font-size:17px;color:var(--heading);margin-top:6px;text-transform:capitalize;}
+  .share-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px;}
+  .share-card.masked{opacity:.5;}
+  .share-head{display:flex;gap:10px;align-items:center;}
+  .share-time{background:var(--gold);color:#fff;font-weight:700;border-radius:6px;padding:2px 8px;font-variant-numeric:tabular-nums;}
+  .share-route{font-weight:600;color:var(--heading);min-width:0;flex:1;}
+  .share-route small{display:block;font-weight:400;color:var(--muted);font-size:12.5px;overflow-wrap:anywhere;}
+  .share-flag{background:var(--amber-bg);color:var(--amber);font-size:13px;border-radius:8px;padding:6px 10px;}
+  .bubble{background:var(--bubble);color:var(--text);border-radius:12px 12px 12px 4px;padding:10px 12px;white-space:pre-wrap;font-size:14.5px;overflow-wrap:anywhere;}
+  .share-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;}
+  .share-fields .full{grid-column:1/-1;}
+  .share-card details summary{cursor:pointer;color:var(--muted);font-size:13.5px;font-weight:600;}
+  .share-actions{display:flex;gap:8px;flex-wrap:wrap;}
+  .sbtn{border:1px solid var(--border);background:var(--card);color:var(--text);border-radius:8px;padding:8px 12px;font-size:13.5px;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
+  .sbtn.gold{background:var(--gold);border-color:var(--gold);color:#fff;}
+  .sbtn.wa{background:var(--wa);border-color:var(--wa);color:#fff;}
+  .share-empty{background:var(--card);border:1px dashed var(--border);border-radius:12px;padding:20px;text-align:center;color:var(--muted);}
+  .share-note{font-size:12.5px;color:var(--muted);margin-top:18px;max-width:640px;}
+  #toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:999px;font-weight:600;font-size:14px;z-index:60;display:none;}
+  #toast.shown{display:block;}
+  .cal-btn{background:none;border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:6px;font-size:12.5px;text-decoration:none;white-space:nowrap;display:inline-block;}
+  .action-cal{background:var(--gold-soft);color:#6B4C16;}
+  .action-waze{background:#DDF3FB;color:#0B6C8C;}
+  @media (prefers-color-scheme:dark){.action-cal{background:#3A2D19;color:#E8C27E}.action-waze{background:#12303B;color:#7FD3EE}}
+  @media (max-width:820px){.share-settings,.share-fields{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<!-- ===================== LOGIN ===================== -->
+<div id="login-screen">
+  <div class="login-card">
+    <h1 class="brand">Taxis Van Paris</h1>
+    <span class="brand-sub"></span>
+    <p class="tag">Connexion au tableau de bord</p>
+    <div class="field">
+      <label for="login-email">Adresse e-mail</label>
+      <input id="login-email" type="email" autocomplete="username" placeholder="vous@exemple.fr">
+    </div>
+    <div class="field">
+      <label for="login-password">Mot de passe</label>
+      <input id="login-password" type="password" autocomplete="current-password" placeholder="••••••••">
+    </div>
+    <button class="btn-primary" id="btn-login">Se connecter</button>
+    <div id="login-error"></div>
+  </div>
+</div>
+
+<!-- ===================== ADMIN APP ===================== -->
+<div id="app">
+  <div id="sidebar">
+    <h2 class="brand">Taxis Van Paris</h2>
+    <span class="brand-sub" style="color:#8B93A7;font-size:12px;margin-bottom:28px;display:block;">Tableau de bord</span>
+    <button class="nav-item active" data-tab="reservations"><span class="dot"></span>Réservations</button>
+    <button class="nav-item" data-tab="facturation"><span class="dot"></span>Facturation</button>
+    <button class="nav-item" data-tab="chauffeurs"><span class="dot"></span>Chauffeurs</button>
+    <button class="nav-item" data-tab="partage"><span class="dot"></span>Partage WhatsApp</button>
+    <div id="sidebar-footer">
+      <div class="who"><strong id="admin-name">—</strong><span id="admin-email">—</span></div>
+      <button class="btn-logout" id="btn-logout-admin">Se déconnecter</button>
+    </div>
+  </div>
+
+  <div id="menu-overlay"></div>
+  <div id="main-wrap">
+    <div id="topbar">
+      <button id="btn-menu" aria-label="Menu">☰</button>
+      <div style="flex:1;min-width:0;">
+        <h1 id="topbar-title">Réservations</h1>
+        <div class="topbar-sub" id="topbar-sub">Toutes les courses en cours et à venir</div>
+      </div>
+      <button class="btn-gold" id="btn-new-primary">+ Nouvelle réservation</button>
+    </div>
+
+    <div id="main">
+      <!-- RÉSERVATIONS -->
+      <div class="tab-panel active" id="tab-reservations">
+        <div class="stats-row">
+          <div class="stat-card"><div class="label">En attente</div><div class="value" id="stat-attente">0</div></div>
+          <div class="stat-card"><div class="label">Confirmées</div><div class="value" id="stat-confirmees">0</div></div>
+          <div class="stat-card"><div class="label">Aujourd'hui</div><div class="value" id="stat-aujourdhui">0</div></div>
+        </div>
+        <div class="panel-head">
+          <div class="filters">
+            <select id="filter-statut-resa">
+              <option value="">Tous les statuts</option>
+              <option value="en attente">En attente</option>
+              <option value="confirmée">Confirmée</option>
+              <option value="terminée">Terminée</option>
+              <option value="annulée">Annulée</option>
+            </select>
+          </div>
+        </div>
+        <table>
+          <thead><tr>
+            <th>Date / heure</th><th>Client</th><th>Trajet</th><th>Véhicule</th><th>Chauffeur</th><th>Prix</th><th>Statut</th><th></th>
+          </tr></thead>
+          <tbody id="resa-tbody"><tr class="empty-row"><td colspan="8">Chargement…</td></tr></tbody>
+        </table>
+      </div>
+
+      <!-- FACTURATION -->
+      <div class="tab-panel" id="tab-facturation">
+        <div class="stats-row">
+          <div class="stat-card"><div class="label">Encaissé ce mois-ci</div><div class="value" id="stat-encaisse">0 €</div></div>
+          <div class="stat-card"><div class="label">En attente de paiement</div><div class="value" id="stat-attente-paiement">0 €</div></div>
+          <div class="stat-card"><div class="label">Impayé</div><div class="value" id="stat-impaye">0 €</div></div>
+        </div>
+        <div class="panel-head">
+          <div class="filters">
+            <select id="filter-statut-facture">
+              <option value="">Tous les statuts</option>
+              <option value="payée">Payée</option>
+              <option value="en attente">En attente</option>
+              <option value="impayée">Impayée</option>
+            </select>
+          </div>
+        </div>
+        <table>
+          <thead><tr><th>Date</th><th>Client</th><th>Trajet</th><th>Montant</th><th>Statut</th><th></th></tr></thead>
+          <tbody id="facture-tbody"><tr class="empty-row"><td colspan="6">Chargement…</td></tr></tbody>
+        </table>
+      </div>
+
+      <!-- CHAUFFEURS -->
+      <div class="tab-panel" id="tab-chauffeurs">
+        <div class="panel-head">
+          <div></div>
+        </div>
+        <table>
+          <thead><tr><th>Nom</th><th>Téléphone</th><th>Véhicule</th><th>Statut</th><th>Compte app chauffeur</th><th></th></tr></thead>
+          <tbody id="chauffeur-tbody"><tr class="empty-row"><td colspan="6">Chargement…</td></tr></tbody>
+        </table>
+      </div>
+
+      <!-- PARTAGE WHATSAPP -->
+      <div class="tab-panel" id="tab-partage">
+        <div class="share-settings">
+          <label>Signature du message<input id="share-sig"></label>
+          <label>Véhicule dans le message<select id="share-veh"><option value="">Celui de la réservation</option><option>Van</option><option>Berline</option></select></label>
+        </div>
+        <div class="share-tabs" id="share-tabs"></div>
+        <div class="share-bulk" id="share-bulk"></div>
+        <div class="share-list" id="share-list"></div>
+        <p class="share-note">Les messages contiennent seulement la date, l'heure, l'arrondissement ou la ville, le véhicule, les passagers et les bagages. Le nom, le téléphone, l'adresse exacte et le prix client ne sont jamais partagés. « Ajouter à mon calendrier » crée la course avec deux alertes, 1 h et 30 min avant.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== DRIVER VIEW ===================== -->
+<div id="driver-view">
+  <div id="driver-top">
+    <div class="who"><strong id="driver-name">—</strong><span>Mes courses</span></div>
+    <button class="btn-logout" id="btn-logout-driver">Déconnexion</button>
+  </div>
+  <div id="driver-list"></div>
+</div>
+
+<!-- ===================== MODAL RÉSERVATION ===================== -->
+<div class="modal-overlay" id="modal-reservation">
+  <div class="modal">
+    <h2>Nouvelle réservation</h2>
+    <div class="grid2">
+      <div class="field"><label>Client</label><input id="f-nom" type="text"></div>
+      <div class="field"><label>Téléphone</label><input id="f-tel" type="tel"></div>
+      <div class="field"><label>Départ</label><input id="f-dep" type="text"></div>
+      <div class="field"><label>Arrivée</label><input id="f-arr" type="text"></div>
+      <div class="field"><label>Date</label><input id="f-date" type="date"></div>
+      <div class="field"><label>Heure</label><input id="f-heure" type="time"></div>
+      <div class="field"><label>Passagers</label><input id="f-pax" type="number" min="1" value="1"></div>
+      <div class="field"><label>Bagages</label><input id="f-bag" type="number" min="0" value="0"></div>
+      <div class="field"><label>Véhicule</label>
+        <select id="f-vh"><option>Berline</option><option>Van</option></select>
+      </div>
+      <div class="field"><label>Prix estimé (€)</label><input id="f-prix" type="number" min="0" step="0.5"></div>
+      <div class="field"><label>Chauffeur assigné</label>
+        <select id="f-chauffeur"><option value="">Non assigné</option></select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" id="btn-cancel-resa">Annuler</button>
+      <button class="btn-gold" id="btn-save-resa">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== MODAL FACTURE ===================== -->
+<div class="modal-overlay" id="modal-facture">
+  <div class="modal">
+    <h2>Nouvelle facture</h2>
+    <div class="grid2">
+      <div class="field"><label>Client</label><input id="ff-client" type="text"></div>
+      <div class="field"><label>Trajet</label><input id="ff-trajet" type="text"></div>
+      <div class="field"><label>Montant (€)</label><input id="ff-montant" type="number" min="0" step="0.5"></div>
+      <div class="field"><label>Date</label><input id="ff-date" type="date"></div>
+      <div class="field"><label>Statut</label>
+        <select id="ff-statut"><option value="en attente">En attente</option><option value="payée">Payée</option><option value="impayée">Impayée</option></select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" id="btn-cancel-facture">Annuler</button>
+      <button class="btn-gold" id="btn-save-facture">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== MODAL CHAUFFEUR ===================== -->
+<div class="modal-overlay" id="modal-chauffeur">
+  <div class="modal">
+    <h2>Nouveau chauffeur</h2>
+    <div class="grid2">
+      <div class="field"><label>Nom</label><input id="fc-nom" type="text"></div>
+      <div class="field"><label>Téléphone</label><input id="fc-tel" type="tel"></div>
+      <div class="field"><label>Véhicule</label><input id="fc-vh" type="text" placeholder="Ex : Van Mercedes Classe V"></div>
+      <div class="field"><label>Statut</label>
+        <select id="fc-statut"><option value="disponible">Disponible</option><option value="en course">En course</option><option value="hors service">Hors service</option></select>
+      </div>
+      <div class="field" style="grid-column:1/-1;">
+        <label>UID compte app chauffeur (optionnel)</label>
+        <input id="fc-uid" type="text" placeholder="Voir instructions plus bas pour créer son accès">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" id="btn-cancel-chauffeur">Annuler</button>
+      <button class="btn-gold" id="btn-save-chauffeur">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" role="status"></div>
+
+<script>
+/* ===== Anonymisation des adresses (arrondissement ou ville seulement) ===== */
+const norm=s=>s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[’']/g,"'");
+const ord=n=>n===1?'1er':n+'e';
+const PLACES=[
+ [/\b(roissy|cdg|charles[ -]de[ -]gaulle|aeroport cdg)\b/,'Aéroport CDG'],
+ [/\borly\b/,"Aéroport d'Orly"],[/\bbeauvais\b/,'Aéroport de Beauvais'],[/\ble bourget\b/,'Le Bourget'],
+ [/\b(disney(land)?( paris)?|marne[ -]la[ -]vallee|chessy)\b/,'Disneyland Paris'],
+ [/\b(gare du nord|gdn)\b/,'Gare du Nord (Paris 10e)'],[/\b(gare de l'est|gde)\b/,"Gare de l'Est (Paris 10e)"],
+ [/\b(gare de lyon|gdl)\b/,'Gare de Lyon (Paris 12e)'],[/\b(gare )?montparnasse\b/,'Gare Montparnasse (Paris 15e)'],
+ [/\b(gare )?saint[ -]lazare\b/,'Gare Saint-Lazare (Paris 8e)'],[/\b(gare d')?austerlitz\b/,"Gare d'Austerlitz (Paris 13e)"],
+ [/\bgare de bercy\b/,'Gare de Bercy (Paris 12e)'],[/\b(la )?defense\b/,'La Défense'],[/\bversailles\b/,'Versailles'],
+ [/\bnotre[ -]dame\b/,'Paris 4e'],[/\brepublique\b/,'Paris 3e'],[/\btour eiffel\b/,'Paris 7e'],[/\bchamps[ -]elysees\b/,'Paris 8e'],
+ [/\b(arc de triomphe|etoile)\b/,'Paris 8e'],[/\bopera\b/,'Paris 9e'],[/\bbastille\b/,'Paris 11e'],[/\bnation\b/,'Paris 11e'],
+ [/\blouvre\b/,'Paris 1er'],[/\bchatelet\b/,'Paris 1er'],[/\btrocadero\b/,'Paris 16e'],[/\bmarais\b/,'Paris 4e'],
+ [/\bmontmartre\b/,'Paris 18e'],[/\bporte maillot\b/,'Paris 17e'],[/\bbercy\b/,'Paris 12e'],[/\bla villette\b/,'Paris 19e'],
+];
+const STREETS=[[/\brue singer\b/,'Paris 16e',false],[/\brue saint[ -]honore\b/,'Paris 1er',true],[/\brue de rivoli\b/,'Paris 1er',true],[/\bboulevard haussmann|bd haussmann\b/,'Paris 8e',true]];
+const CITIES="Paris,Nanterre,Boulogne-Billancourt,Neuilly-sur-Seine,Levallois-Perret,Issy-les-Moulineaux,Courbevoie,Puteaux,Rueil-Malmaison,Suresnes,Colombes,Asnières-sur-Seine,Clichy,Gennevilliers,Bois-Colombes,La Garenne-Colombes,Saint-Cloud,Sèvres,Meudon,Clamart,Montrouge,Malakoff,Vanves,Châtillon,Bagneux,Antony,Châtenay-Malabry,Sceaux,Fontenay-aux-Roses,Chaville,Garches,Vaucresson,Marnes-la-Coquette,Villeneuve-la-Garenne,Saint-Denis,Saint-Ouen,Aubervilliers,Pantin,Montreuil,Bagnolet,Les Lilas,Le Pré-Saint-Gervais,Romainville,Noisy-le-Sec,Bobigny,Drancy,Le Blanc-Mesnil,Aulnay-sous-Bois,Sevran,Villepinte,Tremblay-en-France,Rosny-sous-Bois,Noisy-le-Grand,Bondy,Livry-Gargan,Épinay-sur-Seine,Stains,La Courneuve,Pierrefitte-sur-Seine,Villetaneuse,Vincennes,Saint-Mandé,Charenton-le-Pont,Saint-Maurice,Maisons-Alfort,Alfortville,Créteil,Ivry-sur-Seine,Vitry-sur-Seine,Villejuif,Le Kremlin-Bicêtre,Gentilly,Arcueil,Cachan,L'Haÿ-les-Roses,Fresnes,Rungis,Thiais,Choisy-le-Roi,Orly,Nogent-sur-Marne,Le Perreux-sur-Marne,Fontenay-sous-Bois,Joinville-le-Pont,Saint-Maur-des-Fossés,Champigny-sur-Marne,Villiers-sur-Marne,Bry-sur-Marne,Chennevières-sur-Marne,Sucy-en-Brie,Boissy-Saint-Léger,Argenteuil,Bezons,Sartrouville,Houilles,Chatou,Le Vésinet,Croissy-sur-Seine,Le Pecq,Saint-Germain-en-Laye,Maisons-Laffitte,Poissy,Versailles,Le Chesnay,Vélizy-Villacoublay,Viroflay,Saint-Quentin-en-Yvelines,Montigny-le-Bretonneux,Guyancourt,Trappes,Plaisir,Rambouillet,Mantes-la-Jolie,Les Mureaux,Conflans-Sainte-Honorine,Cergy,Pontoise,Beauchamp,Taverny,Franconville,Ermont,Eaubonne,Sannois,Montmorency,Enghien-les-Bains,Sarcelles,Garges-lès-Gonesse,Gonesse,Goussainville,Roissy-en-France,Louvres,Villiers-le-Bel,Herblay,Cormeilles-en-Parisis,Saint-Gratien,Deuil-la-Barre,Massy,Palaiseau,Orsay,Les Ulis,Évry-Courcouronnes,Corbeil-Essonnes,Savigny-sur-Orge,Juvisy-sur-Orge,Athis-Mons,Brétigny-sur-Orge,Sainte-Geneviève-des-Bois,Viry-Châtillon,Draveil,Longjumeau,Chilly-Mazarin,Étampes,Meaux,Chelles,Torcy,Lognes,Bussy-Saint-Georges,Serris,Lagny-sur-Marne,Pontault-Combault,Roissy-en-Brie,Melun,Fontainebleau,Provins,Montévrain,Magny-le-Hongre,Val d'Europe,Noisiel,Champs-sur-Marne,Vaires-sur-Marne,Lille,Lyon,Marseille,Bordeaux,Nantes,Rouen,Reims,Orléans,Tours,Amiens,Caen,Le Havre,Deauville,Chantilly,Senlis,Compiègne,Bruxelles,Londres".split(',');
+const CITYRX=CITIES.map(c=>[new RegExp('(^|[^a-z])'+norm(c).replace(/[-' ]/g,"[-' ]?")+'(?![a-z])'),c]).sort((a,b)=>b[1].length-a[1].length);
+
+function parsePlaces(text){
+  let t=' '+norm(text||'')+' ';const found=[];let warn=false;
+  const take=(rx,label,flag)=>{let m;while((m=rx.exec(t))){found.push({i:m.index,label});if(flag)warn=true;t=t.slice(0,m.index)+' '.repeat(m[0].length)+t.slice(m.index+m[0].length)}};
+  const g=rx=>new RegExp(rx.source,'g');
+  // code postal : Paris ou ville
+  let m;const pc=/\b(75\d{3}|9[1-5]\d{3}|77\d{3}|78\d{3}|60\d{3})\b/g;let hasPc=false;
+  while((m=pc.exec(t))){const code=m[1];hasPc=true;const blank=(i,len)=>{t=t.slice(0,i)+' '.repeat(len)+t.slice(i+len)};
+    if(code.startsWith('75')){const n=code==='75116'?16:+code.slice(3);found.push({i:m.index,label:n>=1&&n<=20?'Paris '+ord(n):'Paris'});blank(m.index,code.length)}
+    else{const rest=t.slice(m.index+code.length);const known=CITYRX.some(([rx])=>{const r=rx.exec(rest);return r&&r.index<3});
+      if(!known){const w=(rest.match(/^\s*([a-z][a-z'-]*(?:[ -](?:sur|sous|en|le|la|les|lès|de|du|des|aux|saint|sainte)[ -][a-z'-]+)?)/)||[])[1];
+        found.push({i:m.index,label:w?w.replace(/(^|[ -])([a-z])/g,(x,a,b)=>a+b.toUpperCase()):code});blank(m.index,code.length+(w?rest.indexOf(w)+w.length:0))}
+      else blank(m.index,code.length)}
+    pc.lastIndex=0}
+  PLACES.forEach(([rx,l])=>take(g(rx),l));
+  CITYRX.forEach(([rx,c])=>{const r=new RegExp(rx.source,'g');let mm;while((mm=r.exec(t))){found.push({i:mm.index,label:c});t=t.slice(0,mm.index)+' '.repeat(mm[0].length)+t.slice(mm.index+mm[0].length);r.lastIndex=0}});
+  if(!hasPc)STREETS.forEach(([rx,l,f])=>{if(!found.some(x=>x.label.startsWith('Paris ')))take(g(rx),l,f)});
+  // adresse sans ville reconnue
+  const addr=/\b\d+\s*(bis|ter)?\s*,?\s*(rue|av|avenue|bd|boulevard|place|quai|allee|impasse|chemin|route|villa|cite|square|passage)\b/;
+  if(!found.length&&addr.test(t)){found.push({i:t.search(addr),label:'Adresse à préciser'});warn=true}
+  found.sort((a,b)=>a.i-b.i);
+  return {places:found.map(f=>f.label),warn};
+}
+function parseParisN(text){ // "Paris 15" → Paris 15e, avant le reste
+  return (text||'').replace(/\bparis\s*(\d{1,2})\s*(?:er|ème|eme|e)?\b/gi,(m,n)=>{n=+n;return n>=1&&n<=20?'750'+String(n).padStart(2,'0'):m});
+}
+function anonymise(title,location){
+  const t=parseParisN(title||''), l=parseParisN(location||'');
+  const parts=t.split(/\s+(?:vers|->|→|=>|à destination de|direction)\s+/i);
+  let dep=[],arr=[],warn=false;
+  if(parts.length>1){const a=parsePlaces(parts[0]),b=parsePlaces(parts.slice(1).join(' '));dep=a.places;arr=b.places;warn=a.warn||b.warn}
+  else{const a=parsePlaces(t);warn=a.warn;dep=a.places.slice(0,1);arr=a.places.slice(1)}
+  if(l){const L=parsePlaces(l);warn=warn||L.warn;L.places.forEach(p=>{
+    const same=x=>x===p||(x.startsWith('Paris')&&p.startsWith('Paris')&&(x==='Paris'||x==='Adresse à préciser'));
+    if(dep.length&&(same(dep[0])||dep[0]==='Adresse à préciser'))dep[0]=p;
+    else if(arr.length&&(same(arr[arr.length-1])||arr[arr.length-1]==='Adresse à préciser'))arr[arr.length-1]=p;
+    else if(!dep.length)dep.push(p);else if(!arr.length)arr.push(p)})}
+  const d=dep[0]||'',a=arr[arr.length-1]||'';
+  return {dep:d,arr:a,warn:warn||!d||!a||d==='Adresse à préciser'||a==='Adresse à préciser'||d==='Paris'||a==='Paris'};
+}
+
+
+</script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+  import {
+    getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut
+  } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+  import {
+    getFirestore, collection, doc, addDoc, updateDoc, deleteDoc,
+    onSnapshot, query, where, orderBy, getDoc, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+  // ============================================================
+  // 1) COLLE ICI LA CONFIGURATION DE TON PROJET FIREBASE
+  //    Firebase Console > Paramètres du projet > Général >
+  //    "Vos applications" > icône Web (</>) > Config SDK
+  //    Remplace TOUTES les valeurs "COLLE_..." ci-dessous.
+  // ============================================================
+  const firebaseConfig = {
+    apiKey: "AIzaSyBN8uBFONIt1tDTH9C-NIQKeulFdJ2m26Q",
+    authDomain: "taxis-van-paris-by-abts.firebaseapp.com",
+    projectId: "taxis-van-paris-by-abts",
+    storageBucket: "taxis-van-paris-by-abts.firebasestorage.app",
+    messagingSenderId: "53887245170",
+    appId: "1:53887245170:web:2a3b785d734c54e01f9beb",
+    measurementId: "G-E89EF1X0RD"
+  };
+
+  const loginError = (msg) => { document.getElementById("login-error").textContent = msg; };
+
+  // Garde-fou : la config n'a pas été remplie
+  const configIncomplete = Object.values(firebaseConfig).some(v => String(v).startsWith("COLLE_"));
+  if (configIncomplete) {
+    loginError("Configuration Firebase non renseignée : remplace les valeurs « COLLE_… » dans dashboard/index.html.");
+    document.getElementById("btn-login").disabled = true;
+    throw new Error("firebaseConfig contient encore des valeurs COLLE_…");
+  }
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  let currentRole = null;
+  let currentUid = null;
+  let currentUnsubs = [];
+  let reservationsCache = [];
+  let facturesCache = [];
+  let chauffeursCache = [];
+
+  // Normalise les clés du profil (espaces, majuscules) : "Role " -> "role", "Nom" -> "nom"
+  function normalizeProfile(raw) {
+    const out = {};
+    Object.keys(raw || {}).forEach(k => {
+      const v = raw[k];
+      out[k.trim().toLowerCase()] = typeof v === "string" ? v.trim() : v;
+    });
+    return out;
+  }
+
+  // Messages d'erreur de connexion lisibles
+  function authErrorMessage(err) {
+    switch (err && err.code) {
+      case "auth/invalid-credential":
+      case "auth/wrong-password":
+      case "auth/user-not-found":
+      case "auth/invalid-email":
+        return "E-mail ou mot de passe incorrect.";
+      case "auth/too-many-requests":
+        return "Trop de tentatives. Réessaie dans quelques minutes.";
+      case "auth/network-request-failed":
+        return "Problème de réseau. Vérifie ta connexion.";
+      case "auth/api-key-not-valid.-please-pass-a-valid-api-key.":
+      case "auth/invalid-api-key":
+        return "Clé API Firebase invalide : vérifie firebaseConfig dans dashboard/index.html.";
+      case "auth/unauthorized-domain":
+        return "Domaine non autorisé : ajoute taxisvanparis.fr dans Firebase > Authentication > Paramètres > Domaines autorisés.";
+      case "auth/operation-not-allowed":
+        return "Connexion e-mail/mot de passe désactivée dans Firebase > Authentication > Sign-in method.";
+      default:
+        return "Connexion impossible (" + ((err && err.code) || "erreur inconnue") + ").";
+    }
+  }
+
+  // ---------------- LOGIN ----------------
+  document.getElementById("btn-login").addEventListener("click", doLogin);
+  document.getElementById("login-password").addEventListener("keydown", e => { if (e.key === "Enter") doLogin(); });
+
+  function doLogin() {
+    const email = document.getElementById("login-email").value.trim();
+    const pass = document.getElementById("login-password").value;
+    loginError("");
+    if (!email || !pass) { loginError("Merci de renseigner l'e-mail et le mot de passe."); return; }
+    signInWithEmailAndPassword(auth, email, pass).catch(err => {
+      loginError(authErrorMessage(err));
+      console.error(err);
+    });
+  }
+
+  document.getElementById("btn-logout-admin").addEventListener("click", () => signOut(auth));
+  document.getElementById("btn-logout-driver").addEventListener("click", () => signOut(auth));
+
+  onAuthStateChanged(auth, async (user) => {
+    cleanupListeners();
+    if (!user) {
+      document.getElementById("login-screen").style.display = "flex";
+      document.getElementById("app").classList.remove("shown");
+      document.getElementById("driver-view").classList.remove("shown");
+      return;
+    }
+    currentUid = user.uid;
+
+    let userDocSnap;
+    try {
+      userDocSnap = await getDoc(doc(db, "users", user.uid));
+    } catch (err) {
+      console.error(err);
+      loginError(
+        err && err.code === "permission-denied"
+          ? "Accès refusé à Firestore : vérifie les règles (onglet Règles) pour la collection 'users'."
+          : "Impossible de lire le profil Firestore (" + ((err && err.code) || "erreur") + ")."
+      );
+      signOut(auth);
+      return;
+    }
+
+    if (!userDocSnap.exists()) {
+      loginError(
+        "Compte connecté (UID : " + user.uid + ") mais aucun document portant cet ID dans la collection 'users'. " +
+        "Crée le document avec exactement cet ID."
+      );
+      signOut(auth);
+      return;
+    }
+
+    const profile = normalizeProfile(userDocSnap.data());
+    currentRole = String(profile.role || "").toLowerCase();
+    document.getElementById("login-screen").style.display = "none";
+
+    if (currentRole.startsWith("admin")) {
+      currentRole = "admin";
+      document.getElementById("admin-name").textContent = profile.nom || "Administrateur";
+      document.getElementById("admin-email").textContent = user.email;
+      document.getElementById("app").classList.add("shown");
+      startAdminListeners();
+    } else if (currentRole === "chauffeur") {
+      document.getElementById("driver-name").textContent = profile.nom || "Chauffeur";
+      document.getElementById("driver-view").classList.add("shown");
+      startDriverListener(user.uid);
+    } else {
+      document.getElementById("login-screen").style.display = "flex";
+      loginError("Rôle inconnu pour ce compte (« " + (profile.role || "vide") + " »). Valeurs attendues : admin ou chauffeur.");
+      signOut(auth);
+    }
+  });
+
+  function cleanupListeners() {
+    currentUnsubs.forEach(fn => fn());
+    currentUnsubs = [];
+  }
+
+  // ---------------- NAV TABS ----------------
+  const tabTitles = {
+    reservations: ["Réservations", "Toutes les courses en cours et à venir"],
+    facturation: ["Facturation", "Suivi des paiements clients"],
+    chauffeurs: ["Chauffeurs", "Équipe et disponibilités"],
+    partage: ["Partage WhatsApp", "Courses anonymisées, prêtes à poster"]
+  };
+  document.querySelectorAll(".nav-item").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".nav-item").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      const tab = btn.dataset.tab;
+      document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+      document.getElementById("tab-" + tab).classList.add("active");
+      document.getElementById("topbar-title").textContent = tabTitles[tab][0];
+      document.getElementById("topbar-sub").textContent = tabTitles[tab][1];
+      document.getElementById("btn-new-primary").textContent =
+        tab === "reservations" ? "+ Nouvelle réservation" :
+        tab === "facturation" ? "+ Nouvelle facture" : "+ Nouveau chauffeur";
+      document.getElementById("btn-new-primary").dataset.target = tab;
+      document.getElementById("btn-new-primary").style.visibility = tab === "partage" ? "hidden" : "";
+      if (tab === "partage") renderShare();
+    });
+  });
+  // Menu mobile
+  const sidebarEl = document.getElementById("sidebar");
+  const overlayEl = document.getElementById("menu-overlay");
+  const closeMenu = () => { sidebarEl.classList.remove("mobile-open"); overlayEl.classList.remove("shown"); };
+  document.getElementById("btn-menu").addEventListener("click", () => {
+    sidebarEl.classList.add("mobile-open"); overlayEl.classList.add("shown");
+  });
+  overlayEl.addEventListener("click", closeMenu);
+  document.querySelectorAll(".nav-item").forEach(b => b.addEventListener("click", closeMenu));
+
+  document.getElementById("btn-new-primary").dataset.target = "reservations";
+  document.getElementById("btn-new-primary").addEventListener("click", () => {
+    const target = document.getElementById("btn-new-primary").dataset.target;
+    if (target === "reservations") openResaModal();
+    else if (target === "facturation") openFactureModal();
+    else openChauffeurModal();
+  });
+
+  // ---------------- ADMIN: LISTENERS ----------------
+  function startAdminListeners() {
+    const onErr = (err) => console.error("Firestore:", err);
+
+    // Pas de orderBy côté Firestore : il masquerait les documents dont le champ
+    // est absent ou nommé autrement. On lit tout et on trie dans la page.
+    currentUnsubs.push(onSnapshot(collection(db, "reservations"), snap => {
+      reservationsCache = sortReservations(snap.docs.map(d => normResa({ id: d.id, ...d.data() })));
+      renderReservations();
+      renderStatsResa();
+      renderShare();
+    }, onErr));
+
+    currentUnsubs.push(onSnapshot(collection(db, "factures"), snap => {
+      facturesCache = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+        .sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
+      renderFactures();
+      renderStatsFacture();
+    }, onErr));
+
+    currentUnsubs.push(onSnapshot(collection(db, "chauffeurs"), snap => {
+      chauffeursCache = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+        .sort((a, b) => String(a.nom || "").localeCompare(String(b.nom || ""), "fr"));
+      renderChauffeurs();
+      fillChauffeurDropdown();
+    }, onErr));
+  }
+
+  // ---------------- RÉSERVATIONS : normalisation + tri ----------------
+  // Convertit un Timestamp Firestore ou une chaîne en "AAAA-MM-JJ" / "HH:MM"
+  function toDateStr(v) {
+    if (!v) return "";
+    if (typeof v.toDate === "function") {
+      const d = v.toDate();
+      return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+    }
+    const s = String(v).trim();
+    const m = s.match(/(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})/); // 25/09/2026 -> 2026-09-25
+    if (m) return `${m[3]}-${m[2].padStart(2, "0")}-${m[1].padStart(2, "0")}`;
+    const iso = s.match(/(\d{4})-(\d{2})-(\d{2})/);
+    if (iso) return iso[0];
+    const MOIS = ["janv", "févr", "mars", "avr", "mai", "juin", "juil", "août", "sept", "oct", "nov", "déc"];
+    const fr = s.toLowerCase().replace("fevr", "févr").replace("aout", "août").replace("dec", "déc")
+      .match(/(\d{1,2})\s+([a-zéû]+)\.?\s+(\d{4})/);            // "26 septembre 2026"
+    if (fr) {
+      const mi = MOIS.findIndex(x => fr[2].startsWith(x));
+      if (mi >= 0) return `${fr[3]}-${String(mi + 1).padStart(2, "0")}-${fr[1].padStart(2, "0")}`;
+    }
+    return s;
+  }
+  function toTimeStr(v) {
+    if (!v) return "";
+    if (typeof v.toDate === "function") {
+      const d = v.toDate();
+      return String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+    }
+    const m = String(v).trim().match(/^(\d{1,2})[:hH](\d{2})/); // 9h30 / 9:30 -> 09:30
+    return m ? m[1].padStart(2, "0") + ":" + m[2] : String(v).trim();
+  }
+  const EMPTY = ["", "non renseigné", "non renseigne", "undefined", "null", "-"];
+  const pick = (d, ...keys) => {
+    for (const k of keys) {
+      const v = d[k];
+      if (v === undefined || v === null) continue;
+      if (typeof v === "string" && EMPTY.includes(v.trim().toLowerCase())) continue;
+      return v;
+    }
+    return "";
+  };
+
+  // Accepte les variantes de noms de champs écrites par le site
+  function normResa(d) {
+    return {
+      ...d,
+      nom: pick(d, "nom", "name", "client", "clientNom", "nomClient", "nom_client", "client_nom", "prenomNom", "prenom", "fullName"),
+      tel: pick(d, "tel", "telephone", "téléphone", "phone", "tel_client", "telClient", "mobile", "whatsapp"),
+      dep: pick(d, "dep", "depart", "départ", "from", "pickup", "origine"),
+      arr: pick(d, "arr", "arrivee", "arrivée", "to", "dropoff", "destination"),
+      date: toDateStr(pick(d, "date", "dateCourse", "jour")),
+      heure: toTimeStr(pick(d, "heure", "time", "hour")),
+      pax: String(pick(d, "pax", "passagers", "passengers") || 1).replace(/[^\d]/g, "") || 1,
+      bagages: String(pick(d, "bagages", "valises", "luggage", "bags") || "").replace(/[^\d]/g, ""),
+      vehicule: pick(d, "vehicule", "véhicule", "vh", "vehicle", "vehiculeType", "typeVehicule", "type_vehicule", "vehicle_type", "car", "type"),
+      prix: pick(d, "prix", "price", "tarif", "montant"),
+      statut: pick(d, "statut", "status") || "en attente"
+    };
+  }
+
+  // Courses à venir / en cours : de la plus proche à la plus lointaine.
+  // Courses terminées ou annulées : en bas, de la plus récente à la plus ancienne.
+  function todayStr() {
+    const d = new Date();
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
+  const isClosed = r => r.statut === "terminée" || r.statut === "annulée";
+  // Groupe : 0 = à venir (aujourd'hui inclus), 1 = passée non clôturée, 2 = terminée/annulée
+  function groupOf(r) {
+    if (isClosed(r)) return 2;
+    return (!r.date || r.date >= todayStr()) ? 0 : 1;
+  }
+  // À venir : de la plus proche à la plus lointaine.
+  // Passées non clôturées puis terminées/annulées : de la plus récente à la plus ancienne.
+  function sortReservations(list) {
+    const key = r => (r.date || "9999-12-31") + " " + (r.heure || "00:00");
+    const g = [[], [], []];
+    list.forEach(r => g[groupOf(r)].push(r));
+    g[0].sort((a, b) => key(a).localeCompare(key(b)));
+    g[1].sort((a, b) => key(b).localeCompare(key(a)));
+    g[2].sort((a, b) => key(b).localeCompare(key(a)));
+    return g[0].concat(g[1], g[2]);
+  }
+  function fmtPrix(p) {
+    if (p === "" || p === null || p === undefined) return "—";
+    const n = parseFloat(String(p).replace(",", ".").replace(/[^\d.]/g, ""));
+    if (isNaN(n)) return String(p);
+    return (Number.isInteger(n) ? n : n.toFixed(2).replace(".", ",")) + " €";
+  }
+  const JOURS = ["dim.", "lun.", "mar.", "mer.", "jeu.", "ven.", "sam."];
+  function fmtDate(r) {
+    if (!r.date) return "Date non précisée";
+    const m = r.date.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!m) return r.date + (r.heure ? " · " + r.heure : "");
+    const d = new Date(+m[1], +m[2] - 1, +m[3]);
+    const label = r.date === todayStr() ? "Aujourd'hui" : JOURS[d.getDay()] + " " + m[3] + "/" + m[2];
+    return label + (r.heure ? " · " + r.heure : "");
+  }
+
+  document.getElementById("filter-statut-resa").addEventListener("change", renderReservations);
+  document.getElementById("filter-statut-facture").addEventListener("change", renderFactures);
+
+  // ---------------- RENDER: RÉSERVATIONS ----------------
+  function badgeResa(statut) {
+    const map = { "en attente": "attente", "confirmée": "confirmee", "terminée": "terminee", "annulée": "annulee" };
+    return `<span class="badge ${map[statut] || "attente"}">${statut}</span>`;
+  }
+
+  function renderReservations() {
+    const filter = document.getElementById("filter-statut-resa").value;
+    const rows = reservationsCache.filter(r => !filter || r.statut === filter);
+    const tbody = document.getElementById("resa-tbody");
+    if (rows.length === 0) {
+      tbody.innerHTML = `<tr class="empty-row"><td colspan="8">Aucune réservation pour l'instant.</td></tr>`;
+      return;
+    }
+    const titres = ["À venir", "Passées — à clôturer", "Terminées / annulées"];
+    let lastGroup = -1;
+    tbody.innerHTML = rows.map(r => {
+      const grp = groupOf(r);
+      const head = grp !== lastGroup ? `<tr class="group-row"><td colspan="8">${titres[grp]}</td></tr>` : "";
+      lastGroup = grp;
+      return head + `
+      <tr class="resa-row${grp === 1 ? " past" : ""}">
+        <td data-label="Date" class="cell-date">${fmtDate(r)}</td>
+        <td data-label="Client"><span>${r.nom || "—"}${r.tel ? `<br><a href="tel:${r.tel}" style="color:var(--muted);font-size:12.5px;">${r.tel}</a>` : ""}</span></td>
+        <td data-label="Trajet">${r.dep || "?"} → ${r.arr || "?"}</td>
+        <td data-label="Véhicule">${r.vehicule ? r.vehicule + " · " : ""}${r.pax || 1} pax${r.bagages ? " · " + r.bagages + " bag." : ""}</td>
+        <td data-label="Chauffeur">${r.chauffeurNom || "—"}</td>
+        <td data-label="Prix">${fmtPrix(r.prix)}</td>
+        <td data-label="Statut">
+          <select class="statut-select" data-id="${r.id}" data-kind="resa">
+            <option value="en attente" ${r.statut === "en attente" ? "selected" : ""}>En attente</option>
+            <option value="confirmée" ${r.statut === "confirmée" ? "selected" : ""}>Confirmée</option>
+            <option value="terminée" ${r.statut === "terminée" ? "selected" : ""}>Terminée</option>
+            <option value="annulée" ${r.statut === "annulée" ? "selected" : ""}>Annulée</option>
+          </select>
+        </td>
+        <td class="cell-actions">${grp === 0 ? calLink([r], "📅 Calendrier", "cal-btn") : ""} <button class="icon-btn danger" data-id="${r.id}" data-kind="del-resa">Supprimer</button></td>
+      </tr>`;
+    }).join("");
+
+    tbody.querySelectorAll('select[data-kind="resa"]').forEach(sel => {
+      sel.addEventListener("change", () => updateDoc(doc(db, "reservations", sel.dataset.id), { statut: sel.value }));
+    });
+    tbody.querySelectorAll('[data-kind="del-resa"]').forEach(btn => {
+      btn.addEventListener("click", () => {
+        if (confirm("Supprimer cette réservation ?")) deleteDoc(doc(db, "reservations", btn.dataset.id));
+      });
+    });
+  }
+
+  function renderStatsResa() {
+    const today = todayStr();
+    document.getElementById("stat-attente").textContent = reservationsCache.filter(r => r.statut === "en attente").length;
+    document.getElementById("stat-confirmees").textContent = reservationsCache.filter(r => r.statut === "confirmée").length;
+    document.getElementById("stat-aujourdhui").textContent = reservationsCache.filter(r => r.date === today).length;
+  }
+
+  // ---------------- RENDER: FACTURES ----------------
+  function badgeFacture(statut) {
+    const map = { "payée": "payee", "impayée": "impayee", "en attente": "attente" };
+    return `<span class="badge ${map[statut] || "attente"}">${statut}</span>`;
+  }
+
+  function renderFactures() {
+    const filter = document.getElementById("filter-statut-facture").value;
+    const rows = facturesCache.filter(f => !filter || f.statut === filter);
+    const tbody = document.getElementById("facture-tbody");
+    if (rows.length === 0) {
+      tbody.innerHTML = `<tr class="empty-row"><td colspan="6">Aucune facture pour l'instant.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = rows.map(f => `
+      <tr>
+        <td>${f.date || ""}</td>
+        <td>${f.client || ""}</td>
+        <td>${f.trajet || ""}</td>
+        <td>${f.montant ? f.montant + " €" : "—"}</td>
+        <td>
+          <select class="statut-select" data-id="${f.id}" data-kind="facture">
+            <option value="en attente" ${f.statut === "en attente" ? "selected" : ""}>En attente</option>
+            <option value="payée" ${f.statut === "payée" ? "selected" : ""}>Payée</option>
+            <option value="impayée" ${f.statut === "impayée" ? "selected" : ""}>Impayée</option>
+          </select>
+        </td>
+        <td><button class="icon-btn danger" data-id="${f.id}" data-kind="del-facture">Suppr.</button></td>
+      </tr>
+    `).join("");
+
+    tbody.querySelectorAll('select[data-kind="facture"]').forEach(sel => {
+      sel.addEventListener("change", () => updateDoc(doc(db, "factures", sel.dataset.id), { statut: sel.value }));
+    });
+    tbody.querySelectorAll('[data-kind="del-facture"]').forEach(btn => {
+      btn.addEventListener("click", () => {
+        if (confirm("Supprimer cette facture ?")) deleteDoc(doc(db, "factures", btn.dataset.id));
+      });
+    });
+  }
+
+  function renderStatsFacture() {
+    const thisMonth = new Date().toISOString().slice(0, 7);
+    const sum = (arr) => arr.reduce((a, f) => a + (Number(f.montant) || 0), 0);
+    const ceMois = facturesCache.filter(f => (f.date || "").startsWith(thisMonth));
+    document.getElementById("stat-encaisse").textContent = sum(ceMois.filter(f => f.statut === "payée")) + " €";
+    document.getElementById("stat-attente-paiement").textContent = sum(facturesCache.filter(f => f.statut === "en attente")) + " €";
+    document.getElementById("stat-impaye").textContent = sum(facturesCache.filter(f => f.statut === "impayée")) + " €";
+  }
+
+  // ---------------- RENDER: CHAUFFEURS ----------------
+  function badgeChauffeur(statut) {
+    const map = { "disponible": "dispo", "en course": "encourse", "hors service": "horsservice" };
+    return `<span class="badge ${map[statut] || "dispo"}">${statut}</span>`;
+  }
+
+  function renderChauffeurs() {
+    const tbody = document.getElementById("chauffeur-tbody");
+    if (chauffeursCache.length === 0) {
+      tbody.innerHTML = `<tr class="empty-row"><td colspan="6">Aucun chauffeur enregistré.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = chauffeursCache.map(c => `
+      <tr>
+        <td>${c.nom || ""}</td>
+        <td>${c.tel || ""}</td>
+        <td>${c.vehicule || ""}</td>
+        <td>${badgeChauffeur(c.statut || "disponible")}</td>
+        <td>${c.uid ? "Actif" : "Non créé"}</td>
+        <td><button class="icon-btn danger" data-id="${c.id}" data-kind="del-chauffeur">Suppr.</button></td>
+      </tr>
+    `).join("");
+    tbody.querySelectorAll('[data-kind="del-chauffeur"]').forEach(btn => {
+      btn.addEventListener("click", () => {
+        if (confirm("Supprimer ce chauffeur ?")) deleteDoc(doc(db, "chauffeurs", btn.dataset.id));
+      });
+    });
+  }
+
+  function fillChauffeurDropdown() {
+    const sel = document.getElementById("f-chauffeur");
+    sel.innerHTML = `<option value="">Non assigné</option>` +
+      chauffeursCache.map(c => `<option value="${c.uid || ""}" data-nom="${c.nom}">${c.nom}</option>`).join("");
+  }
+
+  // ---------------- MODALS: RÉSERVATION ----------------
+  function openResaModal() {
+    ["f-nom","f-tel","f-dep","f-arr","f-date","f-heure","f-prix"].forEach(id => document.getElementById(id).value = "");
+    document.getElementById("f-pax").value = 1;
+    document.getElementById("f-bag").value = 0;
+    document.getElementById("modal-reservation").classList.add("shown");
+  }
+  document.getElementById("btn-cancel-resa").addEventListener("click", () => document.getElementById("modal-reservation").classList.remove("shown"));
+  document.getElementById("btn-save-resa").addEventListener("click", async () => {
+    const chauffeurSel = document.getElementById("f-chauffeur");
+    const chauffeurUid = chauffeurSel.value;
+    const chauffeurNom = chauffeurUid ? chauffeurSel.selectedOptions[0].dataset.nom : "";
+    const data = {
+      nom: document.getElementById("f-nom").value.trim(),
+      tel: document.getElementById("f-tel").value.trim(),
+      dep: document.getElementById("f-dep").value.trim(),
+      arr: document.getElementById("f-arr").value.trim(),
+      date: document.getElementById("f-date").value,
+      heure: document.getElementById("f-heure").value,
+      pax: Number(document.getElementById("f-pax").value) || 1,
+      bagages: Number(document.getElementById("f-bag").value) || 0,
+      vehicule: document.getElementById("f-vh").value,
+      prix: Number(document.getElementById("f-prix").value) || 0,
+      chauffeurUid, chauffeurNom,
+      statut: "en attente",
+      createdAt: serverTimestamp()
+    };
+    if (!data.nom || !data.date) { alert("Merci de renseigner au moins le nom du client et la date."); return; }
+    await addDoc(collection(db, "reservations"), data);
+    document.getElementById("modal-reservation").classList.remove("shown");
+  });
+
+  // ---------------- MODALS: FACTURE ----------------
+  function openFactureModal() {
+    ["ff-client","ff-trajet","ff-montant","ff-date"].forEach(id => document.getElementById(id).value = "");
+    document.getElementById("modal-facture").classList.add("shown");
+  }
+  document.getElementById("btn-cancel-facture").addEventListener("click", () => document.getElementById("modal-facture").classList.remove("shown"));
+  document.getElementById("btn-save-facture").addEventListener("click", async () => {
+    const data = {
+      client: document.getElementById("ff-client").value.trim(),
+      trajet: document.getElementById("ff-trajet").value.trim(),
+      montant: Number(document.getElementById("ff-montant").value) || 0,
+      date: document.getElementById("ff-date").value,
+      statut: document.getElementById("ff-statut").value
+    };
+    if (!data.client || !data.date) { alert("Merci de renseigner au moins le client et la date."); return; }
+    await addDoc(collection(db, "factures"), data);
+    document.getElementById("modal-facture").classList.remove("shown");
+  });
+
+  // ---------------- MODALS: CHAUFFEUR ----------------
+  function openChauffeurModal() {
+    ["fc-nom","fc-tel","fc-vh","fc-uid"].forEach(id => document.getElementById(id).value = "");
+    document.getElementById("modal-chauffeur").classList.add("shown");
+  }
+  document.getElementById("btn-cancel-chauffeur").addEventListener("click", () => document.getElementById("modal-chauffeur").classList.remove("shown"));
+  document.getElementById("btn-save-chauffeur").addEventListener("click", async () => {
+    const data = {
+      nom: document.getElementById("fc-nom").value.trim(),
+      tel: document.getElementById("fc-tel").value.trim(),
+      vehicule: document.getElementById("fc-vh").value.trim(),
+      statut: document.getElementById("fc-statut").value,
+      uid: document.getElementById("fc-uid").value.trim() || null
+    };
+    if (!data.nom) { alert("Merci de renseigner au moins le nom du chauffeur."); return; }
+    await addDoc(collection(db, "chauffeurs"), data);
+    document.getElementById("modal-chauffeur").classList.remove("shown");
+  });
+
+  // ---------------- CALENDRIER (.ics avec alertes 1 h et 30 min avant) ----------------
+  const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const escH = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const icsEsc = s => String(s || "").replace(/\\/g, "\\\\").replace(/\n/g, "\\n").replace(/([,;])/g, "\\$1");
+  const icsUtc = d => d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+  const resaDate = r => new Date((r.date || "2100-01-01") + "T" + (/^\d{2}:\d{2}$/.test(r.heure) ? r.heure : "00:00"));
+  function anonPair(r) {
+    const a = anonymise(String(r.dep || ""), ""), b = anonymise(String(r.arr || ""), "");
+    const both = anonymise(String(r.dep || "") + " vers " + String(r.arr || ""), "");
+    const w = x => parsePlaces(parseParisN(String(x || ""))).warn;
+    return { dep: a.dep || both.dep, arr: b.dep || both.arr, warnDep: w(r.dep), warnArr: w(r.arr) };
+  }
+  function vevent(r) {
+    const s = resaDate(r), e = new Date(s.getTime() + 3600000), an = anonPair(r);
+    const title = ("Course " + (r.nom || "") + " " + (an.dep || r.dep || "?") + " → " + (an.arr || r.arr || "?")).replace(/\s+/g, " ").trim();
+    const desc = [r.nom && "Client : " + r.nom, r.tel && "Tél : " + r.tel, "Départ : " + (r.dep || "?"), "Arrivée : " + (r.arr || "?"),
+      r.pax && "Passagers : " + r.pax, r.bagages && "Bagages : " + r.bagages, r.vehicule && "Véhicule : " + r.vehicule,
+      (r.prix !== "" && r.prix !== undefined && r.prix !== null) && "Prix : " + fmtPrix(r.prix), r.chauffeurNom && "Chauffeur : " + r.chauffeurNom].filter(Boolean).join("\n");
+    const alarm = m => ["BEGIN:VALARM", "ACTION:DISPLAY", "DESCRIPTION:" + icsEsc(title), "TRIGGER:-PT" + m + "M", "END:VALARM"];
+    return ["BEGIN:VEVENT", "UID:" + r.id + "@taxisvanparis.fr", "DTSTAMP:" + icsUtc(new Date()), "DTSTART:" + icsUtc(s), "DTEND:" + icsUtc(e),
+      "SUMMARY:" + icsEsc(title), "LOCATION:" + icsEsc(r.dep), "DESCRIPTION:" + icsEsc(desc), ...alarm(60), ...alarm(30), "END:VEVENT"];
+  }
+  function calLink(list, label, cls) {
+    const ok = list.filter(r => /^\d{4}-\d{2}-\d{2}$/.test(r.date) && /^\d{2}:\d{2}$/.test(r.heure));
+    if (!ok.length) return "";
+    const ics = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Taxis Van Paris//Dashboard//FR", "CALSCALE:GREGORIAN", "METHOD:PUBLISH", ...ok.flatMap(vevent), "END:VCALENDAR"].join("\r\n");
+    return `<a class="${cls}" href="data:text/calendar;charset=utf-8,${encodeURIComponent(ics)}" ${IS_IOS ? "" : 'download="course.ics"'}>${label}</a>`;
+  }
+
+  // ---------------- PARTAGE WHATSAPP ----------------
+  const shareStore = { get(k, d) { try { const v = localStorage.getItem("tvp_share_" + k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+                       set(k, v) { try { localStorage.setItem("tvp_share_" + k, JSON.stringify(v)); } catch (e) {} } };
+  let shareEdits = shareStore.get("edits", {}), shareTab = "avenir";
+  const sigEl = document.getElementById("share-sig"), vehEl = document.getElementById("share-veh");
+  sigEl.value = shareStore.get("sig", "Intéressé ? Répondez en privé 📲");
+  vehEl.value = shareStore.get("veh", "");
+  sigEl.addEventListener("input", () => { shareStore.set("sig", sigEl.value); renderShare(); });
+  vehEl.addEventListener("change", () => { shareStore.set("veh", vehEl.value); renderShare(); });
+
+  function toast(t) { const e = document.getElementById("toast"); e.textContent = t; e.classList.add("shown"); clearTimeout(toast.t); toast.t = setTimeout(() => e.classList.remove("shown"), 1800); }
+  function copyText(text) {
+    const done = () => toast("Message copié, colle-le dans WhatsApp");
+    const fallback = () => { const ta = document.createElement("textarea"); ta.value = text; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); done(); } catch (e) { toast("Sélectionne le texte et copie-le"); } ta.remove(); };
+    try { navigator.clipboard.writeText(text).then(done, fallback); } catch (e) { fallback(); }
+  }
+  const waLink = t => "https://wa.me/?text=" + encodeURIComponent(t);
+  function vehLabel(v) { const n = String(v || "").toLowerCase(); if (/van|vito|classe v|minivan/.test(n)) return "Van"; if (/berline|sedan|classe e/.test(n)) return "Berline"; return v ? String(v) : ""; }
+  function shareItem(r) {
+    const an = anonPair(r), ed = shareEdits[r.id] || {};
+    const dep = ed.dep ?? an.dep, arr = ed.arr ?? an.arr;
+    const unsure = x => !x || x === "Paris" || x === "Adresse à préciser";
+    return { r, dep, arr, veh: ed.veh ?? "", prixCh: ed.prix ?? "", note: ed.note ?? "", hide: !!ed.hide,
+      warn: ed.dep === undefined && ed.arr === undefined && (unsure(an.dep) || unsure(an.arr) || an.warnDep || an.warnArr) };
+  }
+  function shareMessage(it) {
+    const r = it.r, d = resaDate(r);
+    const jour = r.date ? d.toLocaleDateString("fr-FR", { weekday: "short", day: "2-digit", month: "2-digit" }) : "date à préciser";
+    const veh = it.veh || vehEl.value || vehLabel(r.vehicule);
+    const L = ["🚖 *COURSE DISPONIBLE*", `📅 ${jour} à ${r.heure ? r.heure.replace(":", "h") : "heure à préciser"}`,
+      `📍 Départ : ${it.dep || "à préciser"}`, `🏁 Arrivée : ${it.arr || "à préciser"}`];
+    if (veh) L.push(`🚐 ${veh}`);
+    if (r.pax) L.push(`👥 ${r.pax} passager${+r.pax > 1 ? "s" : ""}`);
+    if (r.bagages && +r.bagages > 0) L.push(`🧳 ${r.bagages} bagage${+r.bagages > 1 ? "s" : ""}`);
+    if (it.prixCh) L.push(`💶 ${it.prixCh} € pour le chauffeur`);
+    if (it.note) L.push(`📝 ${it.note}`);
+    if (sigEl.value.trim()) L.push("", sigEl.value.trim());
+    return L.join("\n");
+  }
+  function renderShare() {
+    if (!document.getElementById("tab-partage").classList.contains("active")) return;
+    const up = reservationsCache.filter(r => groupOf(r) === 0).sort((a, b) => resaDate(a) - resaDate(b));
+    const libres = up.filter(r => !r.chauffeurNom && !r.chauffeurUid);
+    document.getElementById("share-tabs").innerHTML = [["avenir", `À venir (${up.length})`], ["libres", `Sans chauffeur (${libres.length})`]]
+      .map(([k, l]) => `<button class="share-tab${shareTab === k ? " on" : ""}" data-stab="${k}">${l}</button>`).join("");
+    document.querySelectorAll("[data-stab]").forEach(b => b.addEventListener("click", () => { shareTab = b.dataset.stab; renderShare(); }));
+    const items = (shareTab === "libres" ? libres : up).map(shareItem);
+    const visibles = items.filter(i => !i.hide);
+    const digest = visibles.map(shareMessage).join("\n\n———\n\n");
+    document.getElementById("share-bulk").innerHTML =
+      (visibles.length > 1 ? `<button class="sbtn gold" id="share-copyall">Copier les ${visibles.length} courses</button><a class="sbtn wa" href="${waLink(digest)}" target="_blank" rel="noopener">Tout envoyer sur WhatsApp</a>` : "") +
+      (items.length > 1 ? calLink(items.map(i => i.r), `📅 Ajouter les ${items.length} courses à mon calendrier`, "sbtn") : "");
+    const ca = document.getElementById("share-copyall"); if (ca) ca.addEventListener("click", () => copyText(digest));
+    const list = document.getElementById("share-list");
+    if (!items.length) { list.innerHTML = `<div class="share-empty">Aucune course à venir${shareTab === "libres" ? " sans chauffeur" : ""}.</div>`; return; }
+    let lastDay = "", html = "";
+    items.forEach(it => {
+      const r = it.r, day = r.date ? resaDate(r).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" }) : "Date non précisée";
+      if (day !== lastDay) { html += `<div class="share-day">${day}</div>`; lastDay = day; }
+      const msg = shareMessage(it);
+      html += `<div class="share-card${it.hide ? " masked" : ""}" data-sid="${escH(r.id)}">
+        <div class="share-head"><span class="share-time">${escH(r.heure ? r.heure.replace(":", "h") : "--h--")}</span>
+          <div class="share-route">${escH(it.dep || "?")} → ${escH(it.arr || "?")}<small>${escH(r.nom || "")} · ${escH(r.dep || "—")} → ${escH(r.arr || "—")}${r.chauffeurNom ? " · Chauffeur : " + escH(r.chauffeurNom) : ""}</small></div></div>
+        ${it.warn ? `<div class="share-flag">Vérifie le départ et l'arrivée : l'adresse n'a pas pu être rattachée à un arrondissement ou une ville avec certitude.</div>` : ""}
+        ${it.hide ? "" : `<div class="bubble">${escH(msg)}</div>`}
+        <details><summary>Modifier le message</summary><div class="share-fields">
+          <label>Départ<input data-sf="dep" value="${escH(it.dep)}"></label><label>Arrivée<input data-sf="arr" value="${escH(it.arr)}"></label>
+          <label>Véhicule<select data-sf="veh"><option value="">Auto</option><option ${it.veh === "Van" ? "selected" : ""}>Van</option><option ${it.veh === "Berline" ? "selected" : ""}>Berline</option></select></label>
+          <label>Prix chauffeur (€)<input data-sf="prix" inputmode="decimal" value="${escH(it.prixCh)}" placeholder="Facultatif"></label>
+          <label class="full">Note<input data-sf="note" value="${escH(it.note)}" placeholder="Ex. : siège bébé, vol AF1234"></label>
+        </div></details>
+        <div class="share-actions">${it.hide ? `<button class="sbtn" data-sact="show">Réafficher</button>` :
+          `<button class="sbtn gold" data-sact="copy">Copier</button><a class="sbtn wa" href="${waLink(msg)}" target="_blank" rel="noopener">Envoyer sur WhatsApp</a><button class="sbtn" data-sact="hide">Ne pas partager</button>`}
+          ${calLink([r], "📅 Ajouter à mon calendrier", "sbtn")}</div>
+      </div>`;
+    });
+    list.innerHTML = html;
+    list.querySelectorAll(".share-card").forEach(card => {
+      const id = card.dataset.sid, it = items.find(x => x.r.id === id);
+      card.querySelectorAll("[data-sf]").forEach(inp => inp.addEventListener("change", () => {
+        shareEdits[id] = Object.assign({ dep: it.dep, arr: it.arr }, shareEdits[id] || {}, { [inp.dataset.sf]: inp.value });
+        shareStore.set("edits", shareEdits); renderShare();
+        const d = list.querySelector(`[data-sid="${CSS.escape(id)}"] details`); if (d) d.open = true;
+      }));
+      card.querySelectorAll("[data-sact]").forEach(b => b.addEventListener("click", () => {
+        const a = b.dataset.sact;
+        if (a === "copy") copyText(shareMessage(it));
+        else { shareEdits[id] = Object.assign({}, shareEdits[id] || {}, { hide: a === "hide" }); shareStore.set("edits", shareEdits); renderShare(); }
+      }));
+    });
+  }
+
+  // ---------------- DRIVER VIEW ----------------
+  function startDriverListener(uid) {
+    const qMine = query(collection(db, "reservations"), where("chauffeurUid", "==", uid));
+    currentUnsubs.push(onSnapshot(qMine, snap => {
+      const courses = sortReservations(snap.docs.map(d => normResa({ id: d.id, ...d.data() })))
+        .filter(c => c.statut !== "annulée");
+      renderDriverList(courses);
+    }, err => console.error("Firestore:", err)));
+  }
+
+  function renderDriverList(courses) {
+    const wrap = document.getElementById("driver-list");
+    if (courses.length === 0) {
+      wrap.innerHTML = `<p style="text-align:center;color:var(--muted);margin-top:40px;">Aucune course assignée pour l'instant.</p>`;
+      return;
+    }
+    wrap.innerHTML = courses.map(c => `
+      <div class="course-card">
+        <div class="top-row">
+          <div class="date-heure">${c.date || ""} · ${c.heure || ""}</div>
+          ${badgeResa(c.statut)}
+        </div>
+        <div class="route">
+          <div class="stop"><span class="mark">●</span> ${c.dep || ""}</div>
+          <div class="stop"><span class="mark">◆</span> ${c.arr || ""}</div>
+        </div>
+        <div class="course-meta">${c.nom || ""} · ${c.pax || 1} passager(s)${c.bagages ? " · " + c.bagages + " bagage(s)" : ""} · ${c.vehicule || ""}</div>
+        <div class="course-actions">
+          <a class="action-call" href="tel:${c.tel || ""}">Appeler</a>
+          <a class="action-waze" target="_blank" rel="noopener" href="https://waze.com/ul?q=${encodeURIComponent(c.dep||"")}&navigate=yes">Waze départ</a>
+          <a class="action-waze" target="_blank" rel="noopener" href="https://waze.com/ul?q=${encodeURIComponent(c.arr||"")}&navigate=yes">Waze arrivée</a>
+          <a class="action-map" target="_blank" rel="noopener" href="https://maps.apple.com/?saddr=${encodeURIComponent(c.dep||"")}&daddr=${encodeURIComponent(c.arr||"")}&dirflg=d">Plans</a>
+          <a class="action-map" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(c.dep||"")}&destination=${encodeURIComponent(c.arr||"")}">Google Maps</a>
+          ${c.statut !== "terminée" && c.date && c.heure ? calLink([c], "📅 Calendrier", "action-cal") : ""}
+          ${c.statut !== "terminée" ? `<button class="action-done" data-id="${c.id}">Marquer terminée</button>` : ""}
+        </div>
+      </div>
+    `).join("");
+
+    wrap.querySelectorAll(".action-done").forEach(btn => {
+      btn.addEventListener("click", () => updateDoc(doc(db, "reservations", btn.dataset.id), { statut: "terminée" }));
+    });
+  }
+</script>
+</body>
+</html>
