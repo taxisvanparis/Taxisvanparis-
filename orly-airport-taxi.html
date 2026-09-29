@@ -37,18 +37,18 @@ header.top .wrap{display:flex;align-items:center;justify-content:space-between;g
 .hero{position:relative;overflow:hidden;border-bottom:1px solid var(--line)}
 .hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.35}
 .hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,5,5,.2),rgba(5,5,5,.95))}
-.hero .wrap{position:relative;z-index:1;padding-block:56px 44px}
+.hero .wrap{position:relative;z-index:1;padding-block:40px 28px}
 .kicker{display:inline-block;color:var(--gold);font-size:.78rem;letter-spacing:2px;text-transform:uppercase;border:1px solid rgba(201,168,76,.4);border-radius:30px;padding:6px 14px;margin-bottom:18px}
 h1{font-family:'Playfair Display',Georgia,serif;font-weight:900;font-size:clamp(2.1rem,6vw,3.6rem);line-height:1.1;text-wrap:balance;margin-bottom:16px}
 .gold{color:var(--gold)}
-.lead{font-size:1.05rem;color:#d9d4c8;max-width:62ch;margin-bottom:26px}
+.lead{font-size:1rem;color:#d9d4c8;max-width:62ch;margin-bottom:6px}
 .ctas{display:flex;flex-wrap:wrap;gap:10px}
 .btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none;font-weight:700;border-radius:3px;padding:14px 20px;font-size:.95rem}
 .btn-wa{background:var(--wa);color:#04210f}
 .btn-gold{background:var(--gold);color:var(--noir)}
 .btn-line{border:1px solid rgba(248,245,238,.35);color:var(--blanc)}
 .btn:focus-visible,.pill:focus-visible{outline:2px solid var(--gold-light);outline-offset:2px}
-.trust{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:22px;color:#cfc9bb;font-size:.88rem}
+.trust{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:14px;color:#cfc9bb;font-size:.82rem}
 .trust span::before{content:"✓ ";color:var(--gold)}
 section{padding-block:48px;border-bottom:1px solid var(--line)}
 h2{font-family:'Playfair Display',Georgia,serif;font-size:clamp(1.5rem,4vw,2.1rem);margin-bottom:18px;text-wrap:balance}
@@ -83,15 +83,34 @@ figure.fig figcaption{color:var(--gris);font-size:.88rem;margin-top:8px}
 footer{padding-block:34px 90px;color:var(--gris);font-size:.85rem}
 footer .wrap{display:grid;gap:8px}
 .float{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:60;background:var(--wa);color:#04210f;font-weight:700;text-decoration:none;border-radius:40px;padding:13px 18px;box-shadow:0 6px 22px rgba(37,211,102,.4)}
-@media(max-width:560px){.top-cta .pill.hide-sm{display:none}.hero .wrap{padding-block:40px 34px}th,td{padding:12px 8px}th{font-size:.66rem;letter-spacing:.8px}td{font-size:.9rem}td.p{font-size:1.15rem}}
+@media(max-width:560px){.top-cta .pill.hide-sm{display:none}.hero .wrap{padding-block:26px 20px}h1{font-size:2rem}th,td{padding:12px 8px}th{font-size:.66rem;letter-spacing:.8px}td{font-size:.9rem}td.p{font-size:1.15rem}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+.bk{background:var(--noir-3);border:1px solid rgba(201,168,76,.35);border-radius:8px;padding:18px}
+.bk-dirs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.bk-dirs button{flex:1 1 140px;background:var(--noir-4);color:var(--blanc);border:1px solid var(--line);border-radius:4px;padding:11px 10px;font:inherit;font-weight:600;cursor:pointer}
+.bk-dirs button[aria-pressed="true"]{background:var(--gold);color:var(--noir);border-color:var(--gold)}
+.bk-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.bk-grid .full{grid-column:1/-1}
+.bk label{display:flex;flex-direction:column;gap:5px;font-size:.78rem;letter-spacing:.8px;text-transform:uppercase;color:var(--gold-light);font-weight:600;min-width:0}
+.bk input,.bk select,.bk textarea{width:100%;background:var(--noir);color:var(--blanc);border:1px solid rgba(248,245,238,.18);border-radius:4px;padding:12px;font:inherit;font-size:16px;text-transform:none;letter-spacing:0;font-weight:400}
+.bk input:focus,.bk select:focus,.bk textarea:focus{outline:none;border-color:var(--gold)}
+.bk small{color:var(--gris);font-size:.78rem;text-transform:none;letter-spacing:0;font-weight:400}
+.bk-price{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:16px;padding:14px 16px;border:1px dashed rgba(201,168,76,.45);border-radius:6px}
+.bk-price b{font-family:'Playfair Display',Georgia,serif;font-size:1.8rem;color:var(--gold);font-variant-numeric:tabular-nums}
+.bk-price span{color:#cfc9bb;font-size:.9rem}
+.bk-send{width:100%;margin-top:14px;justify-content:center;border:none;cursor:pointer;font:inherit;font-weight:700;font-size:1rem}
+.bk-err{color:#ff8a80;font-size:.9rem;margin-top:10px;min-height:1.2em}
+.pac-container{z-index:10000;font-family:'DM Sans',system-ui,sans-serif}
+.bk-ok{display:none;background:rgba(37,211,102,.12);border:1px solid var(--wa);border-radius:6px;padding:14px;margin-top:14px;color:#d8f5e3}
+@media(max-width:560px){.bk-grid{grid-template-columns:1fr}.bk{padding:14px}}
 </style>
 </head>
 <body>
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KDBPZR9P" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <header class="top"><div class="wrap">
   <a class="logo" href="/en.html">Taxis <span>Van</span> Paris</a>
-  <div class="top-cta"><a class="pill hide-sm" href="tel:+33649553640">📞 +33 6 49 55 36 40</a><a class="pill" href="/en.html#reserver">Get a quote</a></div>
+  <div class="top-cta"><a class="pill hide-sm" href="tel:+33649553640">📞 +33 6 49 55 36 40</a><a class="pill" href="#book">Book now</a></div>
 </div></header>
 
 <main>
@@ -100,15 +119,35 @@ footer .wrap{display:grid;gap:8px}
   <div class="wrap">
     <div class="kicker">Paris-Orly Airport (ORY)</div>
     <h1>Orly Airport Taxi <span class="gold">to Paris</span></h1>
-    <p class="lead">Door-to-door transfers between Orly and Paris with a licensed taxi, at a fixed price you know in advance. Sedan or 8-seater van, baby seat included for free.</p>
-    <div class="ctas">
-      <a class="btn btn-wa" href="https://wa.me/33649553640?text=Hello%2C%20I%20would%20like%20to%20book%20a%20taxi%20between%20Orly%20airport%20and%20Paris.%0ADate%3A%0ATime%20/%20flight%20number%3A%0APassengers%3A%0ALuggage%3A%0ABaby%20seat%20%28yes/no%29%3A%0AAddress%20in%20Paris%3A" target="_blank" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 004.74 1.21h.01c5.46 0 9.91-4.45 9.91-9.91A9.85 9.85 0 0012.04 2zm5.8 14.11c-.24.68-1.41 1.3-1.95 1.35-.5.05-1.13.07-1.83-.12-.42-.13-.96-.31-1.65-.61-2.9-1.25-4.79-4.17-4.94-4.36-.14-.19-1.18-1.57-1.18-3s.75-2.13 1.02-2.42c.26-.29.58-.36.77-.36h.55c.18 0 .42-.07.65.5.24.58.82 2 .89 2.15.07.14.12.31.02.5-.1.19-.14.31-.29.48-.14.17-.3.37-.43.5-.14.14-.29.3-.13.59.17.29.74 1.22 1.59 1.97 1.09.97 2.01 1.27 2.3 1.41.29.14.46.12.63-.07.17-.19.72-.84.91-1.13.19-.29.38-.24.65-.14.26.1 1.68.79 1.97.94.29.14.48.21.55.33.07.12.07.7-.17 1.38z"/></svg> Book on WhatsApp</a>
-      <a class="btn btn-gold" href="/en.html#reserver">Get an instant quote</a>
-      <a class="btn btn-line" href="tel:+33649553640">Call +33 6 49 55 36 40</a>
-    </div>
-    <div class="trust"><span>Licensed official taxi</span><span>Name sign at arrivals</span><span>Flight monitored</span><span>Fixed price</span><span>Free baby seat</span><span>24/7</span><span>Card or cash</span></div>
+    <p class="lead">Licensed taxi or 8-seater van, waiting at arrivals with your name. Fixed price, free baby seat.</p>
+    <div class="trust"><span>Name sign at arrivals</span><span>Flight monitored</span><span>Fixed price</span><span>Free baby seat</span><span>24/7</span></div>
   </div>
 </div>
+
+<section id="book" style="padding-block:22px 40px"><div class="wrap">
+  <h2 style="font-size:1.4rem;margin-bottom:12px">Book your ride</h2>
+  <form class="bk" id="bk" novalidate>
+    <div class="bk-dirs" id="bk-dirs" role="group" aria-label="Trip"></div>
+    <div class="bk-grid">
+      <div class="full" id="bk-from-box"></div>
+      <div class="full" id="bk-to-box"></div>
+      <label>Date<input type="date" id="bk-date" required></label>
+      <label><span id="bk-time-l">Time</span><input type="time" id="bk-time" required></label>
+      <label>Passengers<select id="bk-pax"></select></label>
+      <label>Suitcases<select id="bk-bags"></select></label>
+      <label>Vehicle<select id="bk-veh"><option value="sedan">Sedan (1–4 passengers)</option><option value="van">Van Mercedes V-Class (1–8)</option></select></label>
+      <label>Child seats (free)<select id="bk-kids"><option value="0">None</option><option value="1b">1 baby seat (0–13 kg)</option><option value="1r">1 booster (15–36 kg)</option><option value="1b1r">1 baby seat + 1 booster</option><option value="2r">2 boosters</option><option value="1b2r">1 baby seat + 2 boosters</option><option value="2b">2 baby seats</option></select></label>
+      <label>Your name<input type="text" id="bk-name" autocomplete="name" required></label>
+      <label>Phone / WhatsApp<input type="tel" id="bk-tel" autocomplete="tel" placeholder="+44 7700 900000" required></label>
+      <label class="full">Notes <small>(optional)</small><textarea id="bk-notes" rows="2" placeholder="Stroller, extra luggage, stop on the way…"></textarea></label>
+    </div>
+    <div class="bk-price"><span id="bk-price-l">Fixed price</span><b id="bk-price">—</b></div>
+    <button type="submit" class="btn btn-wa bk-send"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 004.74 1.21h.01c5.46 0 9.91-4.45 9.91-9.91A9.85 9.85 0 0012.04 2zm5.8 14.11c-.24.68-1.41 1.3-1.95 1.35-.5.05-1.13.07-1.83-.12-.42-.13-.96-.31-1.65-.61-2.9-1.25-4.79-4.17-4.94-4.36-.14-.19-1.18-1.57-1.18-3s.75-2.13 1.02-2.42c.26-.29.58-.36.77-.36h.55c.18 0 .42-.07.65.5.24.58.82 2 .89 2.15.07.14.12.31.02.5-.1.19-.14.31-.29.48-.14.17-.3.37-.43.5-.14.14-.29.3-.13.59.17.29.74 1.22 1.59 1.97 1.09.97 2.01 1.27 2.3 1.41.29.14.46.12.63-.07.17-.19.72-.84.91-1.13.19-.29.38-.24.65-.14.26.1 1.68.79 1.97.94.29.14.48.21.55.33.07.12.07.7-.17 1.38z"/></svg> Send my booking on WhatsApp</button>
+    <div class="bk-err" id="bk-err" role="alert"></div>
+    <p style="text-align:center;margin-top:12px;color:#cfc9bb;font-size:.9rem">or <a href="https://wa.me/33649553640" target="_blank" rel="noopener" style="color:var(--wa);font-weight:700">message us on WhatsApp</a> · <a href="tel:+33649553640" style="color:var(--gold-light);font-weight:700">call +33 6 49 55 36 40</a></p>
+    <div class="bk-ok" id="bk-ok">✓ Thank you! Your booking has been sent. We will confirm your driver on WhatsApp within minutes.</div>
+  </form>
+</div></section>
 
 <section><div class="wrap">
   <h2>Fixed prices, Paris ⇄ Orly</h2>
@@ -152,7 +191,178 @@ footer .wrap{display:grid;gap:8px}
   <div>Taxis Van Paris is a brand of AB Taxis Services, Nanterre (92), France · SIREN 912 763 013</div>
   <div><a href="/en.html">English</a> · <a href="/">Français</a> · <a href="/es.html">Español</a> · <a href="/it.html">Italiano</a> · <a href="/ar.html">العربية</a></div>
 </div></footer>
+<script>
+/* ── Tarifs : copie fidèle du calculateur de taxisvanparis.fr ── */
+var TVP = (function(){
+  var AIR = {
+    'CDG':      {lat:49.0097, lon:2.5479, address:'aéroport roissy charles de gaulle cdg', dept:null},
+    'Orly':     {lat:48.7262, lon:2.3652, address:'aéroport orly', dept:null},
+    'Beauvais': {lat:49.4544, lon:2.1128, address:'aéroport beauvais tille', dept:null}
+  };
+  function dg(la1,lo1,la2,lo2){var r=Math.PI/180,dLa=(la2-la1)*r,dLo=(lo2-lo1)*r,a=Math.sin(dLa/2)*Math.sin(dLa/2)+Math.cos(la1*r)*Math.cos(la2*r)*Math.sin(dLo/2)*Math.sin(dLo/2);return 6371*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));}
+  function creuse(h){if(!h)return false;var p=h.split(':').map(Number),m=p[0]*60+p[1];return m>=1200||m<360||(m>=600&&m<900);}
+  function kmPrice(km,c){if(c){if(km<=20)return km*2.9;if(km<=50)return 58+(km-20)*2.2;return 58+66+(km-50)*2.3;}if(km<=20)return km*2.9;if(km<=50)return 58+(km-20)*2.4;return 58+72+(km-50)*2.5;}
+  var VILLES=['paris','boulogne-billancourt','boulogne billancourt','issy-les-moulineaux','issy les moulineaux','issy','neuilly-sur-seine','neuilly sur seine','neuilly','levallois-perret','levallois perret','levallois','clichy','saint-ouen','saint ouen','aubervilliers','pantin','le pré-saint-gervais','pre-saint-gervais','pré saint gervais','le pre saint gervais','les lilas','bagnolet','montreuil','vincennes','charenton-le-pont','charenton le pont','charenton','saint-mandé','saint mande','bois de boulogne','malakoff','montrouge','ivry-sur-seine','ivry sur seine','ivry','vitry-sur-seine','vitry sur seine','vitry'];
+  function forfaitZone(p){if(!p)return false;if(p.dept==='75')return true;var c=(p.city||'').toLowerCase();return !!c&&VILLES.indexOf(c)>=0;}
+  function zoneParis(p){return p&&p.dept&&['75','92','93','94'].indexOf(p.dept)>=0;}
+  function isRoissy(p){var a=p.address;return /cdg|charles de gaulle|roissy|95700|95701|95702|le mesnil amelot/.test(a)||dg(p.lat,p.lon,49.0097,2.5479)<8;}
+  function isOrly(p){var a=p.address;return /orly|94390|94547/.test(a)||dg(p.lat,p.lon,48.7262,2.3652)<5;}
+  function isBeauvais(p){var a=p.address;return /beauvais|tille|60000/.test(a)||dg(p.lat,p.lon,49.4544,2.1128)<6;}
+  function isGare(p){return /(^|\s)gare(\s|$)/.test(p.address||'');}
+  // dep, arr : {lat,lon,address,dept} ; veh : 'berline'|'van'
+  function price(dep,arr,pax,veh,heure){
+    var km=Math.round(dg(dep.lat,dep.lon,arr.lat,arr.lon)*1.35), c=creuse(heure);
+    var supp=pax>3?(pax-3)*5.5:0, total=15+kmPrice(km,c)+supp, fixed=false;
+    var dP=forfaitZone(dep), aP=forfaitZone(arr);
+    function set(b,v5,v8,thr){total=veh==='berline'?b:(pax<=thr?v5:v8);fixed=true;}
+    if(dP&&isRoissy(arr)) set(75,85,95,5);
+    else if(aP&&isRoissy(dep)) set(85,95,105,5);
+    else if(dP&&isOrly(arr)) set(70,80,95,6);
+    else if(aP&&isOrly(dep)) set(80,90,105,6);
+    else if(dP&&isBeauvais(arr)) set(175,188,205,6);
+    else if(aP&&isBeauvais(dep)) set(185,198,215,6);
+    else if((dP&&isGare(arr))||(aP&&isGare(dep))||(isGare(dep)&&isGare(arr))){total=50+supp;fixed=true;}
+    var capped=false;
+    if(!fixed&&(zoneParis(dep)||zoneParis(arr))){
+      var big=veh==='van'&&pax>=6, cap=km<29?(big?95:85):(big?110:100);
+      if(total>cap){total=cap;capped=true;}
+    }
+    return {total:Math.round(total*100)/100, fixed:fixed||capped, km:km, creuse:c};
+  }
+  // lieu Google → {lat,lon,address,dept}
+  function fromPlace(pl){
+    var comps=pl.address_components||[], find=function(t){return comps.filter(function(c){return c.types.indexOf(t)>=0})[0]};
+    var cp=find('postal_code'), loc=find('locality'), adm=find('administrative_area_level_2'), dept=null;
+    if(cp) dept=cp.long_name.substring(0,2);
+    else if(loc&&loc.long_name.toLowerCase()==='paris') dept='75';
+    else if(adm&&adm.long_name.toLowerCase().indexOf('paris')>=0) dept='75';
+    return {lat:pl.geometry.location.lat(), lon:pl.geometry.location.lng(), address:((pl.name||'')+' '+(pl.formatted_address||'')).toLowerCase(), dept:dept, city:loc?loc.long_name.toLowerCase():''};
+  }
+  return {AIR:AIR, price:price, fromPlace:fromPlace};
+})();
 
-<a class="float" href="https://wa.me/33649553640?text=Hello%2C%20I%20would%20like%20to%20book%20a%20taxi%20between%20Orly%20airport%20and%20Paris.%0ADate%3A%0ATime%20/%20flight%20number%3A%0APassengers%3A%0ALuggage%3A%0ABaby%20seat%20%28yes/no%29%3A%0AAddress%20in%20Paris%3A" target="_blank" rel="noopener" aria-label="Book on WhatsApp">💬 Book now</a>
+</script>
+<script>
+(function(){
+  var CFG={"dirs": [{"id": "from", "label": "Orly → Paris", "from": {"type": "flight", "place": "Orly Airport", "fr": "Aéroport d’Orly", "ap": "Orly"}, "to": {"type": "addr", "label": "Drop-off address or hotel in Paris"}, "p": [80, 90, 105], "thr": 6}, {"id": "to", "label": "Paris → Orly", "from": {"type": "addr", "label": "Pick-up address or hotel in Paris"}, "to": {"type": "terminal", "place": "Orly Airport", "fr": "Aéroport d’Orly", "ap": "Orly", "terms": ["Orly 1", "Orly 2", "Orly 3", "Orly 4"]}, "p": [70, 80, 95], "thr": 6}]}, SRC="orly";
+  var dir=CFG.dirs[0], $=function(i){return document.getElementById(i)}, P={from:null,to:null}, typed={from:false,to:false};
+  function apKey(side){var c=dir[side];if(c.ap)return c.ap;var s=$('bk-'+side+(c.type==='flight'?'-ap':''));return s?s.value:null}
+  function setFixed(side){var c=dir[side];P[side]=null;typed[side]=false;if(c.type!=='addr'){var k=apKey(side);P[side]=k&&TVP.AIR[k]?TVP.AIR[k]:null}}
+  function attach(side){
+    var c=dir[side], el=$('bk-'+side); if(c.type!=='addr'||!el||el._ac||!(window.google&&google.maps&&google.maps.places)) return;
+    var ac=new google.maps.places.Autocomplete(el,{fields:['address_components','geometry','name','formatted_address'],componentRestrictions:{country:['fr']}});
+    el._ac=ac;
+    ac.addListener('place_changed',function(){var pl=ac.getPlace();if(pl&&pl.geometry){P[side]=TVP.fromPlace(pl);typed[side]=false;price()}});
+    el.addEventListener('keydown',function(e){if(e.key==='Enter')e.preventDefault()});
+  }
+  window.bkMapsReady=function(){attach('from');attach('to');};
+  function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+  // listes
+  for(var i=1;i<=8;i++) $('bk-pax').insertAdjacentHTML('beforeend','<option value="'+i+'">'+i+(i>1?' passengers':' passenger')+'</option>');
+  for(var j=0;j<=10;j++) $('bk-bags').insertAdjacentHTML('beforeend','<option value="'+j+'">'+j+(j==1?' suitcase':' suitcases')+'</option>');
+  $('bk-pax').value='2'; $('bk-bags').value='2';
+  var d=new Date(Date.now()+864e5); $('bk-date').value=d.toISOString().slice(0,10); $('bk-date').min=new Date().toISOString().slice(0,10);
+  function field(side,cfg){
+    var h='';
+    if(cfg.type==='flight'){
+      if(cfg.airports) h+='<label>Arrival airport<select id="bk-'+side+'-ap">'+cfg.airports.map(function(a){return '<option>'+a+'</option>'}).join('')+'</select></label><div style="height:12px"></div>';
+      h+='<label>Flight number <small>— your driver waits at arrivals with a name sign</small><input type="text" id="bk-'+side+'" placeholder="e.g. BA 304, EZY 8411" autocapitalize="characters" required></label>';
+    } else if(cfg.type==='terminal'){
+      h+='<label>'+esc(cfg.place)+' — terminal <small>(optional)</small><select id="bk-'+side+'"><option value="">I don’t know yet</option>'+cfg.terms.map(function(t){return '<option>'+t+'</option>'}).join('')+'</select></label>';
+    } else if(cfg.type==='airport'){
+      h+='<label>Airport<select id="bk-'+side+'">'+cfg.airports.map(function(a){return '<option>'+a+'</option>'}).join('')+'</select></label>';
+    } else {
+      h+='<label>'+esc(cfg.label)+'<input type="text" id="bk-'+side+'" placeholder="'+esc(cfg.ph||'Street address or hotel name')+'" autocomplete="street-address" required></label>';
+    }
+    $('bk-'+side+'-box').innerHTML=h;
+    setFixed(side);
+    var el=$('bk-'+side), ap=$('bk-'+side+'-ap');
+    if(cfg.type==='addr'&&el) el.addEventListener('input',function(){P[side]=null;typed[side]=!!el.value.trim();price()});
+    if(cfg.type==='airport'&&el) el.addEventListener('change',function(){setFixed(side);price()});
+    if(ap) ap.addEventListener('change',function(){setFixed(side);price()});
+    attach(side);
+  }
+  function setDir(d){
+    dir=d;
+    [].forEach.call($('bk-dirs').children,function(b){b.setAttribute('aria-pressed',b.dataset.id===d.id)});
+    field('from',d.from); field('to',d.to);
+    $('bk-time-l').textContent = d.from.type==='flight' ? 'Landing time' : 'Pick-up time';
+    price();
+  }
+  $('bk-dirs').innerHTML=CFG.dirs.map(function(d){return '<button type="button" data-id="'+d.id+'" aria-pressed="false">'+esc(d.label)+'</button>'}).join('');
+  [].forEach.call($('bk-dirs').children,function(b){b.onclick=function(){setDir(CFG.dirs.filter(function(x){return x.id===b.dataset.id})[0])}});
+  function veh(){var p=+$('bk-pax').value; if(p>4&&$('bk-veh').value==='sedan'){$('bk-veh').value='van'} return $('bk-veh').value}
+  var last=null;
+  function amount(){
+    var p=+$('bk-pax').value, v=veh();
+    if(P.from&&P.to&&window.TVP){last=TVP.price(P.from,P.to,p,v==='sedan'?'berline':'van',$('bk-time').value);return last.total}
+    last=null;
+    if(!dir.p||typed.from||typed.to) return null;
+    if(v==='sedan') return dir.p[0];
+    return p<=dir.thr ? dir.p[1] : dir.p[2];
+  }
+  function fmt(a){return '€'+(a%1?a.toFixed(2):a)}
+  function price(){
+    var a=amount();
+    $('bk-price').textContent = a ? fmt(a) : 'On request';
+    if(a&&last) $('bk-price-l').textContent = last.fixed ? 'Fixed price for the whole vehicle' : 'Estimated price ('+last.km+' km) — confirmed by the driver';
+    else if(a) $('bk-price-l').textContent = 'Fixed price from any Paris address — enter your address for the exact price';
+    else if(typed.from||typed.to) $('bk-price-l').textContent = 'Choose your address from the suggestions to see the price';
+    else $('bk-price-l').textContent = 'We confirm a fixed price on WhatsApp within minutes';
+  }
+  ['bk-pax','bk-veh','bk-time'].forEach(function(id){$(id).addEventListener('change',price)});
+  $('bk-pax').addEventListener('change',function(){veh();price()});
+  function val(id){var e=$(id);return e?e.value.trim():''}
+  function place(side){
+    var c=dir[side], v=val('bk-'+side);
+    if(c.type==='flight'){var ap=c.airports?val('bk-'+side+'-ap')+' Airport':c.place;return {en:ap+' — flight '+v, fr:(c.airports?'Aéroport '+val('bk-'+side+'-ap'):c.fr)+' — vol '+v, flight:v}}
+    if(c.type==='terminal'){return {en:c.place+(v?' — '+v:''), fr:c.fr+(v?' — '+v:'')}}
+    if(c.type==='airport'){return {en:v+' Airport', fr:'Aéroport '+v}}
+    return {en:v, fr:v};
+  }
+  var KIDS={'0':['None','Aucune'],'1b':['1 baby seat','Siège bébé'],'1r':['1 booster','Rehausseur'],'1b1r':['1 baby seat + 1 booster','Siège bébé + Rehausseur'],'2r':['2 boosters','2 rehausseurs'],'1b2r':['1 baby seat + 2 boosters','Siège bébé + 2 rehausseurs'],'2b':['2 baby seats','2 sièges bébé']};
+  $('bk').addEventListener('submit',function(e){
+    e.preventDefault(); $('bk-err').textContent='';
+    var req=['bk-from','bk-to','bk-date','bk-time','bk-name','bk-tel'].filter(function(id){var el=$(id);return el&&el.required&&!el.value.trim()});
+    if(req.length){ $('bk-err').textContent='Please fill in: '+req.map(function(id){var l=$(id).closest('label');return l?l.firstChild.textContent.trim():id}).join(', ')+'.'; $(req[0]).focus(); return; }
+    var f=place('from'), t=place('to'), a=amount(), v=veh(), k=KIDS[$('bk-kids').value];
+    var vhEn=v==='van'?'Mercedes V-Class van 🚐':'Sedan 🚗', vhFr=v==='van'?'Van Mercedes Classe V 🚐':'Berline 🚗';
+    var msg='🚖 *NEW BOOKING — TaxiVanParis*\n━━━━━━━━━━━━━━\n'+
+      '👤 *Name:* '+val('bk-name')+'\n📞 *Phone:* '+val('bk-tel')+'\n━━━━━━━━━━━━━━\n'+
+      '📍 *From:* '+f.en+'\n🏁 *To:* '+t.en+'\n📅 *Date:* '+val('bk-date')+'\n⏰ *'+$('bk-time-l').textContent+':* '+val('bk-time')+'\n'+
+      '👥 *Passengers:* '+$('bk-pax').value+'\n🧳 *Suitcases:* '+$('bk-bags').value+'\n🚗 *Vehicle:* '+vhEn+'\n🪑 *Child seats:* '+k[0]+'\n'+
+      '💰 *Price:* '+(a?fmt(a)+(last&&!last.fixed?' (estimate)':' (fixed)'):'on request')+'\n'+(val('bk-notes')?'📝 *Notes:* '+val('bk-notes')+'\n':'')+
+      '━━━━━━━━━━━━━━\n_Sent from TaxiVanParis.fr (English site — '+SRC+')_';
+    // 1) WhatsApp tout de suite (sinon bloqué sur iPhone)
+    window.open('https://wa.me/33649553640?text='+encodeURIComponent(msg),'_blank');
+    // 2) enregistrement dans le tableau de bord
+    var resa={nom:val('bk-name'), tel:val('bk-tel'), dep:f.fr, arr:t.fr, pax:+$('bk-pax').value, bagages:+$('bk-bags').value,
+      vh:vhFr, vehicule:vhFr, siege:k[1], date:val('bk-date'), heure:val('bk-time'), prix:a?(+a).toFixed(2)+' €':'Sur devis',
+      vol:f.flight||t.flight||'', notes:val('bk-notes'), statut:'en attente', source:'site-en-'+SRC, langue:'en', date_creation:new Date().toISOString()};
+    if(typeof window.enregistrerReservation==='function') window.enregistrerReservation(resa);
+    $('bk-ok').style.display='block'; $('bk-ok').scrollIntoView({behavior:'smooth',block:'center'});
+  });
+  setDir(dir);
+})();
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCotWtH67rWpOKRwxTGXtxj-oVcc0vwOVg&libraries=places&callback=bkMapsReady&language=en" async defer></script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+  import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+  const app = initializeApp({
+    apiKey: "AIzaSyBN8uBFONIt1tDTH9C-NIQKeulFdJ2m26Q",
+    authDomain: "taxis-van-paris-by-abts.firebaseapp.com",
+    projectId: "taxis-van-paris-by-abts",
+    storageBucket: "taxis-van-paris-by-abts.firebasestorage.app",
+    messagingSenderId: "53887245170",
+    appId: "1:53887245170:web:942537659f6de1041f9beb",
+    measurementId: "G-3ZET7NEXW4"
+  });
+  const db = getFirestore(app);
+  window.enregistrerReservation = async function(data){ try{ await addDoc(collection(db,"reservations"),data); }catch(e){ console.error("Firebase:",e); } };
+</script>
+
+<a class="float" href="#book">🚖 Book now</a>
+<script>(function(){var f=document.querySelector('.float'),b=document.getElementById('book');if(!f||!b||!('IntersectionObserver' in window))return;new IntersectionObserver(function(e){f.style.display=e[0].isIntersecting?'none':''},{threshold:0.05}).observe(b);})();</script>
 </body>
 </html>
