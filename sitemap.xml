@@ -50,4 +50,20 @@
     <xhtml:link rel="alternate" hreflang="ar" href="https://taxisvanparis.fr/ar.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://taxisvanparis.fr/"/>
   </url>
+  <url>
+    <loc>https://taxisvanparis.fr/cdg-airport-taxi.html</loc>
+    <lastmod>2026-09-29</lastmod>
+  </url>
+  <url>
+    <loc>https://taxisvanparis.fr/orly-airport-taxi.html</loc>
+    <lastmod>2026-09-29</lastmod>
+  </url>
+  <url>
+    <loc>https://taxisvanparis.fr/disneyland-paris-taxi.html</loc>
+    <lastmod>2026-09-29</lastmod>
+  </url>
+  <url>
+    <loc>https://taxisvanparis.fr/paris-taxi-baby-seat.html</loc>
+    <lastmod>2026-09-29</lastmod>
+  </url>
 </urlset>
