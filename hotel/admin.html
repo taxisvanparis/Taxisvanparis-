@@ -14,6 +14,7 @@
   --new:#E4C57A;--ok:#6FA8DC;--done:#3BB273;--cancel:#7A746A;--err:#F08A7A;--wa:#25D366;
   --display:"Playfair Display",Georgia,serif;--body:"DM Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color-scheme:dark}
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;padding-inline:16px}
 .wrap{max-width:760px;margin:0 auto;padding-block:max(18px,env(safe-area-inset-top)) 70px}
 .top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
@@ -103,9 +104,9 @@ select{background:var(--panel);color:var(--fg);border:1px solid var(--line);bord
 
   <div class="login" id="login" hidden>
     <p class="note" style="margin:0">Entrez votre clé admin. Elle reste enregistrée sur cet appareil.</p>
-    <input id="keyIn" type="password" autocomplete="current-password" placeholder="Clé admin">
+    <input id="keyIn" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" inputmode="text" placeholder="adm-…">
     <button class="btn" id="keyGo" type="button">Ouvrir le tableau de bord</button>
-    <p class="err" id="keyErr" style="color:var(--err);margin:0" hidden>Clé incorrecte.</p>
+    <p class="err" id="keyErr" style="color:var(--err);margin:0" hidden></p>
   </div>
 </div>
 <div class="menu" id="calMenu" hidden><div class="sheet" id="calSheet"></div></div>
@@ -148,7 +149,7 @@ select{background:var(--panel);color:var(--fg);border:1px solid var(--line);bord
     api({action:"admin",k:key}).then(function(res){
       if(!res.ok){ try{localStorage.removeItem("tvp-admin");}catch(_){} askKey(true); return; }
       all=res.reservations||[]; $("sync").textContent="À jour à "+new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"}); show();
-    }).catch(function(){ $("sync").textContent="Hors ligne"; toast("Connexion impossible, réessayez"); });
+    }).catch(function(e){ $("sync").textContent="Hors ligne"; if($("app").hidden) askKey(true,"Connexion au Google Sheets impossible ("+(e&&e.message||"réseau")+"). Réessayez dans un instant."); else toast("Connexion impossible, réessayez"); });
   }
   function setStatut(r,s){
     var old=r.statut; r.statut=s; render();
@@ -264,8 +265,8 @@ select{background:var(--panel);color:var(--fg);border:1px solid var(--line);bord
     keys.forEach(function(k){ var tr=document.createElement("tr"); [per[k].nom+" ("+k.toUpperCase()+")",per[k].n,euro(per[k].ca),euro(per[k].com)].forEach(function(v){var td=document.createElement("td");td.textContent=v;tr.appendChild(td);}); T.appendChild(tr); });
   }
   function show(){ $("login").hidden=true; $("app").hidden=false; render(); }
-  function askKey(bad){ $("app").hidden=true; $("login").hidden=false; $("keyErr").hidden=!bad; $("sync").textContent=""; }
-  $("keyGo").onclick=function(){ key=$("keyIn").value.trim(); if(!key) return; try{localStorage.setItem("tvp-admin",key);}catch(_){} load(); };
+  function askKey(bad,msg){ $("app").hidden=true; $("login").hidden=false; $("keyErr").textContent=msg||"Clé incorrecte. Vérifiez qu'elle commence par adm-"; $("keyErr").hidden=!bad; $("sync").textContent=""; $("keyGo").disabled=false; $("keyGo").textContent="Ouvrir le tableau de bord"; }
+  $("keyGo").onclick=function(){ key=$("keyIn").value.trim().toLowerCase().replace(/\s+/g,""); if(!key){ askKey(true,"Entrez la clé."); return; } this.disabled=true; this.textContent="Connexion…"; try{localStorage.setItem("tvp-admin",key);}catch(_){} load(); };
   $("keyIn").addEventListener("keydown",function(e){ if(e.key==="Enter") $("keyGo").click(); });
   $("hotelF").onchange=function(){ hotelF=this.value; render(); };
   $("refresh").onclick=load;
