@@ -39,9 +39,27 @@ textarea{min-height:64px;resize:vertical}
 .seg input:checked+label{border-color:var(--gold);color:var(--gold-2);background:rgba(201,162,75,.12)}
 .seg input:disabled+label{opacity:.35;cursor:default}
 .seg input:focus-visible+label{outline:2px solid var(--gold-2);outline-offset:2px}
-.total{display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid var(--line);padding-top:14px}
+/* Trajet */
+.trip{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;display:grid;gap:10px}
+.pt{display:grid;grid-template-columns:14px 1fr;gap:10px;align-items:center}
+.dot{width:12px;height:12px;border-radius:50%;border:2px solid var(--gold)}
+.dot.a{background:var(--gold)}
+.ac{position:relative;min-width:0}
+.ac input{background:var(--bg)}
+.ac-list{position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:50;background:#1B1A1D;border:1px solid var(--gold);border-radius:12px;overflow:hidden;box-shadow:0 12px 30px rgba(0,0,0,.5)}
+.ac-item{display:block;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);color:var(--fg);padding:10px 12px;font:14px var(--body);cursor:pointer}
+.ac-item:last-child{border-bottom:0}
+.ac-item:hover,.ac-item:focus-visible{background:rgba(201,162,75,.12)}
+.ac-item small{display:block;color:var(--muted);font-size:12px}
+.swap{justify-self:end;background:none;border:1px solid var(--line);color:var(--gold-2);border-radius:999px;padding:5px 12px;font:13px var(--body);cursor:pointer}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{background:none;border:1px solid var(--line);color:var(--fg);border-radius:999px;padding:7px 11px;font:13.5px var(--body);cursor:pointer}
+.chip:hover{border-color:var(--gold)}
+.km{color:var(--muted);font-size:13px;margin:0}
+.total{display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid var(--line);padding-top:14px;gap:12px}
 .total span{color:var(--muted)}
-.total strong{font:600 28px/1 var(--display);color:var(--gold-2);font-variant-numeric:tabular-nums}
+.total strong{font:600 28px/1 var(--display);color:var(--gold-2);font-variant-numeric:tabular-nums;text-align:right}
+.total strong.small{font:500 14px/1.4 var(--body);color:var(--muted)}
 .btn{display:block;width:100%;text-align:center;background:var(--gold);color:var(--ink);font-weight:700;font-size:16px;border:0;border-radius:14px;padding:15px;cursor:pointer;text-decoration:none}
 .btn[disabled]{opacity:.6}
 .btn-wa{background:#25D366;color:#0B2414}
@@ -63,12 +81,12 @@ textarea{min-height:64px;resize:vertical}
     <div class="lang"><button type="button" data-l="fr" aria-pressed="true">FR</button><button type="button" data-l="en" aria-pressed="false">EN</button></div>
   </div>
   <h1 data-t="h1">Réservez votre taxi</h1>
-  <p class="lead" data-t="lead">Prix fixe annoncé à l'avance. Votre chauffeur vient vous chercher à l'hôtel.</p>
+  <p class="lead" data-t="lead">Prix calculé à l'avance. Votre chauffeur vient vous chercher à l'hôtel.</p>
   <ul class="perks">
-    <li data-t="p1">✓ Prix fixe</li><li data-t="p2">✓ Siège bébé gratuit</li><li data-t="p3">✓ Van 7 places</li><li data-t="p4">✓ 24h/24</li>
+    <li data-t="p1">✓ Prix annoncé</li><li data-t="p2">✓ Siège bébé gratuit</li><li data-t="p3">✓ Van jusqu'à 8 places</li><li data-t="p4">✓ 24h/24</li>
   </ul>
 
-  <div class="hotel"><div class="ic" id="hIni">H</div><div><small data-t="from">Prise en charge</small><strong id="hName">Hôtel</strong></div></div>
+  <div class="hotel"><div class="ic" id="hIni">H</div><div><small data-t="partner">Réservation via</small><strong id="hName">Hôtel</strong></div></div>
 
   <form id="f" novalidate>
     <div class="g2">
@@ -80,12 +98,20 @@ textarea{min-height:64px;resize:vertical}
       <div class="field"><label class="t" for="email" data-t="email">Email (facultatif)</label><input id="email" type="email" autocomplete="email"></div>
     </div>
 
-    <fieldset><legend data-t="dest">Destination</legend><div class="seg" id="dest"></div></fieldset>
-    <div class="field" id="otherWrap" hidden><label class="t" for="other" data-t="other">Adresse de destination</label><input id="other"></div>
+    <fieldset>
+      <legend data-t="trip">Trajet</legend>
+      <div class="trip">
+        <div class="pt"><span class="dot"></span><div class="ac"><label class="t" for="dep" data-t="depL" hidden>Départ</label><input id="dep" autocomplete="off" data-ph="depPh" placeholder="Adresse de départ"><div class="ac-list" id="list-dep" hidden></div></div></div>
+        <button type="button" class="swap" id="swap" data-t="swap">⇅ Inverser</button>
+        <div class="pt"><span class="dot a"></span><div class="ac"><label class="t" for="arr" data-t="arrL" hidden>Arrivée</label><input id="arr" autocomplete="off" data-ph="arrPh" placeholder="Où allez-vous ? Adresse, gare, aéroport…"><div class="ac-list" id="list-arr" hidden></div></div></div>
+        <div class="chips" id="chips"></div>
+        <p class="km" id="km" hidden></p>
+      </div>
+    </fieldset>
 
     <div class="g2">
       <div class="field"><label class="t" for="date" data-t="date">Date</label><input id="date" type="date" required></div>
-      <div class="field"><label class="t" for="time" data-t="time">Heure de départ de l'hôtel</label><input id="time" type="time" required></div>
+      <div class="field"><label class="t" for="time" data-t="time">Heure de prise en charge</label><input id="time" type="time" required></div>
     </div>
     <div class="g2">
       <div class="field"><label class="t" for="pax" data-t="pax">Passagers</label>
@@ -120,81 +146,203 @@ textarea{min-height:64px;resize:vertical}
 <script>
 (function(){
   /* ============ RÉGLAGES ============ */
-  // Collez ici l'adresse du script Google (étape « Déployer »).
-  // Les hôtels, les tarifs et les commissions se changent dans le Google Sheets, pas ici.
+  // Les hôtels, leur adresse et leur commission se changent dans le Google Sheets, pas ici.
   var API_URL = "https://script.google.com/macros/s/AKfycbynqJeRA8W1AoYiHWQhS-ZPGHrEHyQBW8xp4xFGAYgP68lAugMsNZqWYkleYV1P4Va6/exec";
+  var MAPS_KEY = "AIzaSyCotWtH67rWpOKRwxTGXtxj-oVcc0vwOVg"; // même clé Google que le site
   var WHATSAPP = "33649553640";
-  // Prix de secours (commission de 10 € incluse), utilisés seulement si le Google Sheets ne répond pas.
-  var PRIX = {
-    cdg:{berline:85,van:95,grandvan:105}, orly:{berline:70,van:90,grandvan:null},
-    beauvais:{berline:null,van:200,grandvan:null}, disney:{berline:null,van:140,grandvan:null},
-    gare:{berline:60,van:null,grandvan:null}, autre:{berline:null,van:null,grandvan:null}
-  };
+  var COM = 10; // commission de secours, remplacée par celle du Google Sheets
   /* ================================== */
 
   var T = {
-    fr:{h1:"Réservez votre taxi",lead:"Prix fixe annoncé à l'avance. Votre chauffeur vient vous chercher à l'hôtel.",p1:"✓ Prix fixe",p2:"✓ Siège bébé gratuit",p3:"✓ Van 7 places",p4:"✓ 24h/24",
-      from:"Prise en charge",name:"Votre nom",room:"Chambre (facultatif)",phone:"Téléphone / WhatsApp",email:"Email (facultatif)",dest:"Destination",other:"Adresse de destination",
-      date:"Date",time:"Heure de départ de l'hôtel",pax:"Passagers",bags:"Valises",veh:"Véhicule",baby:"Siège enfant (gratuit)",b0:"Aucun",b1:"1 siège bébé",b2:"1 rehausseur",b3:"2 ou plus (préciser l'âge)",
+    fr:{h1:"Réservez votre taxi",lead:"Prix calculé à l'avance. Votre chauffeur vient vous chercher à l'hôtel.",p1:"✓ Prix annoncé",p2:"✓ Siège bébé gratuit",p3:"✓ Van jusqu'à 8 places",p4:"✓ 24h/24",
+      partner:"Réservation via",name:"Votre nom",room:"Chambre (facultatif)",phone:"Téléphone / WhatsApp",email:"Email (facultatif)",trip:"Trajet",depL:"Départ",arrL:"Arrivée",
+      depPh:"Adresse de l'hôtel",arrPh:"Où allez-vous ? Adresse, gare, aéroport…",swap:"⇅ Inverser",
+      date:"Date",time:"Heure de prise en charge",pax:"Passagers",bags:"Valises",veh:"Véhicule",baby:"Siège enfant (gratuit)",b0:"Aucun",b1:"1 siège bébé",b2:"1 rehausseur",b3:"2 ou plus (préciser l'âge)",
       notes:"Remarque (n° de vol, train…)",price:"Prix total",book:"Réserver",sending:"Envoi…",payinfo:"Paiement au chauffeur. Vous recevez une confirmation par WhatsApp ou SMS.",
-      okTitle:"Réservation envoyée",refLbl:"Votre référence",okNote:"Le chauffeur vous confirme la course rapidement. Pour toute question, écrivez-nous :",waBtn:"Écrire au chauffeur sur WhatsApp",lastStep:"Dernière étape",lastNote:"Appuyez sur le bouton vert pour envoyer votre réservation au chauffeur sur WhatsApp. Elle est confirmée dès sa réponse.",waSend:"Envoyer ma réservation sur WhatsApp",
-      quote:"Sur devis",need:"Merci d'indiquer : ",f_name:"votre nom",f_phone:"votre téléphone",f_dt:"la date et l'heure",f_other:"l'adresse de destination",
+      okTitle:"Réservation envoyée",refLbl:"Votre référence",okNote:"Le chauffeur vous confirme la course rapidement. Pour toute question, écrivez-nous :",waBtn:"Écrire au chauffeur sur WhatsApp",
+      pick:"Choisissez l'adresse dans la liste",quote:"Sur devis",need:"Merci d'indiquer : ",f_name:"votre nom",f_phone:"votre téléphone",f_dt:"la date et l'heure",f_dep:"l'adresse de départ",f_arr:"l'adresse d'arrivée",
+      noRes:"Aucun résultat",dist:"Distance estimée",
       netErr:"L'envoi n'a pas abouti. Appuyez sur le bouton vert pour réserver directement par WhatsApp.",
-      d:{cdg:"Aéroport CDG",orly:"Aéroport d'Orly",beauvais:"Aéroport de Beauvais",disney:"Disneyland Paris",gare:"Gare parisienne",autre:"Autre adresse"},
-      v:{berline:"Berline (1–4)",van:"Van (5–7)",grandvan:"Grand van (8)"},
-      r:{dest:"Trajet",when:"Date",pax:"Passagers",veh:"Véhicule",price:"Prix"}},
-    en:{h1:"Book your taxi",lead:"Fixed price shown upfront. Your driver picks you up at the hotel.",p1:"✓ Fixed price",p2:"✓ Free baby seat",p3:"✓ 7-seat van",p4:"✓ 24/7",
-      from:"Pick-up",name:"Your name",room:"Room (optional)",phone:"Phone / WhatsApp",email:"Email (optional)",dest:"Destination",other:"Destination address",
-      date:"Date",time:"Departure time from hotel",pax:"Passengers",bags:"Suitcases",veh:"Vehicle",baby:"Child seat (free)",b0:"None",b1:"1 baby seat",b2:"1 booster seat",b3:"2 or more (add ages in notes)",
+      unknownHotel:"Ce QR code n'est pas encore activé. Appuyez sur le bouton vert pour réserver directement par WhatsApp.",
+      v:{berline:"Berline (1–4)",van:"Van (jusqu'à 8)"},
+      r:{dep:"Départ",arr:"Arrivée",when:"Date",pax:"Passagers",veh:"Véhicule",price:"Prix"}},
+    en:{h1:"Book your taxi",lead:"Price calculated upfront. Your driver picks you up at the hotel.",p1:"✓ Upfront price",p2:"✓ Free baby seat",p3:"✓ Van up to 8 seats",p4:"✓ 24/7",
+      partner:"Booking via",name:"Your name",room:"Room (optional)",phone:"Phone / WhatsApp",email:"Email (optional)",trip:"Trip",depL:"From",arrL:"To",
+      depPh:"Hotel address",arrPh:"Where to? Address, station, airport…",swap:"⇅ Swap",
+      date:"Date",time:"Pick-up time",pax:"Passengers",bags:"Suitcases",veh:"Vehicle",baby:"Child seat (free)",b0:"None",b1:"1 baby seat",b2:"1 booster seat",b3:"2 or more (add ages in notes)",
       notes:"Notes (flight or train number…)",price:"Total price",book:"Book now",sending:"Sending…",payinfo:"Pay the driver. You'll get a confirmation by WhatsApp or text message.",
-      okTitle:"Booking sent",refLbl:"Your reference",okNote:"Your driver will confirm shortly. Any question? Message us:",waBtn:"Message the driver on WhatsApp",lastStep:"One last step",lastNote:"Tap the green button to send your booking to the driver on WhatsApp. It is confirmed as soon as he replies.",waSend:"Send my booking on WhatsApp",
-      quote:"On request",need:"Please enter ",f_name:"your name",f_phone:"your phone number",f_dt:"the date and time",f_other:"the destination address",
+      okTitle:"Booking sent",refLbl:"Your reference",okNote:"Your driver will confirm shortly. Any question? Message us:",waBtn:"Message the driver on WhatsApp",
+      pick:"Pick the address from the list",quote:"On request",need:"Please enter ",f_name:"your name",f_phone:"your phone number",f_dt:"the date and time",f_dep:"the pick-up address",f_arr:"the destination address",
+      noRes:"No results",dist:"Estimated distance",
       netErr:"The booking could not be sent. Tap the green button to book directly on WhatsApp.",
-      d:{cdg:"CDG Airport",orly:"Orly Airport",beauvais:"Beauvais Airport",disney:"Disneyland Paris",gare:"Paris train station",autre:"Other address"},
-      v:{berline:"Sedan (1–4)",van:"Van (5–7)",grandvan:"Large van (8)"},
-      r:{dest:"Trip",when:"Date",pax:"Passengers",veh:"Vehicle",price:"Price"}}
+      unknownHotel:"This QR code is not active yet. Tap the green button to book directly on WhatsApp.",
+      v:{berline:"Sedan (1–4)",van:"Van (up to 8)"},
+      r:{dep:"From",arr:"To",when:"Date",pax:"Passengers",veh:"Vehicle",price:"Price"}}
   };
+
+  // Raccourcis de destination (mêmes points que le site)
+  var LIEUX = [
+    {k:"cdg",fr:"✈️ CDG",en:"✈️ CDG",name:"Aéroport Roissy Charles de Gaulle",lat:49.0097,lon:2.5479,dept:null},
+    {k:"orly",fr:"✈️ Orly",en:"✈️ Orly",name:"Aéroport Orly",lat:48.7233,lon:2.3794,dept:null},
+    {k:"beauvais",fr:"✈️ Beauvais",en:"✈️ Beauvais",name:"Aéroport Beauvais-Tillé",lat:49.4544,lon:2.1128,dept:null},
+    {k:"disney",fr:"🏰 Disneyland",en:"🏰 Disneyland",name:"Disneyland Paris, 77700 Chessy",lat:48.8722,lon:2.7758,dept:"77"},
+    {k:"nord",fr:"🚆 Gare du Nord",en:"🚆 Gare du Nord",name:"Gare du Nord, Paris",lat:48.8809,lon:2.3553,dept:null},
+    {k:"lyon",fr:"🚆 Gare de Lyon",en:"🚆 Gare de Lyon",name:"Gare de Lyon, Paris",lat:48.8449,lon:2.3735,dept:null},
+    {k:"mtp",fr:"🚆 Montparnasse",en:"🚆 Montparnasse",name:"Gare Montparnasse, Paris",lat:48.8408,lon:2.3205,dept:null},
+    {k:"stl",fr:"🚆 Saint-Lazare",en:"🚆 Saint-Lazare",name:"Gare Saint-Lazare, Paris",lat:48.8760,lon:2.3245,dept:null},
+    {k:"est",fr:"🚆 Gare de l'Est",en:"🚆 Gare de l'Est",name:"Gare de l'Est, Paris",lat:48.8765,lon:2.3590,dept:null}
+  ];
+
   var $=function(id){return document.getElementById(id);};
   var params=new URLSearchParams(location.search);
   var code=(params.get("h")||(location.hash||"").replace("#","")||"exemple").toLowerCase();
-  var hotel={nom: API_URL ? "…" : (code==="exemple" ? "Hôtel Exemple Nanterre" : "Taxis Van Paris")};
+  var hotel={nom:"…",adresse:""};
   var lang=(params.get("lang")||(navigator.language||"fr")).slice(0,2)==="fr"?"fr":"en";
+  var P={dep:null,arr:null}; // {lat,lon,address,dept}
+  var maps=null, timers={};
 
-  $("hName").textContent=hotel.nom; $("hIni").textContent=hotel.nom.replace(/^(Hôtel|Hotel)\s+/i,"").charAt(0).toUpperCase();
+  function setHotel(n){ hotel.nom=n; $("hName").textContent=n; $("hIni").textContent=n.replace(/^(Hôtel|Hotel)\s+/i,"").charAt(0).toUpperCase()||"H"; }
+  setHotel("Taxis Van Paris");
 
-  function seg(el,name,keys,first){ el.innerHTML=""; keys.forEach(function(k){
-    el.insertAdjacentHTML("beforeend",'<input type="radio" name="'+name+'" id="'+name+'-'+k+'" value="'+k+'"'+(k===first?" checked":"")+'><label for="'+name+'-'+k+'" data-k="'+k+'"></label>'); }); }
-  seg($("dest"),"dest",Object.keys(PRIX),"cdg"); seg($("veh"),"veh",["berline","van","grandvan"],"berline");
+  // Véhicules
+  $("veh").innerHTML="";
+  ["berline","van"].forEach(function(k,i){
+    $("veh").insertAdjacentHTML("beforeend",'<input type="radio" name="veh" id="veh-'+k+'" value="'+k+'"'+(i===0?" checked":"")+'><label for="veh-'+k+'" data-k="'+k+'"></label>');
+  });
 
   var d=new Date(); d.setDate(d.getDate()+1); $("date").value=d.toISOString().slice(0,10); $("time").value="08:00";
 
   function applyLang(){
     var t=T[lang]; document.documentElement.lang=lang;
     document.querySelectorAll("[data-t]").forEach(function(el){ var k=el.getAttribute("data-t"); if(t[k]) el.textContent=t[k]; });
-    document.querySelectorAll("#dest label").forEach(function(l){ l.textContent=t.d[l.dataset.k]; });
+    document.querySelectorAll("[data-ph]").forEach(function(el){ el.placeholder=t[el.getAttribute("data-ph")]; });
     document.querySelectorAll("#veh label").forEach(function(l){ l.textContent=t.v[l.dataset.k]; });
     document.querySelectorAll(".lang button").forEach(function(b){ b.setAttribute("aria-pressed", b.dataset.l===lang); });
+    $("chips").innerHTML="";
+    LIEUX.forEach(function(L){ var b=document.createElement("button"); b.type="button"; b.className="chip"; b.textContent=L[lang];
+      b.onclick=function(){ setPoint("arr",{lat:L.lat,lon:L.lon,address:L.name,dept:L.dept},L.name); }; $("chips").appendChild(b); });
     update();
   }
   document.querySelectorAll(".lang button").forEach(function(b){ b.onclick=function(){ lang=b.dataset.l; applyLang(); }; });
 
+  /* ---------- Adresses (Google Places, comme sur le site) ---------- */
+  function setPoint(id,pt,label){ P[id]=pt; $(id).value=label; $("list-"+id).hidden=true; update(); }
+  function deptFrom(comps){
+    var cp=comps.find(function(c){return c.types.indexOf("postal_code")>=0;});
+    var loc=comps.find(function(c){return c.types.indexOf("locality")>=0;});
+    if(cp) return cp.long_name.substring(0,2);
+    if(loc&&loc.long_name.toLowerCase()==="paris") return "75";
+    return null;
+  }
+  function details(placeId,desc,cb){
+    maps.pl.getDetails({placeId:placeId,fields:["geometry","address_components"]},function(pl,st){
+      if(st!==google.maps.places.PlacesServiceStatus.OK||!pl) return;
+      cb({lat:pl.geometry.location.lat(),lon:pl.geometry.location.lng(),address:desc,dept:deptFrom(pl.address_components||[])});
+    });
+  }
+  function search(id){
+    var q=$(id).value.trim(), list=$("list-"+id);
+    if(!maps||q.length<3){ list.hidden=true; return; }
+    clearTimeout(timers[id]);
+    timers[id]=setTimeout(function(){
+      maps.ac.getPlacePredictions({input:q,language:lang,componentRestrictions:{country:"fr"}},function(preds,st){
+        list.innerHTML="";
+        if(st!==google.maps.places.PlacesServiceStatus.OK||!preds){ var e=document.createElement("div"); e.className="ac-item"; e.textContent=T[lang].noRes; list.appendChild(e); list.hidden=false; return; }
+        preds.forEach(function(p){
+          var b=document.createElement("button"); b.type="button"; b.className="ac-item";
+          var m=document.createElement("span"); m.textContent=p.structured_formatting.main_text;
+          var s=document.createElement("small"); s.textContent=p.structured_formatting.secondary_text||"";
+          b.appendChild(m); b.appendChild(s);
+          b.addEventListener("mousedown",function(e){ e.preventDefault(); });
+          b.addEventListener("click",function(){ $(id).value=p.description; list.hidden=true;
+            details(p.place_id,p.description.toLowerCase(),function(pt){ setPoint(id,pt,p.description); }); });
+          list.appendChild(b);
+        });
+        list.hidden=false;
+      });
+    },300);
+  }
+  ["dep","arr"].forEach(function(id){
+    $(id).addEventListener("input",function(){ P[id]=null; update(); search(id); });
+    $(id).addEventListener("blur",function(){ setTimeout(function(){ $("list-"+id).hidden=true; },200); });
+  });
+  $("swap").onclick=function(){ var a=P.dep, va=$("dep").value; P.dep=P.arr; $("dep").value=$("arr").value; P.arr=a; $("arr").value=va; update(); };
+
+  // Adresse de l'hôtel (colonne « Adresse » du Google Sheets) → départ pré-rempli
+  function hotelDepart(){
+    if(!maps||!hotel.adresse||P.dep||$("dep").value&&$("dep").value!==hotel.adresse) return;
+    $("dep").value=hotel.adresse;
+    maps.ac.getPlacePredictions({input:hotel.adresse,language:"fr",componentRestrictions:{country:"fr"}},function(preds,st){
+      if(st!==google.maps.places.PlacesServiceStatus.OK||!preds||!preds[0]) return;
+      details(preds[0].place_id,(hotel.nom+", "+hotel.adresse).toLowerCase(),function(pt){ if($("dep").value===hotel.adresse) setPoint("dep",pt,hotel.adresse); });
+    });
+  }
+  window.initMaps=function(){
+    maps={ac:new google.maps.places.AutocompleteService(),pl:new google.maps.places.PlacesService(document.createElement("div"))};
+    hotelDepart();
+  };
+  var sc=document.createElement("script"); sc.async=true;
+  sc.src="https://maps.googleapis.com/maps/api/js?key="+MAPS_KEY+"&libraries=places&callback=initMaps&language=fr";
+  document.head.appendChild(sc);
+
+  /* ---------- Calculateur : même grille que taxisvanparis.fr ---------- */
+  function gps(a,b,c,d){var r=Math.PI/180,x=(c-a)*r,y=(d-b)*r,h=Math.sin(x/2)*Math.sin(x/2)+Math.cos(a*r)*Math.cos(c*r)*Math.sin(y/2)*Math.sin(y/2);return 6371*2*Math.atan2(Math.sqrt(h),Math.sqrt(1-h));}
+  function creuse(hs){ if(!hs) return false; var p=hs.split(":").map(Number), m=p[0]*60+p[1]; return m>=1200||m<360||(m>=600&&m<900); }
+  function montantKm(km,cr){
+    if(km<=20) return km*2.90;
+    if(km<=50) return 20*2.90+(km-20)*(cr?2.20:2.40);
+    return 20*2.90+30*(cr?2.20:2.40)+(km-50)*(cr?2.30:2.50);
+  }
+  var VILLES=['paris','boulogne-billancourt','boulogne billancourt','issy-les-moulineaux','issy les moulineaux','issy','neuilly-sur-seine','neuilly sur seine','neuilly',
+    'levallois-perret','levallois perret','levallois','clichy','saint-ouen','saint ouen','aubervilliers','pantin','le pré-saint-gervais','pre-saint-gervais','pré saint gervais','le pre saint gervais',
+    'les lilas','bagnolet','montreuil','vincennes','charenton-le-pont','charenton le pont','charenton','saint-mandé','saint mande','bois de boulogne','malakoff','montrouge',
+    'ivry-sur-seine','ivry sur seine','ivry','vitry-sur-seine','vitry sur seine','vitry'];
+  function forfaitVille(p){ if(!p) return false; if(p.dept==="75") return true; var a=(p.address||"").toLowerCase(); return VILLES.some(function(v){return a.indexOf(v)>=0;}); }
+  function roissy(p){ var a=(p.address||"").toLowerCase(); return /cdg|charles de gaulle|roissy|9570[012]|le mesnil amelot/.test(a)||gps(p.lat,p.lon,49.0097,2.5479)<8; }
+  function orly(p){ var a=(p.address||"").toLowerCase(); return /orly|94390|94547/.test(a)||gps(p.lat,p.lon,48.7262,2.3652)<5; }
+  function beauvais(p){ var a=(p.address||"").toLowerCase(); return /beauvais|tille|60000/.test(a)||gps(p.lat,p.lon,49.4544,2.1128)<6; }
+  function gare(p){ return (p.address||"").toLowerCase().indexOf("gare")>=0; }
+  function zone(p){ return p&&["75","92","93","94"].indexOf(p.dept)>=0; }
+
+  function tarif(dep,arr,veh,pax,heure){
+    var dist=Math.round(gps(dep.lat,dep.lon,arr.lat,arr.lon)*1.35);
+    var cr=creuse(heure), supp=pax>3?(pax-3)*5.50:0;
+    var total=15+montantKm(dist,cr)+supp, forfait=true;
+    var dP=forfaitVille(dep), aP=forfaitVille(arr), van=veh==="van";
+    if(dP&&roissy(arr)) total=!van?75:(pax<=5?85:95);
+    else if(aP&&roissy(dep)) total=!van?85:(pax<=5?95:105);
+    else if(dP&&orly(arr)) total=!van?70:(pax<=6?80:95);
+    else if(aP&&orly(dep)) total=!van?80:(pax<=6?90:105);
+    else if(dP&&beauvais(arr)) total=!van?175:(pax<=6?188:205);
+    else if(aP&&beauvais(dep)) total=!van?185:(pax<=6?198:215);
+    else if((dP&&gare(arr))||(aP&&gare(dep))||(gare(dep)&&gare(arr))) total=50+supp;
+    else forfait=false;
+    if(!forfait&&(zone(arr)||zone(dep))){
+      var gv=van&&pax>=6, plafond=dist<29?(gv?95:85):(gv?110:100);
+      if(total>plafond) total=plafond;
+    }
+    return {dist:dist,prix:Math.round((total+COM)*100)/100};
+  }
+  function fmt(n){ return (n%1?n.toFixed(2).replace(".",","):String(n))+" €"; }
+
   function val(n){ var x=document.querySelector('input[name="'+n+'"]:checked'); return x?x.value:null; }
-  function prix(dest,v){ var b=PRIX[dest]&&PRIX[dest][v]; return b==null?null:b; }
   function update(){
-    var dest=val("dest"), v=val("veh"), pax=+$("pax").value, big=($("bags").value==="5–7"||$("bags").value==="8+");
-    $("otherWrap").hidden=dest!=="autre";
-    $("veh-berline").disabled=(pax>4||big); $("veh-van").disabled=pax>7;
+    var v=val("veh"), pax=+$("pax").value, big=($("bags").value==="5–7"||$("bags").value==="8+");
+    $("veh-berline").disabled=(pax>4||big);
     if(v==="berline"&&(pax>4||big)){ $("veh-van").checked=true; v="van"; }
-    if(v==="van"&&pax>7){ $("veh-grandvan").checked=true; v="grandvan"; }
-    var p=prix(dest,v); $("price").textContent=p==null?T[lang].quote:p+" €";
-    return {dest:dest,v:v,p:p};
+    var r=null, el=$("price");
+    if(P.dep&&P.arr){ r=tarif(P.dep,P.arr,v,pax,$("time").value); }
+    el.classList.toggle("small",!r);
+    el.textContent=r?fmt(r.prix):(($("dep").value.trim()&&$("arr").value.trim())?(maps?T[lang].pick:T[lang].quote):"—");
+    $("km").hidden=!r; if(r) $("km").textContent=T[lang].dist+" : ≈ "+r.dist+" km";
+    return {v:v,r:r};
   }
   document.addEventListener("change",update);
 
   function waLink(data){
-    var t=T.fr, lines=["🏨 Réservation via "+hotel.nom+" (code "+code+")"+(data.ref?" — réf. "+data.ref:""),
+    var lines=["🏨 Réservation via "+hotel.nom+" (code "+code+")"+(data.ref?" — réf. "+data.ref:""),
       "• Client : "+data.client+(data.room?" — chambre "+data.room:""),"• Tél : "+data.phone,
-      "• Départ : "+hotel.nom,"• Destination : "+data.destLabel,"• Date : "+data.date+" à "+data.time,
+      "• Départ : "+data.depLabel,"• Arrivée : "+data.destLabel,data.km?"• Distance : ≈ "+data.km+" km":null,"• Date : "+data.date+" à "+data.time,
       "• Passagers : "+data.pax+" — Valises : "+data.bags,"• Véhicule : "+data.vehLabel,"• Siège enfant : "+data.baby,
       data.notes?"• Remarque : "+data.notes:null,"• Prix : "+data.priceLabel].filter(Boolean);
     return "https://wa.me/"+WHATSAPP+"?text="+encodeURIComponent(lines.join("\n"));
@@ -205,15 +353,21 @@ textarea{min-height:64px;resize:vertical}
     var s=update(), t=T[lang], miss=[];
     if(!$("client").value.trim()) miss.push(t.f_name);
     if($("phone").value.replace(/\D/g,"").length<8) miss.push(t.f_phone);
+    if(!$("dep").value.trim()) miss.push(t.f_dep);
+    if(!$("arr").value.trim()) miss.push(t.f_arr);
     if(!$("date").value||!$("time").value) miss.push(t.f_dt);
-    if(s.dest==="autre"&&!$("other").value.trim()) miss.push(t.f_other);
     if(miss.length){ $("err").textContent=t.need+miss.join(", ")+"."; $("err").hidden=false; return; }
+    if(maps&&!s.r){ $("err").textContent=t.pick+"."; $("err").hidden=false; return; }
     $("err").hidden=true;
     var babyTxt={none:"Aucun",seat:"1 siège bébé",booster:"1 rehausseur",more:"2 ou plus"}[$("baby").value];
+    var depLabel=$("dep").value.trim(), destLabel=$("arr").value.trim();
+    var extra=[]; if(depLabel!==hotel.adresse) extra.push("Départ : "+depLabel); if(s.r) extra.push("≈ "+s.r.dist+" km");
+    var notes=$("notes").value.trim();
     var data={h:code,client:$("client").value.trim(),room:$("room").value.trim(),phone:$("phone").value.trim(),email:$("email").value.trim(),
-      dest:s.dest,destLabel:s.dest==="autre"?$("other").value.trim():T.fr.d[s.dest],date:$("date").value,time:$("time").value,
-      pax:$("pax").value,bags:$("bags").value,veh:s.v,vehLabel:T.fr.v[s.v],baby:babyTxt,notes:$("notes").value.trim(),
-      priceLabel:s.p==null?"Sur devis":s.p+" €",lang:lang};
+      dest:"calc",depLabel:depLabel,destLabel:destLabel,date:$("date").value,time:$("time").value,
+      pax:$("pax").value,bags:$("bags").value,veh:s.v,vehLabel:T.fr.v[s.v],baby:babyTxt,
+      notes:[notes].concat(extra).filter(Boolean).join(" · "),km:s.r?s.r.dist:"",
+      prix:s.r?s.r.prix:"",priceLabel:s.r?fmt(s.r.prix):"Sur devis",lang:lang};
 
     function done(ref){
       data.ref=ref||"";
@@ -221,36 +375,31 @@ textarea{min-height:64px;resize:vertical}
       var r=T[lang].r, dt=new Date(data.date+"T"+data.time);
       var when=dt.toLocaleDateString(lang==="fr"?"fr-FR":"en-GB",{weekday:"long",day:"numeric",month:"long"})+" · "+data.time;
       $("recap").innerHTML="";
-      [[r.dest,hotel.nom+" → "+(s.dest==="autre"?data.destLabel:T[lang].d[s.dest])],[r.when,when],[r.pax,data.pax],[r.veh,T[lang].v[s.v]],[r.price,s.p==null?T[lang].quote:s.p+" €"]]
+      [[r.dep,depLabel],[r.arr,destLabel],[r.when,when],[r.pax,data.pax],[r.veh,T[lang].v[s.v]],[r.price,s.r?fmt(s.r.prix):T[lang].quote]]
         .forEach(function(x){ var row=document.createElement("div"); var a=document.createElement("span"); a.textContent=x[0]; var b=document.createElement("span"); b.textContent=x[1]; row.appendChild(a); row.appendChild(b); $("recap").appendChild(row); });
       $("wa").href=waLink(data);
       $("f").hidden=true; $("done").hidden=false; window.scrollTo(0,0);
     }
 
-    if(!API_URL){ done(""); $("okTitleEl").textContent=T[lang].lastStep; $("okNoteEl").textContent=T[lang].lastNote; $("wa").textContent=T[lang].waSend; return; }
     $("go").disabled=true; $("go").textContent=t.sending;
     fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(data)})
       .then(function(r){return r.json();})
       .then(function(res){ if(res&&res.ok){ done(res.ref); } else { throw new Error(res&&res.error); } })
-      .catch(function(){ $("err").textContent=t.netErr; $("err").hidden=false; $("wa").href=waLink(data);
-        var b=document.createElement("a"); b.className="btn btn-wa"; b.target="_blank"; b.rel="noopener"; b.href=waLink(data); b.textContent=T[lang].waBtn;
-        if(!document.getElementById("waFallback")){ b.id="waFallback"; $("go").after(b); } })
+      .catch(function(er){ $("err").textContent=(er&&er.message==="hotel_inconnu")?t.unknownHotel:t.netErr; $("err").hidden=false;
+        if(!document.getElementById("waFallback")){ var b=document.createElement("a"); b.className="btn btn-wa"; b.target="_blank"; b.rel="noopener"; b.id="waFallback"; b.textContent=T[lang].waBtn; $("go").after(b); }
+        $("waFallback").href=waLink(data); })
       .finally(function(){ $("go").disabled=false; $("go").textContent=t.book; });
   });
 
   applyLang();
 
-  // Nom de l'hôtel et prix à jour depuis le Google Sheets
-  function setHotel(n){ hotel.nom=n; $("hName").textContent=n; $("hIni").textContent=n.replace(/^(Hôtel|Hotel)\s+/i,"").charAt(0).toUpperCase(); }
-  if(API_URL){
-    fetch(API_URL+"?action=config&h="+encodeURIComponent(code))
-      .then(function(r){return r.json();})
-      .then(function(res){
-        if(res&&res.ok){ setHotel(res.hotel); Object.keys(res.prix||{}).forEach(function(k){ if(PRIX[k]) PRIX[k]=res.prix[k]; }); update(); }
-        else if(res&&res.error==="hotel_inconnu"){ setHotel(lang==="fr"?"Taxis Van Paris":"Taxis Van Paris"); }
-      })
-      .catch(function(){ setHotel("Taxis Van Paris"); });
-  }
+  // Nom, adresse et commission de l'hôtel depuis le Google Sheets
+  fetch(API_URL+"?action=config&h="+encodeURIComponent(code))
+    .then(function(r){return r.json();})
+    .then(function(res){
+      if(res&&res.ok){ setHotel(res.hotel); if(res.c!=null) COM=Number(res.c)||0; hotel.adresse=res.adresse||""; hotelDepart(); update(); }
+    })
+    .catch(function(){});
 })();
 </script>
 </body>
