@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="TVP Admin">
+<title>Tableau de bord TVP</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@600&display=swap">
+<style>
+/* Une colonne type appli : bandeau chiffres, filtres, courses groupées par jour dans l'ordre chronologique */
+:root{--bg:#0B0B0D;--panel:#151518;--panel-2:#1C1B1F;--line:#2B2823;--fg:#F3EFE6;--muted:#A39C8E;--gold:#C9A24B;--gold-2:#E4C57A;--ink:#141008;
+  --new:#E4C57A;--ok:#6FA8DC;--done:#3BB273;--cancel:#7A746A;--err:#F08A7A;--wa:#25D366;
+  --display:"Playfair Display",Georgia,serif;--body:"DM Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;padding-inline:16px}
+.wrap{max-width:760px;margin:0 auto;padding-block:max(18px,env(safe-area-inset-top)) 70px}
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.brand{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin:0}
+h1{font:600 clamp(24px,6vw,30px)/1.15 var(--display);margin:6px 0 0}
+.sync{font-size:12.5px;color:var(--muted)}
+button{font-family:var(--body);cursor:pointer}
+:focus-visible{outline:2px solid var(--gold-2);outline-offset:2px}
+.btn{background:var(--gold);color:var(--ink);border:0;border-radius:10px;padding:9px 13px;font-weight:700;font-size:14px}
+.ghost{background:transparent;color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:13.5px;font-weight:500}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0}
+@media (max-width:560px){.kpis{grid-template-columns:1fr 1fr}}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.kpi b{display:block;font:600 24px/1.1 var(--display);color:var(--gold-2);font-variant-numeric:tabular-nums}
+.kpi span{font-size:12px;color:var(--muted)}
+.kpi.alert b{color:var(--new)}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
+.chip{background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:999px;padding:7px 12px;font-size:13.5px;white-space:nowrap}
+.chip[aria-pressed="true"]{border-color:var(--gold);color:var(--gold-2);background:rgba(201,162,75,.12)}
+select{background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font:14px var(--body)}
+.day{margin:20px 0 8px;display:flex;align-items:baseline;gap:10px}
+.day h2{font:600 18px var(--display);margin:0;text-transform:capitalize}
+.day span{font-size:12.5px;color:var(--muted)}
+.list{display:grid;gap:10px}
+.c{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--st,var(--line));border-radius:14px;padding:12px 14px;display:grid;grid-template-columns:62px 1fr;gap:4px 12px}
+.c.s-Nouvelle{--st:var(--new)}.c.s-Confirmée{--st:var(--ok)}.c.s-Effectuée{--st:var(--done)}.c.s-Annulée{--st:var(--cancel);opacity:.62}
+.time{font:600 20px/1.1 var(--display);color:var(--gold-2);font-variant-numeric:tabular-nums}
+.time small{display:block;font:500 11px var(--body);color:var(--muted);margin-top:4px}
+.main{min-width:0;display:grid;gap:4px}
+.l1{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.name{font-weight:700;overflow-wrap:anywhere}
+.pill{font-size:11.5px;font-weight:700;border-radius:999px;padding:3px 9px;border:1px solid currentColor;white-space:nowrap;color:var(--st)}
+.route{font-size:14px;overflow-wrap:anywhere}
+.route b{color:var(--gold-2);font-weight:500}
+.meta{font-size:13px;color:var(--muted);overflow-wrap:anywhere}
+.note{font-size:13px;background:var(--panel-2);border-radius:8px;padding:6px 9px;overflow-wrap:anywhere}
+.l3{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-top:4px}
+.price{font:600 17px var(--display);font-variant-numeric:tabular-nums}
+.price small{font:500 11.5px var(--body);color:var(--muted);margin-left:6px}
+.acts{display:flex;gap:6px;flex-wrap:wrap}
+.acts button,.acts a{font-size:12.5px;padding:6px 10px;border-radius:9px;border:1px solid var(--line);background:transparent;color:var(--fg);text-decoration:none;font-weight:500}
+.acts .ok{border-color:var(--ok);color:var(--ok)}.acts .done{border-color:var(--done);color:var(--done)}.acts .no{color:var(--muted)}
+.acts .wa{border-color:var(--wa);color:var(--wa)}
+.acts .cal{border-color:var(--gold);color:var(--gold-2)}
+.empty,.msg{text-align:center;padding:28px 16px;border:1px dashed var(--line);border-radius:14px;color:var(--muted);line-height:1.5}
+.msg.err{color:var(--err);border-color:var(--err)}
+.demo{border:1px solid var(--gold);border-radius:10px;padding:8px 12px;color:var(--gold-2);font-size:13px;margin:12px 0 0}
+.com{margin-top:26px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.com h2{font:600 17px var(--display);margin:0 0 10px}
+.com table{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+.com td,.com th{padding:7px 4px;border-bottom:1px solid var(--line);text-align:left}
+.com th{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:500}
+.com td:last-child,.com th:last-child{text-align:right}
+.menu{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center;z-index:20}
+.sheet{background:var(--bg);border:1px solid var(--line);border-radius:18px 18px 0 0;width:100%;max-width:520px;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px));display:grid;gap:10px}
+.sheet h3{font:600 18px var(--display);margin:0}
+.sheet .btn,.sheet .ghost{width:100%;padding:13px;text-align:center;text-decoration:none;display:block;font-size:15px}
+.login{max-width:380px;margin:40px auto;display:grid;gap:10px}
+.login input{background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:12px;font:16px var(--body)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--gold);color:var(--ink);font-weight:700;padding:10px 16px;border-radius:999px;z-index:30}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div><p class="brand">Taxis Van Paris By ABTS</p><h1>Tableau de bord</h1></div>
+    <div style="display:flex;gap:8px;align-items:center"><span class="sync" id="sync"></span><button class="btn" id="refresh" type="button">Actualiser</button></div>
+  </div>
+  <div id="demoNote"></div>
+
+  <div id="app" hidden>
+    <div class="kpis">
+      <div class="kpi alert"><b id="kNew">0</b><span>à confirmer</span></div>
+      <div class="kpi"><b id="kNext">0</b><span>courses à venir</span></div>
+      <div class="kpi"><b id="kCA">0 €</b><span>encaissé ce mois</span></div>
+      <div class="kpi"><b id="kCom">0 €</b><span>commissions du mois</span></div>
+    </div>
+    <div class="bar">
+      <div class="chips" id="filters"></div>
+      <select id="hotelF" aria-label="Filtrer par hôtel"></select>
+      <button class="ghost" id="calAll" type="button">📅 Tout ajouter au calendrier</button>
+    </div>
+    <div id="list"></div>
+    <div class="com"><h2 id="comTitle">Commissions à verser</h2><div style="overflow-x:auto"><table id="comTable"></table></div></div>
+  </div>
+
+  <div class="login" id="login" hidden>
+    <p class="note" style="margin:0">Entrez votre clé admin. Elle reste enregistrée sur cet appareil.</p>
+    <input id="keyIn" type="password" autocomplete="current-password" placeholder="Clé admin">
+    <button class="btn" id="keyGo" type="button">Ouvrir le tableau de bord</button>
+    <p class="err" id="keyErr" style="color:var(--err);margin:0" hidden>Clé incorrecte.</p>
+  </div>
+</div>
+<div class="menu" id="calMenu" hidden><div class="sheet" id="calSheet"></div></div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function(){
+  /* ============ RÉGLAGES ============ */
+  var API_URL = "https://script.google.com/macros/s/AKfycbynqJeRA8W1AoYiHWQhS-ZPGHrEHyQBW8xp4xFGAYgP68lAugMsNZqWYkleYV1P4Va6/exec";
+  /* ================================== */
+  var $=function(id){return document.getElementById(id);};
+  var all=[], filter="avenir", hotelF="", key="", demo=false;
+  var DUREE_MIN=90; // durée d'une course dans le calendrier
+  function today(){var d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,10);}
+  function addDays(n){var d=new Date();d.setDate(d.getDate()+n);d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,10);}
+  function toast(t){var e=$("toast");e.textContent=t;e.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(function(){e.hidden=true;},2200);}
+  function num(v){var n=Number(v);return isNaN(n)?0:n;}
+  function euro(n){return Math.round(n).toLocaleString("fr-FR")+" €";}
+  function stamp(r){return (r.date||"")+"T"+(r.heure||"00:00");}
+
+  /* ---------- Données ---------- */
+  function demoData(){
+    var H="Hôtel partenaire";
+    return [
+      {ref:"H1001-A7KQ",code:"h01",hotel:H,client:"M. Smith",chambre:"214",tel:"+44 7700 900123",destination:"Aéroport CDG",date:today(),heure:"17:30",passagers:3,valises:"3–4",vehicule:"Van (5–7)",siege:"Aucun",remarque:"Vol BA 309",prix:95,commission:10,statut:"Confirmée"},
+      {ref:"H1001-M3PL",code:"h02",hotel:H,client:"Famille Garcia",chambre:"302",tel:"+34 612 345 678",destination:"Disneyland Paris",date:addDays(1),heure:"08:00",passagers:6,valises:"5–7",vehicule:"Van (5–7)",siege:"1 rehausseur",remarque:"",prix:140,commission:10,statut:"Nouvelle"},
+      {ref:"H1001-Q4TZ",code:"h01",hotel:H,client:"Mr Chen",chambre:"221",tel:"+86 138 0000 0000",destination:"Aéroport d'Orly",date:addDays(1),heure:"05:45",passagers:1,valises:"0–2",vehicule:"Berline (1–4)",siege:"Aucun",remarque:"",prix:70,commission:10,statut:"Nouvelle"},
+      {ref:"H1001-B9XN",code:"h03",hotel:H,client:"Mme Rossi",chambre:"108",tel:"+39 333 123 4567",destination:"Gare parisienne",date:addDays(3),heure:"14:10",passagers:2,valises:"0–2",vehicule:"Berline (1–4)",siege:"Aucun",remarque:"Gare de Lyon, TGV 6211",prix:60,commission:10,statut:"Confirmée"},
+      {ref:"H0927-J6YU",code:"h01",hotel:H,client:"Mrs Taylor",chambre:"117",tel:"+1 202 555 0147",destination:"Aéroport CDG",date:addDays(-2),heure:"10:30",passagers:4,valises:"3–4",vehicule:"Van (5–7)",siege:"1 siège bébé",remarque:"",prix:95,commission:10,statut:"Effectuée"},
+      {ref:"H0925-D2RW",code:"h02",hotel:H,client:"M. Dubois",chambre:"",tel:"+33 6 12 34 56 78",destination:"Aéroport CDG",date:addDays(-4),heure:"06:00",passagers:2,valises:"0–2",vehicule:"Berline (1–4)",siege:"Aucun",remarque:"",prix:85,commission:10,statut:"Annulée"}
+    ];
+  }
+  function api(params){
+    var q=Object.keys(params).map(function(k){return k+"="+encodeURIComponent(params[k]);}).join("&");
+    return fetch(API_URL+"?"+q).then(function(r){return r.json();});
+  }
+  function load(){
+    if(demo){ all=demoData(); $("sync").textContent="Aperçu"; show(); return; }
+    $("sync").textContent="Chargement…";
+    api({action:"admin",k:key}).then(function(res){
+      if(!res.ok){ try{localStorage.removeItem("tvp-admin");}catch(_){} askKey(true); return; }
+      all=res.reservations||[]; $("sync").textContent="À jour à "+new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"}); show();
+    }).catch(function(){ $("sync").textContent="Hors ligne"; toast("Connexion impossible, réessayez"); });
+  }
+  function setStatut(r,s){
+    var old=r.statut; r.statut=s; render();
+    if(demo){ toast("Statut : "+s); return; }
+    api({action:"statut",k:key,ref:r.ref,s:s}).then(function(res){
+      if(res.ok) toast("Statut : "+s); else { r.statut=old; render(); toast("Échec, réessayez"); }
+    }).catch(function(){ r.statut=old; render(); toast("Connexion impossible"); });
+  }
+
+  /* ---------- Calendrier ---------- */
+  function icsDate(d,t,addMin){ var x=new Date(d+"T"+(t||"00:00")+":00"); x.setMinutes(x.getMinutes()+(addMin||0));
+    function p(n){return String(n).padStart(2,"0");} return x.getFullYear()+p(x.getMonth()+1)+p(x.getDate())+"T"+p(x.getHours())+p(x.getMinutes())+"00"; }
+  function esc(s){return String(s||"").replace(/\\/g,"\\\\").replace(/;/g,"\\;").replace(/,/g,"\\,").replace(/\n/g,"\\n");}
+  function titre(r){return "🚖 "+r.client+" → "+r.destination;}
+  function details(r){return ["Réf. "+r.ref,"Hôtel : "+r.hotel+(r.chambre?" (ch. "+r.chambre+")":""),"Tél : "+telAff(r.tel),
+    r.passagers+" pers. · "+r.valises+" valises · "+r.vehicule,"Siège enfant : "+r.siege,r.remarque?"Remarque : "+r.remarque:"","Prix : "+(typeof r.prix==="number"?r.prix+" €":r.prix)].filter(Boolean).join("\n");}
+  function ics(list){
+    var L=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Taxis Van Paris//Admin//FR","CALSCALE:GREGORIAN"];
+    list.forEach(function(r){ L.push("BEGIN:VEVENT","UID:"+r.ref+"@taxisvanparis.fr","DTSTAMP:"+new Date().toISOString().replace(/[-:]/g,"").slice(0,15)+"Z",
+      "DTSTART:"+icsDate(r.date,r.heure),"DTEND:"+icsDate(r.date,r.heure,DUREE_MIN),"SUMMARY:"+esc(titre(r)),
+      "LOCATION:"+esc(r.hotel),"DESCRIPTION:"+esc(details(r)),
+      "BEGIN:VALARM","ACTION:DISPLAY","DESCRIPTION:"+esc(titre(r)),"TRIGGER:-PT60M","END:VALARM","END:VEVENT"); });
+    L.push("END:VCALENDAR"); return L.join("\r\n");
+  }
+  function saveIcs(list,name){
+    var blob=new Blob([ics(list)],{type:"text/calendar;charset=utf-8"}), url=URL.createObjectURL(blob);
+    var a=document.createElement("a"); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){URL.revokeObjectURL(url);},4000);
+  }
+  function gcal(r){ return "https://calendar.google.com/calendar/render?action=TEMPLATE&ctz=Europe/Paris&text="+encodeURIComponent(titre(r))+
+    "&dates="+icsDate(r.date,r.heure)+"/"+icsDate(r.date,r.heure,DUREE_MIN)+"&location="+encodeURIComponent(r.hotel)+"&details="+encodeURIComponent(details(r)); }
+  function calMenu(r){
+    var s=$("calSheet"); s.innerHTML="";
+    var h=document.createElement("h3"); h.textContent="Ajouter au calendrier"; s.appendChild(h);
+    var p=document.createElement("p"); p.className="meta"; p.style.margin="0"; p.textContent=titre(r)+" · "+r.heure+" · rappel 1 h avant"; s.appendChild(p);
+    var b1=document.createElement("button"); b1.className="btn"; b1.type="button"; b1.textContent="Calendrier iPhone / Mac";
+    b1.onclick=function(){ saveIcs([r],"course-"+r.ref+".ics"); closeMenu(); }; s.appendChild(b1);
+    var b2=document.createElement("a"); b2.className="ghost"; b2.target="_blank"; b2.rel="noopener"; b2.href=gcal(r); b2.textContent="Google Agenda";
+    b2.onclick=closeMenu; s.appendChild(b2);
+    var b3=document.createElement("button"); b3.className="ghost"; b3.type="button"; b3.textContent="Annuler"; b3.onclick=closeMenu; s.appendChild(b3);
+    $("calMenu").hidden=false;
+  }
+  function closeMenu(){ $("calMenu").hidden=true; }
+  $("calMenu").addEventListener("click",function(e){ if(e.target===this) closeMenu(); });
+
+  /* ---------- Affichage ---------- */
+  var FILTERS=[["avenir","À venir"],["Nouvelle","À confirmer"],["passees","Passées"],["toutes","Toutes"]];
+  function jour(d){
+    if(d===today()) return "Aujourd'hui"; if(d===addDays(1)) return "Demain"; if(d===addDays(-1)) return "Hier";
+    var x=new Date(d+"T12:00"); return isNaN(x)?d:x.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});
+  }
+  function waNum(t){var d=String(t||"").replace(/\D/g,"");if(d.indexOf("00")===0)d=d.slice(2);else if(d.charAt(0)==="0")d="33"+d.slice(1);else if(d.length===9&&/^[67]/.test(d))d="33"+d;return d;}
+  function telAff(t){var d=String(t||"");return /^[67]\d{8}$/.test(d)?("0"+d).replace(/(\d{2})(?=\d)/g,"$1 "):d;}
+  function visible(){
+    var now=stamp({date:today(),heure:new Date().toTimeString().slice(0,5)});
+    return all.filter(function(r){
+      if(hotelF && r.code!==hotelF) return false;
+      if(filter==="avenir") return stamp(r)>=now.slice(0,10)+"T00:00" && r.statut!=="Annulée" && r.statut!=="Effectuée";
+      if(filter==="passees") return stamp(r)<now.slice(0,10)+"T00:00" || r.statut==="Effectuée";
+      if(filter==="Nouvelle") return r.statut==="Nouvelle";
+      return true;
+    }).sort(function(a,b){ var c=stamp(a).localeCompare(stamp(b)); return filter==="passees"?-c:c; });
+  }
+  function render(){
+    var m=today().slice(0,7), t0=today();
+    $("kNew").textContent=all.filter(function(r){return r.statut==="Nouvelle";}).length;
+    $("kNext").textContent=all.filter(function(r){return r.date>=t0 && r.statut!=="Annulée" && r.statut!=="Effectuée";}).length;
+    var done=all.filter(function(r){return r.statut==="Effectuée" && String(r.date).slice(0,7)===m;});
+    $("kCA").textContent=euro(done.reduce(function(s,r){return s+num(r.prix);},0));
+    $("kCom").textContent=euro(done.reduce(function(s,r){return s+num(r.commission);},0));
+
+    $("filters").innerHTML="";
+    FILTERS.forEach(function(f){ var b=document.createElement("button"); b.type="button"; b.className="chip"; b.textContent=f[1];
+      b.setAttribute("aria-pressed",filter===f[0]); b.onclick=function(){filter=f[0];render();}; $("filters").appendChild(b); });
+    var hs={}; all.forEach(function(r){hs[r.code]=r.hotel+" ("+String(r.code).toUpperCase()+")";});
+    $("hotelF").innerHTML='<option value="">Tous les hôtels</option>'+Object.keys(hs).sort().map(function(k){return '<option value="'+k+'"'+(k===hotelF?" selected":"")+'>'+hs[k].replace(/</g,"&lt;")+'</option>';}).join("");
+
+    var L=$("list"); L.innerHTML=""; var items=visible();
+    if(!items.length){ var e=document.createElement("div"); e.className="empty"; e.textContent=filter==="Nouvelle"?"Aucune réservation à confirmer.":"Aucune course ici pour l'instant. Les réservations faites avec les QR codes des hôtels s'afficheront ici, dans l'ordre."; L.appendChild(e); }
+    var cur=null, box=null;
+    items.forEach(function(r){
+      if(r.date!==cur){ cur=r.date; var n=items.filter(function(x){return x.date===cur;}).length;
+        var d=document.createElement("div"); d.className="day"; var h=document.createElement("h2"); h.textContent=jour(cur); var sp=document.createElement("span"); sp.textContent=n+" course"+(n>1?"s":"");
+        d.appendChild(h); d.appendChild(sp); L.appendChild(d); box=document.createElement("div"); box.className="list"; L.appendChild(box); }
+      var c=document.createElement("div"); c.className="c s-"+r.statut;
+      c.innerHTML='<div class="time"></div><div class="main"><div class="l1"><div class="name"></div><span class="pill"></span></div><div class="route"></div><div class="meta m1"></div><div class="meta m2"></div><div class="l3"><div class="price"></div><div class="acts"></div></div></div>';
+      c.querySelector(".time").innerHTML=""; c.querySelector(".time").append(r.heure||"—"); var sm=document.createElement("small"); sm.textContent=r.ref; c.querySelector(".time").appendChild(sm);
+      c.querySelector(".name").textContent=r.client+(r.chambre?" · ch. "+r.chambre:"");
+      c.querySelector(".pill").textContent=r.statut;
+      var ro=c.querySelector(".route"); ro.append(r.hotel+" → "); var bd=document.createElement("b"); bd.textContent=r.destination; ro.appendChild(bd);
+      c.querySelector(".m1").textContent=r.passagers+" pers. · "+r.valises+" valises · "+r.vehicule+(r.siege&&r.siege!=="Aucun"?" · 👶 "+r.siege:"");
+      c.querySelector(".m2").textContent=telAff(r.tel);
+      if(r.remarque){ var no=document.createElement("div"); no.className="note"; no.textContent=r.remarque; c.querySelector(".m2").after(no); }
+      var pr=c.querySelector(".price"); pr.append(typeof r.prix==="number"?euro(r.prix):String(r.prix)); var ps=document.createElement("small"); ps.textContent="dont "+euro(num(r.commission))+" hôtel"; pr.appendChild(ps);
+      var A=c.querySelector(".acts");
+      function act(label,cls,fn){ var b=document.createElement("button"); b.type="button"; b.className=cls; b.textContent=label; b.onclick=fn; A.appendChild(b); }
+      if(r.statut==="Nouvelle") act("Confirmer","ok",function(){setStatut(r,"Confirmée");});
+      if(r.statut==="Nouvelle"||r.statut==="Confirmée") act("Effectuée","done",function(){setStatut(r,"Effectuée");});
+      if(r.statut!=="Annulée"&&r.statut!=="Effectuée") act("Annuler","no",function(){setStatut(r,"Annulée");});
+      if(r.statut==="Annulée"||r.statut==="Effectuée") act("Rétablir","no",function(){setStatut(r,"Confirmée");});
+      var w=waNum(r.tel); if(w){ var a=document.createElement("a"); a.className="wa"; a.target="_blank"; a.rel="noopener"; a.href="https://wa.me/"+w+"?text="+encodeURIComponent("Bonjour "+r.client+", c'est votre chauffeur Taxis Van Paris. Je confirme votre course du "+jour(r.date).toLowerCase()+" à "+r.heure+" vers "+r.destination+". À bientôt !"); a.textContent="WhatsApp"; A.appendChild(a); }
+      if(r.statut!=="Annulée") act("📅","cal",function(){calMenu(r);});
+      box.appendChild(c);
+    });
+
+    // Commissions du mois par hôtel (courses effectuées)
+    var mois=new Date().toLocaleDateString("fr-FR",{month:"long",year:"numeric"});
+    $("comTitle").textContent="Commissions à verser · "+mois;
+    var per={}; done.forEach(function(r){ var k=r.code; per[k]=per[k]||{nom:r.hotel,n:0,ca:0,com:0}; per[k].n++; per[k].ca+=num(r.prix); per[k].com+=num(r.commission); });
+    var T=$("comTable"); var keys=Object.keys(per).sort();
+    T.innerHTML="<tr><th>Hôtel</th><th>Courses</th><th>Chiffre</th><th>Commission</th></tr>";
+    if(!keys.length){ T.innerHTML+='<tr><td colspan="4" style="color:var(--muted)">Aucune course effectuée ce mois-ci.</td></tr>'; }
+    keys.forEach(function(k){ var tr=document.createElement("tr"); [per[k].nom+" ("+k.toUpperCase()+")",per[k].n,euro(per[k].ca),euro(per[k].com)].forEach(function(v){var td=document.createElement("td");td.textContent=v;tr.appendChild(td);}); T.appendChild(tr); });
+  }
+  function show(){ $("login").hidden=true; $("app").hidden=false; render(); }
+  function askKey(bad){ $("app").hidden=true; $("login").hidden=false; $("keyErr").hidden=!bad; $("sync").textContent=""; }
+  $("keyGo").onclick=function(){ key=$("keyIn").value.trim(); if(!key) return; try{localStorage.setItem("tvp-admin",key);}catch(_){} load(); };
+  $("keyIn").addEventListener("keydown",function(e){ if(e.key==="Enter") $("keyGo").click(); });
+  $("hotelF").onchange=function(){ hotelF=this.value; render(); };
+  $("refresh").onclick=load;
+  $("calAll").onclick=function(){ var up=all.filter(function(r){return r.date>=today() && r.statut!=="Annulée" && r.statut!=="Effectuée";}).sort(function(a,b){return stamp(a).localeCompare(stamp(b));});
+    if(!up.length){ toast("Aucune course à venir"); return; } saveIcs(up,"courses-taxis-van-paris.ics"); toast(up.length+" course(s) envoyée(s) au calendrier"); };
+
+  // Démarrage
+  var p=new URLSearchParams(location.search);
+  demo=!API_URL || p.get("demo")==="1";
+  if(demo){ var dn=document.createElement("p"); dn.className="demo"; dn.textContent="Aperçu avec des réservations d'exemple."; $("demoNote").appendChild(dn); load(); }
+  else { try{ key=p.get("k")||localStorage.getItem("tvp-admin")||""; }catch(_){ key=p.get("k")||""; }
+    if(p.get("k")){ try{localStorage.setItem("tvp-admin",key);}catch(_){} history.replaceState(null,"",location.pathname); }
+    if(key) load(); else askKey(false); }
+  setInterval(function(){ if(!demo && key && document.visibilityState==="visible") load(); }, 120000);
+})();
+</script>
+</body>
+</html>
