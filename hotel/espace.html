@@ -72,6 +72,15 @@ select{background:var(--panel);color:var(--fg);border:1px solid var(--line);bord
 
 <script>
 (function(){
+
+  // Remet les dates/heures au bon format même si Google les renvoie en texte long ("Wed Oct 28 2026 00:00:00 GMT+0100…")
+  function propre(list){ var MO={Jan:"01",Feb:"02",Mar:"03",Apr:"04",May:"05",Jun:"06",Jul:"07",Aug:"08",Sep:"09",Oct:"10",Nov:"11",Dec:"12"};
+    return (list||[]).map(function(r){ var d=String(r.date||""), h=String(r.heure||""), m;
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(d)){ if((m=d.match(/(\d{4})-(\d{2})-(\d{2})/))) d=m[1]+"-"+m[2]+"-"+m[3];
+        else if((m=d.match(/([A-Z][a-z]{2}) (\d{1,2}) (\d{4})/))&&MO[m[1]]) d=m[3]+"-"+MO[m[1]]+"-"+("0"+m[2]).slice(-2);
+        else if((m=d.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/))) d=m[3]+"-"+("0"+m[2]).slice(-2)+"-"+("0"+m[1]).slice(-2); }
+      if(!/^\d{2}:\d{2}$/.test(h)){ if((m=h.match(/(\d{1,2}):(\d{2})/))) h=("0"+m[1]).slice(-2)+":"+m[2]; }
+      r.date=d; r.heure=h; return r; }); }
   /* ============ RÉGLAGES ============ */
   var API_URL = "https://script.google.com/macros/s/AKfycbynqJeRA8W1AoYiHWQhS-ZPGHrEHyQBW8xp4xFGAYgP68lAugMsNZqWYkleYV1P4Va6/exec"; // même adresse que sur la page client
   var SITE = "https://taxisvanparis.fr/hotel/";
@@ -121,7 +130,7 @@ select{background:var(--panel);color:var(--fg);border:1px solid var(--line);bord
       .then(function(r){return r.json();})
       .then(function(res){
         if(!res.ok){ msg("Accès refusé. Vérifiez votre lien personnel ou contactez Taxis Van Paris.",true); return; }
-        $("hName").textContent=res.hotel; all=res.reservations||[]; render();
+        $("hName").textContent=res.hotel; all=propre(res.reservations); render();
       })
       .catch(function(){ msg("Connexion impossible. Vérifiez votre connexion internet puis appuyez sur Actualiser.",true); });
   }

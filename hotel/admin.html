@@ -114,6 +114,15 @@ select{background:var(--panel);color:var(--fg);border:1px solid var(--line);bord
 
 <script>
 (function(){
+
+  // Remet les dates/heures au bon format même si Google les renvoie en texte long ("Wed Oct 28 2026 00:00:00 GMT+0100…")
+  function propre(list){ var MO={Jan:"01",Feb:"02",Mar:"03",Apr:"04",May:"05",Jun:"06",Jul:"07",Aug:"08",Sep:"09",Oct:"10",Nov:"11",Dec:"12"};
+    return (list||[]).map(function(r){ var d=String(r.date||""), h=String(r.heure||""), m;
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(d)){ if((m=d.match(/(\d{4})-(\d{2})-(\d{2})/))) d=m[1]+"-"+m[2]+"-"+m[3];
+        else if((m=d.match(/([A-Z][a-z]{2}) (\d{1,2}) (\d{4})/))&&MO[m[1]]) d=m[3]+"-"+MO[m[1]]+"-"+("0"+m[2]).slice(-2);
+        else if((m=d.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/))) d=m[3]+"-"+("0"+m[2]).slice(-2)+"-"+("0"+m[1]).slice(-2); }
+      if(!/^\d{2}:\d{2}$/.test(h)){ if((m=h.match(/(\d{1,2}):(\d{2})/))) h=("0"+m[1]).slice(-2)+":"+m[2]; }
+      r.date=d; r.heure=h; return r; }); }
   /* ============ RÉGLAGES ============ */
   var API_URL = "https://script.google.com/macros/s/AKfycbynqJeRA8W1AoYiHWQhS-ZPGHrEHyQBW8xp4xFGAYgP68lAugMsNZqWYkleYV1P4Va6/exec";
   /* ================================== */
@@ -148,7 +157,7 @@ select{background:var(--panel);color:var(--fg);border:1px solid var(--line);bord
     $("sync").textContent="Chargement…";
     api({action:"admin",k:key}).then(function(res){
       if(!res.ok){ try{localStorage.removeItem("tvp-admin");}catch(_){} askKey(true); return; }
-      all=res.reservations||[]; $("sync").textContent="À jour à "+new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"}); show();
+      all=propre(res.reservations); $("sync").textContent="À jour à "+new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"}); show();
     }).catch(function(e){ $("sync").textContent="Hors ligne"; if($("app").hidden) askKey(true,"Connexion au Google Sheets impossible ("+(e&&e.message||"réseau")+"). Réessayez dans un instant."); else toast("Connexion impossible, réessayez"); });
   }
   function setStatut(r,s){
@@ -175,6 +184,9 @@ select{background:var(--panel);color:var(--fg);border:1px solid var(--line);bord
     L.push("END:VCALENDAR"); return L.join("\r\n");
   }
   function saveIcs(list,name){
+    // iPhone/iPad : ouverture directe → la fenêtre « Ajouter au calendrier » d'Apple s'affiche
+    if(/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1)){
+      location.href="data:text/calendar;charset=utf-8,"+encodeURIComponent(ics(list)); return; }
     var blob=new Blob([ics(list)],{type:"text/calendar;charset=utf-8"}), url=URL.createObjectURL(blob);
     var a=document.createElement("a"); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove();
     setTimeout(function(){URL.revokeObjectURL(url);},4000);
