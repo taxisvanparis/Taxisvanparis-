@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Espace hôtel | Taxis Van Paris</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@600&display=swap">
+<style>
+:root{--bg:#0B0B0D;--panel:#151518;--line:#2B2823;--fg:#F3EFE6;--muted:#A39C8E;--gold:#C9A24B;--gold-2:#E4C57A;--ink:#141008;
+  --new:#E4C57A;--ok:#6FA8DC;--done:#3BB273;--cancel:#7A746A;--err:#F08A7A;
+  --display:"Playfair Display",Georgia,serif;--body:"DM Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;padding-inline:16px}
+.wrap{max-width:720px;margin:0 auto;padding-block:max(20px,env(safe-area-inset-top)) 60px}
+.brand{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin:0}
+h1{font:600 clamp(24px,6vw,32px)/1.15 var(--display);margin:8px 0 4px;text-wrap:balance}
+.sub{color:var(--muted);margin:0 0 18px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px}
+select,button{font:15px var(--body)}
+select{background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:9px 10px}
+.btn{background:var(--gold);color:var(--ink);border:0;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer}
+:focus-visible{outline:2px solid var(--gold-2);outline-offset:2px}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px}
+@media (max-width:420px){.kpis{grid-template-columns:1fr 1fr}.kpis .kpi:last-child{grid-column:1/-1}}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.kpi b{display:block;font:600 26px/1.1 var(--display);color:var(--gold-2);font-variant-numeric:tabular-nums}
+.kpi span{font-size:12.5px;color:var(--muted)}
+.list{display:grid;gap:10px}
+.r{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:grid;gap:6px}
+.r-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.r-name{font-weight:700;min-width:0;overflow-wrap:anywhere}
+.r-meta{font-size:13.5px;color:var(--muted);overflow-wrap:anywhere}
+.r-foot{display:flex;justify-content:space-between;gap:10px;font-size:13.5px;font-variant-numeric:tabular-nums}
+.r-foot b{color:var(--gold-2)}
+.pill{font-size:12px;font-weight:700;border-radius:999px;padding:3px 9px;border:1px solid currentColor;white-space:nowrap}
+.s-Nouvelle{color:var(--new)}.s-Confirmée{color:var(--ok)}.s-Effectuée{color:var(--done)}.s-Annulée{color:var(--cancel)}
+.empty,.msg{text-align:center;padding:28px 16px;border:1px dashed var(--line);border-radius:14px;color:var(--muted);line-height:1.5}
+.msg.err{color:var(--err);border-color:var(--err)}
+.link{margin-top:22px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;display:grid;gap:8px}
+.link code{font:13px ui-monospace,Menlo,monospace;color:var(--gold-2);overflow-wrap:anywhere;user-select:all}
+.note{color:var(--muted);font-size:13px;line-height:1.5;margin:0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="brand">Taxis Van Paris · Espace partenaire</p>
+  <h1 id="hName">Espace hôtel</h1>
+  <p class="sub">Réservations de vos clients et commissions</p>
+
+  <div class="bar">
+    <label for="month" class="note">Mois</label>
+    <select id="month"></select>
+    <button class="btn" id="refresh" type="button">Actualiser</button>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi"><b id="kCount">–</b><span>réservations</span></div>
+    <div class="kpi"><b id="kDone">–</b><span>courses effectuées</span></div>
+    <div class="kpi"><b id="kCom">–</b><span>commission du mois</span></div>
+  </div>
+
+  <div class="list" id="list"><div class="msg">Chargement des réservations…</div></div>
+
+  <div class="link">
+    <strong>Lien de réservation de vos clients</strong>
+    <code id="clientLink"></code>
+    <p class="note">C'est le lien du QR code posé à votre réception. Commission : 10 € par course effectuée, versée chaque mois. Les courses annulées ne sont pas comptées.</p>
+  </div>
+</div>
+
+<script>
+(function(){
+  /* ============ RÉGLAGES ============ */
+  var API_URL = "https://script.google.com/macros/s/AKfycbynqJeRA8W1AoYiHWQhS-ZPGHrEHyQBW8xp4xFGAYgP68lAugMsNZqWYkleYV1P4Va6/exec"; // même adresse que sur la page client
+  var SITE = "https://taxisvanparis.fr/hotel/";
+  /* ================================== */
+  var $=function(id){return document.getElementById(id);};
+  var p=new URLSearchParams(location.search), h=p.get("h")||"", k=p.get("k")||"";
+  var all=[], MONTHS=["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
+  $("clientLink").textContent=SITE+"?h="+encodeURIComponent(h||"exemple");
+
+  // Sélecteur des 12 derniers mois
+  var now=new Date();
+  for(var i=0;i<12;i++){ var d=new Date(now.getFullYear(),now.getMonth()-i,1); var v=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
+    var o=document.createElement("option"); o.value=v; o.textContent=MONTHS[d.getMonth()]+" "+d.getFullYear(); $("month").appendChild(o); }
+
+  function msg(t,err){ $("list").innerHTML=""; var m=document.createElement("div"); m.className="msg"+(err?" err":""); m.textContent=t; $("list").appendChild(m); }
+
+  function render(){
+    var m=$("month").value;
+    var rows=all.filter(function(r){ return String(r.date).slice(0,7)===m; })
+      .sort(function(a,b){ return (b.date+b.heure).localeCompare(a.date+a.heure); });
+    var valid=rows.filter(function(r){ return r.statut!=="Annulée"; });
+    var done=rows.filter(function(r){ return r.statut==="Effectuée"; });
+    $("kCount").textContent=valid.length;
+    $("kDone").textContent=done.length;
+    $("kCom").textContent=done.reduce(function(s,r){return s+(Number(r.commission)||0);},0)+" €";
+    var L=$("list"); L.innerHTML="";
+    if(!rows.length){ var e=document.createElement("div"); e.className="empty"; e.textContent="Aucune réservation ce mois-ci. Les réservations faites avec votre QR code apparaîtront ici."; L.appendChild(e); return; }
+    rows.forEach(function(r){
+      var c=document.createElement("div"); c.className="r";
+      var dt=new Date(r.date+"T"+(r.heure||"00:00"));
+      var when=isNaN(dt)?r.date+" "+r.heure:dt.toLocaleDateString("fr-FR",{weekday:"short",day:"numeric",month:"short"})+" · "+r.heure;
+      c.innerHTML='<div class="r-top"><div class="r-name"></div><span class="pill"></span></div><div class="r-meta"></div><div class="r-foot"><span></span><span>Commission <b></b></span></div>';
+      c.querySelector(".r-name").textContent=r.client+(r.chambre?" · ch. "+r.chambre:"");
+      var pill=c.querySelector(".pill"); pill.textContent=r.statut; pill.className="pill s-"+r.statut;
+      c.querySelector(".r-meta").textContent=when+" → "+r.destination+" · "+r.passagers+" pers. · "+r.vehicule;
+      c.querySelector(".r-foot span").textContent="Réf. "+r.ref;
+      c.querySelector(".r-foot b").textContent=r.statut==="Annulée"?"0 €":(r.commission+" €"+(r.statut==="Effectuée"?"":" (à venir)"));
+      L.appendChild(c);
+    });
+  }
+
+  function load(){
+    if(!API_URL){ if(!h||h==="exemple"){ demo(); } else { msg("Votre espace est en cours d'installation. Contactez Taxis Van Paris au 06 49 55 36 40."); } return; }
+    if(!h||!k){ msg("Lien incomplet. Utilisez le lien personnel envoyé par Taxis Van Paris.",true); return; }
+    msg("Chargement des réservations…");
+    fetch(API_URL+"?h="+encodeURIComponent(h)+"&k="+encodeURIComponent(k))
+      .then(function(r){return r.json();})
+      .then(function(res){
+        if(!res.ok){ msg("Accès refusé. Vérifiez votre lien personnel ou contactez Taxis Van Paris.",true); return; }
+        $("hName").textContent=res.hotel; all=res.reservations||[]; render();
+      })
+      .catch(function(){ msg("Connexion impossible. Vérifiez votre connexion internet puis appuyez sur Actualiser.",true); });
+  }
+  // Aperçu tant que le script Google n'est pas branché : réservations d'exemple, clairement signalées
+  function demo(){
+    var m=$("month").value, y=m.slice(0,4), mo=m.slice(5,7);
+    function d(day){ return y+"-"+mo+"-"+String(day).padStart(2,"0"); }
+    $("hName").textContent="Hôtel Exemple Nanterre";
+    if(!document.getElementById("demoBanner")){ var b=document.createElement("p"); b.id="demoBanner"; b.className="note"; b.style.cssText="border:1px solid var(--gold);border-radius:10px;padding:8px 12px;color:var(--gold-2);margin:0 0 14px";
+    b.textContent="Aperçu avec des réservations d'exemple. Les vraies réservations s'afficheront ici une fois le système installé.";
+    document.querySelector(".bar").before(b); }
+    all=[
+      {ref:"H0928-7KQ2",client:"M. Smith",chambre:"214",destination:"Aéroport CDG",date:d(28),heure:"06:30",passagers:3,vehicule:"Van (5–7)",prix:95,commission:10,statut:"Nouvelle"},
+      {ref:"H0924-B3XN",client:"Mme Rossi",chambre:"108",destination:"Aéroport d'Orly",date:d(24),heure:"09:15",passagers:2,vehicule:"Berline (1–4)",prix:70,commission:10,statut:"Confirmée"},
+      {ref:"H0919-M8PL",client:"Famille Garcia",chambre:"302",destination:"Disneyland Paris",date:d(19),heure:"08:00",passagers:6,vehicule:"Van (5–7)",prix:140,commission:10,statut:"Effectuée"},
+      {ref:"H0912-Q4TZ",client:"Mr Chen",chambre:"221",destination:"Aéroport CDG",date:d(12),heure:"05:45",passagers:1,vehicule:"Berline (1–4)",prix:85,commission:10,statut:"Effectuée"},
+      {ref:"H0907-D2RW",client:"M. Dubois",chambre:"",destination:"Gare parisienne",date:d(7),heure:"14:00",passagers:2,vehicule:"Berline (1–4)",prix:60,commission:10,statut:"Annulée"},
+      {ref:"H0903-J6YU",client:"Mrs Taylor",chambre:"117",destination:"Aéroport CDG",date:d(3),heure:"10:30",passagers:4,vehicule:"Van (5–7)",prix:95,commission:10,statut:"Effectuée"}
+    ];
+    render();
+  }
+
+  $("month").addEventListener("change",function(){ if(!API_URL){ var mm=$("month").value; all.forEach(function(r){ r.date=mm+r.date.slice(7); }); } render(); });
+  $("refresh").addEventListener("click",load);
+  load();
+})();
+</script>
+</body>
+</html>
