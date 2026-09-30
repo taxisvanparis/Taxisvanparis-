@@ -301,9 +301,12 @@ textarea{min-height:64px;resize:vertical}
   function orly(p){ var a=(p.address||"").toLowerCase(); return /orly|94390|94547/.test(a)||gps(p.lat,p.lon,48.7262,2.3652)<5; }
   function beauvais(p){ var a=(p.address||"").toLowerCase(); return /beauvais|tille|60000/.test(a)||gps(p.lat,p.lon,49.4544,2.1128)<6; }
   function gare(p){ return (p.address||"").toLowerCase().indexOf("gare")>=0; }
+  // Paris intra-muros (75) : code postal 75xxx, ou adresse « …, Paris » sans autre département
+  function intraParis(p){ if(!p) return false; if(p.dept) return p.dept==="75"; return /(^|,\s*)paris(\s*,|\s*$|\s+france)/i.test(p.address||""); }
+  var MIN_PARIS=50, MIN_PARIS_SIEGE=60; // minimum Paris → Paris, sans / avec siège enfant (avant commission)
   function zone(p){ return p&&["75","92","93","94"].indexOf(p.dept)>=0; }
 
-  function tarif(dep,arr,veh,pax,heure){
+  function tarif(dep,arr,veh,pax,heure,siege){
     var dist=Math.round(gps(dep.lat,dep.lon,arr.lat,arr.lon)*1.35);
     var cr=creuse(heure), supp=pax>3?(pax-3)*5.50:0;
     var total=15+montantKm(dist,cr)+supp, forfait=true;
@@ -320,6 +323,7 @@ textarea{min-height:64px;resize:vertical}
       var gv=van&&pax>=6, plafond=dist<29?(gv?95:85):(gv?110:100);
       if(total>plafond) total=plafond;
     }
+    if(intraParis(dep)&&intraParis(arr)) total=Math.max(total,siege?MIN_PARIS_SIEGE:MIN_PARIS);
     return {dist:dist,prix:Math.round((total+COM)*100)/100};
   }
   function fmt(n){ return (n%1?n.toFixed(2).replace(".",","):String(n))+" €"; }
@@ -330,7 +334,7 @@ textarea{min-height:64px;resize:vertical}
     $("veh-berline").disabled=(pax>4||big);
     if(v==="berline"&&(pax>4||big)){ $("veh-van").checked=true; v="van"; }
     var r=null, el=$("price");
-    if(P.dep&&P.arr){ r=tarif(P.dep,P.arr,v,pax,$("time").value); }
+    if(P.dep&&P.arr){ r=tarif(P.dep,P.arr,v,pax,$("time").value,$("baby").value!=="none"); }
     el.classList.toggle("small",!r);
     el.textContent=r?fmt(r.prix):(($("dep").value.trim()&&$("arr").value.trim())?(maps?T[lang].pick:T[lang].quote):"—");
     return {v:v,r:r};
