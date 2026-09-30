@@ -105,7 +105,6 @@ textarea{min-height:64px;resize:vertical}
         <button type="button" class="swap" id="swap" data-t="swap">⇅ Inverser</button>
         <div class="pt"><span class="dot a"></span><div class="ac"><label class="t" for="arr" data-t="arrL" hidden>Arrivée</label><input id="arr" autocomplete="off" data-ph="arrPh" placeholder="Où allez-vous ? Adresse, gare, aéroport…"><div class="ac-list" id="list-arr" hidden></div></div></div>
         <div class="chips" id="chips"></div>
-        <p class="km" id="km" hidden></p>
       </div>
     </fieldset>
 
@@ -334,7 +333,6 @@ textarea{min-height:64px;resize:vertical}
     if(P.dep&&P.arr){ r=tarif(P.dep,P.arr,v,pax,$("time").value); }
     el.classList.toggle("small",!r);
     el.textContent=r?fmt(r.prix):(($("dep").value.trim()&&$("arr").value.trim())?(maps?T[lang].pick:T[lang].quote):"—");
-    $("km").hidden=!r; if(r) $("km").textContent=T[lang].dist+" : ≈ "+r.dist+" km";
     return {v:v,r:r};
   }
   document.addEventListener("change",update);
@@ -342,7 +340,7 @@ textarea{min-height:64px;resize:vertical}
   function waLink(data){
     var lines=["🏨 Réservation via "+hotel.nom+" (code "+code+")"+(data.ref?" — réf. "+data.ref:""),
       "• Client : "+data.client+(data.room?" — chambre "+data.room:""),"• Tél : "+data.phone,
-      "• Départ : "+data.depLabel,"• Arrivée : "+data.destLabel,data.km?"• Distance : ≈ "+data.km+" km":null,"• Date : "+data.date+" à "+data.time,
+      "• Départ : "+data.depLabel,"• Arrivée : "+data.destLabel,"• Date : "+data.date+" à "+data.time,
       "• Passagers : "+data.pax+" — Valises : "+data.bags,"• Véhicule : "+data.vehLabel,"• Siège enfant : "+data.baby,
       data.notes?"• Remarque : "+data.notes:null,"• Prix : "+data.priceLabel].filter(Boolean);
     return "https://wa.me/"+WHATSAPP+"?text="+encodeURIComponent(lines.join("\n"));
@@ -361,7 +359,7 @@ textarea{min-height:64px;resize:vertical}
     $("err").hidden=true;
     var babyTxt={none:"Aucun",seat:"1 siège bébé",booster:"1 rehausseur",more:"2 ou plus"}[$("baby").value];
     var depLabel=$("dep").value.trim(), destLabel=$("arr").value.trim();
-    var extra=[]; if(depLabel!==hotel.adresse) extra.push("Départ : "+depLabel); if(s.r) extra.push("≈ "+s.r.dist+" km");
+    var extra=[]; if(depLabel!==hotel.adresse) extra.push("Départ : "+depLabel);
     var notes=$("notes").value.trim();
     var data={h:code,client:$("client").value.trim(),room:$("room").value.trim(),phone:$("phone").value.trim(),email:$("email").value.trim(),
       dest:"calc",depLabel:depLabel,destLabel:destLabel,date:$("date").value,time:$("time").value,
