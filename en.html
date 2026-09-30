@@ -1812,6 +1812,16 @@ forfaitApplique = true;
     }
   }
 
+  // ── Minimum Paris → Paris (75 → 75) : 50 € sans siège, 60 € avec siège bébé / rehausseur ──
+  {
+    const intraParis = id => {
+      if (depts[id]) return depts[id] === '75';
+      return /(^|,\s*)paris(\s*,|\s*$|\s+france)/i.test((coords[id] && coords[id].address) || '');
+    };
+    const avecSiege = ['so-bebe', 'so-reh', 'so-combi'].some(i => { const e = document.getElementById(i); return e && e.classList.contains('checked'); });
+    if (intraParis('dep') && intraParis('arr')) total = Math.max(total, avecSiege ? 60 : 50);
+  }
+
   const bebe =document.getElementById('so-bebe').classList.contains('checked');
   const reh  =document.getElementById('so-reh').classList.contains('checked');
   const combi=document.getElementById('so-combi').classList.contains('checked');
