@@ -170,6 +170,10 @@
   .icon-btn.danger:hover{background:var(--red-bg);color:var(--red);}
 
   /* ---------- MODAL ---------- */
+  .dictee{display:grid;gap:8px;margin:0 0 16px;padding:12px;border:1px dashed var(--gold);border-radius:10px}
+  .dictee textarea{width:100%;box-sizing:border-box;min-height:56px;padding:10px;border-radius:8px;border:1px solid rgba(201,151,74,.35);background:transparent;color:inherit;font:inherit;resize:vertical}
+  .dictee .rec{background:#B3261E}
+  .dictee-aide{margin:0;font-size:12px;opacity:.7;line-height:1.4}
   .modal-overlay{
     display:none;position:fixed;inset:0;background:rgba(20,25,40,.5);
     align-items:center;justify-content:center;z-index:50;padding:20px;
@@ -410,6 +414,12 @@
 <div class="modal-overlay" id="modal-reservation">
   <div class="modal">
     <h2>Nouvelle réservation</h2>
+    <div class="dictee">
+      <button type="button" class="btn-gold" id="btn-dicter">🎤 Dicter la course</button>
+      <textarea id="f-dictee" rows="2" placeholder="Ou appuie ici et utilise le micro du clavier, puis « Remplir les champs »"></textarea>
+      <button type="button" class="btn-ghost" id="btn-remplir">Remplir les champs</button>
+      <p class="dictee-aide">Ex. : « Monsieur Dupont, 06 12 34 56 78, demain à 14h30, de la gare du Nord à CDG, 3 personnes, 2 valises, van, 85 euros »</p>
+    </div>
     <div class="grid2">
       <div class="field"><label>Client</label><input id="f-nom" type="text"></div>
       <div class="field"><label>Téléphone</label><input id="f-tel" type="tel"></div>
@@ -1037,7 +1047,7 @@ function anonymise(title,location){
 
   // ---------------- MODALS: RÉSERVATION ----------------
   function openResaModal() {
-    ["f-nom","f-tel","f-dep","f-arr","f-date","f-heure","f-prix"].forEach(id => document.getElementById(id).value = "");
+    ["f-nom","f-tel","f-dep","f-arr","f-date","f-heure","f-prix","f-dictee"].forEach(id => document.getElementById(id).value = "");
     document.getElementById("f-pax").value = 1;
     document.getElementById("f-bag").value = 0;
     document.getElementById("modal-reservation").classList.add("shown");
@@ -1063,6 +1073,8 @@ function anonymise(title,location){
       createdAt: serverTimestamp()
     };
     if (!data.nom || !data.date) { alert("Merci de renseigner au moins le nom du client et la date."); return; }
+    const dictee = document.getElementById("f-dictee").value.trim();
+    if (dictee) data.note = dictee;
     await addDoc(collection(db, "reservations"), data);
     document.getElementById("modal-reservation").classList.remove("shown");
   });
@@ -1273,6 +1285,127 @@ function anonymise(title,location){
       btn.addEventListener("click", () => updateDoc(doc(db, "reservations", btn.dataset.id), { statut: "terminée" }));
     });
   }
+</script>
+<script>
+/* Analyse d'une course dictée en français → champs du formulaire */
+function analyserDictee(txt, now) {
+  now = now || new Date();
+  const out = {};
+  const N = {un:1,une:1,deux:2,trois:3,quatre:4,cinq:5,six:6,sept:7,huit:8,neuf:9,dix:10};
+  const num = s => /^\d+$/.test(s) ? +s : N[s];
+  const pad = n => String(n).padStart(2, "0");
+  const iso = d => d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+  let t = " " + txt.replace(/[’']/g, "'").replace(/\s+/g, " ") + " ";
+  const cut = re => { t = t.replace(re, " | "); };
+
+  // Téléphone
+  let m = t.match(/(?:\+ ?33 ?|0)\s?[1-9](?:[\s.-]?\d{2}){4}/);
+  if (m) { let d = m[0].replace(/\D/g, ""); if (d.startsWith("33")) d = "0" + d.slice(2); out.tel = d.replace(/(\d{2})(?=\d)/g, "$1 "); cut(m[0]); }
+  t = t.replace(/\b(?:t[ée]l[ée]phone|t[ée]l|num[ée]ro)\b\s*:?/gi, " | ");
+
+  // Prix
+  m = t.match(/(?:prix|tarif|pour)?\s*(\d+(?:[.,]\d+)?)\s*(?:€|euros?)/i);
+  if (m) { out.prix = +m[1].replace(",", "."); cut(m[0]); }
+
+  // Passagers / bagages
+  const W = "(\\d+|un|une|deux|trois|quatre|cinq|six|sept|huit|neuf|dix)";
+  m = t.match(new RegExp(W + "\\s*(?:personnes?|passagers?|pax|adultes?)", "i"));
+  if (m) { out.pax = num(m[1].toLowerCase()); cut(m[0]); }
+  m = t.match(new RegExp(W + "\\s*(?:valises?|bagages?)", "i"));
+  if (m) { out.bagages = num(m[1].toLowerCase()); cut(m[0]); }
+
+  // Véhicule
+  if (/\b(?:van|vans|minibus|classe v|monospace)\b/i.test(t)) out.vehicule = "Van";
+  else if (/\bberline\b/i.test(t)) out.vehicule = "Berline";
+  t = t.replace(/\b(?:en\s+)?(?:van|minibus|classe v|monospace|berline)\b/gi, " | ");
+  if (!out.vehicule && out.pax > 4) out.vehicule = "Van";
+
+  // Heure
+  m = t.match(/(?:\b[àa]\s+|\bvers\s+|\bpour\s+)?\b(\d{1,2})\s*(?:h|heures?|:)\s*(\d{2})?(\s*et\s+(?:demie?|quart))?/i);
+  if (m) { let mn = m[2] ? +m[2] : 0; if (m[3]) mn = /quart/i.test(m[3]) ? 15 : 30; out.heure = pad(+m[1]) + ":" + pad(mn); cut(m[0]); }
+  else if ((m = t.match(/(?:\b[àa]\s+)?\b(midi|minuit)(\s*et\s+(?:demie?|quart))?/i))) { let mn = m[2] ? (/quart/i.test(m[2]) ? 15 : 30) : 0; out.heure = (m[1].toLowerCase() === "midi" ? "12" : "00") + ":" + pad(mn); cut(m[0]); }
+
+  // Date
+  const MOIS = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
+  const JOURS = ["dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"];
+  const d0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  if ((m = t.match(/\bapr[eè]s[- ]demain\b/i))) { d0.setDate(d0.getDate() + 2); out.date = iso(d0); cut(m[0]); }
+  else if ((m = t.match(/\bdemain\b/i))) { d0.setDate(d0.getDate() + 1); out.date = iso(d0); cut(m[0]); }
+  else if ((m = t.match(/\b(?:aujourd'hui|ce soir|ce matin|cet après-midi)\b/i))) { out.date = iso(d0); cut(m[0]); }
+  else if ((m = t.match(new RegExp("(?:\\ble\\s+)?\\b(1er|\\d{1,2})\\s+(" + MOIS.join("|") + "|fevrier|aout|decembre)(?:\\s+(\\d{4}))?", "i")))) {
+    let mi = MOIS.findIndex(x => x.normalize("NFD").replace(/[̀-ͯ]/g, "") === m[2].toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, ""));
+    let y = m[3] ? +m[3] : now.getFullYear(); let d = new Date(y, mi, parseInt(m[1]));
+    if (!m[3] && d < d0) d.setFullYear(y + 1); out.date = iso(d); cut(m[0]);
+  }
+  else if ((m = t.match(/\b(?:le\s+)?(\d{1,2})[\/.-](\d{1,2})(?:[\/.-](\d{2,4}))?\b/))) {
+    let y = m[3] ? (+m[3] < 100 ? 2000 + +m[3] : +m[3]) : now.getFullYear(); let d = new Date(y, +m[2] - 1, +m[1]);
+    if (!m[3] && d < d0) d.setFullYear(y + 1); out.date = iso(d); cut(m[0]);
+  }
+  else if ((m = t.match(new RegExp("\\b(?:ce\\s+|le\\s+)?(" + JOURS.join("|") + ")(?:\\s+prochain)?\\b", "i")))) {
+    let k = JOURS.indexOf(m[1].toLowerCase()), d = new Date(d0); let diff = (k - d.getDay() + 7) % 7 || 7; d.setDate(d.getDate() + diff); out.date = iso(d); cut(m[0]);
+  }
+  else if ((m = t.match(/\ble\s+(1er|\d{1,2})\b(?!\s*(?:h|heures?|:|personnes?|passagers?|valises?|€|euros?))/i))) {
+    let d = new Date(now.getFullYear(), now.getMonth(), parseInt(m[1])); if (d < d0) d.setMonth(d.getMonth() + 1); out.date = iso(d); cut(m[0]);
+  }
+
+  // Client
+  const STOP = /^(?:de|du|des|depuis|à|a|au|aux|vers|le|la|les|pour|demain|aujourd|départ|arrivée|avec|et|qui|il|elle)$/i;
+  m = t.match(/\b(monsieur|madame|mademoiselle|mr|mme|m\.|client|cliente|nom)\s*:?\s+([a-zà-öø-ÿ][\wà-öø-ÿ'-]*)(?:\s+([a-zà-öø-ÿ][\wà-öø-ÿ'-]*))?/i);
+  if (m) {
+    const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+    let words = [m[2]]; if (m[3] && !STOP.test(m[3])) words.push(m[3]);
+    words = words.filter(w => !STOP.test(w));
+    const civ = { monsieur: "M.", mr: "M.", "m.": "M.", madame: "Mme", mme: "Mme", mademoiselle: "Mlle" }[m[1].toLowerCase()] || "";
+    if (words.length) { out.nom = (civ ? civ + " " : "") + words.map(cap).join(" "); cut(m[0].slice(0, m[0].indexOf(words[words.length - 1]) + words[words.length - 1].length)); }
+  }
+
+  // Trajet
+  const clean = s => s.replace(/\|/g, " ").replace(/^\s*(?:l'|la |le |les )/i, m0 => m0).replace(/\s+/g, " ").replace(/^[\s,.;:-]+|[\s,.;:-]+$/g, "").replace(/^(?:la|le|les|l')\s*(?=a[ée]roport|gare)/i, "");
+  const capFirst = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+  m = t.match(/\bd[ée]part\s*:?\s*(?:de |du |depuis )?([^|]+?)\s*(?:\||$|,|\barriv[ée]e\b|\bdestination\b)/i);
+  if (m && clean(m[1])) out.dep = capFirst(clean(m[1]));
+  let m2 = t.match(/\b(?:arriv[ée]e|destination)\s*:?\s*(?:à |a |au |aux )?([^|]+?)\s*(?:\||$|,)/i);
+  if (m2 && clean(m2[1])) out.arr = capFirst(clean(m2[1]));
+  if (!out.dep || !out.arr) {
+    m = t.match(/\b(?:de|du|des|depuis)\s+((?:l'|la |le |les )?[^|,]+?)\s+(?:jusqu'(?:à|au)|à|a|au|aux|vers|pour aller (?:à|au)|direction)\s+([^|,]+?)\s*(?:\||,|$)/i);
+    if (m) { if (!out.dep) out.dep = capFirst(clean(m[1])); if (!out.arr) out.arr = capFirst(clean(m[2])); }
+  }
+  // Raccourcis lieux
+  const lieu = s => !s ? s : s.replace(/^(?:l'?\s*)?a[ée]roport\s+(?:de\s+|d')?(?:roissy|charles de gaulle|cdg)\b.*$/i, "Aéroport CDG").replace(/^(?:roissy|cdg|charles de gaulle)$/i, "Aéroport CDG")
+    .replace(/^(?:l'?\s*)?(?:a[ée]roport\s+(?:d'|de\s+)?)?orly$/i, "Aéroport d'Orly").replace(/^(?:l'?\s*)?(?:a[ée]roport\s+(?:de\s+)?)?beauvais$/i, "Aéroport de Beauvais")
+    .replace(/^disney(?:land)?(?: paris)?$/i, "Disneyland Paris");
+  out.dep = lieu(out.dep); out.arr = lieu(out.arr);
+  Object.keys(out).forEach(k => (out[k] === undefined || out[k] === "") && delete out[k]);
+  return out;
+}
+
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+  var btn = $("btn-dicter"), zone = $("f-dictee");
+  function remplir(){
+    var r = analyserDictee(zone.value || "");
+    var set = function(id, v){ if (v !== undefined && v !== null && v !== "") $(id).value = v; };
+    set("f-nom", r.nom); set("f-tel", r.tel); set("f-dep", r.dep); set("f-arr", r.arr);
+    set("f-date", r.date); set("f-heure", r.heure); set("f-pax", r.pax); set("f-bag", r.bagages); set("f-prix", r.prix);
+    if (r.vehicule) $("f-vh").value = r.vehicule;
+    var n = Object.keys(r).length;
+    $("btn-remplir").textContent = n ? "✓ " + n + " champ" + (n > 1 ? "s" : "") + " rempli" + (n > 1 ? "s" : "") + " — vérifie puis Enregistrer" : "Rien compris, réessaie";
+    setTimeout(function(){ $("btn-remplir").textContent = "Remplir les champs"; }, 4000);
+  }
+  $("btn-remplir").addEventListener("click", remplir);
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { btn.textContent = "🎤 Dicter (micro du clavier)"; btn.addEventListener("click", function(){ zone.focus(); }); return; }
+  var rec = null, base = "";
+  btn.addEventListener("click", function(){
+    if (rec) { rec.stop(); return; }
+    rec = new SR(); rec.lang = "fr-FR"; rec.interimResults = true; rec.continuous = true;
+    base = zone.value ? zone.value.trim() + " " : "";
+    rec.onresult = function(e){ var txt = ""; for (var i = 0; i < e.results.length; i++) txt += e.results[i][0].transcript + " "; zone.value = (base + txt).trim(); };
+    rec.onerror = function(e){ if (e.error === "not-allowed" || e.error === "service-not-allowed") alert("Autorise le micro pour ce site (Réglages › Safari › Micro), ou utilise le micro du clavier dans la zone de texte."); };
+    rec.onend = function(){ rec = null; btn.textContent = "🎤 Dicter la course"; btn.classList.remove("rec"); if (zone.value.trim()) remplir(); };
+    try { rec.start(); btn.textContent = "⏹ Terminer la dictée"; btn.classList.add("rec"); } catch (err) { rec = null; zone.focus(); }
+  });
+})();
 </script>
 </body>
 </html>
