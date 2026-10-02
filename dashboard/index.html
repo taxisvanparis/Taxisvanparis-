@@ -174,6 +174,14 @@
   .dictee textarea{width:100%;box-sizing:border-box;min-height:56px;padding:10px;border-radius:8px;border:1px solid rgba(201,151,74,.35);background:transparent;color:inherit;font:inherit;resize:vertical}
   .dictee .rec{background:#B3261E}
   .dictee-aide{margin:0;font-size:12px;opacity:.7;line-height:1.4}
+  .ac-field{position:relative}
+  .mic-mini{background:none;border:1px solid var(--gold);border-radius:999px;padding:1px 8px;margin-left:6px;cursor:pointer;font-size:13px}
+  .mic-mini.rec{background:#B3261E;border-color:#B3261E}
+  .ac-l{position:absolute;left:0;right:0;top:100%;z-index:50;background:#fff;color:#111;border:1px solid var(--gold);border-radius:8px;box-shadow:0 10px 24px rgba(0,0,0,.25);overflow:hidden}
+  .ac-l button{display:block;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid #eee;padding:9px 11px;font:13px/1.35 inherit;color:#111;cursor:pointer}
+  .ac-l button:last-child{border-bottom:0}
+  .ac-l button small{display:block;color:#777;font-size:11.5px}
+  .ac-l .ac-titre{font-size:11px;color:#8a6a2a;padding:6px 11px;background:#faf5ea}
   .modal-overlay{
     display:none;position:fixed;inset:0;background:rgba(20,25,40,.5);
     align-items:center;justify-content:center;z-index:50;padding:20px;
@@ -418,13 +426,13 @@
       <button type="button" class="btn-gold" id="btn-dicter">🎤 Dicter la course</button>
       <textarea id="f-dictee" rows="2" placeholder="Ou appuie ici et utilise le micro du clavier, puis « Remplir les champs »"></textarea>
       <button type="button" class="btn-ghost" id="btn-remplir">Remplir les champs</button>
-      <p class="dictee-aide">Ex. : « Monsieur Dupont, 06 12 34 56 78, demain à 14h30, de la gare du Nord à CDG, 3 personnes, 2 valises, van, 85 euros »</p>
+      <p class="dictee-aide">Astuce : dis « <b>départ</b> … <b>arrivée</b> … ». Ex. : « Monsieur Dupont, 06 12 34 56 78, demain à 14h30, départ 12 rue de la Paix Paris, arrivée CDG, 3 personnes, van, 85 euros »</p>
     </div>
     <div class="grid2">
       <div class="field"><label>Client</label><input id="f-nom" type="text"></div>
       <div class="field"><label>Téléphone</label><input id="f-tel" type="tel"></div>
-      <div class="field"><label>Départ</label><input id="f-dep" type="text"></div>
-      <div class="field"><label>Arrivée</label><input id="f-arr" type="text"></div>
+      <div class="field ac-field"><label>Départ <button type="button" class="mic-mini" data-for="f-dep" aria-label="Dicter le départ">🎤</button></label><input id="f-dep" type="text" autocomplete="off"><div class="ac-l" id="ac-f-dep" hidden></div></div>
+      <div class="field ac-field"><label>Arrivée <button type="button" class="mic-mini" data-for="f-arr" aria-label="Dicter l'arrivée">🎤</button></label><input id="f-arr" type="text" autocomplete="off"><div class="ac-l" id="ac-f-arr" hidden></div></div>
       <div class="field"><label>Date</label><input id="f-date" type="date"></div>
       <div class="field"><label>Heure</label><input id="f-heure" type="time"></div>
       <div class="field"><label>Passagers</label><input id="f-pax" type="number" min="1" value="1"></div>
@@ -1301,7 +1309,7 @@ function analyserDictee(txt, now) {
   // Téléphone
   let m = t.match(/(?:\+ ?33 ?|0)\s?[1-9](?:[\s.-]?\d{2}){4}/);
   if (m) { let d = m[0].replace(/\D/g, ""); if (d.startsWith("33")) d = "0" + d.slice(2); out.tel = d.replace(/(\d{2})(?=\d)/g, "$1 "); cut(m[0]); }
-  t = t.replace(/\b(?:t[ée]l[ée]phone|t[ée]l|num[ée]ro)\b\s*:?/gi, " | ");
+  t = t.replace(/(?<![\wà-öø-ÿ])(?:t[ée]l[ée]phone|t[ée]l|num[ée]ro)(?![\wà-öø-ÿ])\s*:?/gi, " | ");
 
   // Prix
   m = t.match(/(?:prix|tarif|pour)?\s*(\d+(?:[.,]\d+)?)\s*(?:€|euros?)/i);
@@ -1360,15 +1368,24 @@ function analyserDictee(txt, now) {
   }
 
   // Trajet
-  const clean = s => s.replace(/\|/g, " ").replace(/^\s*(?:l'|la |le |les )/i, m0 => m0).replace(/\s+/g, " ").replace(/^[\s,.;:-]+|[\s,.;:-]+$/g, "").replace(/^(?:la|le|les|l')\s*(?=a[ée]roport|gare)/i, "");
+  const clean = s => s.replace(/\|/g, " ").replace(/\s+/g, " ").replace(/^[\s,.;:-]+|[\s,.;:-]+$/g, "")
+    .replace(/^(?:la|le|les|l')\s*(?=a[ée]roport|gare|h[ôo]tel)/i, "").replace(/\s+(?:à|a)\s+(?=[A-ZÀ-Ö]|paris\b|\d{5})/gi, ", ");
   const capFirst = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
-  m = t.match(/\bd[ée]part\s*:?\s*(?:de |du |depuis )?([^|]+?)\s*(?:\||$|,|\barriv[ée]e\b|\bdestination\b)/i);
-  if (m && clean(m[1])) out.dep = capFirst(clean(m[1]));
-  let m2 = t.match(/\b(?:arriv[ée]e|destination)\s*:?\s*(?:à |a |au |aux )?([^|]+?)\s*(?:\||$|,)/i);
-  if (m2 && clean(m2[1])) out.arr = capFirst(clean(m2[1]));
+  const DEP = /\b(?:adresse de d[ée]part|point de d[ée]part|d[ée]part|prise en charge|on (?:le|la|les) (?:prend|r[ée]cup[èe]re|cherche)|(?:il|elle|ils|elles) part(?:ent)?|(?:le |la |les )?r[ée]cup[ée]rer|(?:le |la |les )?chercher|en partant)\b\s*:?\s*(?:de la |de l'|du |des |de |d'|depuis |à |au |aux |a |en )?/i;
+  const ARR = /\b(?:adresse d'arriv[ée]e|arriv[ée]e|destination|pour aller|direction|(?:le |la |les )?d[ée]pos(?:e|er)|jusqu'|il va|elle va|ils vont)\b\s*:?\s*(?:à la |à l'|au |aux |à |a |en |vers |sur )?/i;
+  const md = t.match(DEP), ma = t.match(ARR);
+  if (md || ma) {
+    const seg = (from) => { let r = t.slice(from).replace(/^(?:\s*\|)+\s*(?:de la |de l'|du |des |de |d'|depuis |à |au |aux )?/i, ""); const stop = r.search(/\||\barriv[ée]e\b|\bdestination\b|\bpour aller\b|\bdirection\b|\bd[ée]pos(?:e|er)\b|\bjusqu'/i); return clean(stop >= 0 ? r.slice(0, stop) : r); };
+    if (md) { let v = seg(md.index + md[0].length); if (v) out.dep = capFirst(v); }
+    if (ma) { let r = t.slice(ma.index + ma[0].length); const stop = r.search(/\||\bd[ée]part\b|\bprise en charge\b/i); let v = clean(stop >= 0 ? r.slice(0, stop) : r); if (v) out.arr = capFirst(v); }
+  }
   if (!out.dep || !out.arr) {
-    m = t.match(/\b(?:de|du|des|depuis)\s+((?:l'|la |le |les )?[^|,]+?)\s+(?:jusqu'(?:à|au)|à|a|au|aux|vers|pour aller (?:à|au)|direction)\s+([^|,]+?)\s*(?:\||,|$)/i);
-    if (m) { if (!out.dep) out.dep = capFirst(clean(m[1])); if (!out.arr) out.arr = capFirst(clean(m[2])); }
+    // « de X à Y » : on coupe de préférence juste avant un lieu connu (aéroport, gare, Disney…)
+    const LIEU = "(?:l'|la |le |les )?(?:a[ée]roport|roissy|cdg|charles de gaulle|orly|beauvais|gare|disney|h[ôo]tel)";
+    let m3 = t.match(new RegExp("\\b(?:de|du|des|depuis)\\s+((?:l'|la |le |les )?[^|]+?)\\s+(?:jusqu'(?:à|au)|à|a|au|aux|vers|pour)\\s+(" + LIEU + "[^|,]*)", "i"))
+      || t.match(/\b(?:de|du|des|depuis)\s+((?:l'|la |le |les )?[^|,]+?)\s+(?:jusqu'(?:à|au)|vers|pour aller (?:à|au)|direction)\s+([^|,]+?)\s*(?:\||,|$)/i)
+      || t.match(/\b(?:de|du|des|depuis)\s+((?:l'|la |le |les )?[^|,]+?)\s+(?:à|a|au|aux)\s+([^|,]+?)\s*(?:\||,|$)/i);
+    if (m3) { if (!out.dep) out.dep = capFirst(clean(m3[1])); if (!out.arr) out.arr = capFirst(clean(m3[2])); }
   }
   // Raccourcis lieux
   const lieu = s => !s ? s : s.replace(/^(?:l'?\s*)?a[ée]roport\s+(?:de\s+|d')?(?:roissy|charles de gaulle|cdg)\b.*$/i, "Aéroport CDG").replace(/^(?:roissy|cdg|charles de gaulle)$/i, "Aéroport CDG")
@@ -1388,11 +1405,60 @@ function analyserDictee(txt, now) {
     set("f-nom", r.nom); set("f-tel", r.tel); set("f-dep", r.dep); set("f-arr", r.arr);
     set("f-date", r.date); set("f-heure", r.heure); set("f-pax", r.pax); set("f-bag", r.bagages); set("f-prix", r.prix);
     if (r.vehicule) $("f-vh").value = r.vehicule;
+    if (r.dep && window.__suggestDep) window.__suggestDep();
     var n = Object.keys(r).length;
     $("btn-remplir").textContent = n ? "✓ " + n + " champ" + (n > 1 ? "s" : "") + " rempli" + (n > 1 ? "s" : "") + " — vérifie puis Enregistrer" : "Rien compris, réessaie";
     setTimeout(function(){ $("btn-remplir").textContent = "Remplir les champs"; }, 4000);
   }
   $("btn-remplir").addEventListener("click", remplir);
+
+  /* ---- Suggestions d'adresses Google (même clé que le site) ---- */
+  var svc = null, timers = {};
+  function suggestions(id, auto){
+    var inp = $(id), box = $("ac-" + id), q = inp.value.trim();
+    if (!svc || q.length < 3) { box.hidden = true; return; }
+    clearTimeout(timers[id]);
+    timers[id] = setTimeout(function(){
+      svc.getPlacePredictions({ input: q, language: "fr", componentRestrictions: { country: "fr" } }, function(preds, st){
+        box.innerHTML = "";
+        if (st !== "OK" || !preds || !preds.length) { box.hidden = true; return; }
+        if (auto) { var t = document.createElement("div"); t.className = "ac-titre"; t.textContent = "Adresse exacte ? Touche la bonne :"; box.appendChild(t); }
+        preds.slice(0, 5).forEach(function(p){
+          var b = document.createElement("button"); b.type = "button";
+          var m = document.createElement("span"); m.textContent = p.structured_formatting.main_text;
+          var sm = document.createElement("small"); sm.textContent = p.structured_formatting.secondary_text || "";
+          b.appendChild(m); b.appendChild(sm);
+          b.addEventListener("mousedown", function(e){ e.preventDefault(); });
+          b.addEventListener("click", function(){ inp.value = p.description; box.hidden = true; });
+          box.appendChild(b);
+        });
+        box.hidden = false;
+      });
+    }, auto ? 0 : 300);
+  }
+  ["f-dep", "f-arr"].forEach(function(id){
+    $(id).addEventListener("input", function(){ suggestions(id); });
+    $(id).addEventListener("blur", function(){ setTimeout(function(){ $("ac-" + id).hidden = true; }, 250); });
+  });
+  window.initDashMaps = function(){ try { svc = new google.maps.places.AutocompleteService(); } catch (e) {} };
+  var gm = document.createElement("script"); gm.async = true;
+  gm.src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyCotWtH67rWpOKRwxTGXtxj-oVcc0vwOVg&libraries=places&callback=initDashMaps&language=fr";
+  document.head.appendChild(gm);
+  window.__suggestDep = function(){ if ($("f-dep").value.trim()) suggestions("f-dep", true); };
+
+  /* ---- Micro dédié à un seul champ (Départ / Arrivée) ---- */
+  var SRx = window.SpeechRecognition || window.webkitSpeechRecognition;
+  document.querySelectorAll(".mic-mini").forEach(function(mb){
+    mb.addEventListener("click", function(e){
+      e.preventDefault();
+      var id = mb.dataset.for, inp = $(id);
+      if (!SRx) { inp.focus(); return; }
+      var r = new SRx(); r.lang = "fr-FR"; r.interimResults = true; r.continuous = false;
+      r.onresult = function(ev){ var t = ""; for (var i = 0; i < ev.results.length; i++) t += ev.results[i][0].transcript; inp.value = t.trim(); };
+      r.onend = function(){ mb.classList.remove("rec"); mb.textContent = "🎤"; suggestions(id, true); };
+      try { r.start(); mb.classList.add("rec"); mb.textContent = "⏺"; } catch (err) { inp.focus(); }
+    });
+  });
   var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SR) { btn.textContent = "🎤 Dicter (micro du clavier)"; btn.addEventListener("click", function(){ zone.focus(); }); return; }
   var rec = null, base = "";
