@@ -182,6 +182,7 @@
   .ac-l button:last-child{border-bottom:0}
   .ac-l button small{display:block;color:#777;font-size:11.5px}
   .ac-l .ac-titre{font-size:11px;color:#8a6a2a;padding:6px 11px;background:#faf5ea}
+  .tag-hotel{display:inline-block;background:#F3E6C8;color:#6B4E12;border:1px solid var(--gold);border-radius:999px;padding:1px 8px;font-size:12px;font-weight:600;margin-bottom:3px}
   .modal-overlay{
     display:none;position:fixed;inset:0;background:rgba(20,25,40,.5);
     align-items:center;justify-content:center;z-index:50;padding:20px;
@@ -892,6 +893,7 @@ function anonymise(title,location){
     g[2].sort((a, b) => key(b).localeCompare(key(a)));
     return g[0].concat(g[1], g[2]);
   }
+  function escHotel(v) { return String(v).replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch])); }
   function fmtPrix(p) {
     if (p === "" || p === null || p === undefined) return "—";
     const n = parseFloat(String(p).replace(",", ".").replace(/[^\d.]/g, ""));
@@ -934,11 +936,11 @@ function anonymise(title,location){
       return head + `
       <tr class="resa-row${grp === 1 ? " past" : ""}">
         <td data-label="Date" class="cell-date">${fmtDate(r)}</td>
-        <td data-label="Client"><span>${r.nom || "—"}${r.tel ? `<br><a href="tel:${r.tel}" style="color:var(--muted);font-size:12.5px;">${r.tel}</a>` : ""}</span></td>
+        <td data-label="Client"><span>${(r.source === "hotel" || r.hotel) ? `<span class="tag-hotel">🏨 ${escHotel(r.hotel || "Hôtel partenaire")}${r.chambre ? " · ch. " + escHotel(r.chambre) : ""}</span><br>` : ""}${r.nom || "—"}${r.tel ? `<br><a href="tel:${r.tel}" style="color:var(--muted);font-size:12.5px;">${r.tel}</a>` : ""}</span></td>
         <td data-label="Trajet"><span>${r.dep || "?"} → ${r.arr || "?"}${volInfo(r) || volCode(r) ? `<br><span style="color:var(--gold);font-weight:600">✈️ ${volInfo(r) || "Vol " + volCode(r)}</span>${volBtn(r)}` : ""}</span></td>
         <td data-label="Véhicule">${r.vehicule ? r.vehicule + " · " : ""}${r.pax || 1} pax${r.bagages ? " · " + r.bagages + " bag." : ""}</td>
         <td data-label="Chauffeur">${r.chauffeurNom || "—"}</td>
-        <td data-label="Prix">${fmtPrix(r.prix)}</td>
+        <td data-label="Prix">${fmtPrix(r.prix)}${(r.source === "hotel" || r.hotel) && r.commission ? `<br><span style="color:var(--muted);font-size:12px">dont ${escHotel(r.commission)} € hôtel</span>` : ""}</td>
         <td data-label="Statut">
           <select class="statut-select" data-id="${r.id}" data-kind="resa">
             <option value="en attente" ${r.statut === "en attente" ? "selected" : ""}>En attente</option>
