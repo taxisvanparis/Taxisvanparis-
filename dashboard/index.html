@@ -359,6 +359,7 @@
   .rc .acts .cal-btn{border-color:var(--gold);color:var(--gold-soft)}
   .rc .acts .del{color:var(--red);border-color:transparent}
   .rc .acts .edit{border-color:var(--gold);color:var(--gold-soft)}
+  .rc .acts .grp-btn{border-color:var(--wa);color:#0B2414;background:var(--wa);font-weight:700}
   .field select{width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:8px;font-size:15px;background:var(--card);color:var(--text);}
   .rempty{text-align:center;padding:28px 16px;border:1px dashed var(--border);border-radius:14px;color:var(--muted);}
 </style>
@@ -1049,7 +1050,8 @@ function anonymise(title,location){
         const boutons = (ferme ? `<button class="no" data-st="en attente" data-id="${esc(r.id)}">Rétablir</button>` :
             (r.statut !== "confirmée" ? `<button class="ok" data-st="confirmée" data-id="${esc(r.id)}">Confirmer</button>` : "") +
             `<button class="done" data-st="terminée" data-id="${esc(r.id)}">Effectuée</button><button class="no" data-st="annulée" data-id="${esc(r.id)}">Annuler</button>`) +
-          waClient(r) + (groupOf(r) === 0 ? calLink([r], "📅", "cal-btn") : "") +
+          waClient(r) + (groupOf(r) === 0 && r.statut !== "annulée" ? `<a class="grp-btn" target="_blank" rel="noopener" href="${waLink(shareMessage(shareItem(r)))}">📢 Dispatcher</a>` : "") +
+          (groupOf(r) === 0 ? calLink([r], "📅", "cal-btn") : "") +
           `<button class="edit" data-edit="${esc(r.id)}">✏️ Modifier</button><button class="del" data-del="${esc(r.id)}" aria-label="Supprimer">🗑️</button>`;
         return `<div class="rc s-${cls}">
           <div class="t">${esc(r.heure || "—")}${r.ref ? `<small>${esc(r.ref)}</small>` : ""}</div>
