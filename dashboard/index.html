@@ -358,6 +358,8 @@
   .rc .acts .wa-btn{border-color:var(--wa)!important;color:var(--wa)!important}
   .rc .acts .cal-btn{border-color:var(--gold);color:var(--gold-soft)}
   .rc .acts .del{color:var(--red);border-color:transparent}
+  .rc .acts .edit{border-color:var(--gold);color:var(--gold-soft)}
+  .field select{width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:8px;font-size:15px;background:var(--card);color:var(--text);}
   .rempty{text-align:center;padding:28px 16px;border:1px dashed var(--border);border-radius:14px;color:var(--muted);}
 </style>
 </head>
@@ -489,7 +491,7 @@
 <!-- ===================== MODAL RÉSERVATION ===================== -->
 <div class="modal-overlay" id="modal-reservation">
   <div class="modal">
-    <h2>Nouvelle réservation</h2>
+    <h2 id="resa-modal-title">Nouvelle réservation</h2>
     <div class="dictee">
       <button type="button" class="btn-gold" id="btn-dicter">🎤 Dicter la course</button>
       <textarea id="f-dictee" rows="2" placeholder="Ou appuie ici et utilise le micro du clavier, puis « Remplir les champs »"></textarea>
@@ -512,6 +514,7 @@
       <div class="field"><label>Chauffeur assigné</label>
         <select id="f-chauffeur"><option value="">Non assigné</option></select>
       </div>
+      <div class="field" style="grid-column:1/-1"><label>Infos en plus (vol, code d'entrée, siège bébé…)</label><textarea id="f-note" rows="2" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--text);font:inherit;resize:vertical"></textarea></div>
     </div>
     <div class="modal-actions">
       <button class="btn-ghost" id="btn-cancel-resa">Annuler</button>
@@ -1047,7 +1050,7 @@ function anonymise(title,location){
             (r.statut !== "confirmée" ? `<button class="ok" data-st="confirmée" data-id="${esc(r.id)}">Confirmer</button>` : "") +
             `<button class="done" data-st="terminée" data-id="${esc(r.id)}">Effectuée</button><button class="no" data-st="annulée" data-id="${esc(r.id)}">Annuler</button>`) +
           waClient(r) + (groupOf(r) === 0 ? calLink([r], "📅", "cal-btn") : "") +
-          `<button class="del" data-del="${esc(r.id)}" aria-label="Supprimer">🗑️</button>`;
+          `<button class="edit" data-edit="${esc(r.id)}">✏️ Modifier</button><button class="del" data-del="${esc(r.id)}" aria-label="Supprimer">🗑️</button>`;
         return `<div class="rc s-${cls}">
           <div class="t">${esc(r.heure || "—")}${r.ref ? `<small>${esc(r.ref)}</small>` : ""}</div>
           <div class="m">
@@ -1061,6 +1064,7 @@ function anonymise(title,location){
           </div></div>`;
       }).join("") + `</div>`).join("");
     box.querySelectorAll("[data-st]").forEach(b => b.addEventListener("click", () => updateDoc(doc(db, "reservations", b.dataset.id), { statut: b.dataset.st })));
+    box.querySelectorAll("[data-edit]").forEach(b => b.addEventListener("click", () => openEditResa(b.dataset.edit)));
     box.querySelectorAll("[data-del]").forEach(b => b.addEventListener("click", () => { if (confirm("Supprimer cette réservation ?")) deleteDoc(doc(db, "reservations", b.dataset.del)); }));
   }
 
@@ -1159,8 +1163,13 @@ function anonymise(title,location){
   }
 
   // ---------------- MODALS: RÉSERVATION ----------------
+  let editingResaId = null, editingChauffeur = null;
   function openResaModal() {
-    ["f-nom","f-tel","f-dep","f-arr","f-date","f-heure","f-prix","f-dictee"].forEach(id => document.getElementById(id).value = "");
+    editingResaId = null;
+    document.getElementById("resa-modal-title").textContent = "Nouvelle réservation";
+    document.querySelector("#modal-reservation .dictee").style.display = "";
+    ["f-nom","f-tel","f-dep","f-arr","f-date","f-heure","f-prix","f-dictee","f-note"].forEach(id => document.getElementById(id).value = "");
+    document.getElementById("f-chauffeur").value = "";
     document.getElementById("f-pax").value = 1;
     document.getElementById("f-bag").value = 0;
     document.getElementById("modal-reservation").classList.add("shown");
@@ -1186,11 +1195,43 @@ function anonymise(title,location){
       createdAt: serverTimestamp()
     };
     if (!data.nom || !data.date) { alert("Merci de renseigner au moins le nom du client et la date."); return; }
+    const noteTxt = document.getElementById("f-note").value.trim();
     const dictee = document.getElementById("f-dictee").value.trim();
-    if (dictee) data.note = dictee;
+    if (editingResaId) {
+      // Modification : on garde le statut, la date de création et les infos hôtel d'origine
+      delete data.statut; delete data.createdAt;
+      if (editingChauffeur && !data.chauffeurUid) { data.chauffeurUid = editingChauffeur.uid; data.chauffeurNom = editingChauffeur.nom; }
+      data.note = noteTxt;
+      try { await updateDoc(doc(db, "reservations", editingResaId), data); }
+      catch (err) { console.error(err); alert("La modification n'a pas pu être enregistrée (" + ((err && err.code) || "erreur") + ")."); return; }
+      editingResaId = null;
+      document.getElementById("modal-reservation").classList.remove("shown");
+      return;
+    }
+    if (noteTxt || dictee) data.note = noteTxt || dictee;
     await addDoc(collection(db, "reservations"), data);
     document.getElementById("modal-reservation").classList.remove("shown");
   });
+
+  // Ouvre la fiche d'une réservation existante pour la modifier
+  function openEditResa(id) {
+    const r = reservationsCache.find(x => x.id === id); if (!r) return;
+    openResaModal();
+    editingResaId = id;
+    document.getElementById("resa-modal-title").textContent = "Modifier la réservation";
+    document.querySelector("#modal-reservation .dictee").style.display = "none";
+    const set = (k, v) => { document.getElementById(k).value = v ?? ""; };
+    set("f-nom", r.nom); set("f-tel", r.tel); set("f-dep", r.dep); set("f-arr", r.arr);
+    set("f-date", /^\d{4}-\d{2}-\d{2}$/.test(r.date || "") ? r.date : "");
+    set("f-heure", /^\d{2}:\d{2}$/.test(r.heure || "") ? r.heure : "");
+    set("f-pax", parseInt(r.pax) || 1); set("f-bag", parseInt(r.bagages) || 0);
+    const p = parseFloat(String(r.prix ?? "").replace(",", ".").replace(/[^\d.]/g, "")); set("f-prix", isNaN(p) ? "" : p);
+    document.getElementById("f-vh").value = /van|classe v|vito|minivan/i.test(String(r.vehicule || "")) ? "Van" : "Berline";
+    const ch = document.getElementById("f-chauffeur"); ch.value = r.chauffeurUid || "";
+    editingChauffeur = (r.chauffeurUid && ch.value !== r.chauffeurUid) ? { uid: r.chauffeurUid, nom: r.chauffeurNom || "" } : null;
+    if (editingChauffeur) ch.value = "";
+    set("f-note", r.note || "");
+  }
 
   // ---------------- MODALS: FACTURE ----------------
   function openFactureModal() {
