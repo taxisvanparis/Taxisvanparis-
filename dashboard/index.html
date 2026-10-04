@@ -979,7 +979,7 @@ function anonymise(title,location){
     const nom = String(r.nom || "").replace(/^🏨\s*/, "").replace(/\s*\(.*\)\s*$/, "").trim();
     const txt = `Bonjour${nom ? " " + nom : ""}, c'est votre chauffeur Taxis Van Paris 🚖\nJe vous confirme votre course${jour ? " du " + jour : ""}${r.heure ? " à " + r.heure.replace(":", "h") : ""}` +
       `${r.dep ? "\n📍 Départ : " + r.dep : ""}${r.arr ? "\n🏁 Arrivée : " + r.arr : ""}\nJe serai là à l'heure prévue. À bientôt !\nTaxis Van Paris — 06 49 55 36 40`;
-    return `<a class="cal-btn wa-btn" target="_blank" rel="noopener" href="https://wa.me/${n}?text=${encodeURIComponent(txt)}">WhatsApp</a> `;
+    return `<a class="cal-btn wa-btn" target="_blank" rel="noopener" href="https://wa.me/${n}?text=${encodeURIComponent(txt)}">📩 Confirmation client</a> `;
   }
   function escHotel(v) { return String(v).replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch])); }
   function fmtPrix(p) {
