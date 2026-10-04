@@ -1181,7 +1181,13 @@ function anonymise(title,location){
     const an = anonPair(r), ed = shareEdits[r.id] || {};
     const dep = ed.dep ?? an.dep, arr = ed.arr ?? an.arr;
     const unsure = x => !x || x === "Paris" || x === "Adresse à préciser";
-    return { r, dep, arr, veh: ed.veh ?? "", prixCh: ed.prix ?? "", note: ed.note ?? "", hide: !!ed.hide,
+    // Course hôtel : le message montre seulement ce que touche le chauffeur (prix client − commission hôtel)
+    const nomCom = String(r.nom || "").match(/dont\s+(\d+(?:[.,]\d+)?)\s*€\s*h[ôo]tel/i);
+    const isHotel = r.source === "hotel" || !!r.hotel || !!nomCom;
+    const com = parseFloat(String(r.commission ?? (nomCom ? nomCom[1] : "")).replace(",", ".")) || 0;
+    const pClient = parseFloat(String(r.prix ?? "").replace(",", ".").replace(/[^\d.]/g, ""));
+    const prixAuto = isHotel && !isNaN(pClient) ? String(Math.round((pClient - com) * 100) / 100) : "";
+    return { r, dep, arr, veh: ed.veh ?? "", prixCh: ed.prix ?? prixAuto, note: ed.note ?? "", hide: !!ed.hide, isHotel,
       warn: ed.dep === undefined && ed.arr === undefined && (unsure(an.dep) || unsure(an.arr) || an.warnDep || an.warnArr) };
   }
   function shareMessage(it) {
@@ -1193,7 +1199,7 @@ function anonymise(title,location){
     if (veh) L.push(`🚐 ${veh}`);
     if (r.pax) L.push(`👥 ${r.pax} passager${+r.pax > 1 ? "s" : ""}`);
     if (r.bagages && +r.bagages > 0) L.push(`🧳 ${r.bagages} bagage${+r.bagages > 1 ? "s" : ""}`);
-    if (it.prixCh) L.push(`💶 ${it.prixCh} € pour le chauffeur`);
+    if (it.prixCh) L.push(`💶 ${it.prixCh} €`);
     if (it.note) L.push(`📝 ${it.note}`);
     if (sigEl.value.trim()) L.push("", sigEl.value.trim());
     return L.join("\n");
@@ -1221,7 +1227,7 @@ function anonymise(title,location){
       const msg = shareMessage(it);
       html += `<div class="share-card${it.hide ? " masked" : ""}" data-sid="${escH(r.id)}">
         <div class="share-head"><span class="share-time">${escH(r.heure ? r.heure.replace(":", "h") : "--h--")}</span>
-          <div class="share-route">${escH(it.dep || "?")} → ${escH(it.arr || "?")}<small>${escH(r.nom || "")} · ${escH(r.dep || "—")} → ${escH(r.arr || "—")}${r.chauffeurNom ? " · Chauffeur : " + escH(r.chauffeurNom) : ""}</small></div></div>
+          <div class="share-route">${escH(it.dep || "?")} → ${escH(it.arr || "?")}<small>${it.isHotel ? "🏨 Course hôtel · commission retirée du prix chauffeur · " : ""}${escH(r.nom || "")} · ${escH(r.dep || "—")} → ${escH(r.arr || "—")}${r.chauffeurNom ? " · Chauffeur : " + escH(r.chauffeurNom) : ""}</small></div></div>
         ${it.warn ? `<div class="share-flag">Vérifie le départ et l'arrivée : l'adresse n'a pas pu être rattachée à un arrondissement ou une ville avec certitude.</div>` : ""}
         ${it.hide ? "" : `<div class="bubble">${escH(msg)}</div>`}
         <details><summary>Modifier le message</summary><div class="share-fields">
