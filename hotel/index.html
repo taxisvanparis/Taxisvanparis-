@@ -371,7 +371,23 @@ textarea{min-height:64px;resize:vertical}
       notes:[notes].concat(extra).filter(Boolean).join(" · "),km:s.r?s.r.dist:"",
       prix:s.r?s.r.prix:"",priceLabel:s.r?fmt(s.r.prix):"Sur devis",lang:lang};
 
+    // Copie dans Firebase (tableau de bord principal), étiquetée « hôtel »
+    function versFirebase(ref){
+      var cle=JSON.stringify([data.client,data.phone,data.date,data.time,data.destLabel]);
+      if(window.__fbDernier===cle||typeof window.enregistrerReservation!=="function") return;
+      window.__fbDernier=cle;
+      var vhFR=s.v==="van"?"Van Mercedes Classe V 🚐":"Berline 🚗";
+      var base={nom:data.client,tel:data.phone,dep:depLabel,arr:destLabel,pax:data.pax,vh:vhFR,vehicule:vhFR,siege:babyTxt,langue:lang,
+        date:data.date,heure:data.time,prix:s.r?fmt(s.r.prix):"Sur devis",statut:"en attente",date_creation:new Date().toISOString()};
+      var complet=Object.assign({},base,{source:"hotel",hotel:hotel.nom,hotel_code:code,chambre:data.room,commission:COM,ref:ref||"",bagages:(String(data.bags).match(/\d+/g)||[0]).pop(),email:data.email,note:data.notes});
+      window.enregistrerReservation(complet).catch(function(){
+        // Si Firebase refuse les champs en plus : même format que le site, hôtel indiqué dans le nom
+        window.enregistrerReservation(Object.assign({},base,{source:"site",nom:"🏨 "+data.client+" ("+hotel.nom+(data.room?", ch. "+data.room:"")+", dont "+COM+" € hôtel)"})).catch(function(){});
+      });
+    }
+
     function done(ref){
+      versFirebase(ref);
       data.ref=ref||"";
       $("ref").textContent=ref||"—";
       var r=T[lang].r, dt=new Date(data.date+"T"+data.time);
@@ -387,7 +403,7 @@ textarea{min-height:64px;resize:vertical}
     fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(data)})
       .then(function(r){return r.json();})
       .then(function(res){ if(res&&res.ok){ done(res.ref); } else { throw new Error(res&&res.error); } })
-      .catch(function(er){ $("err").textContent=(er&&er.message==="hotel_inconnu")?t.unknownHotel:t.netErr; $("err").hidden=false;
+      .catch(function(er){ versFirebase(""); $("err").textContent=(er&&er.message==="hotel_inconnu")?t.unknownHotel:t.netErr; $("err").hidden=false;
         if(!document.getElementById("waFallback")){ var b=document.createElement("a"); b.className="btn btn-wa"; b.target="_blank"; b.rel="noopener"; b.id="waFallback"; b.textContent=T[lang].waBtn; $("go").after(b); }
         $("waFallback").href=waLink(data); })
       .finally(function(){ $("go").disabled=false; $("go").textContent=t.book; });
@@ -403,6 +419,21 @@ textarea{min-height:64px;resize:vertical}
     })
     .catch(function(){});
 })();
+</script>
+<script type="module">
+  // Même base Firebase que le site principal : les réservations hôtels arrivent aussi dans le tableau de bord
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+  import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+  const app = initializeApp({
+    apiKey: "AIzaSyBN8uBFONIt1tDTH9C-NIQKeulFdJ2m26Q",
+    authDomain: "taxis-van-paris-by-abts.firebaseapp.com",
+    projectId: "taxis-van-paris-by-abts",
+    storageBucket: "taxis-van-paris-by-abts.firebasestorage.app",
+    messagingSenderId: "53887245170",
+    appId: "1:53887245170:web:942537659f6de1041f9beb"
+  });
+  const db = getFirestore(app);
+  window.enregistrerReservation = data => addDoc(collection(db, "reservations"), data);
 </script>
 </body>
 </html>
