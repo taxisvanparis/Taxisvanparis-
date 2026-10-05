@@ -494,10 +494,11 @@
   <div class="modal">
     <h2 id="resa-modal-title">Nouvelle réservation</h2>
     <div class="dictee">
-      <button type="button" class="btn-gold" id="btn-dicter">🎤 Dicter la course</button>
-      <textarea id="f-dictee" rows="2" placeholder="Ou appuie ici et utilise le micro du clavier, puis « Remplir les champs »"></textarea>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn-gold" id="btn-dicter">🎤 Dicter la course</button><button type="button" class="btn-ghost" id="btn-coller">📋 Coller un message</button></div>
+      <textarea id="f-dictee" rows="2" placeholder="Colle ici le message du client (WhatsApp, SMS, mail) ou dicte la course, puis « Remplir les champs »"></textarea>
       <button type="button" class="btn-ghost" id="btn-remplir">Remplir les champs</button>
-      <p class="dictee-aide">Astuce : dis « <b>départ</b> … <b>arrivée</b> … ». Ex. : « Monsieur Dupont, 06 12 34 56 78, demain à 14h30, départ 12 rue de la Paix Paris, arrivée CDG, 3 personnes, van, 85 euros »</p>
+      <button type="button" id="btn-ia" style="background:none;border:none;padding:4px 0;font-size:12px;color:#8a6d3b;text-decoration:underline;cursor:pointer">✨ Lecture IA : activer</button>
+      <p class="dictee-aide">Marche aussi avec un message copié depuis WhatsApp. Astuce pour dicter : dis « <b>départ</b> … <b>arrivée</b> … ». Ex. : « Monsieur Dupont, 06 12 34 56 78, demain à 14h30, départ 12 rue de la Paix Paris, arrivée CDG, 3 personnes, van, 85 euros »</p>
     </div>
     <div class="grid2">
       <div class="field"><label>Client</label><input id="f-nom" type="text"></div>
@@ -978,7 +979,7 @@ function anonymise(title,location){
     const jour = m ? new Date(+m[1], +m[2] - 1, +m[3]).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" }) : "";
     const nom = String(r.nom || "").replace(/^🏨\s*/, "").replace(/\s*\(.*\)\s*$/, "").trim();
     const txt = `Bonjour${nom ? " " + nom : ""}, c'est votre chauffeur Taxis Van Paris 🚖\nJe vous confirme votre course${jour ? " du " + jour : ""}${r.heure ? " à " + r.heure.replace(":", "h") : ""}` +
-      `${r.dep ? "\n📍 Départ : " + r.dep : ""}${r.arr ? "\n🏁 Arrivée : " + r.arr : ""}\nJe serai là à l'heure prévue. À bientôt !\nTaxis Van Paris — 06 49 55 36 40`;
+      `${r.dep ? "\n📍 Départ : " + r.dep : ""}${r.arr ? "\n🏁 Arrivée : " + r.arr : ""}\nJe serai là à l'heure prévue. À bientôt !\nTaxis Van Paris — 06 67 40 20 05`;
     return `<a class="cal-btn wa-btn" target="_blank" rel="noopener" href="https://wa.me/${n}?text=${encodeURIComponent(txt)}">📩 Confirmation client</a> `;
   }
   function escHotel(v) { return String(v).replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch])); }
@@ -1457,7 +1458,11 @@ function analyserDictee(txt, now) {
   const num = s => /^\d+$/.test(s) ? +s : N[s];
   const pad = n => String(n).padStart(2, "0");
   const iso = d => d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
-  let t = " " + txt.replace(/[’']/g, "'").replace(/\s+/g, " ") + " ";
+  // Message collé (WhatsApp, SMS, mail) : on enlève emojis et décorations, chaque ligne devient un champ séparé
+  let t = " " + String(txt).replace(/[’']/g, "'")
+    .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}\u{200D}]/gu, " ")
+    .replace(/[*_~━─═•]+/g, " ").replace(/\r?\n+/g, " | ").replace(/[ \t]+/g, " ") + " ";
+  t = t.replace(/\bdistance\s*:?[^|]*/gi, " | ").replace(/\b(?:nouvelle r[ée]servation|taxi ?van ?paris)\b[^|]*/gi, " | ");
   const cut = re => { t = t.replace(re, " | "); };
 
   // Téléphone
@@ -1471,9 +1476,11 @@ function analyserDictee(txt, now) {
 
   // Passagers / bagages
   const W = "(\\d+|un|une|deux|trois|quatre|cinq|six|sept|huit|neuf|dix)";
-  m = t.match(new RegExp(W + "\\s*(?:personnes?|passagers?|pax|adultes?)", "i"));
-  if (m) { out.pax = num(m[1].toLowerCase()); cut(m[0]); }
-  m = t.match(new RegExp(W + "\\s*(?:valises?|bagages?)", "i"));
+  m = t.match(new RegExp(W + "\\s*(?:personnes?|passagers?|pax|adultes?|people|persons|passengers|adults)\\b", "i"))
+    || t.match(/\b(?:passagers?|personnes?|pax|passengers)\s*:?\s*(\d+)/i)
+    || t.match(new RegExp("\\b(?:on est|on sera|nous sommes|nous serons|we are|we're)\\s+" + W, "i"));
+  if (m) { out.pax = num(String(m[1]).toLowerCase()); cut(m[0]); }
+  m = t.match(new RegExp(W + "\\s*(?:valises?|bagages?|suitcases?|bags?|luggage)", "i")) || t.match(/\b(?:valises?|bagages?)\s*:?\s*(\d+)/i);
   if (m) { out.bagages = num(m[1].toLowerCase()); cut(m[0]); }
 
   // Véhicule
@@ -1483,7 +1490,9 @@ function analyserDictee(txt, now) {
   if (!out.vehicule && out.pax > 4) out.vehicule = "Van";
 
   // Heure
-  m = t.match(/(?:\b[àa]\s+|\bvers\s+|\bpour\s+)?\b(\d{1,2})\s*(?:h|heures?|:)\s*(\d{2})?(\s*et\s+(?:demie?|quart))?/i);
+  m = t.match(/(?:\bat\s+|\baround\s+)?\b(\d{1,2})(?::(\d{2}))?\s*(am|pm)\b/i);
+  if (m) { let hh = +m[1] % 12 + (m[3].toLowerCase() === "pm" ? 12 : 0); out.heure = pad(hh) + ":" + (m[2] || "00"); cut(m[0]); m = null; }
+  else m = t.match(/(?:\b[àa]\s+|\bvers\s+|\bpour\s+|\bat\s+)?\b(\d{1,2})\s*(?:h|heures?|:)\s*(\d{2})?(\s*et\s+(?:demie?|quart))?/i);
   if (m) { let mn = m[2] ? +m[2] : 0; if (m[3]) mn = /quart/i.test(m[3]) ? 15 : 30; out.heure = pad(+m[1]) + ":" + pad(mn); cut(m[0]); }
   else if ((m = t.match(/(?:\b[àa]\s+)?\b(midi|minuit)(\s*et\s+(?:demie?|quart))?/i))) { let mn = m[2] ? (/quart/i.test(m[2]) ? 15 : 30) : 0; out.heure = (m[1].toLowerCase() === "midi" ? "12" : "00") + ":" + pad(mn); cut(m[0]); }
 
@@ -1491,15 +1500,16 @@ function analyserDictee(txt, now) {
   const MOIS = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
   const JOURS = ["dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"];
   const d0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  if ((m = t.match(/\bapr[eè]s[- ]demain\b/i))) { d0.setDate(d0.getDate() + 2); out.date = iso(d0); cut(m[0]); }
-  else if ((m = t.match(/\bdemain\b/i))) { d0.setDate(d0.getDate() + 1); out.date = iso(d0); cut(m[0]); }
-  else if ((m = t.match(/\b(?:aujourd'hui|ce soir|ce matin|cet après-midi)\b/i))) { out.date = iso(d0); cut(m[0]); }
+  if ((m = t.match(/\b(\d{4})-(\d{2})-(\d{2})\b/))) { out.date = m[1] + "-" + m[2] + "-" + m[3]; cut(m[0]); }
+  else if ((m = t.match(/\b(?:apr[eè]s[- ]demain|day after tomorrow)\b/i))) { d0.setDate(d0.getDate() + 2); out.date = iso(d0); cut(m[0]); }
+  else if ((m = t.match(/\b(?:demain|tomorrow)\b/i))) { d0.setDate(d0.getDate() + 1); out.date = iso(d0); cut(m[0]); }
+  else if ((m = t.match(/\b(?:aujourd'hui|ce soir|ce matin|cet après-midi|today|tonight)\b/i))) { out.date = iso(d0); cut(m[0]); }
   else if ((m = t.match(new RegExp("(?:\\ble\\s+)?\\b(1er|\\d{1,2})\\s+(" + MOIS.join("|") + "|fevrier|aout|decembre)(?:\\s+(\\d{4}))?", "i")))) {
     let mi = MOIS.findIndex(x => x.normalize("NFD").replace(/[̀-ͯ]/g, "") === m[2].toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, ""));
     let y = m[3] ? +m[3] : now.getFullYear(); let d = new Date(y, mi, parseInt(m[1]));
     if (!m[3] && d < d0) d.setFullYear(y + 1); out.date = iso(d); cut(m[0]);
   }
-  else if ((m = t.match(/\b(?:le\s+)?(\d{1,2})[\/.-](\d{1,2})(?:[\/.-](\d{2,4}))?\b/))) {
+  else if ((m = t.match(/\b(?:le\s+|on\s+)?(\d{1,2})[\/.-](\d{1,2})(?:[\/.-](\d{2,4}))?\b/))) {
     let y = m[3] ? (+m[3] < 100 ? 2000 + +m[3] : +m[3]) : now.getFullYear(); let d = new Date(y, +m[2] - 1, +m[1]);
     if (!m[3] && d < d0) d.setFullYear(y + 1); out.date = iso(d); cut(m[0]);
   }
@@ -1511,7 +1521,7 @@ function analyserDictee(txt, now) {
   }
 
   // Client
-  const STOP = /^(?:de|du|des|depuis|à|a|au|aux|vers|le|la|les|pour|demain|aujourd|départ|arrivée|avec|et|qui|il|elle)$/i;
+  const STOP = /^(?:de|du|des|depuis|à|a|au|aux|vers|le|la|les|pour|demain|aujourd|départ|arrivée|avec|et|qui|il|elle|terminal|vol|t[1-4][a-g]?)$/i;
   m = t.match(/\b(monsieur|madame|mademoiselle|mr|mme|m\.|client|cliente|nom)\s*:?\s+([a-zà-öø-ÿ][\wà-öø-ÿ'-]*)(?:\s+([a-zà-öø-ÿ][\wà-öø-ÿ'-]*))?/i);
   if (m) {
     const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
@@ -1521,13 +1531,19 @@ function analyserDictee(txt, now) {
     if (words.length) { out.nom = (civ ? civ + " " : "") + words.map(cap).join(" "); cut(m[0].slice(0, m[0].indexOf(words[words.length - 1]) + words[words.length - 1].length)); }
   }
 
+  if (!out.nom) { m = txt.match(/(?:[Mm]erci|[Cc]ordialement|[Tt]hanks|[Tt]hank you|[Rr]egards)[\s,!.]+([A-ZÀ-Ö][a-zà-öø-ÿ'-]+(?:\s+[A-ZÀ-Ö][a-zà-öø-ÿ'-]+)?)/);
+    if (m && !/^(Bonjour|Hello|Merci)$/.test(m[1])) out.nom = m[1]; }
+  if (!out.nom) { m = txt.match(/\b(?:client|nom|name)\s*:?\s*\*?\s*([A-ZÀ-Öa-zà-öø-ÿ][\wà-öø-ÿ'-]+(?:\s+[A-ZÀ-Ö][\wà-öø-ÿ'-]+)?)/i); if (m) out.nom = m[1].replace(/^./, c => c.toUpperCase()); }
   // Trajet
   const clean = s => s.replace(/\|/g, " ").replace(/\s+/g, " ").replace(/^[\s,.;:-]+|[\s,.;:-]+$/g, "")
     .replace(/^(?:la|le|les|l')\s*(?=a[ée]roport|gare|h[ôo]tel)/i, "").replace(/\s+(?:à|a)\s+(?=[A-ZÀ-Ö]|paris\b|\d{5})/gi, ", ");
   const capFirst = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
   const DEP = /\b(?:adresse de d[ée]part|point de d[ée]part|d[ée]part|prise en charge|on (?:le|la|les) (?:prend|r[ée]cup[èe]re|cherche)|(?:il|elle|ils|elles) part(?:ent)?|(?:le |la |les )?r[ée]cup[ée]rer|(?:le |la |les )?chercher|en partant)\b\s*:?\s*(?:de la |de l'|du |des |de |d'|depuis |à |au |aux |a |en )?/i;
   const ARR = /\b(?:adresse d'arriv[ée]e|arriv[ée]e|destination|pour aller|direction|(?:le |la |les )?d[ée]pos(?:e|er)|jusqu'|il va|elle va|ils vont)\b\s*:?\s*(?:à la |à l'|au |aux |à |a |en |vers |sur )?/i;
-  const md = t.match(DEP), ma = t.match(ARR);
+  let mx = t.match(/\b(?:pour aller|aller|il faut aller|transfert)\s+(?:de la |de l'|du |des |de |d'|depuis )((?:[^|])+?)\s+(?:à|a|au|aux|vers|jusqu'(?:à|au))\s+([^|,.]+)/i)
+        || t.match(/\bfrom\s+([^|]+?)\s+to\s+([^|,.]+)/i);
+  if (mx) { out.dep = capFirst(clean(mx[1])); out.arr = capFirst(clean(mx[2])); }
+  const md = (out.dep && out.arr) ? null : t.match(DEP), ma = (out.dep && out.arr) ? null : t.match(ARR);
   if (md || ma) {
     const seg = (from) => { let r = t.slice(from).replace(/^(?:\s*\|)+\s*(?:de la |de l'|du |des |de |d'|depuis |à |au |aux )?/i, ""); const stop = r.search(/\||\barriv[ée]e\b|\bdestination\b|\bpour aller\b|\bdirection\b|\bd[ée]pos(?:e|er)\b|\bjusqu'/i); return clean(stop >= 0 ? r.slice(0, stop) : r); };
     if (md) { let v = seg(md.index + md[0].length); if (v) out.dep = capFirst(v); }
@@ -1544,27 +1560,102 @@ function analyserDictee(txt, now) {
   // Raccourcis lieux
   const lieu = s => !s ? s : s.replace(/^(?:l'?\s*)?a[ée]roport\s+(?:de\s+|d')?(?:roissy|charles de gaulle|cdg)\b.*$/i, "Aéroport CDG").replace(/^(?:roissy|cdg|charles de gaulle)$/i, "Aéroport CDG")
     .replace(/^(?:l'?\s*)?(?:a[ée]roport\s+(?:d'|de\s+)?)?orly$/i, "Aéroport d'Orly").replace(/^(?:l'?\s*)?(?:a[ée]roport\s+(?:de\s+)?)?beauvais$/i, "Aéroport de Beauvais")
-    .replace(/^disney(?:land)?(?: paris)?$/i, "Disneyland Paris");
+    .replace(/^disney(?:land)?(?: paris)?$/i, "Disneyland Paris")
+    .replace(/^(?:au\s+|du\s+)?(?:terminal|T)\s?([1-4][A-G]?)$/i, (x, n) => (/\borly\b/i.test(txt) ? "Aéroport d'Orly – Orly " : "Aéroport CDG – Terminal ") + n.toUpperCase())
+    .replace(/^(?:paris\s+)?(\d{1,2})\s*(?:e|ème|eme|er)(?:\s+arrondissement)?$/i, (x, n) => +n >= 1 && +n <= 20 ? "Paris " + n + (n === "1" ? "er" : "e") : x);
   out.dep = lieu(out.dep); out.arr = lieu(out.arr);
+  // Garde-fou : si ce n'est pas une adresse plausible, on laisse la case vide plutôt que de la remplir faux
+  const plausible = v => !!v && v.length <= 70 && v.split(/\s+/).length <= 10 &&
+    !/\b(je|j'|nous|vous|pourriez|pouvez|voudrais|voulons|merci|bonjour|semaines?|il y a|svp|s'il|prévue?|vol au|demande)\b/i.test(v) &&
+    !/\s(?:à|a)$/i.test(v) && (v.match(/[a-zà-öø-ÿ0-9]/gi) || []).length >= 3 &&
+    !/^(?:l'|la|le|les|de|du|des|d'|au|aux|à|a|en)$/i.test(v.trim());
+  if (!plausible(out.dep)) delete out.dep;
+  if (!plausible(out.arr)) delete out.arr;
+  // Arrivée d'un vol (« vol », « terminal », « T3 », « atterrit ») sans départ reconnu → prise en charge à l'aéroport
+  if (!out.dep && /\b(?:vol|flight|terminal|atterri\w*|landing|lands?)\b|\bT\s?[1-4][A-G]?\b/i.test(txt)) {
+    const term = String(txt).match(/\b(?:terminal|T)\s?([1-4][A-G]?)\b/i);
+    const ap = /\borly\b/i.test(txt) ? "Aéroport d'Orly" : /\bbeauvais\b/i.test(txt) ? "Aéroport de Beauvais" : "Aéroport CDG";
+    out.dep = ap + (term ? (ap === "Aéroport d'Orly" ? " – Orly " : " – Terminal ") + term[1].toUpperCase() : "");
+  }
   Object.keys(out).forEach(k => (out[k] === undefined || out[k] === "") && delete out[k]);
   return out;
 }
-
 (function(){
   var $ = function(id){ return document.getElementById(id); };
   var btn = $("btn-dicter"), zone = $("f-dictee");
+  /* Lecture IA (Gemini via votre script Google) : la clé admin reste sur ce téléphone, jamais dans le site */
+  var IA_URL = "https://script.google.com/macros/s/AKfycbynqJeRA8W1AoYiHWQhS-ZPGHrEHyQBW8xp4xFGAYgP68lAugMsNZqWYkleYV1P4Va6/exec";
+  var CHAMPS = { nom: "f-nom", tel: "f-tel", dep: "f-dep", arr: "f-arr", date: "f-date", heure: "f-heure", pax: "f-pax", bagages: "f-bag", prix: "f-prix" };
+  var DEFAUTS = { "f-pax": "1", "f-bag": "0" };
+  function cleIA(){ try { return localStorage.getItem("tvp_cle_ia") || ""; } catch(e){ return ""; } }
+  function majBoutonIA(){ $("btn-ia").textContent = cleIA() ? "✨ Lecture IA activée (toucher pour désactiver)" : "✨ Lecture IA : activer"; }
+  $("btn-ia").addEventListener("click", function(){
+    if (cleIA()) { if (confirm("Désactiver la lecture IA sur ce téléphone ?")) { try { localStorage.removeItem("tvp_cle_ia"); } catch(e){} } }
+    else { var k = prompt("Clé admin (la même que pour le tableau de bord des hôtels) :"); if (k && k.trim()) { try { localStorage.setItem("tvp_cle_ia", k.trim()); } catch(e){} } }
+    majBoutonIA();
+  });
+  majBoutonIA();
+  function etat(txt, ms){ $("btn-remplir").textContent = txt; clearTimeout(etat.t); if (ms) etat.t = setTimeout(function(){ $("btn-remplir").textContent = "Remplir les champs"; }, ms); }
+  function appliquer(r){
+    var faits = [];
+    var set = function(id, v){ if (v !== undefined && v !== null && v !== "") { $(id).value = v; faits.push(id); } };
+    Object.keys(CHAMPS).forEach(function(k){ set(CHAMPS[k], r[k]); });
+    if (r.vehicule) { $("f-vh").value = r.vehicule; faits.push("f-vh"); }
+    if (r.note && !$("f-note").value.trim()) { $("f-note").value = r.note; faits.push("f-note"); }
+    return faits;
+  }
+  var essai = 0;
   function remplir(){
-    var r = analyserDictee(zone.value || "");
-    var set = function(id, v){ if (v !== undefined && v !== null && v !== "") $(id).value = v; };
-    set("f-nom", r.nom); set("f-tel", r.tel); set("f-dep", r.dep); set("f-arr", r.arr);
-    set("f-date", r.date); set("f-heure", r.heure); set("f-pax", r.pax); set("f-bag", r.bagages); set("f-prix", r.prix);
-    if (r.vehicule) $("f-vh").value = r.vehicule;
+    var txt = zone.value || "", n = ++essai;
+    var r = analyserDictee(txt);
+    var locaux = appliquer(r);
     if (r.dep && window.__suggestDep) window.__suggestDep();
-    var n = Object.keys(r).length;
-    $("btn-remplir").textContent = n ? "✓ " + n + " champ" + (n > 1 ? "s" : "") + " rempli" + (n > 1 ? "s" : "") + " — vérifie puis Enregistrer" : "Rien compris, réessaie";
-    setTimeout(function(){ $("btn-remplir").textContent = "Remplir les champs"; }, 4000);
+    var k = cleIA();
+    if (!k || !txt.trim()) {
+      var c = locaux.length;
+      etat(c ? "✓ " + c + " champ" + (c > 1 ? "s" : "") + " rempli" + (c > 1 ? "s" : "") + " — vérifie puis Enregistrer" : "Rien compris, réessaie", 4000);
+      return;
+    }
+    // Anonymisation : nom, téléphone et email ne partent jamais chez Google, ils restent remplis par la lecture simple
+    var anon = txt.replace(/[\w.+-]+@[\w-]+\.[\w.]+/g, "[EMAIL]")
+      .replace(/(?:\+|00)\s?\d[\d\s.-]{7,}\d|\b0\s?[1-9](?:[\s.-]?\d{2}){4}\b/g, "[TEL]")
+      .replace(/((?:merci|cordialement|bien à vous|thanks|thank you|regards|best)[\s,!.]*\n?\s*)([A-ZÀ-Ö][\wà-öø-ÿ'-]+(?:\s+[A-ZÀ-Ö][\wà-öø-ÿ'-]+)?)/gi, "$1[NOM]")
+      .replace(/\b(monsieur|madame|mademoiselle|mr|mrs|ms|mme|m\.|famille|client|cliente|nom|name)(\s*:?\s+)([A-ZÀ-Öa-zà-öø-ÿ][\wà-öø-ÿ'-]+)/gi, "$1$2[NOM]")
+      .replace(/\b(je m'appelle|my name is|i am|i'm|c'est)\s+([A-ZÀ-Ö][\wà-öø-ÿ'-]+(?:\s+[A-ZÀ-Ö][\wà-öø-ÿ'-]+)?)/gi, "$1 [NOM]");
+    if (r.nom) r.nom.replace(/^(?:M\.|Mme|Mlle)\s+/, "").split(/\s+/).forEach(function(w){
+      if (w.length > 1) anon = anon.replace(new RegExp(w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi"), "[NOM]");
+    });
+    etat("✨ L'IA lit le message…");
+    fetch(IA_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "ia", k: k, texte: anon.slice(0, 4000) }) })
+      .then(function(res){ return res.json(); })
+      .then(function(j){
+        if (n !== essai) return;
+        if (!j.ok) {
+          if (j.error === "acces_refuse") { try { localStorage.removeItem("tvp_cle_ia"); } catch(e){} majBoutonIA(); etat("Clé admin incorrecte — lecture simple utilisée", 6000); }
+          else etat("IA indisponible (" + j.error + ") — lecture simple utilisée", 6000);
+          return;
+        }
+        var ia = j.champs || {}; delete ia.nom; delete ia.tel; // nom et téléphone : jamais envoyés, donc gardés tels quels
+        // Ce que la lecture simple avait rempli et que l'IA n'a pas trouvé : on le vide (mieux vide que faux)
+        locaux.forEach(function(id){
+          var cle = Object.keys(CHAMPS).filter(function(x){ return CHAMPS[x] === id; })[0];
+          if (cle && cle !== "nom" && cle !== "tel" && (ia[cle] === undefined || ia[cle] === null || ia[cle] === "")) $(id).value = DEFAUTS[id] || "";
+        });
+        var faits = appliquer(ia);
+        if (ia.dep && window.__suggestDep) window.__suggestDep();
+        var c = faits.length;
+        etat(c ? "✨ " + c + " champ" + (c > 1 ? "s" : "") + " rempli" + (c > 1 ? "s" : "") + " par l'IA — vérifie puis Enregistrer" : "L'IA n'a rien trouvé, vérifie le message", 6000);
+      })
+      .catch(function(){ if (n === essai) etat("Pas de connexion à l'IA — lecture simple utilisée", 6000); });
   }
   $("btn-remplir").addEventListener("click", remplir);
+  // Coller : lit le presse-papiers si le téléphone l'autorise, sinon on colle soi-même dans la zone
+  $("btn-coller").addEventListener("click", function(){
+    if (navigator.clipboard && navigator.clipboard.readText) {
+      navigator.clipboard.readText().then(function(txt){ if (txt && txt.trim()) { zone.value = txt; remplir(); } else zone.focus(); }, function(){ zone.focus(); });
+    } else zone.focus();
+  });
+  zone.addEventListener("paste", function(){ setTimeout(remplir, 50); });
 
   /* ---- Suggestions d'adresses Google (même clé que le site) ---- */
   var svc = null, timers = {};

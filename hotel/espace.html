@@ -123,7 +123,7 @@ select{background:var(--panel);color:var(--fg);border:1px solid var(--line);bord
   }
 
   function load(){
-    if(!API_URL){ if(!h||h==="exemple"){ demo(); } else { msg("Votre espace est en cours d'installation. Contactez Taxis Van Paris au 06 49 55 36 40."); } return; }
+    if(!API_URL){ if(!h||h==="exemple"){ demo(); } else { msg("Votre espace est en cours d'installation. Contactez Taxis Van Paris au 06 67 40 20 05."); } return; }
     if(!h||!k){ msg("Lien incomplet. Utilisez le lien personnel envoyé par Taxis Van Paris.",true); return; }
     msg("Chargement des réservations…");
     fetch(API_URL+"?h="+encodeURIComponent(h)+"&k="+encodeURIComponent(k))
