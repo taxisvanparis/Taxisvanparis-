@@ -356,6 +356,8 @@
   .rc .acts button,.rc .acts a{font-size:12.5px;padding:6px 10px;border-radius:9px;border:1px solid var(--border);background:transparent;color:var(--text);text-decoration:none;font-weight:500;font-family:var(--body);}
   .rc .acts .ok{border-color:var(--ok);color:var(--ok)} .rc .acts .done{border-color:var(--done);color:var(--done)} .rc .acts .no{color:var(--muted)}
   .rc .acts .wa-btn{border-color:var(--wa)!important;color:var(--wa)!important}
+  .rc .acts .avis-btn{border-color:#F4B400!important;color:#F4B400!important;font-weight:600}
+  .rc .acts .avis-btn.fait{opacity:.6;font-weight:400}
   .rc .acts .cal-btn{border-color:var(--gold);color:var(--gold-soft)}
   .rc .acts .del{color:var(--red);border-color:transparent}
   .rc .acts .edit{border-color:var(--gold);color:var(--gold-soft)}
@@ -982,6 +984,24 @@ function anonymise(title,location){
       `${r.dep ? "\n📍 Départ : " + r.dep : ""}${r.arr ? "\n🏁 Arrivée : " + r.arr : ""}\nJe serai là à l'heure prévue. À bientôt !\nTaxis Van Paris — 06 67 40 20 05`;
     return `<a class="cal-btn wa-btn" target="_blank" rel="noopener" href="https://wa.me/${n}?text=${encodeURIComponent(txt)}">📩 Confirmation client</a> `;
   }
+  // Demande d'avis Google au client après la course
+  const AVIS_LINK = "https://g.page/r/CWXImdGQDnt4ECE/review";
+  function waAvis(r) {
+    if (r.statut === "annulée" || !(r.statut === "terminée" || groupOf(r) !== 0)) return "";
+    const n = waNumClient(r.tel); if (!n) return "";
+    const nom = String(r.nom || "").replace(/^🏨\s*/, "").replace(/\s*\(.*\)\s*$/, "").trim();
+    const fr = n.startsWith("33");
+    const txt = fr
+      ? `Bonjour${nom ? " " + nom : ""}, merci d'avoir voyagé avec Taxis Van Paris 🚖\n` +
+        `Si vous avez été satisfait, pourriez-vous nous laisser un petit avis Google ? Cela nous aide énormément ⭐⭐⭐⭐⭐\n👉 ${AVIS_LINK}\n` +
+        `Merci beaucoup et à bientôt !\nTaxis Van Paris — +33 6 67 40 20 05`
+      : `Hello${nom ? " " + nom : ""}, thank you for riding with Taxis Van Paris 🚖\n` +
+        `If you enjoyed your trip, could you leave us a quick Google review? It really helps us ⭐⭐⭐⭐⭐\n👉 ${AVIS_LINK}\n` +
+        `Thank you and have a great stay!\nTaxis Van Paris — +33 6 67 40 20 05`;
+    const fait = !!r.avisDemande;
+    const lib = fait ? (fr ? "⭐ Avis demandé ✓" : "⭐ Review asked ✓") : (fr ? "⭐ Demander un avis 🇫🇷" : "⭐ Ask review 🇬🇧");
+    return `<a class="cal-btn avis-btn${fait ? " fait" : ""}" data-avis="${esc(r.id)}" target="_blank" rel="noopener" href="https://wa.me/${n}?text=${encodeURIComponent(txt)}">${lib}</a> `;
+  }
   function escHotel(v) { return String(v).replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch])); }
   function fmtPrix(p) {
     if (p === "" || p === null || p === undefined) return "—";
@@ -1051,7 +1071,7 @@ function anonymise(title,location){
         const boutons = (ferme ? `<button class="no" data-st="en attente" data-id="${esc(r.id)}">Rétablir</button>` :
             (r.statut !== "confirmée" ? `<button class="ok" data-st="confirmée" data-id="${esc(r.id)}">Confirmer</button>` : "") +
             `<button class="done" data-st="terminée" data-id="${esc(r.id)}">Effectuée</button><button class="no" data-st="annulée" data-id="${esc(r.id)}">Annuler</button>`) +
-          waClient(r) + (groupOf(r) === 0 && r.statut !== "annulée" ? `<a class="grp-btn" target="_blank" rel="noopener" href="${waLink(shareMessage(shareItem(r)))}">📢 Dispatcher</a>` : "") +
+          waClient(r) + waAvis(r) + (groupOf(r) === 0 && r.statut !== "annulée" ? `<a class="grp-btn" target="_blank" rel="noopener" href="${waLink(shareMessage(shareItem(r)))}">📢 Dispatcher</a>` : "") +
           (groupOf(r) === 0 ? calLink([r], "📅", "cal-btn") : "") +
           `<button class="edit" data-edit="${esc(r.id)}">✏️ Modifier</button><button class="del" data-del="${esc(r.id)}" aria-label="Supprimer">🗑️</button>`;
         return `<div class="rc s-${cls}">
@@ -1067,6 +1087,7 @@ function anonymise(title,location){
           </div></div>`;
       }).join("") + `</div>`).join("");
     box.querySelectorAll("[data-st]").forEach(b => b.addEventListener("click", () => updateDoc(doc(db, "reservations", b.dataset.id), { statut: b.dataset.st })));
+    box.querySelectorAll("[data-avis]").forEach(b => b.addEventListener("click", () => { updateDoc(doc(db, "reservations", b.dataset.avis), { avisDemande: true }).catch(() => {}); }));
     box.querySelectorAll("[data-edit]").forEach(b => b.addEventListener("click", () => openEditResa(b.dataset.edit)));
     box.querySelectorAll("[data-del]").forEach(b => b.addEventListener("click", () => { if (confirm("Supprimer cette réservation ?")) deleteDoc(doc(db, "reservations", b.dataset.del)); }));
   }
