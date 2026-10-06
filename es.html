@@ -2259,6 +2259,13 @@ window.initGooglePlaces = window.initGooglePlaces || function(){};
   });
 })();
 </script>
+<!-- ═══ Bouton WhatsApp flottant : rond, discret, en bas à droite ═══ -->
+<style>
+  #btn-float{padding:0!important;width:52px;height:52px;justify-content:center;gap:0!important;font-size:0!important;
+    bottom:18px!important;right:14px!important;box-shadow:0 3px 12px rgba(0,0,0,.25)!important}
+  #btn-float svg{width:28px;height:28px;flex:none}
+</style>
+<script>(function(){var b=document.getElementById("btn-float");if(b){b.setAttribute("aria-label","WhatsApp");b.title="WhatsApp";}})();</script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCotWtH67rWpOKRwxTGXtxj-oVcc0vwOVg&libraries=places&callback=initGooglePlaces&language=fr" async defer></script>
 <script>
 (function(){
