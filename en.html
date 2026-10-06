@@ -2049,6 +2049,12 @@ window.initGooglePlaces = window.initGooglePlaces || function(){};
   .cf-box textarea{resize:vertical;font-size:.95rem}
   .cf-box input:focus,.cf-box textarea:focus{border-color:var(--gold)}
   .cf-box input.cf-bad{border-color:#e07a6a}
+  .cf-recap{border:1px solid rgba(201,168,76,.25);border-radius:10px;padding:10px 12px;margin:0 0 6px;background:var(--noir-3);display:grid;gap:6px}
+  .cf-recap:empty{display:none}
+  .cf-recap .cf-rt{font-size:.72rem;letter-spacing:1.2px;text-transform:uppercase;color:var(--gold)}
+  .cf-recap div:not(.cf-rt){display:grid;grid-template-columns:auto 1fr;gap:10px;font-size:.88rem}
+  .cf-recap span{color:var(--gris);white-space:nowrap}
+  .cf-recap b{color:var(--blanc);font-weight:600;min-width:0;overflow-wrap:anywhere}
   .cf-err{color:#e8907f;font-size:.85rem;margin-top:10px}
   .cf-go{margin-top:16px;width:100%;border:0;border-radius:12px;padding:16px;background:var(--gold);color:#141008;
     font:700 1.05rem 'DM Sans',sans-serif;cursor:pointer;box-shadow:0 10px 24px rgba(201,168,76,.25)}
@@ -2062,19 +2068,19 @@ window.initGooglePlaces = window.initGooglePlaces || function(){};
   var APPS = "https://script.google.com/macros/s/AKfycbynqJeRA8W1AoYiHWQhS-ZPGHrEHyQBW8xp4xFGAYgP68lAugMsNZqWYkleYV1P4Va6/exec";
   var lang = (document.documentElement.lang || "fr").slice(0,2);
   var T = {
-    fr:{drv:"Note pour le chauffeur",drvS:"(facultatif)",drvP:"Ex. : code d'entrée, poussette, nombre de valises, pancarte au nom de…",t:"Confirmez votre réservation",s:"Plus que 30 secondes : vos coordonnées et c'est réservé.",nom:"Prénom et nom",tel:"Téléphone",mail:"Email",mailS:"(facultatif, pour recevoir la confirmation)",vol:"N° de vol",volS:"(si aéroport)",
+    fr:{rc:"Votre course",rDep:"Départ",rArr:"Arrivée",rDt:"Date et heure",eDate:"Indiquez la date et l'heure de prise en charge (« Plus tard »).",ePast:"La date et l'heure doivent être à venir.",drv:"Note pour le chauffeur",drvS:"(facultatif)",drvP:"Ex. : code d'entrée, poussette, nombre de valises, pancarte au nom de…",t:"Confirmez votre réservation",s:"Plus que 30 secondes : vos coordonnées et c'est réservé.",nom:"Prénom et nom",tel:"Téléphone",mail:"Email",mailS:"(facultatif, pour recevoir la confirmation)",vol:"N° de vol",volS:"(si aéroport)",
         go:"✅ Confirmer ma réservation",env:"Envoi en cours…",note:"Paiement à bord par carte ou espèces · Aucun prépaiement",wa:"Une question ? Écrivez-nous sur WhatsApp",
         eNom:"Indiquez votre prénom et votre nom.",eTel:"Indiquez un numéro de téléphone complet.",eMail:"Indiquez une adresse email valide.",eAdr:"Choisissez l'adresse de départ et d'arrivée dans la liste.",ePrix:"Calculez d'abord le tarif."},
-    en:{drv:"Note for the driver",drvS:"(optional)",drvP:"E.g. door code, stroller, number of suitcases, name sign…",t:"Confirm your booking",s:"Just 30 seconds: your details and you're booked.",nom:"First and last name",tel:"Phone",mail:"Email",mailS:"(optional, to receive your confirmation)",vol:"Flight number",volS:"(airport pickup)",
+    en:{rc:"Your ride",rDep:"From",rArr:"To",rDt:"Date and time",eDate:"Please enter the pick-up date and time (\"Later\").",ePast:"The date and time must be in the future.",drv:"Note for the driver",drvS:"(optional)",drvP:"E.g. door code, stroller, number of suitcases, name sign…",t:"Confirm your booking",s:"Just 30 seconds: your details and you're booked.",nom:"First and last name",tel:"Phone",mail:"Email",mailS:"(optional, to receive your confirmation)",vol:"Flight number",volS:"(airport pickup)",
         go:"✅ Confirm my booking",env:"Sending…",note:"Pay the driver by card or cash · No prepayment",wa:"A question? Message us on WhatsApp",
         eNom:"Please enter your first and last name.",eTel:"Please enter a complete phone number.",eMail:"Please enter a valid email address.",eAdr:"Please choose the pick-up and drop-off addresses from the list.",ePrix:"Please calculate the fare first."},
-    es:{drv:"Nota para el conductor",drvS:"(opcional)",drvP:"Ej.: código de entrada, carrito de bebé, número de maletas, cartel con el nombre…",t:"Confirme su reserva",s:"Solo 30 segundos: sus datos y listo.",nom:"Nombre y apellido",tel:"Teléfono",mail:"Email",mailS:"(opcional, para recibir la confirmación)",vol:"N.º de vuelo",volS:"(si aeropuerto)",
+    es:{rc:"Su trayecto",rDep:"Salida",rArr:"Llegada",rDt:"Fecha y hora",eDate:"Indique la fecha y la hora de recogida («Más tarde»).",ePast:"La fecha y la hora deben ser futuras.",drv:"Nota para el conductor",drvS:"(opcional)",drvP:"Ej.: código de entrada, carrito de bebé, número de maletas, cartel con el nombre…",t:"Confirme su reserva",s:"Solo 30 segundos: sus datos y listo.",nom:"Nombre y apellido",tel:"Teléfono",mail:"Email",mailS:"(opcional, para recibir la confirmación)",vol:"N.º de vuelo",volS:"(si aeropuerto)",
         go:"✅ Confirmar mi reserva",env:"Enviando…",note:"Pago al conductor con tarjeta o efectivo · Sin prepago",wa:"¿Una pregunta? Escríbanos por WhatsApp",
         eNom:"Indique su nombre y apellido.",eTel:"Indique un número de teléfono completo.",eMail:"Indique un email válido.",eAdr:"Elija la dirección de salida y de llegada en la lista.",ePrix:"Calcule primero la tarifa."},
-    it:{drv:"Nota per l'autista",drvS:"(facoltativo)",drvP:"Es.: codice d'ingresso, passeggino, numero di valigie, cartello con il nome…",t:"Conferma la prenotazione",s:"Solo 30 secondi: i tuoi dati ed è prenotato.",nom:"Nome e cognome",tel:"Telefono",mail:"Email",mailS:"(facoltativo, per ricevere la conferma)",vol:"N. volo",volS:"(se aeroporto)",
+    it:{rc:"La tua corsa",rDep:"Partenza",rArr:"Arrivo",rDt:"Data e ora",eDate:"Indica la data e l'ora di partenza («Più tardi»).",ePast:"La data e l'ora devono essere future.",drv:"Nota per l'autista",drvS:"(facoltativo)",drvP:"Es.: codice d'ingresso, passeggino, numero di valigie, cartello con il nome…",t:"Conferma la prenotazione",s:"Solo 30 secondi: i tuoi dati ed è prenotato.",nom:"Nome e cognome",tel:"Telefono",mail:"Email",mailS:"(facoltativo, per ricevere la conferma)",vol:"N. volo",volS:"(se aeroporto)",
         go:"✅ Conferma la prenotazione",env:"Invio in corso…",note:"Pagamento all'autista con carta o contanti · Nessun anticipo",wa:"Una domanda? Scrivici su WhatsApp",
         eNom:"Inserisci nome e cognome.",eTel:"Inserisci un numero di telefono completo.",eMail:"Inserisci un'email valida.",eAdr:"Scegli l'indirizzo di partenza e di arrivo dalla lista.",ePrix:"Calcola prima la tariffa."},
-    ar:{drv:"ملاحظة للسائق",drvS:"(اختياري)",drvP:"مثال: رمز الدخول، عربة أطفال، عدد الحقائب، لافتة باسم…",t:"أكّد حجزك",s:"30 ثانية فقط: بياناتك ويتم الحجز.",nom:"الاسم واللقب",tel:"الهاتف",mail:"البريد الإلكتروني",mailS:"(اختياري، لاستلام التأكيد)",vol:"رقم الرحلة",volS:"(عند المطار)",
+    ar:{rc:"رحلتك",rDep:"الانطلاق",rArr:"الوصول",rDt:"التاريخ والوقت",eDate:"حدّد تاريخ ووقت الانطلاق («لاحقًا»).",ePast:"يجب أن يكون التاريخ والوقت في المستقبل.",drv:"ملاحظة للسائق",drvS:"(اختياري)",drvP:"مثال: رمز الدخول، عربة أطفال، عدد الحقائب، لافتة باسم…",t:"أكّد حجزك",s:"30 ثانية فقط: بياناتك ويتم الحجز.",nom:"الاسم واللقب",tel:"الهاتف",mail:"البريد الإلكتروني",mailS:"(اختياري، لاستلام التأكيد)",vol:"رقم الرحلة",volS:"(عند المطار)",
         go:"✅ تأكيد الحجز",env:"جارٍ الإرسال…",note:"الدفع للسائق بالبطاقة أو نقدًا · بدون دفع مسبق",wa:"سؤال؟ راسلنا على واتساب",
         eNom:"اكتب الاسم واللقب.",eTel:"اكتب رقم هاتف كاملًا.",eMail:"اكتب بريدًا إلكترونيًا صحيحًا.",eAdr:"اختر عنوان الانطلاق والوصول من القائمة.",ePrix:"احسب السعر أولًا."}
   }[lang] || null;
@@ -2089,7 +2095,7 @@ window.initGooglePlaces = window.initGooglePlaces || function(){};
     // On retire nom, téléphone et vol de la 1re étape : ils sont demandés après le prix
     [champ("client-nom"), vol && champ("vol")].forEach(function(f){ if (f) f.style.display = "none"; });
     var box = document.createElement("div"); box.className = "cf-box"; box.id = "cf-box";
-    box.innerHTML = '<h3>'+T.t+'</h3><p class="cf-sub">'+T.s+'</p>'+
+    box.innerHTML = '<h3>'+T.t+'</h3><p class="cf-sub">'+T.s+'</p><div class="cf-recap" id="cf-recap"></div>'+
       '<label for="client-nom">'+T.nom+'</label><span id="cf-nom"></span>'+
       '<label for="client-tel">'+T.tel+'</label><span id="cf-tel"></span>'+
       '<label for="client-email">'+T.mail+' <small>'+T.mailS+'</small></label><input type="email" id="client-email" autocomplete="email" inputmode="email" placeholder="nom@exemple.com">'+
@@ -2110,6 +2116,24 @@ window.initGooglePlaces = window.initGooglePlaces || function(){};
     box.addEventListener("input", function(){ $("cf-err").hidden = true; document.querySelectorAll(".cf-bad").forEach(function(x){ x.classList.remove("cf-bad"); }); });
   }
 
+  function quandTxt(){
+    var d = ($("rdate") || {}).value || "", h = ($("rheure") || {}).value || "";
+    if (!d || !h) return "—";
+    var x = new Date(d + "T" + h); if (isNaN(x)) return d + " " + h;
+    return x.toLocaleDateString(lang, {weekday: "long", day: "numeric", month: "long"}) + " · " + h;
+  }
+  function esc(t){ return String(t).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+  function recap(){
+    var r = $("cf-recap"); if (!r) return;
+    r.innerHTML = '<div class="cf-rt">'+T.rc+'</div>'+
+      '<div><span>📍 '+T.rDep+'</span><b>'+esc($("dep").value.trim() || "—")+'</b></div>'+
+      '<div><span>🏁 '+T.rArr+'</span><b>'+esc($("arr").value.trim() || "—")+'</b></div>'+
+      '<div><span>📅 '+T.rDt+'</span><b>'+esc(quandTxt())+'</b></div>';
+  }
+  // Le récapitulatif se met à jour à chaque calcul du prix
+  if (typeof window.calculer === "function") { var calc0 = window.calculer; window.calculer = function(){ var r = calc0.apply(this, arguments); try { recap(); } catch(e){} return r; }; }
+  ["dep","arr","rdate","rheure"].forEach(function(id){ var el = $(id); if (el) el.addEventListener("change", function(){ try { recap(); } catch(e){} }); });
+
   function erreur(msg, el){
     var e = $("cf-err"); e.textContent = msg; e.hidden = false;
     document.querySelectorAll(".cf-bad").forEach(function(x){ x.classList.remove("cf-bad"); });
@@ -2121,6 +2145,15 @@ window.initGooglePlaces = window.initGooglePlaces || function(){};
     var prix = ($("tprice") || {}).textContent || "";
     if (!/\d/.test(prix)) return erreur(T.ePrix);
     if (!$("dep").value.trim() || !$("arr").value.trim() || (typeof coords !== "undefined" && (!coords.dep || !coords.arr))) return erreur(T.eAdr, !$("dep").value.trim() || (typeof coords !== "undefined" && !coords.dep) ? $("dep") : $("arr"));
+    var dtf = $("datetime-fields");
+    if (dtf && dtf.style.display === "none" && $("rdate") && $("rheure")) { // « Maintenant » : on remet l'heure actuelle
+      var n0 = new Date(); $("rdate").value = n0.getFullYear() + "-" + String(n0.getMonth()+1).padStart(2,"0") + "-" + String(n0.getDate()).padStart(2,"0");
+      $("rheure").value = String(n0.getHours()).padStart(2,"0") + ":" + String(n0.getMinutes()).padStart(2,"0");
+    }
+    var dq = ($("rdate") || {}).value || "", hq = ($("rheure") || {}).value || "";
+    if (!dq || !hq) { if (typeof setQuand === "function") setQuand("plustard"); return erreur(T.eDate, !dq ? $("rdate") : $("rheure")); }
+    if (new Date(dq + "T" + hq) < new Date(Date.now() - 15 * 60000)) { if (typeof setQuand === "function") setQuand("plustard"); return erreur(T.ePast, $("rdate")); }
+    recap();
     if (nom.length < 2) return erreur(T.eNom, $("client-nom"));
     if (tel.replace(/\D/g, "").length < 8) return erreur(T.eTel, $("client-tel"));
     if (mail && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(mail)) return erreur(T.eMail, $("client-email"));
