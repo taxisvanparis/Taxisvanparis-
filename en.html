@@ -83,7 +83,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   "@type": "FAQPage",
   "mainEntity": [
     {"@type": "Question", "name": "How do I book a taxi in Paris with Taxis Van Paris?",
-     "acceptedAnswer": {"@type": "Answer", "text": "Book in 3 steps: calculate your fare on our Booking page, choose your vehicle (sedan or van), then confirm directly on WhatsApp at +33 6 67 40 20 05. Available 24/7."}},
+     "acceptedAnswer": {"@type": "Answer", "text": "Book in 3 steps: calculate your fare on our Booking page, choose your vehicle (sedan or van), then confirm online with your name and phone number: you're booked, no WhatsApp needed. Any question? Call or message +33 6 67 40 20 05. Available 24/7."}},
     {"@type": "Question", "name": "How much is a taxi from Paris to CDG airport?",
      "acceptedAnswer": {"@type": "Answer", "text": "The Paris–CDG fare depends on your exact address and the time. By sedan, expect between €55 and €85 depending on your pick-up area. In a Mercedes V-Class van, a small surcharge applies."}},
     {"@type": "Question", "name": "Do you offer transfers to Orly and Beauvais airports?",
@@ -486,6 +486,19 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     #lang-suggest button{background:none;border:none;color:var(--gris);font-size:1.2rem;cursor:pointer;margin-inline-start:auto}
     @media(max-width:900px){.lang-top{display:block;margin-inline-start:auto;margin-inline-end:12px}.nav-links li.lang-sw{display:none!important}}
   </style>
+<style id="theme-mixte">
+/* Version mixte : menu + accueil photo en sombre, tout le reste en clair crème */
+.page > *:not(.hero), #page-booking, #page-fleet, #page-services, #page-contact, #page-faq{
+  --noir:#FBF8F2;--noir-2:#F3EDE2;--noir-3:#ECE4D5;--noir-4:#E2D8C6;
+  --blanc:#1B1813;--blanc-2:#3B352C;--gris:#6B6357;--gold:#A8842C;--gold-light:#8E6E20;
+  color:var(--blanc);
+}
+.page{background:#FBF8F2}
+.page > *:not(.hero){background-color:var(--noir)}
+.form-card{background:#FFFFFF!important;border:1px solid #E6DCC8!important;box-shadow:0 18px 40px rgba(60,45,15,.10)!important;border-radius:14px!important}
+.form-card input,.form-card select,.form-card textarea{background:#FBF8F2!important;color:#1B1813!important;border-color:#DCD1BC!important}
+[style*="#333"],[style*="#444"]{border-color:#D9CFBC!important}
+</style>
 </head>
 <body>
   <!-- Google Tag Manager (noscript) -->
@@ -616,7 +629,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div style="position:absolute;top:0;left:60px;right:60px;height:1px;background:linear-gradient(90deg,transparent,rgba(201,168,76,.25),transparent)"></div>
     <div class="section-label" style="text-align:center">✦ Ready to go?</div>
     <h2 style="font-family:'Playfair Display',serif;font-size:clamp(1.8rem,4vw,2.6rem);font-weight:700;margin-bottom:16px">Book your taxi in <span style="color:var(--gold)">30 seconds</span></h2>
-    <p style="color:var(--gris);margin-bottom:32px;font-size:.95rem">Calculate your fare, choose your vehicle and confirm on WhatsApp</p>
+    <p style="color:var(--gris);margin-bottom:32px;font-size:.95rem">Calculate your fare, choose your vehicle and confirm online in 30 seconds</p>
     <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
       <button class="btn-primary" onclick="goPage('booking')">Get my fare →</button>
       <a class="btn-outline" href="tel:+33667402005" style="display:inline-flex;align-items:center;gap:9px">
@@ -1125,7 +1138,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <span class="faq-arrow">▾</span>
         </button>
         <div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
-          <div itemprop="text">Book in 3 steps: calculate your fare on our Booking page, choose your vehicle (sedan or van), then confirm directly on WhatsApp at +33 6 67 40 20 05. Available 24/7.</div>
+          <div itemprop="text">Book in 3 steps: calculate your fare on our Booking page, choose your vehicle (sedan or van), then confirm online with your name and phone number: you're booked, no WhatsApp needed. Any question? Call or message +33 6 67 40 20 05. Available 24/7.</div>
         </div>
       </div>
 
