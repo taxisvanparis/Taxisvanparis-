@@ -2253,6 +2253,22 @@ window.initGooglePlaces = window.initGooglePlaces || function(){};
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function(){ setTimeout(poser, 0); }); else setTimeout(poser, 0);
 })();
 </script>
+<!-- ═══ Après « Calculer le tarif » : défilement automatique vers le prix + la confirmation ═══ -->
+<script>
+(function(){
+  function go(){
+    var rct = document.getElementById("rct");
+    if (!rct || !rct.classList.contains("show")) return;   // calcul refusé (adresse manquante…)
+    var nav = document.querySelector("nav");
+    var y = rct.getBoundingClientRect().top + window.pageYOffset - ((nav ? nav.offsetHeight : 70) + 12);
+    window.scrollTo({top: y, behavior: "smooth"});
+  }
+  document.addEventListener("click", function(e){
+    var b = e.target.closest('[onclick*="calculer"]');
+    if (b) setTimeout(go, 120);
+  });
+})();
+</script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCotWtH67rWpOKRwxTGXtxj-oVcc0vwOVg&libraries=places&callback=initGooglePlaces&language=fr" async defer></script>
 <script>
 (function(){
