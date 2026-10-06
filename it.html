@@ -2034,9 +2034,10 @@ window.initGooglePlaces = window.initGooglePlaces || function(){};
   .cf-box .cf-sub{font-size:.85rem;color:var(--gris);margin:0 0 14px}
   .cf-box label{display:block;font-size:.72rem;letter-spacing:1.2px;text-transform:uppercase;color:var(--gris);margin:12px 0 6px}
   .cf-box label small{text-transform:none;letter-spacing:0}
-  .cf-box input{width:100%;box-sizing:border-box;background:var(--noir-3);border:1px solid rgba(201,168,76,.25);border-radius:10px;
+  .cf-box input,.cf-box textarea{width:100%;box-sizing:border-box;background:var(--noir-3);border:1px solid rgba(201,168,76,.25);border-radius:10px;
     color:var(--blanc);padding:13px;font-family:'DM Sans',sans-serif;font-size:1rem;outline:none}
-  .cf-box input:focus{border-color:var(--gold)}
+  .cf-box textarea{resize:vertical;font-size:.95rem}
+  .cf-box input:focus,.cf-box textarea:focus{border-color:var(--gold)}
   .cf-box input.cf-bad{border-color:#e07a6a}
   .cf-err{color:#e8907f;font-size:.85rem;margin-top:10px}
   .cf-go{margin-top:16px;width:100%;border:0;border-radius:12px;padding:16px;background:var(--gold);color:#141008;
@@ -2051,19 +2052,19 @@ window.initGooglePlaces = window.initGooglePlaces || function(){};
   var APPS = "https://script.google.com/macros/s/AKfycbynqJeRA8W1AoYiHWQhS-ZPGHrEHyQBW8xp4xFGAYgP68lAugMsNZqWYkleYV1P4Va6/exec";
   var lang = (document.documentElement.lang || "fr").slice(0,2);
   var T = {
-    fr:{t:"Confirmez votre réservation",s:"Plus que 30 secondes : vos coordonnées et c'est réservé.",nom:"Prénom et nom",tel:"Téléphone",mail:"Email",mailS:"(facultatif, pour recevoir la confirmation)",vol:"N° de vol",volS:"(si aéroport)",
+    fr:{drv:"Note pour le chauffeur",drvS:"(facultatif)",drvP:"Ex. : code d'entrée, poussette, nombre de valises, pancarte au nom de…",t:"Confirmez votre réservation",s:"Plus que 30 secondes : vos coordonnées et c'est réservé.",nom:"Prénom et nom",tel:"Téléphone",mail:"Email",mailS:"(facultatif, pour recevoir la confirmation)",vol:"N° de vol",volS:"(si aéroport)",
         go:"✅ Confirmer ma réservation",env:"Envoi en cours…",note:"Paiement à bord par carte ou espèces · Aucun prépaiement",wa:"Une question ? Écrivez-nous sur WhatsApp",
         eNom:"Indiquez votre prénom et votre nom.",eTel:"Indiquez un numéro de téléphone complet.",eMail:"Indiquez une adresse email valide.",eAdr:"Choisissez l'adresse de départ et d'arrivée dans la liste.",ePrix:"Calculez d'abord le tarif."},
-    en:{t:"Confirm your booking",s:"Just 30 seconds: your details and you're booked.",nom:"First and last name",tel:"Phone",mail:"Email",mailS:"(optional, to receive your confirmation)",vol:"Flight number",volS:"(airport pickup)",
+    en:{drv:"Note for the driver",drvS:"(optional)",drvP:"E.g. door code, stroller, number of suitcases, name sign…",t:"Confirm your booking",s:"Just 30 seconds: your details and you're booked.",nom:"First and last name",tel:"Phone",mail:"Email",mailS:"(optional, to receive your confirmation)",vol:"Flight number",volS:"(airport pickup)",
         go:"✅ Confirm my booking",env:"Sending…",note:"Pay the driver by card or cash · No prepayment",wa:"A question? Message us on WhatsApp",
         eNom:"Please enter your first and last name.",eTel:"Please enter a complete phone number.",eMail:"Please enter a valid email address.",eAdr:"Please choose the pick-up and drop-off addresses from the list.",ePrix:"Please calculate the fare first."},
-    es:{t:"Confirme su reserva",s:"Solo 30 segundos: sus datos y listo.",nom:"Nombre y apellido",tel:"Teléfono",mail:"Email",mailS:"(opcional, para recibir la confirmación)",vol:"N.º de vuelo",volS:"(si aeropuerto)",
+    es:{drv:"Nota para el conductor",drvS:"(opcional)",drvP:"Ej.: código de entrada, carrito de bebé, número de maletas, cartel con el nombre…",t:"Confirme su reserva",s:"Solo 30 segundos: sus datos y listo.",nom:"Nombre y apellido",tel:"Teléfono",mail:"Email",mailS:"(opcional, para recibir la confirmación)",vol:"N.º de vuelo",volS:"(si aeropuerto)",
         go:"✅ Confirmar mi reserva",env:"Enviando…",note:"Pago al conductor con tarjeta o efectivo · Sin prepago",wa:"¿Una pregunta? Escríbanos por WhatsApp",
         eNom:"Indique su nombre y apellido.",eTel:"Indique un número de teléfono completo.",eMail:"Indique un email válido.",eAdr:"Elija la dirección de salida y de llegada en la lista.",ePrix:"Calcule primero la tarifa."},
-    it:{t:"Conferma la prenotazione",s:"Solo 30 secondi: i tuoi dati ed è prenotato.",nom:"Nome e cognome",tel:"Telefono",mail:"Email",mailS:"(facoltativo, per ricevere la conferma)",vol:"N. volo",volS:"(se aeroporto)",
+    it:{drv:"Nota per l'autista",drvS:"(facoltativo)",drvP:"Es.: codice d'ingresso, passeggino, numero di valigie, cartello con il nome…",t:"Conferma la prenotazione",s:"Solo 30 secondi: i tuoi dati ed è prenotato.",nom:"Nome e cognome",tel:"Telefono",mail:"Email",mailS:"(facoltativo, per ricevere la conferma)",vol:"N. volo",volS:"(se aeroporto)",
         go:"✅ Conferma la prenotazione",env:"Invio in corso…",note:"Pagamento all'autista con carta o contanti · Nessun anticipo",wa:"Una domanda? Scrivici su WhatsApp",
         eNom:"Inserisci nome e cognome.",eTel:"Inserisci un numero di telefono completo.",eMail:"Inserisci un'email valida.",eAdr:"Scegli l'indirizzo di partenza e di arrivo dalla lista.",ePrix:"Calcola prima la tariffa."},
-    ar:{t:"أكّد حجزك",s:"30 ثانية فقط: بياناتك ويتم الحجز.",nom:"الاسم واللقب",tel:"الهاتف",mail:"البريد الإلكتروني",mailS:"(اختياري، لاستلام التأكيد)",vol:"رقم الرحلة",volS:"(عند المطار)",
+    ar:{drv:"ملاحظة للسائق",drvS:"(اختياري)",drvP:"مثال: رمز الدخول، عربة أطفال، عدد الحقائب، لافتة باسم…",t:"أكّد حجزك",s:"30 ثانية فقط: بياناتك ويتم الحجز.",nom:"الاسم واللقب",tel:"الهاتف",mail:"البريد الإلكتروني",mailS:"(اختياري، لاستلام التأكيد)",vol:"رقم الرحلة",volS:"(عند المطار)",
         go:"✅ تأكيد الحجز",env:"جارٍ الإرسال…",note:"الدفع للسائق بالبطاقة أو نقدًا · بدون دفع مسبق",wa:"سؤال؟ راسلنا على واتساب",
         eNom:"اكتب الاسم واللقب.",eTel:"اكتب رقم هاتف كاملًا.",eMail:"اكتب بريدًا إلكترونيًا صحيحًا.",eAdr:"اختر عنوان الانطلاق والوصول من القائمة.",ePrix:"احسب السعر أولًا."}
   }[lang] || null;
@@ -2083,6 +2084,7 @@ window.initGooglePlaces = window.initGooglePlaces || function(){};
       '<label for="client-tel">'+T.tel+'</label><span id="cf-tel"></span>'+
       '<label for="client-email">'+T.mail+' <small>'+T.mailS+'</small></label><input type="email" id="client-email" autocomplete="email" inputmode="email" placeholder="nom@exemple.com">'+
       (vol ? '<label for="vol">'+T.vol+' <small>'+T.volS+'</small></label><span id="cf-vol"></span>' : '')+
+      '<label for="client-note">'+T.drv+' <small>'+T.drvS+'</small></label><textarea id="client-note" rows="3" maxlength="400" placeholder="'+T.drvP+'"></textarea>'+
       '<div class="cf-err" id="cf-err" hidden></div>'+
       '<button type="button" class="cf-go" id="cf-go">'+T.go+'</button>'+
       '<p class="cf-note">'+T.note+'</p>'+
@@ -2131,9 +2133,14 @@ window.initGooglePlaces = window.initGooglePlaces || function(){};
 
     var b = $("cf-go"); b.disabled = true; b.textContent = T.env;
     // Firebase : exactement les mêmes champs qu'avant (pour ne pas être refusé) ; l'email part avec l'alerte
-    var fb = (typeof window.enregistrerReservation === "function") ? window.enregistrerReservation(resa) : Promise.resolve();
+    var note = (($("client-note") || {}).value || "").trim().slice(0, 400);
+    var fb = Promise.resolve();
+    if (typeof window.enregistrerReservation === "function") {
+      fb = Promise.resolve(window.enregistrerReservation(note ? Object.assign({}, resa, {note: note}) : resa))
+        .catch(function(){ return note ? Promise.resolve(window.enregistrerReservation(resa)).catch(function(){}) : null; });
+    }
     var alerte = fetch(APPS, {method: "POST", headers: {"Content-Type": "text/plain;charset=utf-8"},
-      body: JSON.stringify(Object.assign({action: "site", email: mail}, resa))}).catch(function(){});
+      body: JSON.stringify(Object.assign({action: "site", email: mail, note: note}, resa))}).catch(function(){});
     Promise.race([Promise.all([fb, alerte]), new Promise(function(r){ setTimeout(r, 6000); })])
       .then(function(){ window.location.href = "/merci/?resa=1&l=" + lang; });
   }
@@ -2182,6 +2189,7 @@ window.initGooglePlaces = window.initGooglePlaces || function(){};
       console.log("Réservation enregistrée dans Firebase");
     } catch (e) {
       console.error("Erreur Firebase:", e);
+      throw e;
     }
   };
 </script>
