@@ -2276,6 +2276,39 @@ window.initGooglePlaces = window.initGooglePlaces || function(){};
   #btn-float svg{width:28px;height:28px;flex:none}
 </style>
 <script>(function(){var b=document.getElementById("btn-float");if(b){b.setAttribute("aria-label","WhatsApp");b.title="WhatsApp";}})();</script>
+<!-- ═══ Prix affiché sur la carte (à la place des km / temps de trajet) ═══ -->
+<style>
+  #route-info{display:none!important}
+  .route-price{position:absolute;top:14px;left:14px;z-index:5;display:none;align-items:baseline;gap:10px;
+    padding:12px 22px;border-radius:40px;background:linear-gradient(180deg,#E9C25A,#C9A84C);color:#1B1813;
+    box-shadow:0 6px 18px rgba(0,0,0,.25);font-family:'DM Sans',sans-serif;pointer-events:none}
+  .route-price.on{display:flex}
+  .route-price small{font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+  .route-price b{font-size:1.65rem;font-weight:800;line-height:1}
+  [dir="rtl"] .route-price{left:auto;right:14px}
+</style>
+<script>
+(function(){
+  var lg=(document.documentElement.lang||"fr").slice(0,2);
+  var T={fr:["Forfait","Prix"],en:["Flat rate","Price"],es:["Tarifa fija","Precio"],it:["Forfait","Prezzo"],ar:["سعر ثابت","السعر"]}[lg]||["Forfait","Prix"];
+  var last="";
+  setInterval(function(){
+    var card=document.querySelector(".route-card"), tp=document.getElementById("tprice"), rct=document.getElementById("rct");
+    if(!card||!tp) return;
+    var el=card.querySelector(".route-price");
+    if(!el){ el=document.createElement("div"); el.className="route-price"; el.innerHTML="<small></small><b></b>"; card.appendChild(el); }
+    var ok=rct&&rct.classList.contains("show")&&/\d/.test(tp.textContent);
+    var tl=document.getElementById("tlines");
+    var forfait=tl&&tl.textContent.indexOf("✈")>-1;
+    var prix=tp.textContent.replace(/\.00\s*€/," €").replace(/(\d)\.(\d\d)/,lg==="en"?"$1.$2":"$1,$2").replace(/\s*€/,"€");
+    var key=ok+"|"+forfait+"|"+prix;
+    if(key===last) return; last=key;
+    el.classList.toggle("on",ok);
+    el.querySelector("small").textContent=forfait?T[0]:T[1];
+    el.querySelector("b").textContent=prix;
+  },400);
+})();
+</script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCotWtH67rWpOKRwxTGXtxj-oVcc0vwOVg&libraries=places&callback=initGooglePlaces&language=fr" async defer></script>
 <script>
 (function(){
