@@ -2400,6 +2400,29 @@ window.initGooglePlaces = window.initGooglePlaces || function(){};
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
 })();
 </script>
+<!-- ═══ Bouton « Confirmer · prix » doré premium ═══ -->
+<style>
+  #cf-go{background:linear-gradient(180deg,#EBC660,#C9A84C)!important;color:#1B1813!important;border-radius:14px!important;padding:18px 20px!important;
+    box-shadow:0 8px 22px rgba(169,132,44,.38),inset 0 1px 0 rgba(255,255,255,.45)!important;display:flex!important;align-items:center;justify-content:center;
+    gap:10px;font:800 1.08rem 'DM Sans',sans-serif!important;letter-spacing:.01em}
+  #cf-go svg{flex:none}
+  [dir="rtl"] #cf-go .cf-ar{transform:scaleX(-1)}
+</style>
+<script>
+(function(){
+  var lg=(document.documentElement.lang||"fr").slice(0,2);
+  var L={fr:"Confirmer",en:"Confirm",es:"Confirmar",it:"Conferma",ar:"تأكيد"}[lg]||"Confirmer";
+  var LOCK='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>';
+  var ARR='<svg class="cf-ar" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+  var last=null;
+  setInterval(function(){
+    var b=document.getElementById("cf-go"); if(!b||b.disabled) return;
+    var a=document.querySelector(".tp-aff"), p=a&&/\d/.test(a.textContent)?a.textContent:"";
+    if(p===last&&b.querySelector("svg")) return; last=p;
+    b.innerHTML=LOCK+"<span>"+L+(p?" · "+p:"")+"</span>"+ARR;
+  },300);
+})();
+</script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCotWtH67rWpOKRwxTGXtxj-oVcc0vwOVg&libraries=places&callback=initGooglePlaces&language=fr" async defer></script>
 <script>
 (function(){
