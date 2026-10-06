@@ -219,7 +219,8 @@ var TVP = (function(){
     var supp=pax>3?(pax-3)*5.5:0, total=15+kmPrice(km,c)+supp, fixed=false;
     var dP=forfaitZone(dep), aP=forfaitZone(arr);
     function set(b,v5,v8,thr){total=veh==='berline'?b:(pax<=thr?v5:v8);fixed=true;}
-    if(dP&&isRoissy(arr)) set(75,85,95,5);
+    if((isRoissy(dep)&&isOrly(arr))||(isOrly(dep)&&isRoissy(arr))) set(80,109,109,8); // Roissy ⇄ Orly
+    else if(dP&&isRoissy(arr)) set(75,85,95,5);
     else if(aP&&isRoissy(dep)) set(85,95,105,5);
     else if(dP&&isOrly(arr)) set(70,80,95,6);
     else if(aP&&isOrly(dep)) set(80,90,105,6);

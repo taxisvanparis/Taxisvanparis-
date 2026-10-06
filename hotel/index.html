@@ -318,7 +318,8 @@ textarea{min-height:64px;resize:vertical}
     var cr=creuse(heure), supp=pax>3?(pax-3)*5.50:0;
     var total=15+montantKm(dist,cr)+supp, forfait=true;
     var dP=forfaitVille(dep), aP=forfaitVille(arr), van=veh==="van";
-    if(dP&&roissy(arr)) total=!van?75:(pax<=5?85:95);
+    if((roissy(dep)&&orly(arr))||(orly(dep)&&roissy(arr))) total=!van?80:109; // Roissy ⇄ Orly
+    else if(dP&&roissy(arr)) total=!van?75:(pax<=5?85:95);
     else if(aP&&roissy(dep)) total=!van?85:(pax<=5?95:105);
     else if(dP&&orly(arr)) total=!van?70:(pax<=6?80:95);
     else if(aP&&orly(dep)) total=!van?80:(pax<=6?90:105);

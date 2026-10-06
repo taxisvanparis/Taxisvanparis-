@@ -1763,7 +1763,14 @@ let forfaitApplique = false;
   // Type aéroport depuis coords arr si sélectionné via modal
   const arrAddrType = coords['arr'] ? (coords['arr'].address || '') : '';
   const aerotype = ['roissy','orly','beauvais'].includes(arrAddrType) ? arrAddrType : null;
-  if (depParis75 && (aerotype === 'roissy' || isRoissy(arrAddr, 'arr'))) {
+  // Roissy ⇄ Orly : forfait 80 € berline, 109 € van
+  const roissyOrly = (isRoissy(depAddr, 'dep') && (aerotype === 'orly' || isOrly(arrAddr, 'arr')))
+                  || (isOrly(depAddr, 'dep') && (aerotype === 'roissy' || isRoissy(arrAddr, 'arr')));
+  if (roissyOrly) {
+    total = vehicule === 'berline' ? 80 : 109;
+    forfaitApplique = true;
+  }
+  else if (depParis75 && (aerotype === 'roissy' || isRoissy(arrAddr, 'arr'))) {
     if (vehicule === 'berline') total = 75;
     else if (vehicule === 'van' && pax <= 5) total = 85;
     else total = 95;
