@@ -2197,7 +2197,8 @@ window.initGooglePlaces = window.initGooglePlaces || function(){};
         .catch(function(){ return note ? Promise.resolve(window.enregistrerReservation(resa)).catch(function(){}) : null; });
     }
     var alerte = fetch(APPS, {method: "POST", headers: {"Content-Type": "text/plain;charset=utf-8"},
-      body: JSON.stringify(Object.assign({action: "site", email: mail, note: note}, resa))}).catch(function(){});
+      body: JSON.stringify(Object.assign({action: "site", email: mail, note: note}, resa,
+        {date: /^\d{4}-\d{2}-\d{2}$/.test(date) ? date.split("-").reverse().join("/") : date}))}).catch(function(){}); // date au format JJ/MM/AAAA dans l'email
     Promise.race([Promise.all([fb, alerte]), new Promise(function(r){ setTimeout(r, 6000); })])
       .then(function(){ window.location.href = "/merci/?resa=1&l=" + lang; });
   }
