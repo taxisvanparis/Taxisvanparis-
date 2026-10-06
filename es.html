@@ -2187,17 +2187,31 @@ window.initGooglePlaces = window.initGooglePlaces || function(){};
   .pay-band{background:var(--noir-2);border-top:1px solid rgba(201,168,76,.15);border-bottom:1px solid rgba(201,168,76,.15);padding:22px 16px;text-align:center}
   .pay-band h3{font-family:'Playfair Display',serif;font-size:1.15rem;color:var(--blanc);margin:0 0 4px}
   .pay-band p{font-size:.86rem;color:var(--gris);margin:0 0 12px}
-  .pay-chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
-  .pay-chips span{border:1px solid rgba(201,168,76,.35);border-radius:999px;padding:7px 13px;font:600 .82rem 'DM Sans',sans-serif;color:var(--blanc);background:var(--noir-3);white-space:nowrap}
-  .pay-mini{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:8px}
-  .pay-mini span{border:1px solid rgba(201,168,76,.3);border-radius:999px;padding:4px 9px;font:600 .72rem 'DM Sans',sans-serif;color:var(--blanc)}
+  .pay-chips,.pay-mini{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+  .pay-mini{gap:6px;margin-top:10px}
+  .pay-logo{display:inline-flex;align-items:center;justify-content:center;min-width:66px;padding:0 10px;box-sizing:border-box;height:42px;background:#fff;border-radius:8px;
+    box-shadow:0 1px 0 rgba(0,0,0,.08),0 4px 10px rgba(0,0,0,.18);font-size:30px;line-height:1}
+  .pay-logo b{font:800 .95rem 'DM Sans',Arial,sans-serif;letter-spacing:.3px;white-space:nowrap}
+  .pay-logo em{display:none;font:700 .62rem 'DM Sans',Arial,sans-serif;font-style:normal;color:#222;text-align:center;line-height:1.1}
+  .pay-sans-logo .pay-logo i{display:none}.pay-sans-logo .pay-logo em{display:block}
+  .pay-mini .pay-logo{min-width:50px;padding:0 8px;height:32px;font-size:23px;border-radius:6px}
+  .pay-mini .pay-logo b{font-size:.75rem}
 </style>
 <script>
 (function(){
   var lang = (document.documentElement.lang || "fr").slice(0,2);
   var B = {"fr": ["Toutes les cartes bancaires acceptées", "Quel que soit le montant de la course", "Espèces", "Paiement à bord par carte ou espèces, sans minimum · Aucun prépaiement"], "en": ["All cards accepted", "Whatever the fare", "Cash", "Pay on board by card or cash, no minimum · No prepayment"], "es": ["Aceptamos todas las tarjetas", "Sea cual sea el importe", "Efectivo", "Pago a bordo con tarjeta o efectivo, sin mínimo · Sin prepago"], "it": ["Accettiamo tutte le carte", "Qualunque sia l'importo", "Contanti", "Pagamento a bordo con carta o contanti, senza minimo · Nessun anticipo"], "ar": ["نقبل جميع البطاقات البنكية", "مهما كان مبلغ الرحلة", "نقداً", "الدفع داخل السيارة بالبطاقة أو نقداً، دون حد أدنى · بدون دفع مسبق"]}[lang]; if (!B) return;
-  var C = ["💳 Visa","💳 Mastercard","💳 American Express","💳 CB","Apple Pay","Google Pay","💶 " + B[2]];
-  function chips(cls){ return '<div class="' + cls + '">' + C.map(function(c){ return "<span>" + c + "</span>"; }).join("") + "</div>"; }
+  // Logos (police d'icônes Font Awesome, chargée depuis cdnjs) ; si elle ne charge pas, les noms s'affichent à la place
+  ["fontawesome","brands"].forEach(function(n){ if (document.getElementById("fa-" + n)) return;
+    var l = document.createElement("link"); l.id = "fa-" + n; l.rel = "stylesheet";
+    l.href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/" + n + ".min.css"; document.head.appendChild(l); });
+  var C = [["fa-cc-visa","Visa","#1A1F71"],["fa-cc-mastercard","Mastercard","#EB001B"],["fa-cc-amex","American Express","#2E77BC"],
+           [null,"CB","#1F5FA8"],["fa-cc-apple-pay","Apple Pay","#000"],["fa-google-pay","Google Pay","#3C4043"],[null,"€ " + B[2],"#2E7D32"]];
+  function chips(cls){ return '<div class="' + cls + '">' + C.map(function(c){
+    return '<span class="pay-logo" title="' + c[1] + '" style="color:' + c[2] + '">' +
+      (c[0] ? '<i class="fa-brands ' + c[0] + '" aria-hidden="true"></i><em>' + c[1] + '</em>' : '<b>' + c[1] + '</b>') + '</span>'; }).join("") + "</div>"; }
+  setTimeout(function(){ try { var i = document.querySelector(".pay-logo i");
+    if (i && !/Font Awesome/i.test(getComputedStyle(i).fontFamily)) document.documentElement.classList.add("pay-sans-logo"); } catch(e){} }, 3500);
   function poser(){
     var hero = document.querySelector("#page-home .hero");
     if (hero && !document.getElementById("pay-band")) {
