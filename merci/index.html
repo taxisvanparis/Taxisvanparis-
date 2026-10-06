@@ -59,5 +59,21 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <p>Votre conversation WhatsApp a bien été ouverte. Notre équipe vous répond dans les plus brefs délais, 7j/7.</p>
     <a class="btn" href="/">Retour à l'accueil</a>
   </div>
+<script>
+(function(){
+  var q = new URLSearchParams(location.search); if (!q.get("resa")) return;
+  var l = (q.get("l") || "fr").slice(0,2);
+  var M = {
+    fr:["Réservation <span>envoyée</span>","Merci ! Nous avons bien reçu votre réservation. Nous vous confirmons le chauffeur très rapidement par téléphone ou WhatsApp. Un email récapitulatif vous a été envoyé.","Retour à l'accueil"],
+    en:["Booking <span>sent</span>","Thank you! We have received your booking and will confirm your driver very shortly by phone or WhatsApp. A summary has been sent to your email.","Back to home"],
+    es:["Reserva <span>enviada</span>","¡Gracias! Hemos recibido su reserva y le confirmaremos el conductor muy pronto por teléfono o WhatsApp. Le hemos enviado un resumen por email.","Volver al inicio"],
+    it:["Prenotazione <span>inviata</span>","Grazie! Abbiamo ricevuto la tua prenotazione e ti confermeremo l'autista a breve per telefono o WhatsApp. Ti abbiamo inviato un riepilogo via email.","Torna alla home"],
+    ar:["تم <span>إرسال الحجز</span>","شكرًا! استلمنا حجزك وسنؤكد لك السائق قريبًا جدًا عبر الهاتف أو واتساب. أرسلنا لك ملخصًا عبر البريد الإلكتروني.","العودة إلى الرئيسية"]
+  }[l] || null; if (!M) return;
+  var h = document.querySelector("h1"), p = document.querySelector("h1 + p"), a = document.querySelector("a.btn");
+  if (h) h.innerHTML = M[0]; if (p) p.textContent = M[1]; if (a) { a.textContent = M[2]; a.href = l === "fr" ? "/" : "/" + l + ".html"; }
+  if (l === "ar") document.documentElement.dir = "rtl";
+})();
+</script>
 </body>
 </html>

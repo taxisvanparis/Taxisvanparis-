@@ -2027,6 +2027,117 @@ window.initGooglePlaces = window.initGooglePlaces || function(){};
 })();
 </script>
 
+<!-- ═══ Étape 2 : confirmation directe sur le site (sans passer par WhatsApp) ═══ -->
+<style>
+  .cf-box{margin:18px 0 14px;padding:18px;border:1px solid rgba(201,168,76,.35);border-radius:14px;background:var(--noir-4)}
+  .cf-box h3{font-family:'Playfair Display',serif;font-size:1.15rem;color:var(--blanc);margin:0 0 4px}
+  .cf-box .cf-sub{font-size:.85rem;color:var(--gris);margin:0 0 14px}
+  .cf-box label{display:block;font-size:.72rem;letter-spacing:1.2px;text-transform:uppercase;color:var(--gris);margin:12px 0 6px}
+  .cf-box label small{text-transform:none;letter-spacing:0}
+  .cf-box input{width:100%;box-sizing:border-box;background:var(--noir-3);border:1px solid rgba(201,168,76,.25);border-radius:10px;
+    color:var(--blanc);padding:13px;font-family:'DM Sans',sans-serif;font-size:1rem;outline:none}
+  .cf-box input:focus{border-color:var(--gold)}
+  .cf-box input.cf-bad{border-color:#e07a6a}
+  .cf-err{color:#e8907f;font-size:.85rem;margin-top:10px}
+  .cf-go{margin-top:16px;width:100%;border:0;border-radius:12px;padding:16px;background:var(--gold);color:#141008;
+    font:700 1.05rem 'DM Sans',sans-serif;cursor:pointer;box-shadow:0 10px 24px rgba(201,168,76,.25)}
+  .cf-go:disabled{opacity:.6;cursor:default}
+  .cf-note{font-size:.8rem;color:var(--gris);text-align:center;margin-top:10px}
+  .cf-wa{display:block;text-align:center;margin-top:8px;font-size:.85rem;color:var(--gris);text-decoration:underline}
+  #rct .btn-wa-res{display:none!important}
+</style>
+<script>
+(function(){
+  var APPS = "https://script.google.com/macros/s/AKfycbynqJeRA8W1AoYiHWQhS-ZPGHrEHyQBW8xp4xFGAYgP68lAugMsNZqWYkleYV1P4Va6/exec";
+  var lang = (document.documentElement.lang || "fr").slice(0,2);
+  var T = {
+    fr:{t:"Confirmez votre réservation",s:"Plus que 30 secondes : vos coordonnées et c'est réservé.",nom:"Prénom et nom",tel:"Téléphone",mail:"Email",mailS:"(pour recevoir la confirmation)",vol:"N° de vol",volS:"(si aéroport)",
+        go:"✅ Confirmer ma réservation",env:"Envoi en cours…",note:"Paiement à bord par carte ou espèces · Aucun prépaiement",wa:"Une question ? Écrivez-nous sur WhatsApp",
+        eNom:"Indiquez votre prénom et votre nom.",eTel:"Indiquez un numéro de téléphone complet.",eMail:"Indiquez une adresse email valide.",ePrix:"Calculez d'abord le tarif."},
+    en:{t:"Confirm your booking",s:"Just 30 seconds: your details and you're booked.",nom:"First and last name",tel:"Phone",mail:"Email",mailS:"(to receive your confirmation)",vol:"Flight number",volS:"(airport pickup)",
+        go:"✅ Confirm my booking",env:"Sending…",note:"Pay the driver by card or cash · No prepayment",wa:"A question? Message us on WhatsApp",
+        eNom:"Please enter your first and last name.",eTel:"Please enter a complete phone number.",eMail:"Please enter a valid email address.",ePrix:"Please calculate the fare first."},
+    es:{t:"Confirme su reserva",s:"Solo 30 segundos: sus datos y listo.",nom:"Nombre y apellido",tel:"Teléfono",mail:"Email",mailS:"(para recibir la confirmación)",vol:"N.º de vuelo",volS:"(si aeropuerto)",
+        go:"✅ Confirmar mi reserva",env:"Enviando…",note:"Pago al conductor con tarjeta o efectivo · Sin prepago",wa:"¿Una pregunta? Escríbanos por WhatsApp",
+        eNom:"Indique su nombre y apellido.",eTel:"Indique un número de teléfono completo.",eMail:"Indique un email válido.",ePrix:"Calcule primero la tarifa."},
+    it:{t:"Conferma la prenotazione",s:"Solo 30 secondi: i tuoi dati ed è prenotato.",nom:"Nome e cognome",tel:"Telefono",mail:"Email",mailS:"(per ricevere la conferma)",vol:"N. volo",volS:"(se aeroporto)",
+        go:"✅ Conferma la prenotazione",env:"Invio in corso…",note:"Pagamento all'autista con carta o contanti · Nessun anticipo",wa:"Una domanda? Scrivici su WhatsApp",
+        eNom:"Inserisci nome e cognome.",eTel:"Inserisci un numero di telefono completo.",eMail:"Inserisci un'email valida.",ePrix:"Calcola prima la tariffa."},
+    ar:{t:"أكّد حجزك",s:"30 ثانية فقط: بياناتك ويتم الحجز.",nom:"الاسم واللقب",tel:"الهاتف",mail:"البريد الإلكتروني",mailS:"(لاستلام التأكيد)",vol:"رقم الرحلة",volS:"(عند المطار)",
+        go:"✅ تأكيد الحجز",env:"جارٍ الإرسال…",note:"الدفع للسائق بالبطاقة أو نقدًا · بدون دفع مسبق",wa:"سؤال؟ راسلنا على واتساب",
+        eNom:"اكتب الاسم واللقب.",eTel:"اكتب رقم هاتف كاملًا.",eMail:"اكتب بريدًا إلكترونيًا صحيحًا.",ePrix:"احسب السعر أولًا."}
+  }[lang] || null;
+  if (!T) return;
+
+  function $(id){ return document.getElementById(id); }
+  function champ(id){ var el = $(id); return el ? el.closest(".booking-field") : null; }
+
+  function monter(){
+    var rct = $("rct"), nom = $("client-nom"), tel = $("client-tel"); if (!rct || !nom || !tel || $("cf-box")) return;
+    var vol = $("vol");
+    // On retire nom, téléphone et vol de la 1re étape : ils sont demandés après le prix
+    [champ("client-nom"), vol && champ("vol")].forEach(function(f){ if (f) f.style.display = "none"; });
+    var box = document.createElement("div"); box.className = "cf-box"; box.id = "cf-box";
+    box.innerHTML = '<h3>'+T.t+'</h3><p class="cf-sub">'+T.s+'</p>'+
+      '<label for="client-nom">'+T.nom+'</label><span id="cf-nom"></span>'+
+      '<label for="client-tel">'+T.tel+'</label><span id="cf-tel"></span>'+
+      '<label for="client-email">'+T.mail+' <small>'+T.mailS+'</small></label><input type="email" id="client-email" autocomplete="email" inputmode="email" placeholder="nom@exemple.com">'+
+      (vol ? '<label for="vol">'+T.vol+' <small>'+T.volS+'</small></label><span id="cf-vol"></span>' : '')+
+      '<div class="cf-err" id="cf-err" hidden></div>'+
+      '<button type="button" class="cf-go" id="cf-go">'+T.go+'</button>'+
+      '<p class="cf-note">'+T.note+'</p>'+
+      '<a class="cf-wa" href="https://wa.me/33667402005" target="_blank" rel="noopener">'+T.wa+'</a>';
+    var btns = rct.querySelector(".reserve-btns");
+    rct.insertBefore(box, btns || null);
+    $("cf-nom").replaceWith(nom); $("cf-tel").replaceWith(tel); if (vol) $("cf-vol").replaceWith(vol);
+    nom.setAttribute("autocomplete", "name"); tel.setAttribute("autocomplete", "tel");
+    $("cf-go").addEventListener("click", confirmer);
+    box.addEventListener("input", function(){ $("cf-err").hidden = true; document.querySelectorAll(".cf-bad").forEach(function(x){ x.classList.remove("cf-bad"); }); });
+  }
+
+  function erreur(msg, el){
+    var e = $("cf-err"); e.textContent = msg; e.hidden = false;
+    document.querySelectorAll(".cf-bad").forEach(function(x){ x.classList.remove("cf-bad"); });
+    if (el) { el.classList.add("cf-bad"); el.focus(); }
+  }
+
+  function confirmer(){
+    var nom = $("client-nom").value.trim(), tel = $("client-tel").value.trim(), mail = $("client-email").value.trim();
+    var prix = ($("tprice") || {}).textContent || "";
+    if (!/\d/.test(prix)) return erreur(T.ePrix);
+    if (nom.length < 2) return erreur(T.eNom, $("client-nom"));
+    if (tel.replace(/\D/g, "").length < 8) return erreur(T.eTel, $("client-tel"));
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(mail)) return erreur(T.eMail, $("client-email"));
+    $("cf-err").hidden = true;
+
+    var dep = $("dep").value.trim(), arr = $("arr").value.trim();
+    var vol = (($("vol") || {}).value || "").trim().toUpperCase();
+    var volprov = (($("volprov") || {}).value || "").trim();
+    var volarr = dep.indexOf("✈️") === 0 ? dep.replace(/^✈️\s*/, "") : "";
+    var bebe = $("so-bebe").classList.contains("checked"), reh = $("so-reh").classList.contains("checked"), combi = $("so-combi").classList.contains("checked");
+    var siege = (combi || (bebe && reh)) ? "Siège bébé + Rehausseur" : bebe ? "Siège bébé" : reh ? "Rehausseur" : "Aucune";
+    var vh = (typeof vehicule !== "undefined" && vehicule === "van") ? "Van Mercedes Classe V 🚐" : "Berline 🚗";
+    var date = $("rdate").value || "", heure = $("rheure").value || "";
+    if (!date) { var d = new Date(); date = d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0"); }
+    if (!heure) { var h = new Date(); heure = "Maintenant (" + String(h.getHours()).padStart(2,"0") + ":" + String(h.getMinutes()).padStart(2,"0") + ")"; }
+    var resa = {nom: nom, tel: tel, dep: dep, arr: arr, vol: vol, vol_provenance: volprov, vol_arrivee: volarr,
+      dep_zone: (typeof coords !== "undefined" && coords.dep && coords.dep.zone) || "", arr_zone: (typeof coords !== "undefined" && coords.arr && coords.arr.zone) || "",
+      pax: $("pax").value, vh: vh, vehicule: vh, siege: siege, langue: lang, date: date, heure: heure, prix: prix.trim(),
+      statut: "en attente", source: "site", date_creation: new Date().toISOString()};
+
+    var b = $("cf-go"); b.disabled = true; b.textContent = T.env;
+    // Firebase : exactement les mêmes champs qu'avant (pour ne pas être refusé) ; l'email part avec l'alerte
+    var fb = (typeof window.enregistrerReservation === "function") ? window.enregistrerReservation(resa) : Promise.resolve();
+    var alerte = fetch(APPS, {method: "POST", headers: {"Content-Type": "text/plain;charset=utf-8"},
+      body: JSON.stringify(Object.assign({action: "site", email: mail}, resa))}).catch(function(){});
+    Promise.race([Promise.all([fb, alerte]), new Promise(function(r){ setTimeout(r, 6000); })])
+      .then(function(){ window.location.href = "/merci/?resa=1&l=" + lang; });
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", monter); else monter();
+})();
+</script>
+
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCotWtH67rWpOKRwxTGXtxj-oVcc0vwOVg&libraries=places&callback=initGooglePlaces&language=fr" async defer></script>
 <script>
 (function(){
