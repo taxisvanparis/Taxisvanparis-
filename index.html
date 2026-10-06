@@ -1918,6 +1918,126 @@ function demandeDevis(service) {
 // Fallback si Google Maps pas encore chargé
 window.initGooglePlaces = window.initGooglePlaces || function(){};
 </script>
+<!-- ═══ Carte avec tracé par la route + Adultes / Enfants (ajout) ═══ -->
+<style>
+  .route-card{border-radius:14px;overflow:hidden;border:1px solid rgba(201,168,76,.25);margin-bottom:18px;background:#EEE;position:relative}
+  #route-map{width:100%;height:320px}
+  .route-info{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:center;padding:12px 14px;
+    background:var(--noir-3);border-top:1px solid rgba(201,168,76,.2);font-family:'DM Sans',sans-serif;font-size:.92rem;color:var(--blanc)}
+  .route-info b{color:var(--gold)}
+  .route-info:empty{display:none}
+  .pax-steps{display:grid;grid-template-columns:1fr 1fr;gap:14px;width:100%;flex:1 1 100%;margin-bottom:12px}
+  .frow:has(.pax-steps){grid-template-columns:1fr!important}
+  .frow:has(.pax-steps) .vehicle-grid{width:100%}
+  .pax-steps .ps-l{display:block;font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:700;color:var(--blanc);margin-bottom:8px}
+  .pax-steps .ps-l small{font-weight:400;color:var(--gris)}
+  .ps-row{display:grid;grid-template-columns:44px 1fr 44px;gap:6px}
+  .ps-row button,.ps-row output{height:44px;border-radius:10px;border:1px solid rgba(201,168,76,.25);background:var(--noir-4);
+    color:var(--blanc);font:600 1.2rem 'DM Sans',sans-serif;display:flex;align-items:center;justify-content:center}
+  .ps-row button{cursor:pointer}
+  .ps-row button:hover{border-color:var(--gold);color:var(--gold)}
+  .ps-row button:disabled{opacity:.35;cursor:default}
+  #client-nom,#client-tel{width:100%;box-sizing:border-box;background:var(--noir-4);border:1px solid rgba(201,168,76,.2);border-radius:10px;color:var(--blanc);padding:13px;font-family:'DM Sans',sans-serif;font-size:.95rem;outline:none}
+  #client-nom:focus,#client-tel:focus{border-color:var(--gold)}
+  @media(max-width:600px){#route-map{height:260px}}
+</style>
+<script>
+(function(){
+  var L = {
+    fr:{ad:"Adultes",adS:"(+10 ans)",en:"Enfants",enS:"(0–10 ans)",km:"km par la route",min:"min",env:"environ"},
+    en:{ad:"Adults",adS:"(10+)",en:"Children",enS:"(0–10)",km:"km by road",min:"min",env:"about"},
+    es:{ad:"Adultos",adS:"(+10)",en:"Niños",enS:"(0–10)",km:"km por carretera",min:"min",env:"aprox."},
+    it:{ad:"Adulti",adS:"(+10)",en:"Bambini",enS:"(0–10)",km:"km su strada",min:"min",env:"circa"},
+    ar:{ad:"بالغون",adS:"(+10)",en:"أطفال",enS:"(0–10)",km:"كم عبر الطريق",min:"دقيقة",env:"حوالي"}
+  }[(document.documentElement.lang||"fr").slice(0,2)] || null;
+  if (!L) L = {ad:"Adultes",adS:"(+10 ans)",en:"Enfants",enS:"(0–10 ans)",km:"km par la route",min:"min",env:"environ"};
+
+  /* ---- Adultes / Enfants : remplace la liste « passagers » (le calcul utilise toujours le total) ---- */
+  function steppers(){
+    var sel = document.getElementById("pax"); if (!sel || document.querySelector(".pax-steps")) return;
+    var box = sel.closest(".sw") || sel.parentNode; box.style.display = "none";
+    var n = {a: Math.max(1, +sel.value || 1), e: 0};
+    var w = document.createElement("div"); w.className = "pax-steps";
+    w.innerHTML = '<div><span class="ps-l">'+L.ad+' <small>'+L.adS+'</small></span><div class="ps-row"><button type="button" data-k="a" data-d="-1">−</button><output id="ps-a">'+n.a+'</output><button type="button" data-k="a" data-d="1">+</button></div></div>'+
+                  '<div><span class="ps-l">'+L.en+' <small>'+L.enS+'</small></span><div class="ps-row"><button type="button" data-k="e" data-d="-1">−</button><output id="ps-e">0</output><button type="button" data-k="e" data-d="1">+</button></div></div>';
+    box.parentNode.insertBefore(w, box);
+    function maj(){
+      document.getElementById("ps-a").textContent = n.a; document.getElementById("ps-e").textContent = n.e;
+      var tot = n.a + n.e;
+      if (tot > 4 && typeof selectV === "function" && typeof vehicule !== "undefined" && vehicule !== "van") { try { selectV("van"); } catch(e){} }
+      sel.value = String(Math.min(8, tot));
+      sel.dispatchEvent(new Event("change", {bubbles:true}));
+      w.querySelectorAll("button").forEach(function(b){
+        var k = b.dataset.k, d = +b.dataset.d;
+        b.disabled = d < 0 ? n[k] <= (k === "a" ? 1 : 0) : tot >= 8;
+      });
+    }
+    // Si le client choisit la berline (4 places max), on ajuste les compteurs
+    var vb = document.getElementById("vc-berline");
+    if (vb) vb.addEventListener("click", function(){ setTimeout(function(){
+      var max = +sel.value || 4; while (n.a + n.e > max) { if (n.e > 0) n.e--; else n.a--; } maj();
+    }, 0); });
+    w.addEventListener("click", function(ev){
+      var b = ev.target.closest("button"); if (!b || b.disabled) return;
+      n[b.dataset.k] += +b.dataset.d; maj();
+    });
+    maj();
+  }
+
+  /* ---- Carte avec tracé par la route ---- */
+  var map, renderer, service, ligne, marques = [];
+  function carte(){
+    var rc = document.querySelector(".result-card"); if (!rc || document.getElementById("route-map")) return;
+    var c = document.createElement("div"); c.className = "route-card";
+    c.innerHTML = '<div id="route-map"></div><div class="route-info" id="route-info"></div>';
+    rc.insertBefore(c, rc.firstChild); // en haut de la colonne du prix
+    map = new google.maps.Map(document.getElementById("route-map"), {
+      center: {lat: 48.8566, lng: 2.3522}, zoom: 11, disableDefaultUI: true, zoomControl: true, gestureHandling: "cooperative",
+      styles: [{elementType:"geometry",stylers:[{color:"#f4f3f0"}]},{featureType:"poi",stylers:[{visibility:"off"}]},
+               {featureType:"transit",stylers:[{visibility:"off"}]},{featureType:"road",elementType:"geometry",stylers:[{color:"#ffffff"}]},
+               {featureType:"road.highway",elementType:"geometry",stylers:[{color:"#e6dcc8"}]},{featureType:"water",stylers:[{color:"#cfd8de"}]},
+               {elementType:"labels.text.fill",stylers:[{color:"#6b6357"}]}]
+    });
+    service = new google.maps.DirectionsService();
+    renderer = new google.maps.DirectionsRenderer({map: map, suppressMarkers: false,
+      polylineOptions: {strokeColor: "#C9A84C", strokeWeight: 6, strokeOpacity: .95}});
+  }
+  function nettoyer(){ if (ligne) { ligne.setMap(null); ligne = null; } marques.forEach(function(m){ m.setMap(null); }); marques = []; }
+  function tracer(){
+    if (!map || typeof coords === "undefined" || !coords.dep || !coords.arr) return;
+    var a = {lat: coords.dep.lat, lng: coords.dep.lon}, b = {lat: coords.arr.lat, lng: coords.arr.lon};
+    var info = document.getElementById("route-info");
+    service.route({origin: a, destination: b, travelMode: "DRIVING", region: "fr"}, function(res, st){
+      nettoyer();
+      if (st === "OK" && res.routes && res.routes[0]) {
+        renderer.setMap(map); renderer.setDirections(res);
+        var leg = res.routes[0].legs[0];
+        info.innerHTML = "🛣️ <b>" + Math.round(leg.distance.value / 1000) + " " + L.km + "</b> · ⏱️ " + L.env + " <b>" + Math.round(leg.duration.value / 60) + " " + L.min + "</b>";
+      } else {
+        // Itinéraire indisponible : ligne directe entre les deux points
+        renderer.setMap(null);
+        marques = [new google.maps.Marker({position: a, map: map, label: "A"}), new google.maps.Marker({position: b, map: map, label: "B"})];
+        ligne = new google.maps.Polyline({path: [a, b], geodesic: true, map: map, strokeColor: "#C9A84C", strokeWeight: 5});
+        var bd = new google.maps.LatLngBounds(); bd.extend(a); bd.extend(b); map.fitBounds(bd, 40);
+        info.innerHTML = typeof distKm !== "undefined" && distKm ? "🛣️ " + L.env + " <b>" + distKm + " " + L.km + "</b>" : "";
+      }
+    });
+  }
+  // Redessine dès que départ et arrivée sont choisis (adresse, gare, aéroport ou position)
+  var t = null;
+  setInterval(function(){
+    if (typeof coords === "undefined") return;
+    var k = coords.dep && coords.arr ? [coords.dep.lat, coords.dep.lon, coords.arr.lat, coords.arr.lon].join(",") : "";
+    if (k !== t) { t = k; if (k) tracer(); else { nettoyer(); if (renderer) renderer.setMap(null); var i = document.getElementById("route-info"); if (i) i.innerHTML = ""; } }
+  }, 600);
+
+  var precedent = window.initGooglePlaces;
+  window.initGooglePlaces = function(){ if (typeof precedent === "function") precedent.apply(this, arguments); try { carte(); } catch(e){} };
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", steppers); else steppers();
+  if (window.google && google.maps && google.maps.Map) { try { carte(); } catch(e){} }
+})();
+</script>
+
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCotWtH67rWpOKRwxTGXtxj-oVcc0vwOVg&libraries=places&callback=initGooglePlaces&language=fr" async defer></script>
 <script>
 (function(){
