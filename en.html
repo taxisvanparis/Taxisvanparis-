@@ -97,7 +97,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     {"@type": "Question", "name": "Which areas do you cover?",
      "acceptedAnswer": {"@type": "Answer", "text": "We cover Paris and the whole Île-de-France region (75, 92, 93, 94, 95, 78, 77, 91), as well as long-distance trips across France and Europe."}},
     {"@type": "Question", "name": "Can I pay by card?",
-     "acceptedAnswer": {"@type": "Answer", "text": "We accept cash and card payments. The fare is confirmed before the ride, so there are no surprises on arrival."}},
+     "acceptedAnswer": {"@type": "Answer", "text": "We accept card payments for any amount, with no minimum: Visa, Mastercard, American Express, Apple Pay and Google Pay, as well as cash. The fare is confirmed before the ride, so there are no surprises on arrival."}},
     {"@type": "Question", "name": "How can I reach Taxis Van Paris quickly?",
      "acceptedAnswer": {"@type": "Answer", "text": "Call or message us on WhatsApp at +33 6 67 40 20 05, available 24/7."}}
   ]
@@ -1202,7 +1202,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <span class="faq-arrow">▾</span>
         </button>
         <div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
-          <div itemprop="text">We accept cash and card payments. The fare is confirmed before the ride, so there are no surprises on arrival.</div>
+          <div itemprop="text">We accept card payments for any amount, with no minimum: Visa, Mastercard, American Express, Apple Pay and Google Pay, as well as cash. The fare is confirmed before the ride, so there are no surprises on arrival.</div>
         </div>
       </div>
 
@@ -2192,6 +2192,37 @@ window.initGooglePlaces = window.initGooglePlaces || function(){};
 })();
 </script>
 
+<!-- ═══ Moyens de paiement acceptés (ajout) ═══ -->
+<style>
+  .pay-band{background:var(--noir-2);border-top:1px solid rgba(201,168,76,.15);border-bottom:1px solid rgba(201,168,76,.15);padding:22px 16px;text-align:center}
+  .pay-band h3{font-family:'Playfair Display',serif;font-size:1.15rem;color:var(--blanc);margin:0 0 4px}
+  .pay-band p{font-size:.86rem;color:var(--gris);margin:0 0 12px}
+  .pay-chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+  .pay-chips span{border:1px solid rgba(201,168,76,.35);border-radius:999px;padding:7px 13px;font:600 .82rem 'DM Sans',sans-serif;color:var(--blanc);background:var(--noir-3);white-space:nowrap}
+  .pay-mini{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:8px}
+  .pay-mini span{border:1px solid rgba(201,168,76,.3);border-radius:999px;padding:4px 9px;font:600 .72rem 'DM Sans',sans-serif;color:var(--blanc)}
+</style>
+<script>
+(function(){
+  var lang = (document.documentElement.lang || "fr").slice(0,2);
+  var B = {"fr": ["Paiement par carte dès le 1er euro", "Toutes les cartes acceptées, sans minimum", "Espèces", "Paiement à bord par carte ou espèces, sans minimum · Aucun prépaiement"], "en": ["Card payment for any amount", "All cards accepted, no minimum", "Cash", "Pay on board by card or cash, no minimum · No prepayment"], "es": ["Pago con tarjeta desde el primer euro", "Todas las tarjetas, sin mínimo", "Efectivo", "Pago a bordo con tarjeta o efectivo, sin mínimo · Sin prepago"], "it": ["Pagamento con carta da 1 euro", "Tutte le carte accettate, senza minimo", "Contanti", "Pagamento a bordo con carta o contanti, senza minimo · Nessun anticipo"], "ar": ["الدفع بالبطاقة لأي مبلغ", "جميع البطاقات مقبولة، دون حد أدنى", "نقداً", "الدفع داخل السيارة بالبطاقة أو نقداً، دون حد أدنى · بدون دفع مسبق"]}[lang]; if (!B) return;
+  var C = ["💳 Visa","💳 Mastercard","💳 American Express","💳 CB","Apple Pay","Google Pay","💶 " + B[2]];
+  function chips(cls){ return '<div class="' + cls + '">' + C.map(function(c){ return "<span>" + c + "</span>"; }).join("") + "</div>"; }
+  function poser(){
+    var hero = document.querySelector("#page-home .hero");
+    if (hero && !document.getElementById("pay-band")) {
+      var d = document.createElement("div"); d.className = "pay-band"; d.id = "pay-band";
+      d.innerHTML = "<h3>💳 " + B[0] + "</h3><p>" + B[1] + "</p>" + chips("pay-chips");
+      // après le bandeau de chiffres s'il existe, sinon juste après l'accueil
+      var apres = hero.nextElementSibling && /stat|trust|chiffre/i.test(hero.nextElementSibling.className) ? hero.nextElementSibling : hero;
+      apres.parentNode.insertBefore(d, apres.nextSibling);
+    }
+    var note = document.querySelector("#cf-box .cf-note");
+    if (note && !note.dataset.pay) { note.dataset.pay = "1"; note.textContent = B[3]; note.insertAdjacentHTML("afterend", chips("pay-mini")); }
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function(){ setTimeout(poser, 0); }); else setTimeout(poser, 0);
+})();
+</script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCotWtH67rWpOKRwxTGXtxj-oVcc0vwOVg&libraries=places&callback=initGooglePlaces&language=fr" async defer></script>
 <script>
 (function(){
