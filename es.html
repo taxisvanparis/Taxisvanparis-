@@ -2191,6 +2191,8 @@ window.initGooglePlaces = window.initGooglePlaces || function(){};
   .pay-mini{gap:6px;margin-top:10px}
   .pay-logo{display:inline-flex;align-items:center;justify-content:center;min-width:66px;padding:0 10px;box-sizing:border-box;height:42px;background:#fff;border-radius:8px;
     box-shadow:0 1px 0 rgba(0,0,0,.08),0 4px 10px rgba(0,0,0,.18);font-size:30px;line-height:1}
+  .pay-logo img{height:26px;width:auto;display:block}
+  .pay-mini .pay-logo img{height:19px}
   .pay-logo b{font:800 .95rem 'DM Sans',Arial,sans-serif;letter-spacing:.3px;white-space:nowrap}
   .pay-logo em{display:none;font:700 .62rem 'DM Sans',Arial,sans-serif;font-style:normal;color:#222;text-align:center;line-height:1.1}
   .pay-sans-logo .pay-logo i{display:none}.pay-sans-logo .pay-logo em{display:block}
@@ -2205,11 +2207,12 @@ window.initGooglePlaces = window.initGooglePlaces || function(){};
   ["fontawesome","brands"].forEach(function(n){ if (document.getElementById("fa-" + n)) return;
     var l = document.createElement("link"); l.id = "fa-" + n; l.rel = "stylesheet";
     l.href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/" + n + ".min.css"; document.head.appendChild(l); });
-  var C = [["fa-cc-visa","Visa","#1A1F71"],["fa-cc-mastercard","Mastercard","#EB001B"],["fa-cc-amex","American Express","#2E77BC"],
+  var C = [["fa-cc-visa","Visa","#1A1F71"],["fa-cc-mastercard","Mastercard","#EB001B","https://commons.wikimedia.org/wiki/Special:FilePath/Mastercard_2019_logo.svg"],["fa-cc-amex","American Express","#2E77BC"],
            [null,"CB","#1F5FA8"],["fa-cc-apple-pay","Apple Pay","#000"],["fa-google-pay","Google Pay","#3C4043"],[null,"€ " + B[2],"#2E7D32"]];
   function chips(cls){ return '<div class="' + cls + '">' + C.map(function(c){
     return '<span class="pay-logo" title="' + c[1] + '" style="color:' + c[2] + '">' +
-      (c[0] ? '<i class="fa-brands ' + c[0] + '" aria-hidden="true"></i><em>' + c[1] + '</em>' : '<b>' + c[1] + '</b>') + '</span>'; }).join("") + "</div>"; }
+      (c[3] ? '<img src="' + c[3] + '" alt="' + c[1] + '" loading="lazy" onerror="this.outerHTML=\'<i class=&quot;fa-brands ' + c[0] + '&quot; aria-hidden=&quot;true&quot;></i><em>' + c[1] + '</em>\'">' :
+       c[0] ? '<i class="fa-brands ' + c[0] + '" aria-hidden="true"></i><em>' + c[1] + '</em>' : '<b>' + c[1] + '</b>') + '</span>'; }).join("") + "</div>"; }
   setTimeout(function(){ try { var i = document.querySelector(".pay-logo i");
     if (i && !/Font Awesome/i.test(getComputedStyle(i).fontFamily)) document.documentElement.classList.add("pay-sans-logo"); } catch(e){} }, 3500);
   function poser(){
