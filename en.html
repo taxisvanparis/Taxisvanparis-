@@ -2267,7 +2267,8 @@ window.initGooglePlaces = window.initGooglePlaces || function(){};
     var rct = document.getElementById("rct");
     if (!rct || !rct.classList.contains("show")) return;   // calcul refusé (adresse manquante…)
     var nav = document.querySelector("nav");
-    var y = rct.getBoundingClientRect().top + window.pageYOffset - ((nav ? nav.offsetHeight : 70) + 12);
+    var cible = document.querySelector(".route-card") || rct;
+    var y = cible.getBoundingClientRect().top + window.pageYOffset - ((nav ? nav.offsetHeight : 70) + 12);
     window.scrollTo({top: y, behavior: "smooth"});
   }
   document.addEventListener("click", function(e){
@@ -2348,6 +2349,65 @@ window.initGooglePlaces = window.initGooglePlaces || function(){};
     var t=tp.textContent; if(t===last) return; last=t;
     a.textContent=/\d/.test(t) ? t.replace(/\.00\s*€/," €").replace(/(\d)\.(\d\d)/,lg==="en"?"$1.$2":"$1,$2") : t;
   },300);
+})();
+</script>
+<!-- ═══ Après le calcul : bouton « Réserver à ce prix » + barre fixe en bas ═══ -->
+<style>
+  .cta-go{display:none;width:100%;margin:-4px 0 18px;padding:16px;border:0;border-radius:12px;cursor:pointer;
+    background:linear-gradient(180deg,#E9C25A,#C9A84C);color:#1B1813;font:800 1.05rem 'DM Sans',sans-serif;letter-spacing:.02em;
+    box-shadow:0 6px 18px rgba(169,132,44,.35)}
+  .cta-go.on{display:block}
+  .cta-bar{position:fixed;left:0;right:0;bottom:0;z-index:9998;display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));background:#1B1813;border-top:1px solid rgba(201,168,76,.4);
+    box-shadow:0 -6px 20px rgba(0,0,0,.25);transform:translateY(110%);transition:transform .25s;visibility:hidden}
+  .cta-bar.on{transform:none;visibility:visible}
+  .cta-bar .cb-p small{display:block;font:700 .66rem 'DM Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#C9A84C}
+  .cta-bar .cb-p b{font:800 1.45rem 'DM Sans',sans-serif;color:#fff;white-space:nowrap}
+  .cta-bar button{flex:none;border:0;border-radius:10px;padding:13px 20px;background:linear-gradient(180deg,#E9C25A,#C9A84C);
+    color:#1B1813;font:800 .98rem 'DM Sans',sans-serif;cursor:pointer}
+  #btn-float{transition:bottom .25s}
+  body.cta-bar-on #btn-float{bottom:86px!important}
+  @media(min-width:901px){.cta-bar{display:none}body.cta-bar-on #btn-float{bottom:18px!important}}
+</style>
+<script>
+(function(){
+  var lg=(document.documentElement.lang||"fr").slice(0,2);
+  var T={fr:["Réserver à ce prix ↓","Réserver →","Forfait · prix garanti","Prix garanti"],
+         en:["Book at this price ↓","Book →","Flat rate · guaranteed","Guaranteed price"],
+         es:["Reservar a este precio ↓","Reservar →","Tarifa fija · garantizada","Precio garantizado"],
+         it:["Prenota a questo prezzo ↓","Prenota →","Forfait · prezzo garantito","Prezzo garantito"],
+         ar:["احجز بهذا السعر ↓","احجز ←","سعر ثابت · مضمون","سعر مضمون"]}[lg]||null;
+  if(!T) T=["Réserver à ce prix ↓","Réserver →","Forfait · prix garanti","Prix garanti"];
+  var bar,go,formVu=false;
+  function versFormulaire(){
+    var f=document.getElementById("cf-box")||document.getElementById("rct"); if(!f) return;
+    var nav=document.querySelector("nav");
+    window.scrollTo({top:f.getBoundingClientRect().top+window.pageYOffset-((nav?nav.offsetHeight:70)+12),behavior:"smooth"});
+  }
+  function init(){
+    bar=document.createElement("div"); bar.className="cta-bar";
+    bar.innerHTML='<div class="cb-p"><small></small><b></b></div><button type="button"></button>';
+    bar.querySelector("button").textContent=T[1]; bar.querySelector("button").onclick=versFormulaire;
+    document.body.appendChild(bar);
+    window.addEventListener("scroll",maj,{passive:true});
+    setInterval(maj,400);
+  }
+  function maj(){
+    var rct=document.getElementById("rct"), tp=document.getElementById("tprice");
+    var ok=!!(rct&&rct.classList.contains("show")&&tp&&/\d/.test(tp.textContent)&&document.getElementById("page-booking")&&document.getElementById("page-booking").classList.contains("active"));
+    var rc=document.querySelector(".route-card");
+    if(!go&&rc){ go=document.createElement("button"); go.type="button"; go.className="cta-go"; go.textContent=T[0]; go.onclick=versFormulaire; rc.parentNode.insertBefore(go,rc.nextSibling); }
+    if(go) go.classList.toggle("on",ok);
+    if(!bar) return;
+    var aff=document.querySelector(".tp-aff"), tl=document.getElementById("tlines");
+    bar.querySelector("small").textContent=(tl&&tl.textContent.indexOf("✈")>-1)?T[2]:T[3];
+    bar.querySelector("b").textContent=aff?aff.textContent:(tp?tp.textContent:"");
+    var nm=document.getElementById("client-nom")||document.getElementById("cf-box");
+    formVu=!!(nm&&nm.offsetParent&&nm.getBoundingClientRect().top<window.innerHeight*0.7);
+    var on=ok&&!formVu;
+    bar.classList.toggle("on",on); document.body.classList.toggle("cta-bar-on",on&&window.innerWidth<=900);
+  }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
 })();
 </script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCotWtH67rWpOKRwxTGXtxj-oVcc0vwOVg&libraries=places&callback=initGooglePlaces&language=fr" async defer></script>
