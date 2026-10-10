@@ -1809,7 +1809,7 @@ forfaitApplique = true;
 
   // ── Plafonds zone taxi parisien (75, 92, 93, 94) hors forfait ──
   if (!forfaitApplique) {
-    const zoneParis = isZoneParis('arr') || isZoneParis('dep');
+    const zoneParis = isZoneParis('arr') && isZoneParis('dep');
     const grandVan = vehicule === 'van' && pax >= 6;
     if (zoneParis) {
       if (distKm < 29) {

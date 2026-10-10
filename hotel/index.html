@@ -327,7 +327,7 @@ textarea{min-height:64px;resize:vertical}
     else if(aP&&beauvais(dep)) total=!van?185:(pax<=6?198:215);
     else if((dP&&gare(arr))||(aP&&gare(dep))||(gare(dep)&&gare(arr))) total=50+supp;
     else forfait=false;
-    if(!forfait&&(zone(arr)||zone(dep))){
+    if(!forfait&&(zone(arr)&&zone(dep))){
       var gv=van&&pax>=6, plafond=dist<29?(gv?95:85):(gv?110:100);
       if(total>plafond) total=plafond;
     }

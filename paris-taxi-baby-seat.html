@@ -228,7 +228,7 @@ var TVP = (function(){
     else if(aP&&isBeauvais(dep)) set(185,198,215,6);
     else if((dP&&isGare(arr))||(aP&&isGare(dep))||(isGare(dep)&&isGare(arr))){total=50+supp;fixed=true;}
     var capped=false;
-    if(!fixed&&(zoneParis(dep)||zoneParis(arr))){
+    if(!fixed&&(zoneParis(dep)&&zoneParis(arr))){
       var big=veh==='van'&&pax>=6, cap=km<29?(big?95:85):(big?110:100);
       if(total>cap){total=cap;capped=true;}
     }
