@@ -232,6 +232,8 @@ var TVP = (function(){
       var big=veh==='van'&&pax>=6, cap=km<29?(big?95:85):(big?110:100);
       if(total>cap){total=cap;capped=true;}
     }
+    var crt=function(p){return /cr[ée]teil|94000/i.test((p&&p.address)||'');}; // Créteil ⇄ Orly : 70 € minimum
+    if((crt(dep)&&isOrly(arr))||(isOrly(dep)&&crt(arr))) total=Math.max(total,70);
     return {total:Math.round(total*100)/100, fixed:fixed||capped, km:km, creuse:c};
   }
   // lieu Google → {lat,lon,address,dept}
