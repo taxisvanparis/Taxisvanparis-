@@ -1024,9 +1024,9 @@ function anonymise(title,location){
   }
   // Fiche course pour le chauffeur : sans numéro du client ni prix, avec lien Waze du départ (sauf aéroport)
   const AERO_RX = /\b(cdg|roissy|charles[ -]?de[ -]?gaulle|orly|beauvais|till[ée]|a[ée]roport|airport|terminal)\b/i;
-  const sansPrixNiTel = (t, masque) => String(t || "")
-    .replace(/(?:\+\s?\d{2,3}|\b0)\s?[1-9](?:[\s.-]?\d{2}){4}/g, masque ? "[n° masqué]" : "")
-    .replace(/\b(?:dont\s+)?\d+(?:[.,]\d+)?\s*(?:€|euros?)(?:\s*h[ôo]tel)?/gi, masque ? "[prix masqué]" : "")
+  const sansPrixNiTel = t => String(t || "")
+    .replace(/(?:\+\s?\d{2,3}|\b0)\s?[1-9](?:[\s.-]?\d{2}){4}/g, "")
+    .replace(/\b(?:dont\s+)?\d+(?:[.,]\d+)?\s*(?:€|euros?)(?:\s*h[ôo]tel)?/gi, "")
     .replace(/\(\s*\)/g, "").replace(/\s{2,}/g, " ").trim();
   function chauffeurDe(r) {
     return chauffeursCache.find(c => (r.chauffeurUid && c.uid === r.chauffeurUid) || (r.chauffeurNom && c.nom === r.chauffeurNom)) || null;
@@ -1048,7 +1048,9 @@ function anonymise(title,location){
     const det = [vehLabel(r.vehicule) && "🚐 " + vehLabel(r.vehicule), r.pax && "👥 " + r.pax + " pers.", r.bagages && +r.bagages > 0 && "🧳 " + r.bagages + " bagage" + (+r.bagages > 1 ? "s" : ""),
       r.siege && r.siege !== "Aucun" && r.siege !== "Aucune" && "👶 " + r.siege].filter(Boolean);
     if (det.length) L.push(det.join(" · "));
-    const note = sansPrixNiTel(r.note, true);
+    const enCompte = /\ben\s+compte\b/i.test([r.prix, r.paiement, r.note, r.nom].map(v => String(v ?? "")).join(" "));
+    if (enCompte) L.push("💳 En compte");
+    const note = sansPrixNiTel(enCompte ? String(r.note || "").replace(/\ben\s+compte\b/gi, "") : r.note).replace(/^[\s,;.:-]+|[\s,;:-]+$/g, "").replace(/\s+([,;.])/g, "$1").replace(/([,;])\s*(?=[,;]|$)/g, "");
     if (note) L.push(`📝 ${note}`);
     return L.join("\n");
   }
