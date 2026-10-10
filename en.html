@@ -1686,6 +1686,27 @@ function calculer() {
   if (!dep||!arr)  { alert("Please enter the pick-up and drop-off addresses."); return; }
   if (!distKm)     { alert('Please choose the addresses from the suggestion list.'); return; }
 
+  // ── Distance réelle par la route (Google) ; repli sur l'estimation si indisponible ──
+  const cleRoute = [coords.dep.lat, coords.dep.lon, coords.arr.lat, coords.arr.lon].join(',');
+  if (window._routeKey !== cleRoute) {
+    if (window._routeEnCours) return;
+    if (window.google && google.maps && google.maps.DirectionsService) {
+      window._routeEnCours = true;
+      new google.maps.DirectionsService().route({
+        origin: {lat: coords.dep.lat, lng: coords.dep.lon},
+        destination: {lat: coords.arr.lat, lng: coords.arr.lon},
+        travelMode: 'DRIVING', region: 'fr'
+      }, function(res, st) {
+        window._routeEnCours = false;
+        window._routeKey = cleRoute;
+        window._routeKm = (st === 'OK' && res.routes && res.routes[0]) ? Math.max(1, Math.round(res.routes[0].legs[0].distance.value / 1000)) : null;
+        calculer();
+      });
+      return;
+    }
+  }
+  if (window._routeKey === cleRoute && window._routeKm) distKm = window._routeKm;
+
   const heureStr = document.getElementById('rheure').value;
   const creuse = isHeureCreuse(heureStr);
   const PRISE=15.00, SUPP=5.50;
@@ -1771,6 +1792,7 @@ function calculer() {
 
 
 let forfaitApplique = false;
+let forfaitGare = false;
 
   // Paris → Roissy
   // Type aéroport depuis coords arr si sélectionné via modal
@@ -1827,6 +1849,7 @@ let forfaitApplique = false;
   else if ((depParis75 && isGare(arrAddr)) || (arrParis75 && isGare(depAddr)) || (isGare(depAddr) && isGare(arrAddr))) {
 total = 50 + suppPax
 forfaitApplique = true;
+forfaitGare = true;
 }
 
 
@@ -1859,6 +1882,27 @@ forfaitApplique = true;
     };
     const avecSiege = ['so-bebe', 'so-reh', 'so-combi'].some(i => { const e = document.getElementById(i); return e && e.classList.contains('checked'); });
     if (intraParis('dep') && intraParis('arr')) total = Math.max(total, avecSiege ? 60 : 50);
+  }
+
+  // ── Van pour 1 à 4 personnes : toujours au moins 10 € de plus qu'en berline ──
+  // (forfaits aéroport van déjà ≥ +10 € ; ailleurs le prix berline et van est le même → +10 €)
+  if (vehicule === 'van' && pax <= 4 && (!forfaitApplique || forfaitGare)) total += 10;
+
+  // ── Van : minimum 70 € entre Gare Montparnasse et le 92, et entre Gare de Lyon et l'ouest parisien (92) ──
+  if (vehicule === 'van') {
+    const norm = t => (t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[-'’]/g, ' ');
+    const V92 = ['antony','asnieres sur seine','bagneux','bois colombes','boulogne billancourt','bourg la reine','chatenay malabry','chatillon','chaville','clamart','clichy','colombes','courbevoie','fontenay aux roses','garches','gennevilliers','issy les moulineaux','la garenne colombes','le plessis robinson','levallois perret','malakoff','marnes la coquette','meudon','montrouge','nanterre','neuilly sur seine','puteaux','rueil malmaison','saint cloud','sceaux','sevres','suresnes','vanves','vaucresson','ville d avray','villeneuve la garenne'];
+    const V93 = ['aubervilliers','aulnay sous bois','bagnolet','bobigny','bondy','clichy sous bois','coubron','drancy','dugny','epinay sur seine','gagny','gournay sur marne','l ile saint denis','la courneuve','le blanc mesnil','le bourget','le pre saint gervais','le raincy','les lilas','les pavillons sous bois','livry gargan','montfermeil','montreuil','neuilly plaisance','neuilly sur marne','noisy le grand','noisy le sec','pantin','romainville','rosny sous bois','saint denis','pierrefitte sur seine','saint ouen','sevran','stains','tremblay en france','vaujours','villemomble','villepinte','villetaneuse'];
+    const V94 = ['ablon sur seine','alfortville','arcueil','boissy saint leger','bonneuil sur marne','bry sur marne','cachan','champigny sur marne','charenton le pont','chennevieres sur marne','chevilly larue','choisy le roi','creteil','fontenay sous bois','fresnes','gentilly','ivry sur seine','joinville le pont','l hay les roses','la queue en brie','le kremlin bicetre','le perreux sur marne','le plessis trevise','limeil brevannes','maisons alfort','mandres les roses','marolles en brie','nogent sur marne','noiseau','orly','ormesson sur marne','perigny','rungis','saint mande','saint maur des fosses','saint maurice','santeny','sucy en brie','thiais','valenton','villecresnes','villejuif','villeneuve le roi','villeneuve saint georges','villiers sur marne','vincennes','vitry sur seine'];
+    const adr = id => norm(coords[id] && coords[id].address);
+    const dansListe = (id, l) => l.some(v => adr(id).includes(v));
+    const dept = id => depts[id] || (dansListe(id, V93) ? '93' : dansListe(id, V94) ? '94' : dansListe(id, V92) ? '92' : null);
+    const pres = (id, la, lo) => !!coords[id] && distGPS(coords[id].lat, coords[id].lon, la, lo) < 0.7;
+    const estMontparnasse = id => pres(id, 48.8408, 2.3205) || adr(id).includes('montparnasse');
+    const estGareDeLyon   = id => pres(id, 48.8449, 2.3735) || adr(id).includes('gare de lyon');
+    const montp92 = (estMontparnasse('dep') && dept('arr') === '92') || (estMontparnasse('arr') && dept('dep') === '92');
+    const lyonOuest = (estGareDeLyon('dep') && dept('arr') === '92') || (estGareDeLyon('arr') && dept('dep') === '92');
+    if (montp92 || lyonOuest) total = Math.max(total, 70);
   }
 
   const bebe =document.getElementById('so-bebe').classList.contains('checked');
@@ -2282,9 +2326,9 @@ window.initGooglePlaces = window.initGooglePlaces || function(){};
 <!-- ═══ Après « Calculer le tarif » : défilement automatique vers le prix + la confirmation ═══ -->
 <script>
 (function(){
-  function go(){
+  function go(k){
     var rct = document.getElementById("rct");
-    if (!rct || !rct.classList.contains("show")) return;   // calcul refusé (adresse manquante…)
+    if (!rct || !rct.classList.contains("show")) { if ((k||0) < 12) setTimeout(function(){ go((k||0)+1); }, 150); return; }   // calcul refusé (adresse manquante…)
     var nav = document.querySelector("nav");
     var cible = document.querySelector(".route-card") || rct;
     var y = cible.getBoundingClientRect().top + window.pageYOffset - ((nav ? nav.offsetHeight : 70) + 12);
