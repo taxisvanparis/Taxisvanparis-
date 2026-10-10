@@ -1022,6 +1022,41 @@ function anonymise(title,location){
       `${r.dep ? "\n📍 Départ : " + r.dep : ""}${r.arr ? "\n🏁 Arrivée : " + r.arr : ""}\nJe serai là à l'heure prévue. À bientôt !\nTaxis Van Paris — 06 67 40 20 05`;
     return `<a class="cal-btn wa-btn" target="_blank" rel="noopener" href="https://wa.me/${n}?text=${encodeURIComponent(txt)}">📩 Confirmation client</a> `;
   }
+  // Fiche course pour le chauffeur : sans numéro du client ni prix, avec lien Waze du départ (sauf aéroport)
+  const AERO_RX = /\b(cdg|roissy|charles[ -]?de[ -]?gaulle|orly|beauvais|till[ée]|a[ée]roport|airport|terminal)\b/i;
+  const sansPrixNiTel = (t, masque) => String(t || "")
+    .replace(/(?:\+\s?\d{2,3}|\b0)\s?[1-9](?:[\s.-]?\d{2}){4}/g, masque ? "[n° masqué]" : "")
+    .replace(/\b(?:dont\s+)?\d+(?:[.,]\d+)?\s*(?:€|euros?)(?:\s*h[ôo]tel)?/gi, masque ? "[prix masqué]" : "")
+    .replace(/\(\s*\)/g, "").replace(/\s{2,}/g, " ").trim();
+  function chauffeurDe(r) {
+    return chauffeursCache.find(c => (r.chauffeurUid && c.uid === r.chauffeurUid) || (r.chauffeurNom && c.nom === r.chauffeurNom)) || null;
+  }
+  function messageChauffeur(r) {
+    const m = String(r.date || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    const jour = m ? new Date(+m[1], +m[2] - 1, +m[3]).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" }) : "date à préciser";
+    const nom = sansPrixNiTel(String(r.nom || "").replace(/^🏨\s*/, "").replace(/\s*\(.*\)\s*$/, ""));
+    const depAero = AERO_RX.test(String(r.dep || "") + " " + String(r.depZone || ""));
+    const L = ["🚖 *COURSE ATTRIBUÉE*"];
+    if (r.chauffeurNom) L.push(`Chauffeur : ${r.chauffeurNom}`);
+    L.push("", `📅 ${jour} à ${r.heure ? r.heure.replace(":", "h") : "heure à préciser"}`);
+    if (nom) L.push(`👤 Client : ${nom}${r.chambre ? " · ch. " + r.chambre : ""}`);
+    if (isHotelR(r) && r.hotel) L.push(`🏨 ${r.hotel}`);
+    L.push(`📍 Départ : ${r.dep || "à préciser"}`);
+    if (r.dep && !depAero) L.push(`🧭 Waze : https://waze.com/ul?q=${encodeURIComponent(r.dep)}&navigate=yes`);
+    if (volInfo(r) || volCode(r)) L.push(`✈️ ${volInfo(r) || "Vol " + volCode(r)}`);
+    L.push(`🏁 Arrivée : ${r.arr || "à préciser"}`);
+    const det = [vehLabel(r.vehicule) && "🚐 " + vehLabel(r.vehicule), r.pax && "👥 " + r.pax + " pers.", r.bagages && +r.bagages > 0 && "🧳 " + r.bagages + " bagage" + (+r.bagages > 1 ? "s" : ""),
+      r.siege && r.siege !== "Aucun" && r.siege !== "Aucune" && "👶 " + r.siege].filter(Boolean);
+    if (det.length) L.push(det.join(" · "));
+    const note = sansPrixNiTel(r.note, true);
+    if (note) L.push(`📝 ${note}`);
+    return L.join("\n");
+  }
+  function waChauffeur(r) {
+    const c = chauffeurDe(r), n = c ? waNumClient(c.tel) : "";
+    const href = (n ? "https://wa.me/" + n : "https://wa.me/") + "?text=" + encodeURIComponent(messageChauffeur(r));
+    return `<a class="cal-btn wa-btn" target="_blank" rel="noopener" href="${href}">🚖 Envoyer au chauffeur</a> `;
+  }
   // Demande d'avis Google au client après la course
   const AVIS_LINK = "https://g.page/r/CWXImdGQDnt4ECE/review";
   function waAvis(r) {
@@ -1109,7 +1144,7 @@ function anonymise(title,location){
         const boutons = (ferme ? `<button class="no" data-st="en attente" data-id="${esc(r.id)}">Rétablir</button>` :
             (r.statut !== "confirmée" ? `<button class="ok" data-st="confirmée" data-id="${esc(r.id)}">Confirmer</button>` : "") +
             `<button class="done" data-st="terminée" data-id="${esc(r.id)}">Effectuée</button><button class="no" data-st="annulée" data-id="${esc(r.id)}">Annuler</button>`) +
-          waClient(r) + waAvis(r) + (groupOf(r) === 0 && r.statut !== "annulée" ? `<a class="grp-btn" target="_blank" rel="noopener" href="${waLink(shareMessage(shareItem(r)))}">📢 Dispatcher</a>` : "") +
+          waClient(r) + waAvis(r) + (groupOf(r) === 0 && r.statut !== "annulée" ? waChauffeur(r) : "") + (groupOf(r) === 0 && r.statut !== "annulée" ? `<a class="grp-btn" target="_blank" rel="noopener" href="${waLink(shareMessage(shareItem(r)))}">📢 Dispatcher</a>` : "") +
           (groupOf(r) === 0 ? calLink([r], "📅", "cal-btn") : "") +
           `<button class="edit" data-edit="${esc(r.id)}">✏️ Modifier</button><button class="del" data-del="${esc(r.id)}" aria-label="Supprimer">🗑️</button>`;
         return `<div class="rc s-${cls}">
