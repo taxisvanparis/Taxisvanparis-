@@ -1833,10 +1833,10 @@ forfaitApplique = true;
     }
   }
 
-  // ── Créteil ⇄ Orly : 70 € minimum ──
+  // ── Créteil ⇄ Orly : 60 € minimum ──
   {
     const estCreteil = a => /cr[ée]teil|94000/i.test(a || '');
-    if ((estCreteil(depAddr) && isOrly(arrAddr, 'arr')) || (isOrly(depAddr, 'dep') && estCreteil(arrAddr))) total = Math.max(total, 70);
+    if ((estCreteil(depAddr) && isOrly(arrAddr, 'arr')) || (isOrly(depAddr, 'dep') && estCreteil(arrAddr))) total = Math.max(total, 60);
   }
 
   // ── Minimum Paris → Paris (75 → 75) : 50 € sans siège, 60 € avec siège bébé / rehausseur ──

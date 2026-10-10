@@ -332,8 +332,8 @@ textarea{min-height:64px;resize:vertical}
       if(total>plafond) total=plafond;
     }
     if(intraParis(dep)&&intraParis(arr)) total=Math.max(total,siege?MIN_PARIS_SIEGE:MIN_PARIS);
-    var crt=function(p){return /cr[ée]teil|94000/i.test((p&&p.address)||'');}; // Créteil ⇄ Orly : 70 € minimum
-    if((crt(dep)&&orly(arr))||(orly(dep)&&crt(arr))) total=Math.max(total,70);
+    var crt=function(p){return /cr[ée]teil|94000/i.test((p&&p.address)||'');}; // Créteil ⇄ Orly : 60 € minimum
+    if((crt(dep)&&orly(arr))||(orly(dep)&&crt(arr))) total=Math.max(total,60);
     return {dist:dist,prix:Math.round((total+COM)*100)/100};
   }
   function fmt(n){ return (n%1?n.toFixed(2).replace(".",","):String(n))+" €"; }
