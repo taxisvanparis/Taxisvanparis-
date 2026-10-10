@@ -374,6 +374,7 @@
   .rc .acts .grp-btn{border-color:var(--wa);color:#0B2414;background:var(--wa);font-weight:700}
   .field select{width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:8px;font-size:15px;background:var(--card);color:var(--text);}
   .rempty{text-align:center;padding:28px 16px;border:1px dashed var(--border);border-radius:14px;color:var(--muted);}
+.wa-direct{display:inline-block;background:#25D366;color:#fff!important;font-weight:700;text-decoration:none;padding:3px 10px;border-radius:12px;font-size:.82rem}
 </style>
 </head>
 <body>
@@ -1156,7 +1157,7 @@ function anonymise(title,location){
             ${hotel ? `<div><span class="tag-hotel">🏨 ${esc(r.hotel || "Hôtel partenaire")}</span></div>` : ""}
             <div class="rt">${esc(r.dep || "?")} → <b>${esc(r.arr || "?")}</b></div>
             ${meta ? `<div class="mt">${meta}</div>` : ""}
-            ${r.tel ? `<div class="mt"><a href="tel:${esc(r.tel)}">${esc(r.tel)}</a>${r.chauffeurNom ? " · Chauffeur : " + esc(r.chauffeurNom) : ""}</div>` : (r.chauffeurNom ? `<div class="mt">Chauffeur : ${esc(r.chauffeurNom)}</div>` : "")}
+            ${r.tel ? `<div class="mt"><a href="tel:${esc(r.tel)}">${esc(r.tel)}</a>${waNumClient(r.tel) ? ` · <a class="wa-direct" target="_blank" rel="noopener" href="https://wa.me/${waNumClient(r.tel)}">💬 WhatsApp</a>` : ""}${r.chauffeurNom ? " · Chauffeur : " + esc(r.chauffeurNom) : ""}</div>` : (r.chauffeurNom ? `<div class="mt">Chauffeur : ${esc(r.chauffeurNom)}</div>` : "")}
             ${vol}${note}
             <div class="l3"><span class="pr">${fmtPrix(r.prix)}${hotel && r.commission ? `<small>dont ${esc(r.commission)} € hôtel</small>` : ""}</span><div class="acts">${boutons}</div></div>
           </div></div>`;
