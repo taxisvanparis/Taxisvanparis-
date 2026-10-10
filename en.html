@@ -2473,6 +2473,28 @@ window.initGooglePlaces = window.initGooglePlaces || function(){};
   document.addEventListener("click",function(e){ if(e.target.closest(".sopt")||e.target.closest("#vc-berline")) setTimeout(verifier,0); });
 })();
 </script>
+<!-- ═══ Prix toujours à jour : recalcul automatique après un changement ═══ -->
+<script>
+(function(){
+  var t=null;
+  function recalc(){
+    clearTimeout(t);
+    t=setTimeout(function(){
+      var rct=document.getElementById("rct");
+      if(!rct||!rct.classList.contains("show")||typeof calculer!=="function") return;
+      if(typeof coords!=="undefined"&&(!coords.dep||!coords.arr)) return;
+      var a=window.alert; window.alert=function(){};            // jamais de fenêtre d'erreur pendant un recalcul
+      try{ calculer(); }catch(e){} finally{ window.alert=a; }
+    },80);
+  }
+  document.addEventListener("click",function(e){
+    if(e.target.closest("#vc-berline,#vc-van,.sopt,.pax-steps button,#btn-maintenant,#btn-plustard")) recalc();
+  });
+  document.addEventListener("change",function(e){
+    if(e.target&&/^(pax|rdate|rheure)$/.test(e.target.id)) recalc();
+  });
+})();
+</script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCotWtH67rWpOKRwxTGXtxj-oVcc0vwOVg&libraries=places&callback=initGooglePlaces&language=fr" async defer></script>
 <script>
 (function(){
