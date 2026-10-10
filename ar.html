@@ -1890,7 +1890,7 @@ forfaitGare = true;
   // (forfaits aéroport van déjà ≥ +10 € ; ailleurs le prix berline et van est le même → +10 €)
   if (vehicule === 'van' && pax <= 4 && (!forfaitApplique || forfaitGare)) total += 10;
 
-  // ── Van : minimum 70 € pour toute course depuis ou vers une gare parisienne ──
+  // ── Van : minimum 70 € entre une gare parisienne et la banlieue (Paris ⇄ Paris inchangé) ──
   if (vehicule === 'van') {
     const norm = t => (t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[-'’]/g, ' ');
     const V92 = ['antony','asnieres sur seine','bagneux','bois colombes','boulogne billancourt','bourg la reine','chatenay malabry','chatillon','chaville','clamart','clichy','colombes','courbevoie','fontenay aux roses','garches','gennevilliers','issy les moulineaux','la garenne colombes','le plessis robinson','levallois perret','malakoff','marnes la coquette','meudon','montrouge','nanterre','neuilly sur seine','puteaux','rueil malmaison','saint cloud','sceaux','sevres','suresnes','vanves','vaucresson','ville d avray','villeneuve la garenne'];
@@ -1903,7 +1903,8 @@ forfaitGare = true;
     const GARES_PARIS = [[48.8809, 2.3553, 'gare du nord'], [48.8449, 2.3735, 'gare de lyon'], [48.8408, 2.3205, 'montparnasse'],
                          [48.8760, 2.3245, 'saint lazare'], [48.8765, 2.3590, 'gare de l est'], [48.8426, 2.3655, 'austerlitz'], [48.8402, 2.3793, 'bercy']];
     const estGareParis = id => GARES_PARIS.some(g => pres(id, g[0], g[1]) || adr(id).includes(g[2]));
-    if (estGareParis('dep') || estGareParis('arr')) total = Math.max(total, 70);
+    const enParis = id => estGareParis(id) || depts[id] === '75' || (!depts[id] && /\b75\d{3}\b|(^|,\s*)paris(\s*,|\s*$|\s+france)/i.test((coords[id] && coords[id].address) || ''));
+    if ((estGareParis('dep') && !enParis('arr')) || (estGareParis('arr') && !enParis('dep'))) total = Math.max(total, 70);
   }
 
   const bebe =document.getElementById('so-bebe').classList.contains('checked');
