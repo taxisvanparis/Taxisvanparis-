@@ -2433,6 +2433,46 @@ window.initGooglePlaces = window.initGooglePlaces || function(){};
   },300);
 })();
 </script>
+<!-- ═══ Siège bébé + rehausseur : passage automatique en van ═══ -->
+<style>
+  .seat-van-note{display:none;margin-top:10px;padding:10px 12px;border-radius:10px;background:rgba(201,168,76,.14);border:1px solid rgba(201,168,76,.4);
+    font:600 .82rem 'DM Sans',sans-serif;color:var(--blanc,#1B1813);line-height:1.4}
+  .seat-van-note.on{display:block}
+</style>
+<script>
+(function(){
+  var lg=(document.documentElement.lang||"fr").slice(0,2);
+  var MSG={fr:"🚐 Siège bébé + rehausseur : nous vous envoyons un van, pour plus de place et de confort.",
+           en:"🚐 Baby seat + booster: we'll send you a van for more space and comfort.",
+           es:"🚐 Silla de bebé + elevador: le enviaremos una furgoneta, con más espacio y comodidad.",
+           it:"🚐 Seggiolino + rialzo: le invieremo un van, per più spazio e comfort.",
+           ar:"🚐 مقعد رضيع + مقعد معزز: سنرسل لكم سيارة فان لمزيد من المساحة والراحة."}[lg]||"";
+  function besoinVan(){
+    var c=function(i){var e=document.getElementById(i);return !!(e&&e.classList.contains("checked"));};
+    return c("so-combi")||(c("so-bebe")&&c("so-reh"));
+  }
+  function note(on){
+    var so=document.getElementById("so-combi"); if(!so) return;
+    var box=so.closest(".seat-opts")||so.parentNode, n=document.querySelector(".seat-van-note");
+    if(!n){ n=document.createElement("div"); n.className="seat-van-note"; n.textContent=MSG; box.parentNode.insertBefore(n,box.nextSibling); }
+    n.classList.toggle("on",on);
+  }
+  function verifier(){
+    var on=besoinVan(); note(on);
+    if(on&&typeof vehicule!=="undefined"&&vehicule!=="van"&&typeof selectV==="function"){
+      selectV("van");
+      var rct=document.getElementById("rct");
+      if(rct&&rct.classList.contains("show")&&typeof calculer==="function"){ try{ calculer(); }catch(e){} }
+    }
+  }
+  var orig=window.selectV;
+  if(typeof orig==="function"){
+    window.selectV=function(v){ if(v==="berline"&&besoinVan()){ v="van"; } return orig.call(this,v); };
+    try{ selectV=window.selectV; }catch(e){}
+  }
+  document.addEventListener("click",function(e){ if(e.target.closest(".sopt")||e.target.closest("#vc-berline")) setTimeout(verifier,0); });
+})();
+</script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCotWtH67rWpOKRwxTGXtxj-oVcc0vwOVg&libraries=places&callback=initGooglePlaces&language=fr" async defer></script>
 <script>
 (function(){

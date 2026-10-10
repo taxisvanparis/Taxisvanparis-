@@ -347,6 +347,8 @@ textarea{min-height:64px;resize:vertical}
     el.textContent=r?fmt(r.prix):(($("dep").value.trim()&&$("arr").value.trim())?(maps?T[lang].pick:T[lang].quote):"—");
     return {v:v,r:r};
   }
+  // Siège bébé + rehausseur (2 sièges ou plus) : passage automatique en van
+  document.addEventListener("change",function(e){ if(e.target&&(e.target.id==="baby"||e.target.name==="veh")&&$("baby").value==="more"&&$("veh-van")&&!$("veh-van").checked){ $("veh-van").checked=true; update(); } });
   document.addEventListener("change",update);
 
   function waLink(data){
