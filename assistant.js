@@ -92,7 +92,9 @@
 
   // La clé Gemini reste cachée dans le script Google (Apps Script) : le site ne fait que lui transmettre la conversation.
   function appel() {
-    return fetch(APPS, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
+    var ctrl = typeof AbortController === "function" ? new AbortController() : null;
+    if (ctrl) setTimeout(function () { ctrl.abort(); }, 30000); // au-delà de 30 s : message d'erreur au lieu de bloquer
+    return fetch(APPS, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, signal: ctrl ? ctrl.signal : undefined,
       body: JSON.stringify({ action: "assistant", systeme: SYSTEME, contents: histo.slice(-30) }) })
       .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
       .then(function (j) { if (!j || !j.texte) throw new Error("vide"); return j.texte; });
