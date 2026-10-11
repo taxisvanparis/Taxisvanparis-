@@ -2816,6 +2816,65 @@ window.initGooglePlaces = window.initGooglePlaces || function(){};
 .h2-dots{margin-top:7px!important}
 }
 </style>
+<!-- ═══ Départ / arrivée : aéroports et gares en priorité ═══ -->
+<style>
+  .ac-list .lr-grp{padding:8px 14px 4px;font:700 .66rem 'DM Sans',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#A8842C;background:#FBF8F2}
+  .ac-list .lr-item .ac-main{font-weight:700}
+  .ac-list .lr-item{background:#FFFDF8}
+</style>
+<script>
+(function(){
+  var lg=(document.documentElement.lang||"fr").slice(0,2);
+  var G={fr:["Aéroports","Gares & parcs","Aéroport"],en:["Airports","Stations & parks","Airport"],es:["Aeropuertos","Estaciones y parques","Aeropuerto"],it:["Aeroporti","Stazioni e parchi","Aeroporto"],ar:["المطارات","المحطات والمتنزهات","مطار"]}[lg]||["Aéroports","Gares & parcs","Aéroport"];
+  var A=[{k:"cdg-all",n:"Roissy-Charles de Gaulle (CDG)",m:/cdg|roiss|charles|gaulle|a[ée]ro|airp|aeropu|aerop|مطار/i,i:"✈️"},
+         {k:"orly-all",n:"Orly (ORY)",m:/^or|orly|a[ée]ro|airp|aeropu|aerop|أورلي|مطار/i,i:"✈️"},
+         {k:"beauvais",n:"Beauvais-Tillé (BVA)",m:/beau|till|bva|a[ée]ro|airp|aeropu|aerop|بوفيه|مطار/i,i:"✈️"}];
+  var Gs=[{n:"Disneyland Paris",a:"disneyland paris, 77777 marne-la-vallée",lat:48.8722,lon:2.7758,m:/disn|marne|chessy|ديزني/i,i:"🏰",d:true},
+          {n:"Gare du Nord",a:"Gare du Nord, Paris",lat:48.8809,lon:2.3553,m:/gare|nord|stat|estac|stazi|محط/i,i:"🚆"},
+          {n:"Gare de Lyon",a:"Gare de Lyon, Paris",lat:48.8449,lon:2.3735,m:/gare|lyon|stat|estac|stazi|محط/i,i:"🚆"},
+          {n:"Gare Montparnasse",a:"Gare Montparnasse, Paris",lat:48.8408,lon:2.3205,m:/gare|montp|stat|estac|stazi|محط/i,i:"🚆"},
+          {n:"Gare de l'Est",a:"Gare de l'Est, Paris",lat:48.8765,lon:2.3590,m:/gare|est|stat|estac|stazi|محط/i,i:"🚆"},
+          {n:"Gare Saint-Lazare",a:"Gare Saint-Lazare, Paris",lat:48.8760,lon:2.3245,m:/gare|lazare|stat|estac|stazi|محط/i,i:"🚆"},
+          {n:"Gare d'Austerlitz",a:"Gare d'Austerlitz, Paris",lat:48.8426,lon:2.3655,m:/gare|auster|stat|estac|stazi|محط/i,i:"🚆"}];
+  function ligne(it,idx,type){ return '<div class="ac-item lr-item" data-lr="'+type+':'+idx+'"><span class="ac-icon">'+it.i+'</span><span><span class="ac-main">'+(type==="a"?G[2]+" ":"")+it.n+'</span></span></div>'; }
+  function html(q){
+    var as=A.map(function(x,i){return [x,i];}).filter(function(p){return !q||p[0].m.test(q);});
+    var gs=Gs.map(function(x,i){return [x,i];}).filter(function(p){return !q||p[0].m.test(q);});
+    var h="";
+    if(as.length) h+='<div class="lr-grp">'+G[0]+'</div>'+as.map(function(p){return ligne(p[0],p[1],"a");}).join("");
+    if(gs.length&&(!q||as.length<3)) h+='<div class="lr-grp">'+G[1]+'</div>'+gs.slice(0,q?3:7).map(function(p){return ligne(p[0],p[1],"g");}).join("");
+    return h;
+  }
+  function choisir(id,code){
+    var t=code.split(":")[0], i=+code.split(":")[1], inp=document.getElementById(id), list=document.getElementById("list-"+id);
+    if(t==="a"&&typeof pickAeroport==="function"){ pickAeroport(id,A[i].k,G[2]+" "+A[i].n); }
+    else{ var g=Gs[i]; inp.value=g.n; coords[id]={lat:g.lat,lon:g.lon,address:g.a.toLowerCase(),zone:g.n}; depts[id]=g.d?"77":null; if(coords.dep&&coords.arr&&typeof calcDistance==="function") calcDistance(); }
+    if(list){ list.classList.remove("open"); list.innerHTML=""; }
+    inp.dispatchEvent(new Event("change",{bubbles:true}));
+  }
+  function brancher(id){
+    var inp=document.getElementById(id), list=document.getElementById("list-"+id);
+    if(!inp||!list||inp.dataset.lr) return; inp.dataset.lr="1";
+    // liste rapide dès qu'on touche un champ vide
+    function rapide(){ if(inp.value.trim()) return; list.innerHTML=html(""); list.classList.add("open"); }
+    inp.addEventListener("focus",rapide); inp.addEventListener("click",rapide);
+    inp.addEventListener("input",function(){ var q=inp.value.trim();
+      if(!q) return setTimeout(rapide,0);
+      if(q.length<3){ var h=html(q); if(h){ list.innerHTML=h; list.classList.add("open"); } else { list.classList.remove("open"); } } });
+    // pendant la frappe : aéroports / gares correspondants en tête de la liste Google
+    new MutationObserver(function(){
+      if(list.querySelector(".lr-item")||!list.innerHTML) return;
+      var q=inp.value.trim(); if(q.length<2) return;
+      var h=html(q); if(!h) return;
+      var vide=list.querySelector(".ac-empty"); if(vide) vide.remove();
+      list.insertAdjacentHTML("afterbegin",h); list.classList.add("open");
+    }).observe(list,{childList:true});
+    list.addEventListener("mousedown",function(e){ var it=e.target.closest(".lr-item"); if(!it) return; e.preventDefault(); e.stopPropagation(); choisir(id,it.dataset.lr); },true);
+  }
+  function init(){ brancher("dep"); brancher("arr"); }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",function(){ setTimeout(init,100); }); else setTimeout(init,100);
+})();
+</script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCotWtH67rWpOKRwxTGXtxj-oVcc0vwOVg&libraries=places&callback=initGooglePlaces&language=fr" async defer></script>
 <script>
 (function(){
