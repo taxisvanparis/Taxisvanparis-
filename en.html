@@ -2787,6 +2787,33 @@ window.initGooglePlaces = window.initGooglePlaces || function(){};
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",function(){ setTimeout(construire,60); }); else setTimeout(construire,60);
 })();
 </script>
+<!-- ═══ Accueil compacte sur téléphone (tout tient sur l'écran) ═══ -->
+<style>
+@media(max-width:899px){
+#page-home .hero.hero2{padding:76px 14px 18px!important}
+.h2-t{font-size:clamp(1.6rem,7.2vw,2.3rem)!important;min-height:2.15em!important}
+.h2-chips{flex-wrap:wrap!important;gap:4px!important;margin:8px -6px 6px!important}
+.h2-chips span{font-size:.66rem!important;padding:4px 7px!important;white-space:nowrap}
+.h2-prix{font-size:.8rem!important;margin:0 0 8px!important}
+.hq{padding:11px!important;border-radius:14px!important}
+.hq .lab{margin:0 0 4px!important;font-size:.62rem!important}
+.hq .ac-wrap{margin-bottom:7px!important}
+.hq .ac-wrap input{padding:10px 11px!important;font-size:.95rem!important}
+.hq .pax1{margin:0 0 7px!important}
+.hq .stp button{width:34px!important;height:34px!important;font-size:1.1rem!important}
+.hq .vsel{gap:6px!important;margin-bottom:7px!important}
+.hq .vc{display:flex!important;align-items:center;text-align:start}
+.hq .vc img{width:58px!important;height:46px!important;flex:none}
+.hq .vc .vb{padding:4px 6px!important;text-align:start!important}
+.hq .vc b{font-size:.82rem!important}.hq .vc small{font-size:.66rem!important}
+.hq .vc .ck{width:18px!important;height:18px!important;font-size:.65rem!important;top:4px!important;right:4px!important}
+.hq .seg{gap:6px!important;margin-bottom:9px!important}
+.hq .seg button{padding:6px 4px!important;font-size:.8rem!important}
+.hq .go{padding:12px!important;font-size:1rem!important}
+.h2-ann{margin:7px 0 0!important;font-size:.72rem!important}
+.h2-dots{margin-top:7px!important}
+}
+</style>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCotWtH67rWpOKRwxTGXtxj-oVcc0vwOVg&libraries=places&callback=initGooglePlaces&language=fr" async defer></script>
 <script>
 (function(){
