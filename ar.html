@@ -2631,6 +2631,164 @@ window.initGooglePlaces = window.initGooglePlaces || function(){};
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",function(){setTimeout(poser,50);}); else setTimeout(poser,50);
 })();
 </script>
+<!-- ═══ Nouvelle accueil : diaporama + réservation rapide ═══ -->
+<style>
+  #page-home .hero.hero2{height:auto!important;min-height:100svh;display:flex!important;align-items:flex-end!important;justify-content:center;padding:96px 18px 34px!important;box-sizing:border-box;overflow:hidden}
+  .hero2>*:not(.h2-sl):not(.h2-in){display:none!important}
+  .h2-sl{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity 1.2s ease}
+  .h2-sl.on{opacity:1}
+  .hero2:after{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(12,10,8,.15),rgba(12,10,8,.45) 35%,rgba(12,10,8,.85) 70%,rgba(12,10,8,.95));pointer-events:none}
+  .h2-in{position:relative;z-index:2;width:100%;max-width:520px;text-align:center}
+  .h2-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  .h2-t{font:700 clamp(2.1rem,6vw,3.2rem)/1.1 'Playfair Display',Georgia,serif;color:#fff;margin:0;text-shadow:0 2px 12px rgba(0,0,0,.6);min-height:2.2em}
+  .h2-t span{display:block;color:#E9C25A}
+  .h2-chips{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:14px 0 8px}
+  .h2-chips span{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:999px;padding:6px 12px;font:600 .8rem 'DM Sans',sans-serif}
+  .h2-chips b{color:#E9C25A}
+  .h2-prix{color:#E8DFC9;font:500 .9rem 'DM Sans',sans-serif;margin:0 0 12px}
+  .h2-prix b{color:#E9C25A}
+  .hq{background:rgba(15,13,10,.74);border:1px solid rgba(201,168,76,.45);border-radius:16px;padding:14px;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);text-align:start}
+  .hq .lab{display:block;font:700 .68rem 'DM Sans',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#C9A84C;margin:0 0 5px}
+  .hq .ac-wrap{margin-bottom:10px}
+  .hq .ac-wrap input{background:#FBF8F2!important;color:#1B1813!important;border:1px solid rgba(201,168,76,.3)!important;border-radius:10px!important;padding:13px 12px!important;font:500 1rem 'DM Sans',sans-serif!important}
+  .hq .ac-wrap input::placeholder{color:#8A8274!important}
+  .hq .ac-list{text-align:start}
+  .hq .ac-list *{color:#1B1813}
+  .hq .pax1{display:flex;align-items:center;justify-content:space-between;margin:2px 0 12px}
+  .hq .stp{display:flex;align-items:center;gap:6px}
+  .hq .stp button{width:40px;height:40px;border-radius:10px;border:1px solid rgba(201,168,76,.5);background:transparent;color:#F3E6C0;font:700 1.3rem 'DM Sans',sans-serif;cursor:pointer}
+  .hq .stp button:disabled{opacity:.35}
+  .hq .stp output{min-width:34px;text-align:center;color:#fff;font:700 1.15rem 'DM Sans',sans-serif}
+  .hq .vsel{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+  .hq .vc{border:1.5px solid rgba(201,168,76,.35);border-radius:12px;overflow:hidden;background:#FBF8F2;position:relative;cursor:pointer;padding:0}
+  .hq .vc.on{border-color:#E9C25A;box-shadow:0 0 0 2px rgba(233,194,90,.45)}
+  .hq .vc img{display:block;width:100%;height:78px;object-fit:cover;background:#222}
+  .hq .vc .vb{padding:7px 6px;text-align:center}
+  .hq .vc b{display:block;font:700 .9rem 'DM Sans',sans-serif;color:#1B1813}
+  .hq .vc small{font:500 .72rem 'DM Sans',sans-serif;color:#7A6A45}
+  .hq .vc .ck{display:none;position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;background:#E9C25A;color:#1B1813;font:800 .8rem sans-serif;align-items:center;justify-content:center}
+  .hq .vc.on .ck{display:flex}
+  .hq .seg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+  .hq .seg button{border:1px solid rgba(201,168,76,.4);border-radius:10px;padding:10px 6px;text-align:center;color:#F3E6C0;font:600 .88rem 'DM Sans',sans-serif;background:rgba(255,255,255,.04);cursor:pointer}
+  .hq .seg button.on{background:rgba(201,168,76,.25);border-color:#E9C25A;color:#fff}
+  .hq .seg small{display:block;font-weight:400;font-size:.7rem;color:#C9BFA8}
+  .hq .go{width:100%;border:0;border-radius:12px;padding:15px;background:linear-gradient(180deg,#EBC660,#C9A84C);color:#1B1813;font:800 1.05rem 'DM Sans',sans-serif;cursor:pointer}
+  .hq .err{display:none;margin:8px 0 0;color:#FFB4A8;font:600 .85rem 'DM Sans',sans-serif;text-align:center}
+  .hq .vnote{display:none;margin:-4px 0 10px;color:#F3E6C0;font:500 .78rem 'DM Sans',sans-serif}
+  .h2-ann{color:#D8CFBE;font-size:.8rem;margin:10px 0 0}
+  .h2-dots{display:flex;gap:8px;justify-content:center;margin-top:12px}
+  .h2-dots i{width:8px;height:8px;border-radius:9px;background:rgba(255,255,255,.4);transition:width .3s}
+  .h2-dots i.on{width:26px;background:#E9C25A}
+  @media(min-width:900px){#page-home .hero.hero2{align-items:center!important;padding-top:130px!important;padding-bottom:50px!important}}
+</style>
+<script>
+(function(){
+  var lg=(document.documentElement.lang||"fr").slice(0,2);
+  var T={
+   fr:{h1:"Taxi Van à Paris avec siège bébé – transferts aéroports CDG, Orly, Beauvais",s:[["Voyagez en famille,","siège bébé offert"],["Transferts aéroports","CDG · Orly · Beauvais"],["Taxi Van à Paris","24h/24, 7j/7"]],
+       c:["Avis Google","Prix garanti","Siège bébé offert"],p:["CDG dès","Orly dès","Gares dès"],dep:"📍 Départ",arr:"🏁 Arrivée",phd:"Adresse, gare, aéroport…",pha:"Destination…",pax:"👥 Passagers",veh:"🚘 Véhicule",
+       vb:["Berline","jusqu'à 4 pers."],vv:["Van Classe V","jusqu'à 7 pers."],st:"👶 Siège enfant (offert)",sb:["Siège bébé","0–13 kg"],sr:["Rehausseur","15–36 kg"],go:"Voir mon prix en 30 s →",
+       err:"Choisissez le départ et l'arrivée dans la liste proposée.",vn:"🚐 Van choisi automatiquement (plus de place).",ann:"✓ Annulation gratuite jusqu'à 24 h avant · Paiement à bord"},
+   en:{h1:"Paris van taxi with baby seat – airport transfers CDG, Orly, Beauvais",s:[["Travel as a family,","free baby seat"],["Airport transfers","CDG · Orly · Beauvais"],["Van taxi in Paris","24/7"]],
+       c:["Google reviews","Guaranteed price","Free baby seat"],p:["CDG from","Orly from","Stations from"],dep:"📍 From",arr:"🏁 To",phd:"Address, station, airport…",pha:"Destination…",pax:"👥 Passengers",veh:"🚘 Vehicle",
+       vb:["Sedan","up to 4 pax"],vv:["V-Class van","up to 7 pax"],st:"👶 Child seat (free)",sb:["Baby seat","0–13 kg"],sr:["Booster","15–36 kg"],go:"Get my price in 30 s →",
+       err:"Please select pick-up and drop-off from the suggestions.",vn:"🚐 Van selected automatically (more space).",ann:"✓ Free cancellation up to 24 h before · Pay on board"},
+   es:{h1:"Taxi van en París con silla de bebé – traslados aeropuertos CDG, Orly, Beauvais",s:[["Viaje en familia,","silla de bebé gratis"],["Traslados aeropuertos","CDG · Orly · Beauvais"],["Taxi van en París","24 h/24, 7 días"]],
+       c:["Opiniones Google","Precio garantizado","Silla de bebé gratis"],p:["CDG desde","Orly desde","Estaciones desde"],dep:"📍 Salida",arr:"🏁 Llegada",phd:"Dirección, estación, aeropuerto…",pha:"Destino…",pax:"👥 Pasajeros",veh:"🚘 Vehículo",
+       vb:["Berlina","hasta 4 pers."],vv:["Van Clase V","hasta 7 pers."],st:"👶 Silla infantil (gratis)",sb:["Silla de bebé","0–13 kg"],sr:["Elevador","15–36 kg"],go:"Ver mi precio en 30 s →",
+       err:"Elija la salida y la llegada en la lista propuesta.",vn:"🚐 Van elegido automáticamente (más espacio).",ann:"✓ Cancelación gratuita hasta 24 h antes · Pago a bordo"},
+   it:{h1:"Taxi van a Parigi con seggiolino – transfer aeroporti CDG, Orly, Beauvais",s:[["Viaggiate in famiglia,","seggiolino gratuito"],["Transfer aeroporti","CDG · Orly · Beauvais"],["Taxi van a Parigi","24 ore su 24"]],
+       c:["Recensioni Google","Prezzo garantito","Seggiolino gratuito"],p:["CDG da","Orly da","Stazioni da"],dep:"📍 Partenza",arr:"🏁 Arrivo",phd:"Indirizzo, stazione, aeroporto…",pha:"Destinazione…",pax:"👥 Passeggeri",veh:"🚘 Veicolo",
+       vb:["Berlina","fino a 4 pers."],vv:["Van Classe V","fino a 7 pers."],st:"👶 Seggiolino (gratuito)",sb:["Seggiolino","0–13 kg"],sr:["Rialzo","15–36 kg"],go:"Vedi il mio prezzo in 30 s →",
+       err:"Scegliete partenza e arrivo nell'elenco proposto.",vn:"🚐 Van scelto automaticamente (più spazio).",ann:"✓ Cancellazione gratuita fino a 24 h prima · Pagamento a bordo"},
+   ar:{h1:"تاكسي فان في باريس مع مقعد رضيع – نقل من وإلى مطارات CDG وأورلي وبوفيه",s:[["سافروا مع العائلة،","مقعد الرضيع مجاني"],["النقل من وإلى المطارات","CDG · أورلي · بوفيه"],["تاكسي فان في باريس","24/24، 7/7"]],
+       c:["تقييمات Google","سعر مضمون","مقعد رضيع مجاني"],p:["CDG من","أورلي من","المحطات من"],dep:"📍 الانطلاق",arr:"🏁 الوصول",phd:"عنوان، محطة، مطار…",pha:"الوجهة…",pax:"👥 الركاب",veh:"🚘 السيارة",
+       vb:["سيدان","حتى 4 أشخاص"],vv:["فان كلاس V","حتى 7 أشخاص"],st:"👶 مقعد طفل (مجاني)",sb:["مقعد رضيع","0–13 كغ"],sr:["مقعد معزز","15–36 كغ"],go:"اعرف السعر في 30 ثانية ←",
+       err:"اختر الانطلاق والوصول من القائمة المقترحة.",vn:"🚐 تم اختيار الفان تلقائياً (مساحة أكبر).",ann:"✓ إلغاء مجاني حتى 24 ساعة قبل · الدفع في السيارة"}
+  }[lg]; if(!T) return;
+  var IMG=["/img/accueil-1.jpg","/img/accueil-2.jpg","/img/accueil-3.jpg"];
+  var st={pax:1,veh:"berline",bebe:false,reh:false}, home={}, booking={};
+  function $(i){return document.getElementById(i);}
+  function construire(){
+    var hero=document.querySelector("#page-home .hero"); if(!hero||hero.classList.contains("hero2")) return;
+    var vbImg=($("vc-berline")&&$("vc-berline").querySelector("img")||{}).src||"", vvImg=($("vc-van")&&$("vc-van").querySelector("img")||{}).src||"";
+    hero.classList.add("hero2");
+    hero.insertAdjacentHTML("afterbegin",IMG.map(function(u,i){return '<div class="h2-sl'+(i?'':' on')+'" style="background-image:url('+u+')"></div>';}).join(""));
+    var d=document.createElement("div"); d.className="h2-in";
+    d.innerHTML='<h1 class="h2-sr">'+T.h1+'</h1><div class="h2-t" aria-hidden="true"></div>'+
+      '<div class="h2-chips"><span><b>★★★★★</b> '+T.c[0]+'</span><span>✓ '+T.c[1]+'</span><span>👶 '+T.c[2]+'</span></div>'+
+      '<p class="h2-prix">'+T.p[0]+' <b>75 €</b> · '+T.p[1]+' <b>70 €</b> · '+T.p[2]+' <b>50 €</b></p>'+
+      '<div class="hq"><span class="lab">'+T.dep+'</span><div id="hq-dep"></div><span class="lab">'+T.arr+'</span><div id="hq-arr"></div>'+
+      '<div class="pax1"><span class="lab" style="margin:0">'+T.pax+'</span><div class="stp"><button type="button" data-d="-1" aria-label="-">−</button><output id="hq-pax">1</output><button type="button" data-d="1" aria-label="+">+</button></div></div>'+
+      '<span class="lab">'+T.veh+'</span><div class="vsel"><button type="button" class="vc on" data-v="berline"><span class="ck">✓</span><img alt="" src="'+vbImg+'"><span class="vb"><b>'+T.vb[0]+'</b><small>'+T.vb[1]+'</small></span></button>'+
+      '<button type="button" class="vc" data-v="van"><span class="ck">✓</span><img alt="" src="'+vvImg+'"><span class="vb"><b>'+T.vv[0]+'</b><small>'+T.vv[1]+'</small></span></button></div>'+
+      '<p class="vnote">'+T.vn+'</p>'+
+      '<span class="lab">'+T.st+'</span><div class="seg"><button type="button" data-s="bebe">'+T.sb[0]+'<small>'+T.sb[1]+'</small></button><button type="button" data-s="reh">'+T.sr[0]+'<small>'+T.sr[1]+'</small></button></div>'+
+      '<button type="button" class="go">'+T.go+'</button><p class="err">'+T.err+'</p></div>'+
+      '<p class="h2-ann">'+T.ann+'</p><div class="h2-dots">'+IMG.map(function(u,i){return '<i class="'+(i?'':'on')+'"></i>';}).join("")+'</div>';
+    hero.appendChild(d);
+    // anciennes balises h1 de l'accueil : on garde un seul h1
+    var old=hero.querySelector(".hero-title"); if(old) old.setAttribute("aria-hidden","true");
+    titre(0); diapo(hero);
+    // champs d'adresse : on déplace les vrais champs (avec la recherche Google) dans l'accueil
+    ["dep","arr"].forEach(function(k){ var w=$("wrap-"+k); if(!w) return; booking[k]={p:w.parentNode,n:w.nextSibling}; home[k]=$("hq-"+k); });
+    placer();
+    d.addEventListener("click",clic);
+    maj();
+  }
+  function titre(i){ var t=document.querySelector(".h2-t"); if(t) t.innerHTML=T.s[i][0]+'<span>'+T.s[i][1]+'</span>'; }
+  function diapo(hero){
+    var n=0, sl=hero.querySelectorAll(".h2-sl"), dots=hero.querySelectorAll(".h2-dots i");
+    if(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    setInterval(function(){ if(document.hidden) return; sl[n].classList.remove("on"); dots[n].classList.remove("on"); n=(n+1)%sl.length; sl[n].classList.add("on"); dots[n].classList.add("on"); titre(n); },5000);
+  }
+  function placer(){
+    var surAccueil=$("page-home")&&$("page-home").classList.contains("active");
+    ["dep","arr"].forEach(function(k){ var w=$("wrap-"+k); if(!w||!booking[k]) return;
+      if(surAccueil){ if(w.parentNode!==home[k]){ var i=$(k); if(i) i.placeholder=k==="dep"?T.phd:T.pha; home[k].appendChild(w);} }
+      else if(w.parentNode!==booking[k].p){ booking[k].p.insertBefore(w,booking[k].n); }
+    });
+  }
+  function maj(){
+    var besoinVan=st.pax>4||(st.bebe&&st.reh); if(besoinVan) st.veh="van";
+    document.querySelectorAll(".hq .vc").forEach(function(b){ b.classList.toggle("on",b.dataset.v===st.veh); });
+    document.querySelectorAll(".hq .seg button").forEach(function(b){ b.classList.toggle("on",!!st[b.dataset.s]); });
+    var o=$("hq-pax"); if(o) o.textContent=st.pax;
+    var bs=document.querySelectorAll(".hq .stp button"); if(bs.length){ bs[0].disabled=st.pax<=1; bs[1].disabled=st.pax>=7; }
+    var vn=document.querySelector(".hq .vnote"); if(vn) vn.style.display=besoinVan?"block":"none";
+  }
+  function clic(e){
+    var b=e.target.closest("button"); if(!b||!b.closest(".hq")) return;
+    if(b.dataset.d){ st.pax=Math.max(1,Math.min(7,st.pax+(+b.dataset.d))); if(st.pax<=4&&!(st.bebe&&st.reh)&&b.dataset.d==="-1"){} maj(); }
+    else if(b.dataset.v){ st.veh=b.dataset.v; maj(); }
+    else if(b.dataset.s){ st[b.dataset.s]=!st[b.dataset.s]; maj(); }
+    else if(b.classList.contains("go")) envoyer();
+  }
+  function envoyer(){
+    var err=document.querySelector(".hq .err");
+    if(typeof coords==="undefined"||!coords.dep||!coords.arr){ err.style.display="block"; return; }
+    err.style.display="none";
+    // sièges
+    [["so-bebe",st.bebe],["so-reh",st.reh],["so-combi",false]].forEach(function(x){ var e=$(x[0]); if(e) e.classList.toggle("checked",x[1]); });
+    // passagers : on règle les compteurs adultes de la page réservation
+    var moins=document.querySelector('.pax-steps button[data-k="a"][data-d="-1"]'), plus=document.querySelector('.pax-steps button[data-k="a"][data-d="1"]'), enf=document.querySelector('.pax-steps button[data-k="e"][data-d="-1"]');
+    if(moins&&plus){ for(var i=0;i<8;i++){ if(enf&&!enf.disabled) enf.click(); if(!moins.disabled) moins.click(); } for(var j=1;j<st.pax;j++) plus.click(); }
+    else if($("pax")) $("pax").value=String(st.pax);
+    if(typeof selectV==="function") selectV(st.veh);
+    if(typeof goPage==="function") goPage("booking");
+    setTimeout(function(){
+      try{ if(typeof calcDistance==="function"&&coords.dep&&coords.arr&&!distKm) calcDistance(); }catch(x){}
+      var a=window.alert; window.alert=function(){}; try{ calculer(); }catch(x){} finally{ window.alert=a; }
+      setTimeout(function(){ var c=document.querySelector(".route-card")||$("rct"); if(c){ var nav=document.querySelector("nav"); window.scrollTo({top:c.getBoundingClientRect().top+window.pageYOffset-((nav?nav.offsetHeight:70)+12),behavior:"smooth"}); } },350);
+    },150);
+  }
+  // suivre les changements de page (menu, liens…) pour remettre les champs au bon endroit
+  var og=window.goPage;
+  if(typeof og==="function"){ window.goPage=function(p){ var r=og.apply(this,arguments); setTimeout(placer,0); return r; }; try{ goPage=window.goPage; }catch(e){} }
+  setInterval(function(){ placer(); var er=document.querySelector('.hq .err'); if(er&&typeof coords!=='undefined'&&coords.dep&&coords.arr) er.style.display='none'; document.querySelectorAll('.hq .vc img').forEach(function(im){ if(!im.getAttribute('src')){ var src=document.querySelector('#vc-'+im.closest('.vc').dataset.v+' img'); if(src&&src.src) im.src=src.src; } }); },800);
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",function(){ setTimeout(construire,60); }); else setTimeout(construire,60);
+})();
+</script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCotWtH67rWpOKRwxTGXtxj-oVcc0vwOVg&libraries=places&callback=initGooglePlaces&language=fr" async defer></script>
 <script>
 (function(){
