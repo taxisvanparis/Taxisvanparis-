@@ -2548,6 +2548,77 @@ window.initGooglePlaces = window.initGooglePlaces || function(){};
   });
 })();
 </script>
+<!-- ═══ Avis clients Google (section fixe) ═══ -->
+<style>
+  .avis-sec{background:var(--noir,#FBF8F2);padding:44px 0 40px;border-bottom:1px solid rgba(201,168,76,.15)}
+  .avis-sec .av-head{text-align:center;padding:0 20px;margin-bottom:22px}
+  .avis-sec .av-lab{font:600 .72rem 'DM Sans',sans-serif;letter-spacing:.22em;text-transform:uppercase;color:var(--gold,#A8842C)}
+  .avis-sec h2{font-family:'Playfair Display',serif;font-size:1.7rem;color:var(--blanc,#1B1813);margin:8px 0 6px}
+  .avis-sec .av-sub{font-size:.9rem;color:var(--gris,#6B6357);margin:0}
+  .avis-sec .av-stars{color:#E2B33C;letter-spacing:2px;font-size:1.05rem}
+  .av-row{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 20px 14px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .av-row::-webkit-scrollbar{display:none}
+  .av-row{direction:ltr}
+  .av-card{flex:0 0 82%;max-width:340px;scroll-snap-align:center;background:#fff;border:1px solid rgba(201,168,76,.25);border-radius:14px;padding:18px 18px 16px;
+    box-shadow:0 6px 18px rgba(27,24,19,.06);display:flex;flex-direction:column;gap:10px}
+  .av-card p{margin:0;font-size:.92rem;line-height:1.55;color:#2B2620;flex:1}
+  .av-who{display:flex;align-items:center;gap:10px}
+  .av-ini{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 .95rem 'DM Sans',sans-serif;color:#fff;flex:none}
+  .av-who b{display:block;font:700 .9rem 'DM Sans',sans-serif;color:#1B1813}
+  .av-who small{font-size:.75rem;color:#8A8274}
+  .av-cta{text-align:center;margin-top:10px}
+  .av-cta a{display:inline-block;border:1.5px solid var(--gold,#A8842C);color:var(--gold,#A8842C);border-radius:999px;padding:11px 22px;font:700 .9rem 'DM Sans',sans-serif;text-decoration:none}
+  .av-row{scroll-snap-type:none}
+  @media(min-width:900px){.av-card{flex:0 0 320px}}
+</style>
+<script>
+(function(){
+  var lg=(document.documentElement.lang||"fr").slice(0,2);
+  var T={fr:["Avis clients","Ce que disent nos clients","Avis publiés sur Google","Voir tous nos avis sur Google","Client Google"],
+         en:["Reviews","What our customers say","Reviews published on Google","See all our Google reviews","Google review"],
+         es:["Opiniones","Lo que dicen nuestros clientes","Opiniones publicadas en Google","Ver todas nuestras opiniones en Google","Opinión de Google"],
+         it:["Recensioni","Cosa dicono i nostri clienti","Recensioni pubblicate su Google","Vedi tutte le recensioni su Google","Recensione Google"],
+         ar:["آراء العملاء","ماذا يقول عملاؤنا","آراء منشورة على Google","شاهد جميع آرائنا على Google","رأي على Google"]}[lg]||null;
+  if(!T) return;
+  var A=[["Sendie M.","#E07A2E","Je fais régulièrement appel à leurs services depuis plus de 2 ans et je n'ai jamais été déçu ! Toujours au top, ponctuels, agréables et bienveillants. Je recommande les yeux fermés !"],
+         ["Ani H.","#C2185B","Excellent service and very punctual 🙏 Our family 💯 recommends his services."],
+         ["Benane N.","#1565C0","Toujours un plaisir de voyager avec vous ! À l'écoute et toujours de bonne humeur. Je recommande sans hésiter !"],
+         ["Capitaine Morgan","#5D4037","Un service impeccable, pro et aidant !"],
+         ["Fethi Z.","#0D47A1","Très bon service et ponctuel."]];
+  var URL="https://g.page/r/CWXImdGQDnt4ECE";
+  function esc(s){return s.replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+  function poser(){
+    if(document.getElementById("avis-sec")) return;
+    var ref=document.getElementById("pay-band"); if(!ref) return setTimeout(poser,300);
+    var s=document.createElement("section"); s.className="avis-sec"; s.id="avis-sec";
+    s.innerHTML='<div class="av-head"><div class="av-lab">✦ '+T[0]+'</div><h2>'+T[1]+'</h2><p class="av-sub"><span class="av-stars">★★★★★</span> · '+T[2]+'</p></div>'+
+      '<div class="av-row">'+A.map(function(a){return '<div class="av-card"><span class="av-stars">★★★★★</span><p>« '+esc(a[2])+' »</p><div class="av-who"><span class="av-ini" style="background:'+a[1]+'">'+a[0].charAt(0)+'</span><span><b>'+esc(a[0])+'</b><small>'+T[4]+'</small></span></div></div>';}).join("")+'</div>'+
+      '<div class="av-cta"><a href="'+URL+'" target="_blank" rel="noopener">'+T[3]+' →</a></div>';
+    ref.parentNode.insertBefore(s,ref.nextSibling);
+    defiler(s.querySelector(".av-row"));
+  }
+  // Défilement automatique continu (vers la droite), pause quand le client touche ou survole
+  function defiler(row){
+    if(!row||(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)) return;
+    row.innerHTML+=row.innerHTML;                       // liste doublée = boucle sans fin
+    var pause=0, pos=null, v=0.45;
+    function stop(){ pause=Date.now()+4000; }
+    ["touchstart","mousedown","wheel"].forEach(function(e){ row.addEventListener(e,stop,{passive:true}); });
+    row.addEventListener("mouseenter",function(){ pause=Infinity; });
+    row.addEventListener("mouseleave",function(){ pause=Date.now()+800; });
+    (function tick(){
+      var moitie=row.scrollWidth/2;
+      if(moitie>row.clientWidth){
+        if(pos===null||Date.now()<pause) pos=row.scrollLeft;
+        if(pos===null||pos<=0) pos=moitie;               // départ à la fin : les cartes glissent vers la droite
+        if(Date.now()>=pause){ pos-=v; if(pos<=0) pos+=moitie; row.scrollLeft=pos; }
+      }
+      requestAnimationFrame(tick);
+    })();
+  }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",function(){setTimeout(poser,50);}); else setTimeout(poser,50);
+})();
+</script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCotWtH67rWpOKRwxTGXtxj-oVcc0vwOVg&libraries=places&callback=initGooglePlaces&language=fr" async defer></script>
 <script>
 (function(){
