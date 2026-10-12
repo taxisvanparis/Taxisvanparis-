@@ -188,6 +188,8 @@
     align-items:center;justify-content:center;z-index:50;padding:20px;
   }
   .modal-overlay.shown{display:flex;}
+  #tab-facturation table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  #tab-facturation td,#tab-facturation th{white-space:nowrap}
   .modal{
     background:var(--card);color:var(--text);border-radius:14px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;
     padding:28px 30px;
@@ -460,6 +462,7 @@
         </div>
         <div class="panel-head">
           <div class="filters">
+            <button class="btn-ghost" id="btn-reglages" type="button" style="margin-right:8px">⚙️ Réglages facture</button>
             <select id="filter-statut-facture">
               <option value="">Tous les statuts</option>
               <option value="payée">Payée</option>
@@ -469,8 +472,8 @@
           </div>
         </div>
         <table>
-          <thead><tr><th>Date</th><th>Client</th><th>Trajet</th><th>Montant</th><th>Statut</th><th></th></tr></thead>
-          <tbody id="facture-tbody"><tr class="empty-row"><td colspan="6">Chargement…</td></tr></tbody>
+          <thead><tr><th>N°</th><th>Date</th><th>Client</th><th>Trajet</th><th>Montant</th><th>Statut</th><th></th></tr></thead>
+          <tbody id="facture-tbody"><tr class="empty-row"><td colspan="7">Chargement…</td></tr></tbody>
         </table>
       </div>
 
@@ -546,22 +549,57 @@
   </div>
 </div>
 
+<!-- ===================== MODAL REGLAGES FACTURE ===================== -->
+<div class="modal-overlay" id="modal-reglages">
+  <div class="modal">
+    <h2>⚙️ Réglages facture</h2>
+    <div class="field"><label>Prochain numéro de facture</label><input id="rg-prochain" type="number" min="1"></div>
+    <div class="field"><label>Titulaire du compte</label><input id="rg-titulaire" type="text"></div>
+    <div class="field"><label>Banque</label><input id="rg-banque" type="text"></div>
+    <div class="field"><label>IBAN</label><input id="rg-iban" type="text"></div>
+    <div class="field"><label>BIC</label><input id="rg-bic" type="text"></div>
+    <p style="font-size:12px;color:var(--muted)">Le RIB s'affiche en bas des factures. Laissé vide, il n'apparaît pas.</p>
+    <div class="modal-actions">
+      <button class="btn-ghost" id="btn-cancel-reglages">Annuler</button>
+      <button class="btn-gold" id="btn-save-reglages">Enregistrer</button>
+    </div>
+  </div>
+</div>
 <!-- ===================== MODAL FACTURE ===================== -->
 <div class="modal-overlay" id="modal-facture">
   <div class="modal">
-    <h2>Nouvelle facture</h2>
+    <h2 id="ff-titre">Nouvelle facture</h2>
+    <p style="font-size:12px;color:var(--muted);margin:-12px 0 14px">Les champs laissés vides n'apparaissent pas sur la facture.</p>
     <div class="grid2">
-      <div class="field"><label>Client</label><input id="ff-client" type="text"></div>
-      <div class="field"><label>Trajet</label><input id="ff-trajet" type="text"></div>
-      <div class="field"><label>Montant (€)</label><input id="ff-montant" type="number" min="0" step="0.5"></div>
-      <div class="field"><label>Date</label><input id="ff-date" type="date"></div>
+      <div class="field"><label>N° de facture</label><input id="ff-numero" type="number" min="1"></div>
+      <div class="field"><label>Date d'émission</label><input id="ff-emission" type="date"></div>
+      <div class="field"><label>Nom du client *</label><input id="ff-client" type="text"></div>
+      <div class="field"><label>Société qui paie</label><input id="ff-societe" type="text" placeholder="facultatif"></div>
+    </div>
+    <div class="field"><label>Adresse de facturation</label><textarea id="ff-adresse" rows="2" style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--border);background:transparent;color:inherit;font:inherit"></textarea></div>
+    <div class="grid2">
+      <div class="field"><label>SIRET client</label><input id="ff-siret" type="text"></div>
+      <div class="field"><label>N° TVA client</label><input id="ff-tvaclient" type="text"></div>
+      <div class="field"><label>Votre référence</label><input id="ff-reference" type="text" placeholder="bon de commande…"></div>
+      <div class="field"><label>Passager(s)</label><input id="ff-passager" type="text"></div>
+      <div class="field"><label>Véhicule</label><input id="ff-vehicule" type="text" list="ff-veh-list"></div>
+      <div class="field"><label>Date de la course</label><input id="ff-date" type="date"></div>
+    </div>
+    <datalist id="ff-veh-list"><option value="Berline"><option value="Van Mercedes Classe V"></datalist>
+    <div class="field"><label>Trajet</label><input id="ff-trajet" type="text"></div>
+    <div class="field"><label>Détail</label><input id="ff-detail" type="text" placeholder="heure, passagers, mise à disposition…"></div>
+    <div class="grid2">
+      <div class="field"><label>Montant TTC (€) *</label><input id="ff-montant" type="number" min="0" step="0.01"></div>
+      <div class="field"><label>Mode de paiement</label><input id="ff-paiement" type="text" list="ff-pay-list"></div>
       <div class="field"><label>Statut</label>
         <select id="ff-statut"><option value="en attente">En attente</option><option value="payée">Payée</option><option value="impayée">Impayée</option></select>
       </div>
     </div>
+    <datalist id="ff-pay-list"><option value="Carte bancaire"><option value="Espèces"><option value="Virement"><option value="Virement à 30 jours"></datalist>
+    <div class="field"><label>Informations (note libre)</label><textarea id="ff-notes" rows="2" style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--border);background:transparent;color:inherit;font:inherit"></textarea></div>
     <div class="modal-actions">
       <button class="btn-ghost" id="btn-cancel-facture">Annuler</button>
-      <button class="btn-gold" id="btn-save-facture">Enregistrer</button>
+      <button class="btn-gold" id="btn-save-facture">Enregistrer et voir la facture</button>
     </div>
   </div>
 </div>
@@ -654,6 +692,7 @@ function anonymise(title,location){
 
 
 </script>
+<script src="facture.js"></script>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
   import {
@@ -661,7 +700,7 @@ function anonymise(title,location){
   } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
   import {
     getFirestore, collection, doc, addDoc, updateDoc, deleteDoc,
-    onSnapshot, query, where, orderBy, getDoc, serverTimestamp
+    onSnapshot, query, where, orderBy, getDoc, setDoc, serverTimestamp
   } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
   // ============================================================
@@ -699,6 +738,7 @@ function anonymise(title,location){
   let currentUnsubs = [];
   let reservationsCache = [];
   let facturesCache = [];
+  let reglagesFacture = {};
   let chauffeursCache = [];
 
   // Normalise les clés du profil (espaces, majuscules) : "Role " -> "role", "Nom" -> "nom"
@@ -868,8 +908,10 @@ function anonymise(title,location){
     }, onErr));
 
     currentUnsubs.push(onSnapshot(collection(db, "factures"), snap => {
-      facturesCache = snap.docs.map(d => ({ id: d.id, ...d.data() }))
-        .sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
+      const tous = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      reglagesFacture = (tous.find(f => f.id === "_reglages") || {});
+      facturesCache = tous.filter(f => f.id !== "_reglages")
+        .sort((a, b) => (Number(b.numero) || 0) - (Number(a.numero) || 0) || String(b.date || "").localeCompare(String(a.date || "")));
       renderFactures();
       renderStatsFacture();
     }, onErr));
@@ -1154,6 +1196,7 @@ function anonymise(title,location){
             `<button class="done" data-st="terminée" data-id="${esc(r.id)}">Effectuée</button><button class="no" data-st="annulée" data-id="${esc(r.id)}">Annuler</button>`) +
           waClient(r) + waAvis(r) + (groupOf(r) === 0 && r.statut !== "annulée" ? waChauffeur(r) : "") + (groupOf(r) === 0 && r.statut !== "annulée" ? `<a class="grp-btn" target="_blank" rel="noopener" href="${waLink(shareMessage(shareItem(r)))}">📢 Dispatcher</a>` : "") +
           (groupOf(r) === 0 ? calLink([r], "📅", "cal-btn") : "") +
+          (r.statut === "terminée" ? `<button class="edit" data-facture="${esc(r.id)}">🧾 ${r.factureNumero ? "Facture n° " + esc(r.factureNumero) : "Facture"}</button>` : "") +
           `<button class="edit" data-edit="${esc(r.id)}">✏️ Modifier</button><button class="del" data-del="${esc(r.id)}" aria-label="Supprimer">🗑️</button>`;
         return `<div class="rc s-${cls}">
           <div class="t">${esc(r.heure || "—")}${r.ref ? `<small>${esc(r.ref)}</small>` : ""}</div>
@@ -1171,6 +1214,11 @@ function anonymise(title,location){
     box.querySelectorAll("[data-avis]").forEach(b => b.addEventListener("click", () => { updateDoc(doc(db, "reservations", b.dataset.avis), { avisDemande: true }).catch(() => {}); }));
     box.querySelectorAll("[data-avistrip]").forEach(b => b.addEventListener("click", () => { updateDoc(doc(db, "reservations", b.dataset.avistrip), { avisTripDemande: true }).catch(() => {}); }));
     box.querySelectorAll("[data-edit]").forEach(b => b.addEventListener("click", () => openEditResa(b.dataset.edit)));
+    box.querySelectorAll("[data-facture]").forEach(b => b.addEventListener("click", () => {
+      const r = reservationsCache.find(x => x.id === b.dataset.facture); if (!r) return;
+      const ex = r.factureNumero && facturesCache.find(f => Number(f.numero) === Number(r.factureNumero));
+      if (ex) ouvrirFacture(ex); else factureDepuisResa(r);
+    }));
     box.querySelectorAll("[data-del]").forEach(b => b.addEventListener("click", () => { if (confirm("Supprimer cette réservation ?")) deleteDoc(doc(db, "reservations", b.dataset.del)); }));
   }
 
@@ -1194,14 +1242,15 @@ function anonymise(title,location){
     const rows = facturesCache.filter(f => !filter || f.statut === filter);
     const tbody = document.getElementById("facture-tbody");
     if (rows.length === 0) {
-      tbody.innerHTML = `<tr class="empty-row"><td colspan="6">Aucune facture pour l'instant.</td></tr>`;
+      tbody.innerHTML = `<tr class="empty-row"><td colspan="7">Aucune facture pour l'instant.</td></tr>`;
       return;
     }
     tbody.innerHTML = rows.map(f => `
       <tr>
-        <td>${f.date || ""}</td>
-        <td>${f.client || ""}</td>
-        <td>${f.trajet || ""}</td>
+        <td>${f.numero ? esc(f.numero) : "—"}</td>
+        <td>${esc(f.dateEmission || f.date || "")}</td>
+        <td>${esc(f.societe || f.client || "")}</td>
+        <td>${esc(f.trajet || "")}</td>
         <td>${f.montant ? f.montant + " €" : "—"}</td>
         <td>
           <select class="statut-select" data-id="${f.id}" data-kind="facture">
@@ -1210,13 +1259,19 @@ function anonymise(title,location){
             <option value="impayée" ${f.statut === "impayée" ? "selected" : ""}>Impayée</option>
           </select>
         </td>
-        <td><button class="icon-btn danger" data-id="${f.id}" data-kind="del-facture">Suppr.</button></td>
+        <td style="white-space:nowrap"><button class="icon-btn" data-id="${f.id}" data-kind="voir-facture">🧾 PDF</button> <button class="icon-btn" data-id="${f.id}" data-kind="edit-facture">✏️</button> <button class="icon-btn danger" data-id="${f.id}" data-kind="del-facture">Suppr.</button></td>
       </tr>
     `).join("");
 
     tbody.querySelectorAll('select[data-kind="facture"]').forEach(sel => {
       sel.addEventListener("change", () => updateDoc(doc(db, "factures", sel.dataset.id), { statut: sel.value }));
     });
+    tbody.querySelectorAll('[data-kind="voir-facture"]').forEach(btn => btn.addEventListener("click", () => {
+      const f = facturesCache.find(x => x.id === btn.dataset.id); if (f) ouvrirFacture(f);
+    }));
+    tbody.querySelectorAll('[data-kind="edit-facture"]').forEach(btn => btn.addEventListener("click", () => {
+      const f = facturesCache.find(x => x.id === btn.dataset.id); if (f) openFactureModal(f, f.id);
+    }));
     tbody.querySelectorAll('[data-kind="del-facture"]').forEach(btn => {
       btn.addEventListener("click", () => {
         if (confirm("Supprimer cette facture ?")) deleteDoc(doc(db, "factures", btn.dataset.id));
@@ -1342,22 +1397,74 @@ function anonymise(title,location){
   }
 
   // ---------------- MODALS: FACTURE ----------------
-  function openFactureModal() {
-    ["ff-client","ff-trajet","ff-montant","ff-date"].forEach(id => document.getElementById(id).value = "");
+  const FF = ["numero","emission","client","societe","adresse","siret","tvaclient","reference","passager","vehicule","date","trajet","detail","montant","paiement","statut","notes"];
+  const FKEY = { emission: "dateEmission", adresse: "clientAdresse", tvaclient: "tvaClient" };
+  let factureEditId = null;
+  function prochainNumero() {
+    const max = facturesCache.reduce((m, f) => Math.max(m, Number(f.numero) || 0), 0);
+    return Math.max(Number(reglagesFacture.prochain) || 235, max + 1);
+  }
+  function ouvrirFacture(f, w) {
+    const html = window.factureHTML(f, reglagesFacture);
+    w = w || window.open("", "_blank");
+    if (!w) { alert("Autorisez l'ouverture des fenêtres pour voir la facture."); return; }
+    w.document.open(); w.document.write(html); w.document.close();
+  }
+  function prixNum(p) { const n = parseFloat(String(p ?? "").replace(",", ".").replace(/[^\d.]/g, "")); return isFinite(n) ? n : ""; }
+  function openFactureModal(pre, editId) {
+    pre = pre || {}; factureEditId = editId || null; window._factureResaId = null;
+    document.getElementById("ff-titre").textContent = editId ? "Modifier la facture" : "Nouvelle facture";
+    FF.forEach(k => { const el = document.getElementById("ff-" + k); el.value = pre[FKEY[k] || k] ?? ""; });
+    if (!pre.numero) document.getElementById("ff-numero").value = prochainNumero();
+    if (!pre.dateEmission) document.getElementById("ff-emission").value = todayStr();
+    if (!pre.statut) document.getElementById("ff-statut").value = "en attente";
     document.getElementById("modal-facture").classList.add("shown");
+  }
+  function factureDepuisResa(r) {
+    const m = String(r.date || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    const detail = [m ? "Course du " + m[3] + "/" + m[2] + "/" + m[1] + (r.heure ? " à " + r.heure : "") : "", r.pax ? r.pax + " passager" + (+r.pax > 1 ? "s" : "") : ""].filter(Boolean).join(" · ");
+    openFactureModal({
+      client: String(r.nom || "").replace(/^🏨\s*/, "").trim(), date: r.date || "",
+      trajet: [r.dep, r.arr].filter(Boolean).join(" → "), detail,
+      vehicule: vehLabel(r.vehicule) || "", montant: prixNum(r.prix), reservationId: r.id
+    });
+    window._factureResaId = r.id;
   }
   document.getElementById("btn-cancel-facture").addEventListener("click", () => document.getElementById("modal-facture").classList.remove("shown"));
   document.getElementById("btn-save-facture").addEventListener("click", async () => {
-    const data = {
-      client: document.getElementById("ff-client").value.trim(),
-      trajet: document.getElementById("ff-trajet").value.trim(),
-      montant: Number(document.getElementById("ff-montant").value) || 0,
-      date: document.getElementById("ff-date").value,
-      statut: document.getElementById("ff-statut").value
-    };
-    if (!data.client || !data.date) { alert("Merci de renseigner au moins le client et la date."); return; }
-    await addDoc(collection(db, "factures"), data);
+    const data = {};
+    FF.forEach(k => { const v = document.getElementById("ff-" + k).value; data[FKEY[k] || k] = typeof v === "string" ? v.trim() : v; });
+    data.numero = Number(data.numero) || prochainNumero();
+    data.montant = Number(data.montant) || 0;
+    if (!data.client && !data.societe) { alert("Merci de renseigner au moins le nom du client ou la société."); return; }
+    if (!data.montant) { alert("Merci de renseigner le montant TTC."); return; }
+    if (!factureEditId && facturesCache.some(f => Number(f.numero) === data.numero)) { alert("Le numéro " + data.numero + " existe déjà."); return; }
+    const w = window.open("", "_blank");
+    try {
+      if (factureEditId) await updateDoc(doc(db, "factures", factureEditId), data);
+      else {
+        if (window._factureResaId) data.reservationId = window._factureResaId;
+        await addDoc(collection(db, "factures"), data);
+        await setDoc(doc(db, "factures", "_reglages"), { prochain: data.numero + 1 }, { merge: true });
+        if (window._factureResaId) updateDoc(doc(db, "reservations", window._factureResaId), { factureNumero: data.numero }).catch(() => {});
+      }
+    } catch (e) { if (w) w.close(); alert("Erreur : la facture n'a pas été enregistrée."); return; }
+    window._factureResaId = null;
     document.getElementById("modal-facture").classList.remove("shown");
+    ouvrirFacture(data, w);
+  });
+  // ---------------- MODAL: REGLAGES FACTURE ----------------
+  document.getElementById("btn-reglages").addEventListener("click", () => {
+    document.getElementById("rg-prochain").value = prochainNumero();
+    ["titulaire","banque","iban","bic"].forEach(k => document.getElementById("rg-" + k).value = reglagesFacture[k] || "");
+    document.getElementById("modal-reglages").classList.add("shown");
+  });
+  document.getElementById("btn-cancel-reglages").addEventListener("click", () => document.getElementById("modal-reglages").classList.remove("shown"));
+  document.getElementById("btn-save-reglages").addEventListener("click", async () => {
+    const d = { prochain: Number(document.getElementById("rg-prochain").value) || 235 };
+    ["titulaire","banque","iban","bic"].forEach(k => d[k] = document.getElementById("rg-" + k).value.trim());
+    try { await setDoc(doc(db, "factures", "_reglages"), d, { merge: true }); } catch (e) { alert("Erreur d'enregistrement des réglages."); return; }
+    document.getElementById("modal-reglages").classList.remove("shown");
   });
 
   // ---------------- MODALS: CHAUFFEUR ----------------
