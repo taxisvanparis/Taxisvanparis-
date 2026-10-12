@@ -1062,6 +1062,8 @@ function anonymise(title,location){
   }
   // Demande d'avis Google au client après la course
   const AVIS_LINK = "https://g.page/r/CWXImdGQDnt4ECE/review";
+  const TRIP_FR = "https://www.tripadvisor.fr/UserReviewEdit-d34709392?m=68676";
+  const TRIP_EN = "https://www.tripadvisor.com/UserReviewEdit-d34709392?m=68676";
   function waAvis(r) {
     if (r.statut === "annulée" || !(r.statut === "terminée" || groupOf(r) !== 0)) return "";
     const n = waNumClient(r.tel); if (!n) return "";
@@ -1069,10 +1071,12 @@ function anonymise(title,location){
     const fr = n.startsWith("33");
     const txt = fr
       ? `Bonjour${nom ? " " + nom : ""}, merci d'avoir voyagé avec Taxis Van Paris 🚖\n` +
-        `Si vous avez été satisfait, pourriez-vous nous laisser un petit avis Google ? Cela nous aide énormément ⭐⭐⭐⭐⭐\n👉 ${AVIS_LINK}\n` +
+        `Si vous avez été satisfait, pourriez-vous nous laisser un petit avis ? Cela nous aide énormément ⭐⭐⭐⭐⭐\n` +
+        `👉 Google : ${AVIS_LINK}\n👉 Tripadvisor : ${TRIP_FR}\n` +
         `Merci beaucoup et à bientôt !\nTaxis Van Paris — +33 6 67 40 20 05`
       : `Hello${nom ? " " + nom : ""}, thank you for riding with Taxis Van Paris 🚖\n` +
-        `If you enjoyed your trip, could you leave us a quick Google review? It really helps us ⭐⭐⭐⭐⭐\n👉 ${AVIS_LINK}\n` +
+        `If you enjoyed your trip, could you leave us a quick review? It really helps us ⭐⭐⭐⭐⭐\n` +
+        `👉 Tripadvisor: ${TRIP_EN}\n👉 Google: ${AVIS_LINK}\n` +
         `Thank you and have a great stay!\nTaxis Van Paris — +33 6 67 40 20 05`;
     const fait = !!r.avisDemande;
     const lib = fait ? (fr ? "⭐ Avis demandé ✓" : "⭐ Review asked ✓") : (fr ? "⭐ Demander un avis 🇫🇷" : "⭐ Ask review 🇬🇧");
