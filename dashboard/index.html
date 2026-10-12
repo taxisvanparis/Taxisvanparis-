@@ -570,6 +570,13 @@
   <div class="modal">
     <h2 id="ff-titre">Nouvelle facture</h2>
     <p style="font-size:12px;color:var(--muted);margin:-12px 0 14px">Les champs laissés vides n'apparaissent pas sur la facture.</p>
+    <div style="background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.35);border-radius:10px;padding:10px 12px;margin:-6px 0 14px">
+      <label style="display:block;font-size:13px;color:var(--gold,#C9A84C);font-weight:700;margin-bottom:6px">📋 Coller les infos du client</label>
+      <textarea id="ff-coller" rows="3" placeholder="Colle ici le mail, le message WhatsApp ou la signature du client (société, adresse, SIRET, TVA, bon de commande…)" style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--border);background:transparent;color:inherit;font:inherit"></textarea>
+      <button type="button" class="btn-gold" id="btn-ff-remplir" style="margin-top:8px;width:100%">✨ Remplir la facture</button>
+      <div id="ff-remplir-etat" style="font-size:12px;color:var(--muted);margin-top:6px"></div>
+    </div>
+
     <div class="grid2">
       <div class="field"><label>N° de facture</label><input id="ff-numero" type="number" min="1"></div>
       <div class="field"><label>Date d'émission</label><input id="ff-emission" type="date"></div>
@@ -583,11 +590,15 @@
       <div class="field"><label>Votre référence</label><input id="ff-reference" type="text" placeholder="bon de commande…"></div>
       <div class="field"><label>Passager(s)</label><input id="ff-passager" type="text"></div>
       <div class="field"><label>Véhicule</label><input id="ff-vehicule" type="text" list="ff-veh-list"></div>
-      <div class="field"><label>Date de la course</label><input id="ff-date" type="date"></div>
     </div>
     <datalist id="ff-veh-list"><option value="Berline"><option value="Van Mercedes Classe V"></datalist>
-    <div class="field"><label>Trajet</label><input id="ff-trajet" type="text"></div>
-    <div class="field"><label>Détail</label><input id="ff-detail" type="text" placeholder="heure, passagers, mise à disposition…"></div>
+    <div class="grid2">
+      <div class="field"><label>Départ</label><input id="ff-depart" type="text"></div>
+      <div class="field"><label>Arrivée</label><input id="ff-arrivee" type="text"></div>
+      <div class="field"><label>Date de la course</label><input id="ff-date" type="date"></div>
+      <div class="field"><label>Heure</label><input id="ff-heure" type="time"></div>
+    </div>
+    <div class="field"><label>Détail</label><input id="ff-detail" type="text" placeholder="passagers, mise à disposition…"></div>
     <div class="grid2">
       <div class="field"><label>Montant TTC (€) *</label><input id="ff-montant" type="number" min="0" step="0.01"></div>
       <div class="field"><label>Mode de paiement</label><input id="ff-paiement" type="text" list="ff-pay-list"></div>
@@ -1250,7 +1261,7 @@ function anonymise(title,location){
         <td>${f.numero ? esc(f.numero) : "—"}</td>
         <td>${esc(f.dateEmission || f.date || "")}</td>
         <td>${esc(f.societe || f.client || "")}</td>
-        <td>${esc(f.trajet || "")}</td>
+        <td>${esc(f.depart || f.arrivee ? [f.depart, f.arrivee].filter(Boolean).join(" → ") : (f.trajet || ""))}</td>
         <td>${f.montant ? f.montant + " €" : "—"}</td>
         <td>
           <select class="statut-select" data-id="${f.id}" data-kind="facture">
@@ -1397,7 +1408,7 @@ function anonymise(title,location){
   }
 
   // ---------------- MODALS: FACTURE ----------------
-  const FF = ["numero","emission","client","societe","adresse","siret","tvaclient","reference","passager","vehicule","date","trajet","detail","montant","paiement","statut","notes"];
+  const FF = ["numero","emission","client","societe","adresse","siret","tvaclient","reference","passager","vehicule","depart","arrivee","date","heure","detail","montant","paiement","statut","notes"];
   const FKEY = { emission: "dateEmission", adresse: "clientAdresse", tvaclient: "tvaClient" };
   let factureEditId = null;
   function prochainNumero() {
@@ -1418,14 +1429,15 @@ function anonymise(title,location){
     if (!pre.numero) document.getElementById("ff-numero").value = prochainNumero();
     if (!pre.dateEmission) document.getElementById("ff-emission").value = todayStr();
     if (!pre.statut) document.getElementById("ff-statut").value = "en attente";
+    document.getElementById("ff-coller").value = ""; document.getElementById("ff-remplir-etat").textContent = "";
     document.getElementById("modal-facture").classList.add("shown");
   }
   function factureDepuisResa(r) {
     const m = String(r.date || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
-    const detail = [m ? "Course du " + m[3] + "/" + m[2] + "/" + m[1] + (r.heure ? " à " + r.heure : "") : "", r.pax ? r.pax + " passager" + (+r.pax > 1 ? "s" : "") : ""].filter(Boolean).join(" · ");
+    const detail = r.pax ? r.pax + " passager" + (+r.pax > 1 ? "s" : "") : "";
     openFactureModal({
       client: String(r.nom || "").replace(/^🏨\s*/, "").trim(), date: r.date || "",
-      trajet: [r.dep, r.arr].filter(Boolean).join(" → "), detail,
+      depart: r.dep || "", arrivee: r.arr || "", heure: r.heure || "", detail,
       vehicule: vehLabel(r.vehicule) || "", montant: prixNum(r.prix), reservationId: r.id
     });
     window._factureResaId = r.id;
@@ -1452,6 +1464,36 @@ function anonymise(title,location){
     window._factureResaId = null;
     document.getElementById("modal-facture").classList.remove("shown");
     ouvrirFacture(data, w);
+  });
+  // ---------------- COLLER LES INFOS CLIENT → REMPLIR LA FACTURE ----------------
+  const IA_FACT_URL = "https://script.google.com/macros/s/AKfycbynqJeRA8W1AoYiHWQhS-ZPGHrEHyQBW8xp4xFGAYgP68lAugMsNZqWYkleYV1P4Va6/exec";
+  const FMAP = { societe: "societe", client: "client", clientAdresse: "adresse", siret: "siret", tvaClient: "tvaclient", reference: "reference",
+    passager: "passager", depart: "depart", arrivee: "arrivee", date: "date", heure: "heure", montant: "montant", paiement: "paiement", notes: "notes" };
+  function remplirFacture(champs) {
+    let n = 0;
+    Object.keys(FMAP).forEach(k => {
+      const v = champs[k]; if (v === undefined || v === null || v === "") return;
+      const el = document.getElementById("ff-" + FMAP[k]); if (!el) return;
+      if (k === "notes" && el.value.trim()) return;
+      el.value = v; n++;
+    });
+    return n;
+  }
+  document.getElementById("btn-ff-remplir").addEventListener("click", () => {
+    const txt = document.getElementById("ff-coller").value.trim(), etatEl = document.getElementById("ff-remplir-etat");
+    if (!txt) { etatEl.textContent = "Colle d'abord les infos du client."; return; }
+    const n1 = remplirFacture(window.lireInfosFacture(txt));
+    let k = ""; try { k = localStorage.getItem("tvp_cle_ia") || ""; } catch (e) {}
+    if (!k) { etatEl.textContent = n1 ? "✓ " + n1 + " champ(s) rempli(s) — vérifie avant d'enregistrer. (Lecture IA non activée : active-la dans « Nouvelle réservation ».)" : "Rien trouvé : remplis à la main."; return; }
+    etatEl.textContent = "✨ L'IA lit le texte…";
+    fetch(IA_FACT_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "iafacture", k, texte: txt.slice(0, 4000) }) })
+      .then(r => r.json())
+      .then(j => {
+        if (!j.ok) { etatEl.textContent = (n1 ? "✓ " + n1 + " champ(s) rempli(s) par la lecture simple. " : "") + "IA indisponible (" + j.error + ")."; return; }
+        const n2 = remplirFacture(j.champs || {});
+        etatEl.textContent = "✓ " + Math.max(n1, n2) + " champ(s) rempli(s) par l'IA — vérifie avant d'enregistrer.";
+      })
+      .catch(() => { etatEl.textContent = (n1 ? "✓ " + n1 + " champ(s) rempli(s) par la lecture simple. " : "") + "IA injoignable."; });
   });
   // ---------------- MODAL: REGLAGES FACTURE ----------------
   document.getElementById("btn-reglages").addEventListener("click", () => {
