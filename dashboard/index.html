@@ -368,6 +368,7 @@
   .rc .acts .wa-btn{border-color:var(--wa)!important;color:var(--wa)!important}
   .rc .acts .avis-btn{border-color:#F4B400!important;color:#F4B400!important;font-weight:600}
   .rc .acts .avis-btn.fait{opacity:.6;font-weight:400}
+  .rc .acts .trip-btn{border-color:#34E0A1!important;color:#34E0A1!important}
   .rc .acts .cal-btn{border-color:var(--gold);color:var(--gold-soft)}
   .rc .acts .del{color:var(--red);border-color:transparent}
   .rc .acts .edit{border-color:var(--gold);color:var(--gold-soft)}
@@ -1069,18 +1070,17 @@ function anonymise(title,location){
     const n = waNumClient(r.tel); if (!n) return "";
     const nom = String(r.nom || "").replace(/^🏨\s*/, "").replace(/\s*\(.*\)\s*$/, "").trim();
     const fr = n.startsWith("33");
-    const txt = fr
+    const msg = (site, lien) => fr
       ? `Bonjour${nom ? " " + nom : ""}, merci d'avoir voyagé avec Taxis Van Paris 🚖\n` +
-        `Si vous avez été satisfait, pourriez-vous nous laisser un petit avis ? Cela nous aide énormément ⭐⭐⭐⭐⭐\n` +
-        `👉 Google : ${AVIS_LINK}\n👉 Tripadvisor : ${TRIP_FR}\n` +
+        `Si vous avez été satisfait, pourriez-vous nous laisser un petit avis ${site} ? Cela nous aide énormément ⭐⭐⭐⭐⭐\n👉 ${lien}\n` +
         `Merci beaucoup et à bientôt !\nTaxis Van Paris — +33 6 67 40 20 05`
       : `Hello${nom ? " " + nom : ""}, thank you for riding with Taxis Van Paris 🚖\n` +
-        `If you enjoyed your trip, could you leave us a quick review? It really helps us ⭐⭐⭐⭐⭐\n` +
-        `👉 Tripadvisor: ${TRIP_EN}\n👉 Google: ${AVIS_LINK}\n` +
+        `If you enjoyed your trip, could you leave us a quick ${site} review? It really helps us ⭐⭐⭐⭐⭐\n👉 ${lien}\n` +
         `Thank you and have a great stay!\nTaxis Van Paris — +33 6 67 40 20 05`;
-    const fait = !!r.avisDemande;
-    const lib = fait ? (fr ? "⭐ Avis demandé ✓" : "⭐ Review asked ✓") : (fr ? "⭐ Demander un avis 🇫🇷" : "⭐ Ask review 🇬🇧");
-    return `<a class="cal-btn avis-btn${fait ? " fait" : ""}" data-avis="${esc(r.id)}" target="_blank" rel="noopener" href="https://wa.me/${n}?text=${encodeURIComponent(txt)}">${lib}</a> `;
+    const g = !!r.avisDemande, t = !!r.avisTripDemande, drap = fr ? " 🇫🇷" : " 🇬🇧";
+    const bG = `<a class="cal-btn avis-btn${g ? " fait" : ""}" data-avis="${esc(r.id)}" target="_blank" rel="noopener" href="https://wa.me/${n}?text=${encodeURIComponent(msg("Google", AVIS_LINK))}">${g ? "⭐ Google ✓" : "⭐ Avis Google" + drap}</a> `;
+    const bT = `<a class="cal-btn avis-btn trip-btn${t ? " fait" : ""}" data-avistrip="${esc(r.id)}" target="_blank" rel="noopener" href="https://wa.me/${n}?text=${encodeURIComponent(msg("Tripadvisor", fr ? TRIP_FR : TRIP_EN))}">${t ? "🦉 Tripadvisor ✓" : "🦉 Avis Tripadvisor" + drap}</a> `;
+    return bG + bT;
   }
   function escHotel(v) { return String(v).replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch])); }
   function fmtPrix(p) {
@@ -1168,6 +1168,7 @@ function anonymise(title,location){
       }).join("") + `</div>`).join("");
     box.querySelectorAll("[data-st]").forEach(b => b.addEventListener("click", () => updateDoc(doc(db, "reservations", b.dataset.id), { statut: b.dataset.st })));
     box.querySelectorAll("[data-avis]").forEach(b => b.addEventListener("click", () => { updateDoc(doc(db, "reservations", b.dataset.avis), { avisDemande: true }).catch(() => {}); }));
+    box.querySelectorAll("[data-avistrip]").forEach(b => b.addEventListener("click", () => { updateDoc(doc(db, "reservations", b.dataset.avistrip), { avisTripDemande: true }).catch(() => {}); }));
     box.querySelectorAll("[data-edit]").forEach(b => b.addEventListener("click", () => openEditResa(b.dataset.edit)));
     box.querySelectorAll("[data-del]").forEach(b => b.addEventListener("click", () => { if (confirm("Supprimer cette réservation ?")) deleteDoc(doc(db, "reservations", b.dataset.del)); }));
   }
