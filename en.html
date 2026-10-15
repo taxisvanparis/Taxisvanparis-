@@ -92,6 +92,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   "@context": "https://schema.org",
   "@type": "FAQPage",
   "mainEntity": [
+    {"@type": "Question", "name": "Can your taxis use the bus lanes?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Yes. Our taxis drive in the bus and taxi lanes of Paris and on some main roads such as the A1. At rush hour, that means a smoother ride and a calmer arrival."}},
     {"@type": "Question", "name": "How do I book a taxi in Paris with Taxis Van Paris?",
      "acceptedAnswer": {"@type": "Answer", "text": "Book in 3 steps: calculate your fare on our Booking page, choose your vehicle (sedan or van), then confirm online with your name and phone number: you're booked, no WhatsApp needed. Any question? Call or message +33 6 67 40 20 05. Available 24/7."}},
     {"@type": "Question", "name": "How much is a taxi from Paris to CDG airport?",
@@ -669,8 +671,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="srv-card" style="border-color:rgba(201,168,76,.4)">
         <span class="srv-icon">🏅</span>
         <h3>Licensed official taxi</h3>
-        <p>We are officially licensed taxis. Certified professional licence and access to bus lanes to help you avoid traffic jams. Travel legally and with peace of mind.</p>
-        <span class="srv-tag">Approved by the Préfecture</span>
+        <p>Certified professional licence and access to the bus lanes: a smoother ride at rush hour, and a calmer arrival.</p>
       </div>
       <div class="srv-card"><span class="srv-icon">🛡️</span><h3>Maximum safety</h3><p>Certified drivers, regularly inspected vehicles, certified child seats.</p></div>
       <div class="srv-card"><span class="srv-icon">⏱️</span><h3>Punctuality</h3><p>Real-time traffic monitoring. Your driver always arrives at the agreed time.</p></div>
@@ -1214,6 +1215,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </button>
         <div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
           <div itemprop="text">Book in 3 steps: calculate your fare on our Booking page, choose your vehicle (sedan or van), then confirm online with your name and phone number: you're booked, no WhatsApp needed. Any question? Call or message +33 6 67 40 20 05. Available 24/7.</div>
+        </div>
+      </div>
+
+      <!-- Q-bus -->
+      <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+        <button class="faq-q" onclick="toggleFaq(this)" itemprop="name">
+          Can your taxis use the bus lanes?
+          <span class="faq-arrow">▾</span>
+        </button>
+        <div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+          <div itemprop="text">Yes. Our taxis drive in the bus and taxi lanes of Paris and on some main roads such as the A1. At rush hour, that means a smoother ride and a calmer arrival.</div>
         </div>
       </div>
 
