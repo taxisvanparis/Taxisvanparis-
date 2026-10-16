@@ -58,7 +58,7 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline
 #linkState{font-weight:800}
 .recent{display:flex;flex-wrap:wrap;gap:8px}
 .recent button{font-size:14px;padding:6px 12px;border-color:var(--line);color:var(--ink);font-weight:500}
-.avisbtn{display:flex;align-items:center;gap:.4em;flex:none;font:inherit;font-weight:800;font-size:clamp(13px,2vw,20px);color:#C9A84C;background:transparent;border:2px solid #C9A84C;border-radius:999px;padding:.35em .9em;cursor:pointer}
+.avisbtn{display:flex;align-items:center;gap:.15em;flex:none;font:inherit;font-weight:800;font-size:clamp(13px,2vw,20px);color:#C9A84C;background:transparent;border:2px solid #C9A84C;border-radius:999px;padding:.35em .9em;cursor:pointer}
 .avisbtn svg{width:1em;height:1em}
 .avis{position:fixed;inset:0;z-index:50;background:radial-gradient(ellipse at 30% 50%,#1b1608 0%,#050505 62%);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:24px}
 .avis[hidden]{display:none}
@@ -80,7 +80,7 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline
 <div class="sign">
   <header class="band">
     <div class="brand"><span>Taxis <b>Van</b> Paris</span><small>By ABTS</small></div>
-    <button type="button" class="avisbtn" id="btnAvis" aria-label="Afficher le QR code des avis"><svg width="1em" height="1em" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l3 6.9 7.5.7-5.7 5 1.7 7.4L12 18l-6.5 4 1.7-7.4-5.7-5 7.5-.7z"/></svg><span>Avis</span></button>
+    <button type="button" class="avisbtn" id="btnAvis" aria-label="Afficher le QR code des avis"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l3 6.9 7.5.7-5.7 5 1.7 7.4L12 18l-6.5 4 1.7-7.4-5.7-5 7.5-.7z"/></svg><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l3 6.9 7.5.7-5.7 5 1.7 7.4L12 18l-6.5 4 1.7-7.4-5.7-5 7.5-.7z"/></svg><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l3 6.9 7.5.7-5.7 5 1.7 7.4L12 18l-6.5 4 1.7-7.4-5.7-5 7.5-.7z"/></svg><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l3 6.9 7.5.7-5.7 5 1.7 7.4L12 18l-6.5 4 1.7-7.4-5.7-5 7.5-.7z"/></svg><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l3 6.9 7.5.7-5.7 5 1.7 7.4L12 18l-6.5 4 1.7-7.4-5.7-5 7.5-.7z"/></svg></button>
   </header>
   <main class="stage" id="stage" aria-label="Toucher pour modifier">
     <div id="name">M. DUPONT</div>
