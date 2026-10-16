@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#050505">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;800;900&family=Playfair+Display:wght@900&display=swap">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Pancarte Taxis Van Paris</title>
+<style>
+html{-webkit-text-size-adjust:100%}body{margin:0}[hidden]{display:none!important}
+
+/* Layout: one full-screen sign — brand band on top, client name auto-fitted in the middle, controls hidden behind a tap */
+:root{
+  --paper:#ffffff; --ink:#0d1420; --brand:#050505; --brand-ink:#ffffff; --gold:#C9A84C; --muted:#5b6474; --line:#d9dee7; --accent:#c8102e;
+  --f:"Archivo","Helvetica Neue",Arial,sans-serif;
+  color-scheme: light;
+}
+html,body{height:100%}
+body{background:var(--paper);color:var(--ink);font-family:var(--f);overflow:hidden;-webkit-user-select:none;user-select:none}
+.sign{height:100%;display:flex;flex-direction:column}
+.band{background:var(--brand);color:var(--brand-ink);display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding-block:14px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.band{border-bottom:3px solid var(--gold)}
+.brand{font-family:"Playfair Display",Georgia,"Times New Roman",serif;font-weight:900;letter-spacing:-.5px;font-size:clamp(22px,4.2vw,48px);line-height:1;display:flex;align-items:baseline;gap:.4em;flex-wrap:wrap}
+.brand b{color:var(--gold);font-weight:900}
+.brand small{font-family:var(--f);font-weight:500;font-size:.38em;letter-spacing:.2em;text-transform:uppercase;color:var(--gold)}
+.flag{display:flex;height:clamp(14px,2.4vw,26px);width:clamp(30px,5vw,54px);border-radius:3px;overflow:hidden;flex:none}
+.flag i{flex:1}.flag i:nth-child(1){background:#002395}.flag i:nth-child(2){background:#ffffff}.flag i:nth-child(3){background:var(--accent)}
+.stage{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2vh;cursor:pointer;
+  padding-block:2vh;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+#name{font-weight:900;line-height:1;text-align:center;white-space:nowrap;letter-spacing:-.01em;text-transform:uppercase}
+#sub{font-weight:500;color:var(--muted);text-align:center;font-size:clamp(18px,4vw,44px)}
+#sub:empty{display:none}
+.hint{position:fixed;right:max(12px,env(safe-area-inset-right,0px));bottom:calc(10px + env(safe-area-inset-bottom,0px));
+  color:var(--muted);font-size:12px;opacity:.7;pointer-events:none}
+.panel{position:fixed;left:0;right:0;bottom:0;background:var(--paper);border-top:2px solid var(--line);box-shadow:0 -8px 24px rgba(13,20,32,.12);
+  display:grid;gap:12px;padding-top:16px;padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.row{display:flex;flex-wrap:wrap;gap:10px}
+.row>*{min-width:0}
+label{display:grid;gap:4px;flex:1 1 220px;font-size:13px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+input{font:inherit;font-size:22px;font-weight:800;color:var(--ink);background:var(--paper);border:2px solid var(--line);border-radius:8px;padding:10px 12px;width:100%;text-transform:none;letter-spacing:0}
+input:focus{outline:none;border-color:var(--brand)}
+button{font:inherit;font-weight:800;font-size:17px;border-radius:8px;padding:12px 18px;border:2px solid var(--brand);background:var(--paper);color:var(--brand);cursor:pointer}
+button.main{background:var(--brand);color:var(--brand-ink);flex:1 1 160px}
+button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.recent{display:flex;flex-wrap:wrap;gap:8px}
+.recent button{font-size:14px;padding:6px 12px;border-color:var(--line);color:var(--ink);font-weight:500}
+</style>
+</head>
+<body>
+<div class="sign">
+  <header class="band">
+    <div class="brand"><span>Taxis <b>Van</b> Paris</span><small>By ABTS</small></div>
+    <div class="flag" aria-hidden="true"><i></i><i></i><i></i></div>
+  </header>
+  <main class="stage" id="stage" aria-label="Toucher pour modifier">
+    <div id="name">M. DUPONT</div>
+    <div id="sub">Welcome to Paris · Bienvenue</div>
+  </main>
+</div>
+<div class="hint" id="hint">Touchez l'écran pour modifier</div>
+
+<form class="panel" id="panel" hidden autocomplete="off">
+  <div class="row">
+    <label for="inName">Nom du client
+      <input id="inName" maxlength="40" placeholder="ex. M. DUPONT">
+    </label>
+    <label for="inSub">2ᵉ ligne (facultatif)
+      <input id="inSub" maxlength="60" placeholder="ex. Vol AF 1234 · Welcome">
+    </label>
+  </div>
+  <div class="recent" id="recent"></div>
+  <div class="row">
+    <button type="submit" class="main">Afficher</button>
+    <button type="button" id="fs">Plein écran</button>
+  </div>
+</form>
+
+<script>
+const $=id=>document.getElementById(id);
+const nameEl=$('name'), subEl=$('sub'), panel=$('panel'), inName=$('inName'), inSub=$('inSub');
+const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},
+             set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let state=store.get('pancarte',{name:'M. DUPONT',sub:'Welcome to Paris · Bienvenue'});
+let recent=store.get('pancarte-recent',[]);
+
+function fit(){
+  const stage=$('stage'); const maxW=stage.clientWidth-32; const maxH=stage.clientHeight*(subEl.textContent?0.62:0.8);
+  let lo=10,hi=600;
+  while(hi-lo>1){const m=(lo+hi)>>1;nameEl.style.fontSize=m+'px';
+    (nameEl.scrollWidth<=maxW&&nameEl.offsetHeight<=maxH)?lo=m:hi=m;}
+  nameEl.style.fontSize=lo+'px';
+}
+function render(){nameEl.textContent=state.name||' ';subEl.textContent=state.sub||'';fit();}
+function renderRecent(){const r=$('recent');r.innerHTML='';
+  recent.forEach(n=>{const b=document.createElement('button');b.type='button';b.textContent=n;
+    b.onclick=()=>{inName.value=n;inName.focus()};r.appendChild(b);});}
+
+$('stage').addEventListener('click',()=>{inName.value=state.name;inSub.value=state.sub;renderRecent();
+  panel.hidden=false;$('hint').hidden=true;inName.focus();inName.select();});
+panel.addEventListener('submit',e=>{e.preventDefault();
+  state={name:inName.value.trim(),sub:inSub.value.trim()};store.set('pancarte',state);
+  if(state.name){recent=[state.name,...recent.filter(n=>n!==state.name)].slice(0,6);store.set('pancarte-recent',recent);}
+  panel.hidden=true;inName.blur();render();keepAwake();});
+$('fs').addEventListener('click',()=>{const d=document.documentElement;
+  try{(d.requestFullscreen||d.webkitRequestFullscreen).call(d)?.catch?.(()=>{})}catch(e){}});
+
+let lock=null;
+async function keepAwake(){try{if('wakeLock' in navigator&&!lock){lock=await navigator.wakeLock.request('screen');lock.addEventListener('release',()=>lock=null);}}catch(e){}}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')keepAwake();});
+document.addEventListener('click',keepAwake,{once:true});
+
+addEventListener('resize',fit);
+document.fonts?.ready.then(fit);
+render();
+if('serviceWorker' in navigator){addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{});});}
+</script>
+</body>
+</html>
