@@ -1232,8 +1232,10 @@ function anonymise(title,location){
       }).join("") + `</div>`).join("");
     box.querySelectorAll("[data-st]").forEach(b => b.addEventListener("click", () => updateDoc(doc(db, "reservations", b.dataset.id), { statut: b.dataset.st })));
     box.querySelectorAll("[data-pancarte-send]").forEach(b => b.addEventListener("click", async () => {
-      try { await setDoc(doc(db, "pancarte", "courant"), { nom: b.dataset.nom, ligne: b.dataset.ligne || "", ts: serverTimestamp() }); toast("Envoyé à la pancarte ✔"); }
-      catch (e) { toast("Échec : règle Firebase « pancarte » à ajouter"); }
+      toast("Envoi à la pancarte…", 8000);
+      const lent = setTimeout(() => toast("Envoi en attente : vérifie ta connexion internet", 6000), 8000);
+      try { await setDoc(doc(db, "pancarte", "courant"), { nom: b.dataset.nom, ligne: b.dataset.ligne || "", ts: serverTimestamp() }); clearTimeout(lent); toast("Envoyé à la pancarte ✔ " + b.dataset.nom, 5000); }
+      catch (e) { clearTimeout(lent); toast("Échec envoi pancarte : " + ((e && e.code) || "erreur") + (e && e.code === "permission-denied" ? " (règle Firebase)" : ""), 8000); }
     }));
     box.querySelectorAll("[data-avis]").forEach(b => b.addEventListener("click", () => { updateDoc(doc(db, "reservations", b.dataset.avis), { avisDemande: true }).catch(() => {}); }));
     box.querySelectorAll("[data-avistrip]").forEach(b => b.addEventListener("click", () => { updateDoc(doc(db, "reservations", b.dataset.avistrip), { avisTripDemande: true }).catch(() => {}); }));
@@ -1583,7 +1585,7 @@ function anonymise(title,location){
   sigEl.addEventListener("input", () => { shareStore.set("sig", sigEl.value); renderShare(); });
   vehEl.addEventListener("change", () => { shareStore.set("veh", vehEl.value); renderShare(); });
 
-  function toast(t) { const e = document.getElementById("toast"); e.textContent = t; e.classList.add("shown"); clearTimeout(toast.t); toast.t = setTimeout(() => e.classList.remove("shown"), 1800); }
+  function toast(t, ms) { const e = document.getElementById("toast"); e.textContent = t; e.classList.add("shown"); clearTimeout(toast.t); toast.t = setTimeout(() => e.classList.remove("shown"), ms || 1800); }
   function copyText(text) {
     const done = () => toast("Message copié, colle-le dans WhatsApp");
     const fallback = () => { const ta = document.createElement("textarea"); ta.value = text; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); done(); } catch (e) { toast("Sélectionne le texte et copie-le"); } ta.remove(); };

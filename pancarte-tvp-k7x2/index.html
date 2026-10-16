@@ -153,7 +153,7 @@ async function startLink(){
         if(ts&&ts<=last)return;
         if(ts)store.set('pancarte-ts',ts);
         state={name:String(d.nom).slice(0,40),sub:String(d.ligne||'').slice(0,60)}; store.set('pancarte',state); render();
-        linkState('connectée, nom reçu');
+        linkState('connectée, dernier nom reçu : '+state.name+' à '+new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}));
       },err=>linkState('accès refusé par Firebase (règle à ajouter)'));
     });
   }catch(e){linkState('hors ligne');}
