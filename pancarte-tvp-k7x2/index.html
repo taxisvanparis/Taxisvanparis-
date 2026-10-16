@@ -14,6 +14,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>Pancarte Taxis Van Paris</title>
 <style>
+*,*::before,*::after{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}body{margin:0}[hidden]{display:none!important}
 
 /* Layout: one full-screen sign — brand band on top, client name auto-fitted in the middle, controls hidden behind a tap */
@@ -51,6 +52,9 @@ input:focus{outline:none;border-color:var(--brand)}
 button{font:inherit;font-weight:800;font-size:17px;border-radius:8px;padding:12px 18px;border:2px solid var(--brand);background:var(--paper);color:var(--brand);cursor:pointer}
 button.main{background:var(--brand);color:var(--brand-ink);flex:1 1 160px}
 button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.link{display:grid;gap:8px;border-top:1px solid var(--line);padding-top:10px;font-size:13px;color:var(--muted)}
+.link input{font-size:16px;padding:8px 10px}
+#linkState{font-weight:800}
 .recent{display:flex;flex-wrap:wrap;gap:8px}
 .recent button{font-size:14px;padding:6px 12px;border-color:var(--line);color:var(--ink);font-weight:500}
 </style>
@@ -78,6 +82,14 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline
     </label>
   </div>
   <div class="recent" id="recent"></div>
+  <div class="link">
+    <div>Liaison avec le tableau de bord : <span id="linkState">en cours…</span></div>
+    <div class="row" id="loginRow" hidden>
+      <label for="inMail">Email du tableau de bord<input id="inMail" type="email" autocomplete="username" autocapitalize="off"></label>
+      <label for="inPass">Mot de passe<input id="inPass" type="password" autocomplete="current-password"></label>
+      <button type="button" id="btnLogin">Se connecter</button>
+    </div>
+  </div>
   <div class="row">
     <button type="submit" class="main">Afficher</button>
     <button type="button" id="fs">Plein écran</button>
@@ -121,6 +133,37 @@ async function keepAwake(){try{if('wakeLock' in navigator&&!lock){lock=await nav
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')keepAwake();});
 document.addEventListener('click',keepAwake,{once:true});
 
+
+/* ---- Réception du nom envoyé depuis le tableau de bord (Firebase, gratuit) ---- */
+const FB_CFG={apiKey:"AIzaSyBN8uBFONIt1tDTH9C-NIQKeulFdJ2m26Q",authDomain:"taxis-van-paris-by-abts.firebaseapp.com",projectId:"taxis-van-paris-by-abts",storageBucket:"taxis-van-paris-by-abts.firebasestorage.app",messagingSenderId:"53887245170",appId:"1:53887245170:web:2a3b785d734c54e01f9beb"};
+const linkState=t=>{$('linkState').textContent=t};
+let fbAuth=null,fbSignIn=null,unsub=null;
+async function startLink(){
+  try{
+    const V='https://www.gstatic.com/firebasejs/10.13.0/';
+    const [A,B,C]=await Promise.all([import(V+'firebase-app.js'),import(V+'firebase-auth.js'),import(V+'firebase-firestore.js')]);
+    const app=A.initializeApp(FB_CFG); fbAuth=B.getAuth(app); fbSignIn=B.signInWithEmailAndPassword; const db=C.getFirestore(app);
+    B.onAuthStateChanged(fbAuth,u=>{
+      if(unsub){unsub();unsub=null;}
+      if(!u){linkState('non connectée');$('loginRow').hidden=false;return;}
+      $('loginRow').hidden=true; linkState('connectée, en attente d\'un nom');
+      unsub=C.onSnapshot(C.doc(db,'pancarte','courant'),snap=>{
+        const d=snap.data(); if(!d||!d.nom)return;
+        const ts=d.ts&&d.ts.toMillis?d.ts.toMillis():0, last=store.get('pancarte-ts',0);
+        if(ts&&ts<=last)return;
+        if(ts)store.set('pancarte-ts',ts);
+        state={name:String(d.nom).slice(0,40),sub:String(d.ligne||'').slice(0,60)}; store.set('pancarte',state); render();
+        linkState('connectée, nom reçu');
+      },err=>linkState('accès refusé par Firebase (règle à ajouter)'));
+    });
+  }catch(e){linkState('hors ligne');}
+}
+$('btnLogin').addEventListener('click',async()=>{
+  if(!fbAuth)return linkState('hors ligne');
+  try{linkState('connexion…');await fbSignIn(fbAuth,$('inMail').value.trim(),$('inPass').value);$('inPass').value='';}
+  catch(e){linkState('email ou mot de passe incorrect');}
+});
+startLink();
 addEventListener('resize',fit);
 document.fonts?.ready.then(fit);
 render();

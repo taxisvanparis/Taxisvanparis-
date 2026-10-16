@@ -1,4 +1,4 @@
-const CACHE = 'pancarte-v2';
+const CACHE = 'pancarte-v3';
 const FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
@@ -19,7 +19,7 @@ self.addEventListener('fetch', e => {
     }));
     return;
   }
-  const font = url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com';
+  const font = ['fonts.googleapis.com','fonts.gstatic.com','www.gstatic.com'].includes(url.hostname);
   if (url.origin !== location.origin && !font) return;
   e.respondWith(caches.open(CACHE).then(async c => {
     const hit = await c.match(req);

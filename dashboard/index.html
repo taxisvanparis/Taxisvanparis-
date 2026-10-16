@@ -1121,7 +1121,8 @@ function anonymise(title,location){
     if (!nom) return "";
     const ligne = r.vol ? "Vol " + r.vol : "";
     const href = "../pancarte-tvp-k7x2/?nom=" + encodeURIComponent(nom) + (ligne ? "&ligne=" + encodeURIComponent(ligne) : "");
-    return `<a class="cal-btn" target="_blank" rel="noopener" href="${href}">🪧 Pancarte</a> `;
+    return `<a class="cal-btn" target="_blank" rel="noopener" href="${href}">🪧 Pancarte</a> ` +
+      `<button type="button" class="cal-btn" style="font-family:inherit;cursor:pointer" data-pancarte-send data-nom="${esc(nom)}" data-ligne="${esc(ligne)}">📲 Envoyer à la pancarte</button> `;
   }
   // Demande d'avis Google au client après la course
   const AVIS_LINK = "https://g.page/r/CWXImdGQDnt4ECE/review";
@@ -1230,6 +1231,10 @@ function anonymise(title,location){
           </div></div>`;
       }).join("") + `</div>`).join("");
     box.querySelectorAll("[data-st]").forEach(b => b.addEventListener("click", () => updateDoc(doc(db, "reservations", b.dataset.id), { statut: b.dataset.st })));
+    box.querySelectorAll("[data-pancarte-send]").forEach(b => b.addEventListener("click", async () => {
+      try { await setDoc(doc(db, "pancarte", "courant"), { nom: b.dataset.nom, ligne: b.dataset.ligne || "", ts: serverTimestamp() }); toast("Envoyé à la pancarte ✔"); }
+      catch (e) { toast("Échec : règle Firebase « pancarte » à ajouter"); }
+    }));
     box.querySelectorAll("[data-avis]").forEach(b => b.addEventListener("click", () => { updateDoc(doc(db, "reservations", b.dataset.avis), { avisDemande: true }).catch(() => {}); }));
     box.querySelectorAll("[data-avistrip]").forEach(b => b.addEventListener("click", () => { updateDoc(doc(db, "reservations", b.dataset.avistrip), { avisTripDemande: true }).catch(() => {}); }));
     box.querySelectorAll("[data-edit]").forEach(b => b.addEventListener("click", () => openEditResa(b.dataset.edit)));
