@@ -91,6 +91,9 @@ const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.
              set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 let state=store.get('pancarte',{name:'M. DUPONT',sub:'Welcome to Paris · Bienvenue'});
 let recent=store.get('pancarte-recent',[]);
+(function(){try{const q=new URLSearchParams(location.search),n=(q.get('nom')||'').trim();
+  if(n){state={name:n.slice(0,40),sub:(q.get('ligne')||'').trim().slice(0,60)};store.set('pancarte',state);
+    if(history.replaceState)history.replaceState(null,'',location.pathname);}}catch(e){}})();
 
 function fit(){
   const stage=$('stage'); const maxW=stage.clientWidth-32; const maxH=stage.clientHeight*(subEl.textContent?0.62:0.8);

@@ -1115,6 +1115,14 @@ function anonymise(title,location){
     const href = (n ? "https://wa.me/" + n : "https://wa.me/") + "?text=" + encodeURIComponent(messageChauffeur(r));
     return `<a class="cal-btn wa-btn" target="_blank" rel="noopener" href="${href}">🚖 Envoyer au chauffeur</a> `;
   }
+  // Pancarte aéroport : ouvre l'appli tablette avec le nom du client déjà écrit
+  function pancarteBtn(r) {
+    const nom = sansPrixNiTel(String(r.nom || "")).replace(/^🏨\s*/, "").replace(/\s*\(.*?\)\s*/g, " ").replace(/\s{2,}/g, " ").trim();
+    if (!nom) return "";
+    const ligne = r.vol ? "Vol " + r.vol : "";
+    const href = "../pancarte-tvp-k7x2/?nom=" + encodeURIComponent(nom) + (ligne ? "&ligne=" + encodeURIComponent(ligne) : "");
+    return `<a class="cal-btn" target="_blank" rel="noopener" href="${href}">🪧 Pancarte</a> `;
+  }
   // Demande d'avis Google au client après la course
   const AVIS_LINK = "https://g.page/r/CWXImdGQDnt4ECE/review";
   const TRIP_FR = "https://www.tripadvisor.fr/UserReviewEdit-d34709392?m=68676";
@@ -1205,7 +1213,7 @@ function anonymise(title,location){
         const boutons = (ferme ? `<button class="no" data-st="en attente" data-id="${esc(r.id)}">Rétablir</button>` :
             (r.statut !== "confirmée" ? `<button class="ok" data-st="confirmée" data-id="${esc(r.id)}">Confirmer</button>` : "") +
             `<button class="done" data-st="terminée" data-id="${esc(r.id)}">Effectuée</button><button class="no" data-st="annulée" data-id="${esc(r.id)}">Annuler</button>`) +
-          waClient(r) + waAvis(r) + (groupOf(r) === 0 && r.statut !== "annulée" ? waChauffeur(r) : "") + (groupOf(r) === 0 && r.statut !== "annulée" ? `<a class="grp-btn" target="_blank" rel="noopener" href="${waLink(shareMessage(shareItem(r)))}">📢 Dispatcher</a>` : "") +
+          waClient(r) + waAvis(r) + (groupOf(r) === 0 && r.statut !== "annulée" ? waChauffeur(r) : "") + (groupOf(r) === 0 && r.statut !== "annulée" ? pancarteBtn(r) : "") + (groupOf(r) === 0 && r.statut !== "annulée" ? `<a class="grp-btn" target="_blank" rel="noopener" href="${waLink(shareMessage(shareItem(r)))}">📢 Dispatcher</a>` : "") +
           (groupOf(r) === 0 ? calLink([r], "📅", "cal-btn") : "") +
           (r.statut === "terminée" ? `<button class="edit" data-facture="${esc(r.id)}">🧾 ${r.factureNumero ? "Facture n° " + esc(r.factureNumero) : "Facture"}</button>` : "") +
           `<button class="edit" data-edit="${esc(r.id)}">✏️ Modifier</button><button class="del" data-del="${esc(r.id)}" aria-label="Supprimer">🗑️</button>`;
