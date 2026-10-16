@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#050505">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Dépenses">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<title>Mes dépenses</title>
+<style>
+:root{--bg:#050505;--card:#121212;--line:#2a2a2a;--ink:#fff;--mut:#9a9a9a;--gold:#C9A84C;--red:#e5484d;--green:#46c37b}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,Arial,sans-serif;-webkit-text-size-adjust:100%}
+body{padding:max(14px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) calc(40px + env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left))}
+.app{max-width:640px;margin:0 auto}
+header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:6px 0 14px}
+h1{font-size:22px;margin:0;font-weight:800}h1 b{color:var(--gold)}
+button{font:inherit;color:inherit;cursor:pointer}
+.btn{background:var(--gold);color:#111;border:0;border-radius:12px;padding:14px 18px;font-weight:800;font-size:17px;min-height:48px}
+.btn.ghost{background:transparent;color:var(--gold);border:2px solid var(--gold)}
+.btn.red{background:transparent;color:var(--red);border:2px solid var(--red)}
+.btn.small{padding:8px 12px;font-size:14px;min-height:40px;border-radius:10px}
+.month{display:flex;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:6px}
+.month button{background:none;border:0;font-size:26px;width:48px;height:44px;color:var(--gold)}
+.month span{font-weight:800;font-size:18px;text-transform:capitalize}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-top:12px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.lbl{color:var(--mut);font-size:13px;text-transform:uppercase;letter-spacing:.06em}
+.big{font-size:34px;font-weight:800;line-height:1.1}
+.reste{font-size:40px;font-weight:800}
+.pos{color:var(--green)}.neg{color:var(--red)}
+.ca{display:flex;align-items:center;gap:8px}
+.ca input{width:130px;text-align:right}
+input,select,textarea{font:inherit;font-size:18px;color:var(--ink);background:#0b0b0b;border:2px solid var(--line);border-radius:10px;padding:12px;width:100%}
+input:focus,select:focus{outline:none;border-color:var(--gold)}
+label{display:block;color:var(--mut);font-size:13px;text-transform:uppercase;letter-spacing:.06em;margin:14px 0 6px}
+.cats{display:flex;flex-wrap:wrap;gap:8px}
+.cats button{background:#0b0b0b;border:2px solid var(--line);border-radius:999px;padding:10px 14px;font-size:16px}
+.cats button.on{border-color:var(--gold);color:var(--gold);font-weight:800}
+.bar{height:10px;background:#222;border-radius:6px;overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;background:var(--gold)}
+.catline{margin-top:12px}
+.item{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--line);cursor:pointer}
+.item:first-child{border-top:0}
+.item .d{flex:1;min-width:0}
+.item .t{font-weight:700}.item .s{color:var(--mut);font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item .m{font-weight:800;font-size:18px;white-space:nowrap}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.tabs button{background:var(--card);border:2px solid var(--line);border-radius:12px;padding:12px;font-weight:800;font-size:16px}
+.tabs button.on{border-color:var(--gold);color:var(--gold)}
+.badge{display:inline-block;font-size:12px;font-weight:800;border-radius:999px;padding:2px 8px;margin-left:6px;vertical-align:middle}
+.badge.due{background:#3a2a05;color:var(--gold)}.badge.ok{background:#0f2a1a;color:var(--green)}
+.wa{background:#1faa59;color:#fff;border:0;border-radius:10px;padding:8px 12px;font-weight:800;font-size:14px;min-height:40px;white-space:nowrap}
+.lock{position:fixed;inset:0;z-index:100;background:#050505;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px}
+.lock h2{margin:0;font-size:22px;text-align:center}
+.dots{display:flex;gap:14px;height:20px}.dots i{width:16px;height:16px;border-radius:50%;border:2px solid var(--gold)}.dots i.on{background:var(--gold)}
+.pad{display:grid;grid-template-columns:repeat(3,76px);gap:14px}
+.pad button{height:76px;border-radius:50%;background:var(--card);border:1px solid var(--line);font-size:28px;font-weight:700}
+.pad button:active{background:var(--gold);color:#111}
+.lock .err{color:var(--red);height:20px;font-size:15px}
+.lock .forgot{background:none;border:0;color:var(--mut);font-size:14px;text-decoration:underline}
+.dlg{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:10;display:flex;align-items:flex-end;justify-content:center}
+.dlg[hidden]{display:none}
+.sheet{background:#0f0f0f;border:1px solid var(--line);border-radius:20px 20px 0 0;width:100%;max-width:640px;max-height:92vh;overflow:auto;padding:18px 16px calc(22px + env(safe-area-inset-bottom))}
+.sheet h2{margin:0 0 4px;font-size:20px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mut{color:var(--mut)}
+.empty{color:var(--mut);text-align:center;padding:22px 0}
+.thumb{max-width:100%;border-radius:10px;margin-top:8px}
+.note{font-size:13px;color:var(--mut);margin-top:10px;line-height:1.4}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--gold);color:#111;font-weight:800;padding:12px 18px;border-radius:12px;z-index:20}
+.toast[hidden]{display:none}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>Mes <b>dépenses</b></h1>
+    <button class="btn small ghost" id="btnMenu">Export</button>
+  </header>
+
+  <div class="month"><button id="prev" aria-label="Mois précédent">‹</button><span id="mLabel"></span><button id="next" aria-label="Mois suivant">›</button></div>
+
+  <section class="card" id="bilan">
+    <div class="row"><div><div class="lbl">Ce que je gagne</div><div class="big pos" id="rec">0,00 €</div></div><div id="due" style="text-align:right;font-size:14px;color:var(--gold)"></div></div>
+    <div class="row" style="margin-top:14px"><div class="lbl">Mes dépenses</div><div id="tot" style="font-weight:800;font-size:22px">0,00 €</div></div>
+    <div class="row" style="margin-top:12px;border-top:1px solid var(--line);padding-top:12px"><div class="lbl">Il me reste</div><div class="reste" id="reste">—</div></div>
+    <div class="row" style="margin-top:8px"><div class="lbl">TVA sur mes dépenses</div><div id="tva" style="font-weight:800">0,00 €</div></div>
+    <div id="vs" class="mut" style="margin-top:8px;font-size:13px"></div>
+  </section>
+
+  <div class="tabs"><button id="tabRec" class="on">Ce que je gagne</button><button id="tabDep">Mes dépenses</button></div>
+
+  <button class="btn" id="add" style="width:100%;margin-top:12px">+ Ajouter une dépense</button>
+  <button class="btn" id="addR" style="width:100%;margin-top:12px">+ Ajouter une recette</button>
+
+  <section class="card" id="cats" hidden></section>
+
+  <section class="card" id="listR"></section>
+
+  <section class="card" id="list"></section>
+
+  <p class="note">Tes dépenses sont enregistrées uniquement sur cet appareil. Pense à faire une sauvegarde de temps en temps (bouton Export).</p>
+</div>
+
+<div class="dlg" id="dForm" hidden><form class="sheet" id="form" autocomplete="off">
+  <h2 id="fTitle">Nouvelle dépense</h2>
+  <label>Catégorie</label><div class="cats" id="fCats"></div>
+  <div class="two">
+    <div><label for="fAmt">Montant TTC (€)</label><input id="fAmt" inputmode="decimal" placeholder="0,00" required></div>
+    <div><label for="fDate">Date</label><input id="fDate" type="date" required></div>
+  </div>
+  <label for="fTva">TVA (€) — facultatif</label><input id="fTva" inputmode="decimal" placeholder="ex. 12,50">
+  <label for="fNote">Note — facultatif</label><input id="fNote" maxlength="80" placeholder="ex. Total Nanterre">
+  <label>Photo du ticket — facultatif</label>
+  <input id="fPhoto" type="file" accept="image/*" capture="environment">
+  <img id="fThumb" class="thumb" alt="" hidden>
+  <button type="button" class="btn small red" id="fRmPhoto" style="margin-top:8px" hidden>Retirer la photo</button>
+  <div class="two" style="margin-top:20px"><button type="button" class="btn ghost" id="fCancel">Annuler</button><button type="submit" class="btn">Enregistrer</button></div>
+  <button type="button" class="btn red" id="fDel" style="width:100%;margin-top:12px" hidden>Supprimer cette dépense</button>
+</form></div>
+
+<div class="dlg" id="dRec" hidden><form class="sheet" id="formR" autocomplete="off">
+  <h2 id="rTitle">Nouvelle recette</h2>
+  <label>D'où vient l'argent</label><div class="cats" id="rSrc"></div>
+  <div class="two">
+    <div><label for="rAmt">Montant (€)</label><input id="rAmt" inputmode="decimal" placeholder="0,00" required></div>
+    <div><label for="rDate">Date</label><input id="rDate" type="date" required></div>
+  </div>
+  <label for="rNb">Nombre de courses — facultatif</label><input id="rNb" inputmode="numeric" placeholder="ex. 14">
+  <label for="rName">Contact (qui me l'a donnée) — facultatif</label><input id="rName" maxlength="50" placeholder="Nom">
+  <label for="rPhone">Téléphone — facultatif</label><input id="rPhone" type="tel" inputmode="tel" placeholder="06 12 34 56 78">
+  <label>Paiement</label><div class="cats" id="rPaid"></div>
+  <label for="rNote">Note — facultatif</label><input id="rNote" maxlength="80" placeholder="ex. Transfert CDG, paiement CB">
+  <button type="button" class="wa" id="rWa" style="width:100%;margin-top:14px" hidden>Relancer sur WhatsApp</button>
+  <div class="two" style="margin-top:20px"><button type="button" class="btn ghost" id="rCancel">Annuler</button><button type="submit" class="btn">Enregistrer</button></div>
+  <button type="button" class="btn red" id="rDel" style="width:100%;margin-top:12px" hidden>Supprimer cette recette</button>
+</form></div>
+
+<div class="dlg" id="dMenu" hidden><div class="sheet">
+  <h2>Export et sauvegarde</h2>
+  <p class="mut" style="margin:6px 0 14px">Pour ton comptable ou pour garder une copie.</p>
+  <button class="btn" id="xMonth" style="width:100%">Tableau du mois (CSV)</button>
+  <button class="btn ghost" id="xAll" style="width:100%;margin-top:10px">Tableau de toute l'année (CSV)</button>
+  <button class="btn ghost" id="xBack" style="width:100%;margin-top:10px">Sauvegarde complète</button>
+  <button class="btn ghost" id="xRest" style="width:100%;margin-top:10px">Restaurer une sauvegarde</button>
+  <input type="file" id="xFile" accept="application/json,.json" hidden>
+  <button class="btn small" id="mClose" style="width:100%;margin-top:16px;background:#222;color:#fff">Fermer</button>
+</div></div>
+
+<div class="dlg" id="dPhoto" hidden><div class="sheet"><img id="pImg" class="thumb" alt="Ticket"><button class="btn" id="pClose" style="width:100%;margin-top:14px">Fermer</button></div></div>
+
+<div class="lock" id="lock"><h2 id="lTitle">Code</h2><div class="dots" id="lDots"></div><div class="err" id="lErr"></div><div class="pad" id="lPad"></div><button class="forgot" id="lForgot" hidden>Code oublié ?</button></div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+const $=id=>document.getElementById(id);
+const CATS=['Carburant','Péage','Entretien','Lavage','Parking','Téléphone','Autre'];
+const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}}};
+let items=store.get('dep-items',[]);   // {id,cat,amt,tva,date,note,photo:bool}
+let recs=store.get('dep-rec',[]);       // {id,src,amt,date,nb,name,phone,paid,note}
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+let cur=today().slice(0,7);
+const eur=n=>(n||0).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
+const num=v=>{const n=parseFloat(String(v||'').replace(/\s/g,'').replace(',','.'));return isFinite(n)?n:0};
+const save=()=>{if(!store.set('dep-items',items)||!store.set('dep-rec',recs))toast("Mémoire pleine : fais une sauvegarde")};
+function toast(t){const e=$('toast');e.textContent=t;e.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>e.hidden=true,2600)}
+
+/* photos in IndexedDB */
+const idb=()=>new Promise((res,rej)=>{const r=indexedDB.open('dep-photos',1);r.onupgradeneeded=()=>r.result.createObjectStore('p');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});
+async function pPut(id,data){const d=await idb();return new Promise((res,rej)=>{const t=d.transaction('p','readwrite');t.objectStore('p').put(data,id);t.oncomplete=res;t.onerror=()=>rej(t.error)})}
+async function pGet(id){const d=await idb();return new Promise((res,rej)=>{const r=d.transaction('p').objectStore('p').get(id);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
+async function pDel(id){try{const d=await idb();d.transaction('p','readwrite').objectStore('p').delete(id)}catch(e){}}
+async function pAll(){const d=await idb();return new Promise((res,rej)=>{const o={};const r=d.transaction('p').objectStore('p').openCursor();r.onsuccess=()=>{const c=r.result;if(c){o[c.key]=c.value;c.continue()}else res(o)};r.onerror=()=>rej(r.error)})}
+function shrink(file){return new Promise((res,rej)=>{const img=new Image();const u=URL.createObjectURL(file);img.onload=()=>{const m=1100,k=Math.min(1,m/Math.max(img.width,img.height));const c=document.createElement('canvas');c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);c.getContext('2d').drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(u);res(c.toDataURL('image/jpeg',.72))};img.onerror=()=>rej();img.src=u})}
+
+const monthName=m=>{const [y,mo]=m.split('-');return new Date(+y,+mo-1,1).toLocaleDateString('fr-FR',{month:'long',year:'numeric'})};
+const shift=(m,n)=>{const [y,mo]=m.split('-').map(Number);const d=new Date(y,mo-1+n,1);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')};
+const inMonth=m=>items.filter(i=>i.date.slice(0,7)===m);
+const sum=(a,k='amt')=>a.reduce((s,i)=>s+(i[k]||0),0);
+
+let tab=store.get('dep-tab','rec');
+const inMonthR=m=>recs.filter(i=>i.date.slice(0,7)===m);
+const dshort=d=>new Date(d+'T12:00').toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
+function waLink(r){
+  let p=String(r.phone||'').replace(/[^\d+]/g,'');
+  if(p.startsWith('+'))p=p.slice(1);else if(p.startsWith('00'))p=p.slice(2);else if(p.startsWith('0'))p='33'+p.slice(1);
+  const nom=r.name?' '+r.name:'';
+  const txt=`Bonjour${nom}, je me permets de vous relancer au sujet du paiement de ${eur(r.amt)} pour la course du ${new Date(r.date+'T12:00').toLocaleDateString('fr-FR',{day:'numeric',month:'long'})}. Merci d'avance. Taxis Van Paris`;
+  return 'https://wa.me/'+p+'?text='+encodeURIComponent(txt);
+}
+function render(){
+  $('mLabel').textContent=monthName(cur);
+  const L=inMonth(cur).sort((a,b)=>b.date.localeCompare(a.date)||b.id-a.id);
+  const R=inMonthR(cur).sort((a,b)=>b.date.localeCompare(a.date)||b.id-a.id);
+  const tot=sum(L),gain=sum(R.filter(x=>x.paid!==false)),due=sum(R.filter(x=>x.paid===false));
+  $('tot').textContent=eur(tot);
+  $('rec').textContent=eur(gain);
+  $('due').textContent=due?`${eur(due)} à recevoir`:'';
+  $('tva').textContent=eur(sum(L,'tva'));
+  const prev=sum(inMonth(shift(cur,-1)));
+  $('vs').textContent=prev?`Dépenses du mois d'avant : ${eur(prev)}`:'';
+  const r=$('reste');
+  if(gain||tot){const v=gain-tot;r.textContent=eur(v);r.className='reste '+(v>=0?'pos':'neg')}else{r.textContent='—';r.className='reste'}
+  $('tabRec').className=tab==='rec'?'on':'';$('tabDep').className=tab==='dep'?'on':'';
+  $('add').hidden=tab!=='dep';$('addR').hidden=tab!=='rec';
+  $('listR').hidden=tab!=='rec';$('list').hidden=tab!=='dep';
+  // categories
+  const cs=$('cats');
+  if(tab==='dep'&&L.length){
+    const by={};L.forEach(i=>by[i.cat]=(by[i.cat]||0)+i.amt);
+    const rows=Object.entries(by).sort((a,b)=>b[1]-a[1]);
+    cs.hidden=false;
+    cs.innerHTML='<div class="lbl">Par catégorie</div>'+rows.map(([k,v])=>`<div class="catline"><div class="row"><span>${k}</span><b>${eur(v)}</b></div><div class="bar"><i style="width:${Math.round(v/tot*100)}%"></i></div></div>`).join('');
+  }else cs.hidden=true;
+  // lists
+  $('list').innerHTML=L.length?L.map(i=>`<div class="item" data-id="${i.id}"><div class="d"><div class="t">${i.cat}${i.photo?' 📷':''}</div><div class="s">${dshort(i.date)}${i.note?' · '+esc(i.note):''}</div></div><div class="m">${eur(i.amt)}</div></div>`).join(''):'<div class="empty">Aucune dépense ce mois-ci.</div>';
+  $('listR').innerHTML=R.length?R.map(i=>`<div class="item" data-id="${i.id}"><div class="d"><div class="t">${i.src}${i.paid===false?'<span class="badge due">à recevoir</span>':''}</div><div class="s">${dshort(i.date)}${i.nb?' · '+i.nb+' courses':''}${i.name?' · '+esc(i.name):''}${i.note?' · '+esc(i.note):''}</div></div>${i.paid===false&&i.phone?`<button class="wa" data-wa="${i.id}">Relancer</button>`:''}<div class="m">${eur(i.amt)}</div></div>`).join(''):'<div class="empty">Aucune recette ce mois-ci.</div>';
+}
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+$('prev').onclick=()=>{cur=shift(cur,-1);render()};
+$('next').onclick=()=>{cur=shift(cur,1);render()};
+$('tabRec').onclick=()=>{tab='rec';store.set('dep-tab',tab);render()};
+$('tabDep').onclick=()=>{tab='dep';store.set('dep-tab',tab);render()};
+
+/* form */
+let editId=null,fCat='Carburant',fPhoto=null,fPhotoChanged=false;
+function drawCats(){$('fCats').innerHTML=CATS.map(c=>`<button type="button" data-c="${c}" class="${c===fCat?'on':''}">${c}</button>`).join('')}
+$('fCats').onclick=e=>{const b=e.target.closest('button');if(!b)return;fCat=b.dataset.c;drawCats()};
+async function openForm(id){
+  editId=id||null;fPhoto=null;fPhotoChanged=false;
+  const it=id?items.find(i=>i.id===id):null;
+  $('fTitle').textContent=it?'Modifier la dépense':'Nouvelle dépense';
+  fCat=it?it.cat:'Carburant';drawCats();
+  $('fAmt').value=it?String(it.amt).replace('.',','):'';
+  $('fDate').value=it?it.date:(today().slice(0,7)===cur?today():cur+'-01');
+  $('fTva').value=it&&it.tva?String(it.tva).replace('.',','):'';
+  $('fNote').value=it?it.note||'':'';
+  $('fPhoto').value='';$('fThumb').hidden=true;$('fRmPhoto').hidden=true;
+  $('fDel').hidden=!it;
+  if(it&&it.photo){try{fPhoto=await pGet(it.id)}catch(e){}if(fPhoto){$('fThumb').src=fPhoto;$('fThumb').hidden=false;$('fRmPhoto').hidden=false}}
+  $('dForm').hidden=false;
+  if(!it)setTimeout(()=>$('fAmt').focus(),50);
+}
+$('add').onclick=()=>openForm();
+$('fCancel').onclick=()=>$('dForm').hidden=true;
+$('list').onclick=e=>{const r=e.target.closest('.item');if(r)openForm(+r.dataset.id)};
+$('fPhoto').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{fPhoto=await shrink(f);fPhotoChanged=true;$('fThumb').src=fPhoto;$('fThumb').hidden=false;$('fRmPhoto').hidden=false}catch(x){toast('Photo illisible')}};
+$('fRmPhoto').onclick=()=>{fPhoto=null;fPhotoChanged=true;$('fThumb').hidden=true;$('fRmPhoto').hidden=true;$('fPhoto').value=''};
+$('form').onsubmit=async e=>{
+  e.preventDefault();
+  const amt=num($('fAmt').value);if(!(amt>0)){toast('Montant ?');return}
+  const rec={cat:fCat,amt:Math.round(amt*100)/100,tva:Math.round(num($('fTva').value)*100)/100,date:$('fDate').value,note:$('fNote').value.trim()};
+  let id=editId;
+  if(id){const i=items.findIndex(x=>x.id===id);rec.id=id;rec.photo=items[i].photo;items[i]=rec}
+  else{id=Date.now();rec.id=id;rec.photo=false;items.push(rec)}
+  if(fPhotoChanged){try{if(fPhoto){await pPut(id,fPhoto);rec.photo=true}else{await pDel(id);rec.photo=false}}catch(x){toast('Photo non enregistrée')}}
+  save();cur=rec.date.slice(0,7);$('dForm').hidden=true;render();toast('Enregistré');
+};
+$('fDel').onclick=()=>{if(!editId||!confirm('Supprimer cette dépense ?'))return;items=items.filter(i=>i.id!==editId);pDel(editId);save();$('dForm').hidden=true;render()};
+$('list').addEventListener('click',()=>{});
+// show photo on long info: tap thumb in form
+$('fThumb').onclick=()=>{$('pImg').src=$('fThumb').src;$('dPhoto').hidden=false};
+$('pClose').onclick=()=>$('dPhoto').hidden=true;
+
+/* recettes */
+const SRC=['U','Course CB','Espèces','Autre prestataire'];
+let rId=null,rSrc='U',rPaid=true;
+function drawR(){$('rSrc').innerHTML=SRC.map(c=>`<button type="button" data-c="${c}" class="${c===rSrc?'on':''}">${c}</button>`).join('');
+  $('rPaid').innerHTML=`<button type="button" data-p="1" class="${rPaid?'on':''}">Reçu</button><button type="button" data-p="0" class="${rPaid?'':'on'}">À recevoir</button>`;
+  $('rWa').hidden=!(rId&&!rPaid&&$('rPhone').value.trim())}
+$('rSrc').onclick=e=>{const b=e.target.closest('button');if(!b)return;rSrc=b.dataset.c;drawR()};
+$('rPaid').onclick=e=>{const b=e.target.closest('button');if(!b)return;rPaid=b.dataset.p==='1';drawR()};
+$('rPhone').oninput=drawR;
+function openRec(id){
+  rId=id||null;const it=id?recs.find(i=>i.id===id):null;
+  $('rTitle').textContent=it?'Modifier la recette':'Nouvelle recette';
+  rSrc=it?it.src:'U';rPaid=it?it.paid!==false:true;
+  $('rAmt').value=it?String(it.amt).replace('.',','):'';
+  $('rDate').value=it?it.date:(today().slice(0,7)===cur?today():cur+'-01');
+  $('rNb').value=it&&it.nb?it.nb:'';$('rName').value=it?it.name||'':'';$('rPhone').value=it?it.phone||'':'';$('rNote').value=it?it.note||'':'';
+  $('rDel').hidden=!it;drawR();$('dRec').hidden=false;if(!it)setTimeout(()=>$('rAmt').focus(),50);
+}
+$('addR').onclick=()=>openRec();
+$('rCancel').onclick=()=>$('dRec').hidden=true;
+$('listR').onclick=e=>{const w=e.target.closest('[data-wa]');if(w){const r=recs.find(x=>x.id===+w.dataset.wa);if(r)location.href=waLink(r);return}const r=e.target.closest('.item');if(r)openRec(+r.dataset.id)};
+$('rWa').onclick=()=>{const r=recs.find(x=>x.id===rId);if(r)location.href=waLink(r)};
+$('formR').onsubmit=e=>{
+  e.preventDefault();const amt=num($('rAmt').value);if(!(amt>0)){toast('Montant ?');return}
+  const rec={src:rSrc,amt:Math.round(amt*100)/100,date:$('rDate').value,nb:parseInt($('rNb').value)||0,name:$('rName').value.trim(),phone:$('rPhone').value.trim(),paid:rPaid,note:$('rNote').value.trim()};
+  if(rId){rec.id=rId;recs[recs.findIndex(x=>x.id===rId)]=rec}else{rec.id=Date.now();recs.push(rec)}
+  save();cur=rec.date.slice(0,7);tab='rec';store.set('dep-tab',tab);$('dRec').hidden=true;render();toast('Enregistré');
+};
+$('rDel').onclick=()=>{if(!rId||!confirm('Supprimer cette recette ?'))return;recs=recs.filter(i=>i.id!==rId);save();$('dRec').hidden=true;render()};
+
+/* export */
+$('btnMenu').onclick=()=>$('dMenu').hidden=false;
+$('mClose').onclick=()=>$('dMenu').hidden=true;
+function dl(name,text,type){const b=new Blob([text],{type});const f=new File([b],name,{type});
+  if(navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f],title:name}).catch(()=>{});return}
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)}
+function csv(list,rl){
+  const q=s=>'"'+String(s).replace(/"/g,'""')+'"';
+  const n=v=>(v||0).toFixed(2).replace('.',',');
+  const f=d=>d.split('-').reverse().join('/');
+  const rows=[['Type','Date','Catégorie / Source','Montant','TVA','Contact','Téléphone','Statut','Note'].join(';')];
+  [...rl].sort((a,b)=>a.date.localeCompare(b.date)).forEach(i=>rows.push(['Recette',f(i.date),q(i.src),n(i.amt),'',q(i.name||''),q(i.phone||''),i.paid===false?'À recevoir':'Reçu',q(i.note||'')].join(';')));
+  [...list].sort((a,b)=>a.date.localeCompare(b.date)).forEach(i=>rows.push(['Dépense',f(i.date),q(i.cat),n(i.amt),n(i.tva),'','','',q(i.note||'')].join(';')));
+  rows.push(['Total recettes','','',n(sum(rl.filter(x=>x.paid!==false))),'','','','',''].join(';'));
+  rows.push(['Total dépenses','','',n(sum(list)),n(sum(list,'tva')),'','','',''].join(';'));
+  return '\ufeff'+rows.join('\r\n');
+}
+$('xMonth').onclick=()=>{dl(`depenses-${cur}.csv`,csv(inMonth(cur),inMonthR(cur)),'text/csv');$('dMenu').hidden=true};
+$('xAll').onclick=()=>{const y=cur.slice(0,4);dl(`depenses-${y}.csv`,csv(items.filter(i=>i.date.startsWith(y)),recs.filter(i=>i.date.startsWith(y))),'text/csv');$('dMenu').hidden=true};
+$('xBack').onclick=async()=>{let p={};try{p=await pAll()}catch(e){}dl(`sauvegarde-depenses-${today()}.json`,JSON.stringify({v:2,items,recs,photos:p}),'application/json');$('dMenu').hidden=true};
+$('xRest').onclick=()=>$('xFile').click();
+$('xFile').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const j=JSON.parse(await f.text());if(!Array.isArray(j.items))throw 0;if(!confirm('Remplacer les dépenses actuelles par cette sauvegarde ?'))return;items=j.items;recs=j.recs||[];save();for(const [k,v] of Object.entries(j.photos||{}))await pPut(+k,v);$('dMenu').hidden=true;render();toast('Sauvegarde restaurée')}catch(x){toast('Fichier non valide')}e.target.value=''};
+
+/* code d'accès */
+const lock=$('lock');let pin='',stage='enter',first='',hiddenAt=0;
+async function hash(p){const salt='dep-k9m4';try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(salt+p));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}catch(e){let h=0;for(const c of salt+p)h=(h*31+c.charCodeAt(0))|0;return 'f'+h}}
+function lockUI(){
+  $('lTitle').textContent=stage==='set'?'Choisis un code à 4 chiffres':stage==='confirm'?'Confirme ton code':'Entre ton code';
+  $('lDots').innerHTML=[0,1,2,3].map(i=>`<i class="${i<pin.length?'on':''}"></i>`).join('');
+  $('lForgot').hidden=stage!=='enter';
+}
+$('lPad').innerHTML=['1','2','3','4','5','6','7','8','9','','0','⌫'].map(k=>k?`<button type="button" data-k="${k}">${k}</button>`:'<span></span>').join('');
+function showLock(){pin='';first='';stage=store.get('dep-pin',null)?'enter':'set';$('lErr').textContent='';lock.hidden=false;lockUI()}
+$('lPad').onclick=async e=>{const b=e.target.closest('button');if(!b)return;const k=b.dataset.k;$('lErr').textContent='';
+  if(k==='⌫'){pin=pin.slice(0,-1);lockUI();return}
+  if(pin.length>=4)return;pin+=k;lockUI();if(pin.length<4)return;
+  const h=await hash(pin);
+  if(stage==='enter'){if(h===store.get('dep-pin')){lock.hidden=true;pin=''}else{$('lErr').textContent='Code incorrect';pin='';setTimeout(lockUI,250)}}
+  else if(stage==='set'){first=pin;pin='';stage='confirm';setTimeout(lockUI,150)}
+  else{if(pin===first){store.set('dep-pin',h);lock.hidden=true;pin='';toast('Code enregistré')}else{$('lErr').textContent='Les codes sont différents';stage='set';pin='';first='';setTimeout(lockUI,300)}}
+};
+$('lForgot').onclick=()=>{if(confirm("Code oublié : l'appli sera remise à zéro et TOUTES les dépenses et recettes seront effacées. Continuer ?")){localStorage.removeItem('dep-pin');localStorage.removeItem('dep-items');localStorage.removeItem('dep-rec');items=[];recs=[];try{indexedDB.deleteDatabase('dep-photos')}catch(e){};render();showLock()}};
+document.addEventListener('visibilitychange',()=>{if(document.hidden)hiddenAt=Date.now();else if(hiddenAt&&Date.now()-hiddenAt>60000&&store.get('dep-pin',null))showLock()});
+showLock();
+
+if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+render();
+</script>
+</body>
+</html>
