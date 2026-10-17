@@ -1268,7 +1268,7 @@ function anonymise(title,location){
   document.getElementById("btn-tout-vu").addEventListener("click", () => marquerVues(reservationsCache.map(r => r.id)));
 
   // ---------- Notifications sur le téléphone, même appli fermée (Firebase Cloud Messaging, gratuit) ----------
-  const VAPID_KEY = "COLLE_CLE_WEB_PUSH";
+  const VAPID_KEY = "BOXaMxALtm_gQKauJU91dkR-7d2-vyr90g8ZLpeXlEZH_v8KoQ5L5CDoKg4oC8VtnM7KQq8uEkEUsPeUiGPqwnU";
   const ua = navigator.userAgent || "", estIOS = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
   const estAppli = () => window.navigator.standalone === true || (window.matchMedia && matchMedia("(display-mode: standalone)").matches);
   const pushPossible = () => "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
