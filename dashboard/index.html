@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Taxis Van Paris — Dashboard</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="TVP Réservations">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0B0B0B">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
 <style>
@@ -464,7 +471,8 @@
           <select id="filter-statut-resa" hidden><option value=""></option></select>
           <span id="resa-cal-all"></span>
         </div>
-        <div class="new-bar" id="new-bar"><span id="new-bar-txt"></span><button type="button" id="btn-alertes" hidden>🔔 Activer les alertes</button><button type="button" class="pl" id="btn-tout-vu">Tout marquer comme vu</button></div>
+        <div class="new-bar push-bar" id="push-bar"><span id="push-bar-txt"></span><button type="button" id="btn-push-plustard">Plus tard</button><button type="button" class="pl" id="btn-push">🔔 Activer</button></div>
+        <div class="new-bar" id="new-bar"><span id="new-bar-txt"></span><button type="button" class="pl" id="btn-tout-vu">Tout marquer comme vu</button></div>
         <div id="resa-list"><div class="rempty">Chargement…</div></div>
       </div>
 
@@ -1226,7 +1234,8 @@ function anonymise(title,location){
     ["nb-nav", "nb-menu"].forEach(id => { const e = document.getElementById(id); if (e) { e.textContent = n; e.classList.toggle("on", n > 0); } });
     document.getElementById("new-bar").classList.toggle("on", n > 0);
     document.getElementById("new-bar-txt").textContent = "🔔 " + n + (n > 1 ? " nouvelles réservations pas encore vues" : " nouvelle réservation pas encore vue");
-    document.getElementById("btn-alertes").hidden = !("Notification" in window) || Notification.permission !== "default";
+    try { if (navigator.setAppBadge) { if (n) navigator.setAppBadge(n); else navigator.clearAppBadge(); } } catch (e) {}
+    try { if (navigator.serviceWorker && navigator.serviceWorker.controller) navigator.serviceWorker.controller.postMessage({ type: "pastille", n }); } catch (e) {}
     document.title = (n ? "(" + n + ") " : "") + TITRE;
   }
   function bip() {
@@ -1257,7 +1266,48 @@ function anonymise(title,location){
     majNouvelles();
   }
   document.getElementById("btn-tout-vu").addEventListener("click", () => marquerVues(reservationsCache.map(r => r.id)));
-  document.getElementById("btn-alertes").addEventListener("click", () => { try { Notification.requestPermission().then(majNouvelles); } catch (e) {} });
+
+  // ---------- Notifications sur le téléphone, même appli fermée (Firebase Cloud Messaging, gratuit) ----------
+  const VAPID_KEY = "COLLE_CLE_WEB_PUSH";
+  const ua = navigator.userAgent || "", estIOS = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+  const estAppli = () => window.navigator.standalone === true || (window.matchMedia && matchMedia("(display-mode: standalone)").matches);
+  const pushPossible = () => "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
+  if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js", { scope: "./" }).catch(e => console.warn("SW:", e));
+  function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  function majPushBar() {
+    const bar = document.getElementById("push-bar"), txt = document.getElementById("push-bar-txt"), btn = document.getElementById("btn-push");
+    let msg = "", bouton = false;
+    const plusTard = Number(lsGet("tvp_push_plustard") || 0) > Date.now();
+    if (VAPID_KEY.startsWith("COLLE_") || plusTard) msg = "";
+    else if (estIOS && !estAppli()) msg = "📲 Pour recevoir les nouvelles réservations en notification sur cet iPhone : bouton Partager ⬆️ → « Sur l'écran d'accueil », puis ouvre l'appli depuis la nouvelle icône.";
+    else if (!pushPossible()) msg = "";
+    else if (Notification.permission === "denied") msg = "🔕 Notifications bloquées sur cet appareil : autorise-les dans les réglages du téléphone (Notifications → TVP Réservations).";
+    else if (Notification.permission !== "granted" || lsGet("tvp_push_ok") !== "1") { msg = "🔔 Reçois une notification à chaque nouvelle réservation, même quand l'appli est fermée."; bouton = true; }
+    bar.classList.toggle("on", !!msg); txt.textContent = msg; btn.hidden = !bouton;
+  }
+  async function activerPush() {
+    const btn = document.getElementById("btn-push"); btn.disabled = true; btn.textContent = "Activation…";
+    try {
+      const perm = await Notification.requestPermission();
+      if (perm !== "granted") { toast("Notifications refusées — tu peux les autoriser dans les réglages du téléphone", 6000); return; }
+      const reg = await navigator.serviceWorker.ready;
+      const { getMessaging, getToken } = await import("https://www.gstatic.com/firebasejs/10.13.0/firebase-messaging.js");
+      const token = await getToken(getMessaging(app), { vapidKey: VAPID_KEY, serviceWorkerRegistration: reg });
+      if (!token) throw new Error("jeton vide");
+      const idToken = await auth.currentUser.getIdToken();
+      const appareil = /iPhone|iPad|iPod/.test(ua) ? "iPhone" : /Android/.test(ua) ? "Android" : "Ordinateur";
+      const r = await fetch(IA_FACT_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "pushtoken", idToken, token, appareil, nom: document.getElementById("admin-name").textContent }) }).then(x => x.json());
+      if (!r.ok) throw new Error(r.error || "erreur");
+      lsSet("tvp_push_ok", "1");
+      toast("✅ Notifications activées sur ce " + (appareil === "Ordinateur" ? "poste" : "téléphone"), 5000);
+    } catch (e) { toast("Impossible d'activer les notifications (" + (e.message || e) + ")", 7000); }
+    finally { btn.disabled = false; btn.textContent = "🔔 Activer"; majPushBar(); }
+  }
+  document.getElementById("btn-push").addEventListener("click", activerPush);
+  document.getElementById("btn-push-plustard").addEventListener("click", () => { lsSet("tvp_push_plustard", String(Date.now() + 3 * 86400000)); majPushBar(); });
+  majPushBar();
 
   function renderReservations() {
     const aVenir = reservationsCache.filter(r => groupOf(r) === 0 && r.statut !== "annulée");
