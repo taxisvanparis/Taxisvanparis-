@@ -324,7 +324,7 @@ var TVP = (function(){
   function price(){
     var a=amount();
     $('bk-price').textContent = a ? fmt(a) : 'On request';
-    if(a&&last) $('bk-price-l').textContent = last.fixed ? 'Fixed price for the whole vehicle' : 'Estimated price ('+last.km+' km) — confirmed by the driver';
+    if(a&&last) $('bk-price-l').textContent = last.fixed ? 'Fixed price for the whole vehicle' : 'Guaranteed price ('+last.km+' km) for the whole vehicle';
     else if(a) $('bk-price-l').textContent = 'Fixed price from any Paris address — enter your address for the exact price';
     else if(typed.from||typed.to) $('bk-price-l').textContent = 'Choose your address from the suggestions to see the price';
     else $('bk-price-l').textContent = 'We confirm a fixed price on WhatsApp within minutes';
