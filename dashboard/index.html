@@ -392,6 +392,10 @@
   .new-bar button.pl{background:var(--gold);color:#141008}
   .rc .acts .grp-btn{border-color:var(--wa);color:#0B2414;background:var(--wa);font-weight:700}
   .field select{width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:8px;font-size:15px;background:var(--card);color:var(--text);}
+  .rc.s-dem{--st:var(--gold)} .rc.s-dem-ok{--st:var(--done);opacity:.75} .rc.s-dem-spam{--st:var(--cancel);opacity:.62}
+  .rc .acts .spam-btn{color:var(--red);border-color:var(--red)}
+  .dem-err{border:1px solid var(--red);color:var(--red);border-radius:12px;padding:12px 14px;margin-bottom:12px;font-size:14px;overflow-wrap:anywhere}
+  .dem-err code{display:block;white-space:pre-wrap;background:var(--soft);color:var(--text);border-radius:8px;padding:8px;margin-top:8px;font-size:12px}
   .rempty{text-align:center;padding:28px 16px;border:1px dashed var(--border);border-radius:14px;color:var(--muted);}
 .wa-direct{display:inline-block;background:#25D366;color:#fff!important;font-weight:700;text-decoration:none;padding:3px 10px;border-radius:12px;font-size:.82rem}
 </style>
@@ -424,6 +428,7 @@
     <h2 class="brand">Taxis Van Paris</h2>
     <span class="brand-sub" style="color:#8B93A7;font-size:12px;margin-bottom:28px;display:block;">Tableau de bord</span>
     <button class="nav-item active" data-tab="reservations"><span class="dot"></span>Réservations<span class="nb" id="nb-nav"></span></button>
+    <button class="nav-item" data-tab="demandes"><span class="dot"></span>Demandes<span class="nb" id="nb-dem"></span></button>
     <button class="nav-item" data-tab="facturation"><span class="dot"></span>Facturation</button>
     <button class="nav-item" data-tab="chauffeurs"><span class="dot"></span>Chauffeurs</button>
     <button class="nav-item" data-tab="partage"><span class="dot"></span>Partage WhatsApp</button>
@@ -474,6 +479,19 @@
         <div class="new-bar push-bar" id="push-bar"><span id="push-bar-txt"></span><button type="button" id="btn-push-plustard">Plus tard</button><button type="button" class="pl" id="btn-push">🔔 Activer</button></div>
         <div class="new-bar" id="new-bar"><span id="new-bar-txt"></span><button type="button" class="pl" id="btn-tout-vu">Tout marquer comme vu</button></div>
         <div id="resa-list"><div class="rempty">Chargement…</div></div>
+      </div>
+
+      <!-- DEMANDES (formulaire de contact) -->
+      <div class="tab-panel" id="tab-demandes">
+        <div id="dem-err"></div>
+        <div class="rbar">
+          <div class="rchips" id="dem-chips">
+            <button type="button" class="rchip" data-v="atraiter" aria-pressed="true">À traiter <span id="dem-c-atraiter"></span></button>
+            <button type="button" class="rchip" data-v="traitees" aria-pressed="false">Traitées <span id="dem-c-traitees"></span></button>
+            <button type="button" class="rchip" data-v="spam" aria-pressed="false">Spam <span id="dem-c-spam"></span></button>
+          </div>
+        </div>
+        <div id="dem-list"><div class="rempty">Chargement…</div></div>
       </div>
 
       <!-- FACTURATION -->
@@ -889,6 +907,7 @@ function anonymise(title,location){
   // ---------------- NAV TABS ----------------
   const tabTitles = {
     reservations: ["Réservations", "Toutes les courses en cours et à venir"],
+    demandes: ["Demandes", "Messages reçus par le formulaire de contact"],
     facturation: ["Facturation", "Suivi des paiements clients"],
     chauffeurs: ["Chauffeurs", "Équipe et disponibilités"],
     partage: ["Partage WhatsApp", "Courses anonymisées, prêtes à poster"]
@@ -906,7 +925,7 @@ function anonymise(title,location){
         tab === "reservations" ? "+ Nouvelle réservation" :
         tab === "facturation" ? "+ Nouvelle facture" : "+ Nouveau chauffeur";
       document.getElementById("btn-new-primary").dataset.target = tab;
-      document.getElementById("btn-new-primary").style.visibility = tab === "partage" ? "hidden" : "";
+      document.getElementById("btn-new-primary").style.visibility = (tab === "partage" || tab === "demandes") ? "hidden" : "";
       if (tab === "partage") renderShare();
     });
   });
@@ -941,6 +960,19 @@ function anonymise(title,location){
       renderStatsResa();
       renderShare();
     }, onErr));
+
+    currentUnsubs.push(onSnapshot(collection(db, "demandes"), snap => {
+      document.getElementById("dem-err").innerHTML = "";
+      demandesCache = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+        .sort((a, b) => String(b.date_creation || "").localeCompare(String(a.date_creation || "")));
+      renderDemandes();
+    }, err => {
+      console.error("Firestore demandes:", err);
+      document.getElementById("dem-list").innerHTML = "";
+      document.getElementById("dem-err").innerHTML = err && err.code === "permission-denied"
+        ? "Firebase bloque encore la lecture des demandes. Ajoute cette règle dans Firebase › Firestore › Règles :<code>match /demandes/{id} {\n  allow create: if true;\n  allow read, update, delete: if request.auth != null;\n}</code>"
+        : "Impossible de charger les demandes (" + esc((err && err.code) || "erreur") + ").";
+    }));
 
     currentUnsubs.push(onSnapshot(collection(db, "factures"), snap => {
       const tous = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -1377,6 +1409,73 @@ function anonymise(title,location){
     const faites = reservationsCache.filter(r => r.statut === "terminée" && String(r.date || "").slice(0, 7) === mois);
     document.getElementById("stat-attente").textContent = reservationsCache.filter(r => r.statut === "en attente").length;
     document.getElementById("stat-avenir").textContent = reservationsCache.filter(r => groupOf(r) === 0 && r.statut !== "annulée").length;
+  }
+
+  // ---------------- RENDER: DEMANDES (formulaire de contact) ----------------
+  let demandesCache = [], demView = "atraiter";
+  const MOTS_SPAM = /\b(seo|website|web ?site|audit|agency|agence web|marketing|backlinks?|ranking|web development|redesign|developer|outsourc\w*|guest post|leads?|digital|crypto|casino|loan|traffic)\b/i;
+  function demSpam(d) {
+    if (d.spam === true) return true;
+    if (d.spam === false) return false;
+    if (d.date && !/^\d{4}-\d{2}-\d{2}$/.test(d.date)) return true;           // date bidon (ex. « Business Inquiry »)
+    if (/lead|scrap|seo|marketing/i.test(d.email || "")) return true;
+    return MOTS_SPAM.test(d.message || "");
+  }
+  const demGroupe = d => demSpam(d) ? "spam" : (d.statut === "traitée" ? "traitees" : "atraiter");
+  function demRecu(iso) {
+    const t = new Date(iso || ""); if (isNaN(t)) return "";
+    return t.toLocaleDateString("fr-FR", { day: "numeric", month: "short" }) + " " + t.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+  }
+  document.querySelectorAll("#dem-chips .rchip").forEach(b => b.addEventListener("click", () => {
+    demView = b.dataset.v;
+    document.querySelectorAll("#dem-chips .rchip").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+    renderDemandes();
+  }));
+  function renderDemandes() {
+    const n = { atraiter: 0, traitees: 0, spam: 0 };
+    demandesCache.forEach(d => n[demGroupe(d)]++);
+    Object.keys(n).forEach(k => { document.getElementById("dem-c-" + k).textContent = n[k] ? "(" + n[k] + ")" : ""; });
+    const nb = document.getElementById("nb-dem"); nb.textContent = n.atraiter; nb.classList.toggle("on", n.atraiter > 0);
+    const rows = demandesCache.filter(d => demGroupe(d) === demView);
+    const box = document.getElementById("dem-list");
+    if (!rows.length) { box.innerHTML = `<div class="rempty">${demView === "atraiter" ? "Aucune demande à traiter." : demView === "spam" ? "Aucun spam." : "Aucune demande traitée."}</div>`; return; }
+    box.innerHTML = `<div class="rlist">` + rows.map(d => {
+      const g = demGroupe(d);
+      const cls = g === "spam" ? "s-dem-spam" : g === "traitees" ? "s-dem-ok" : "s-dem";
+      const lib = g === "spam" ? "Spam" : g === "traitees" ? "Traitée" : "À traiter";
+      const recu = demRecu(d.date_creation);
+      const wa = waNumClient(d.tel || "");
+      const quand = /^\d{4}-\d{2}-\d{2}$/.test(d.date || "") ? jourTitre(d.date) : (d.date || "");
+      const meta = [d.service ? esc(d.service) : "", quand ? "📅 " + esc(quand) : ""].filter(Boolean).join(" · ");
+      const btns = (g === "atraiter"
+          ? `<button class="ok" data-dem-st="traitée" data-id="${esc(d.id)}">✔ Traitée</button><button class="edit" data-dem-resa="${esc(d.id)}">📅 Créer la réservation</button><button class="spam-btn" data-dem-spam="1" data-id="${esc(d.id)}">🚫 Spam</button>`
+          : g === "spam"
+            ? `<button class="no" data-dem-spam="0" data-id="${esc(d.id)}">Pas un spam</button>`
+            : `<button class="no" data-dem-st="nouvelle" data-id="${esc(d.id)}">Remettre à traiter</button>`)
+        + `<button class="del" data-dem-del="${esc(d.id)}" aria-label="Supprimer">🗑️</button>`;
+      return `<div class="rc ${cls}">
+        <div class="t" style="font-size:15px">${esc(recu.split(" ").slice(0, 2).join(" ")) || "—"}<small>${esc(recu.split(" ")[2] || "")}</small></div>
+        <div class="m">
+          <div class="l1"><span class="nm">${esc(d.nom || "—")}</span><span class="pill">${lib}</span></div>
+          ${meta ? `<div class="mt">${meta}</div>` : ""}
+          <div class="mt">${d.tel ? `<a href="tel:${esc(d.tel)}">${esc(d.tel)}</a>` : ""}${wa ? ` · <a class="wa-direct" target="_blank" rel="noopener" href="https://wa.me/${wa}">💬 WhatsApp</a>` : ""}${d.email ? ` · <a href="mailto:${esc(d.email)}">${esc(d.email)}</a>` : ""}</div>
+          ${d.message ? `<div class="nt" style="white-space:pre-line">${esc(d.message)}</div>` : ""}
+          <div class="l3"><span></span><div class="acts">${btns}</div></div>
+        </div></div>`;
+    }).join("") + `</div>`;
+    const maj = (id, champs) => updateDoc(doc(db, "demandes", id), champs).catch(e => toast("Échec : " + ((e && e.code) || "erreur"), 5000));
+    box.querySelectorAll("[data-dem-st]").forEach(b => b.addEventListener("click", () => maj(b.dataset.id, { statut: b.dataset.demSt })));
+    box.querySelectorAll("[data-dem-spam]").forEach(b => b.addEventListener("click", () => maj(b.dataset.id, { spam: b.dataset.demSpam === "1" })));
+    box.querySelectorAll("[data-dem-del]").forEach(b => b.addEventListener("click", () => { if (confirm("Supprimer cette demande ?")) deleteDoc(doc(db, "demandes", b.dataset.demDel)); }));
+    box.querySelectorAll("[data-dem-resa]").forEach(b => b.addEventListener("click", () => {
+      const d = demandesCache.find(x => x.id === b.dataset.demResa); if (!d) return;
+      openResaModal();
+      document.getElementById("f-nom").value = d.nom || "";
+      document.getElementById("f-tel").value = d.tel || "";
+      if (/^\d{4}-\d{2}-\d{2}$/.test(d.date || "")) document.getElementById("f-date").value = d.date;
+      document.getElementById("f-note").value = [d.service, d.message].filter(Boolean).join(" — ");
+      maj(d.id, { statut: "traitée" });
+    }));
   }
 
   // ---------------- RENDER: FACTURES ----------------

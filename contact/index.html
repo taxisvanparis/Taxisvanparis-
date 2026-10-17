@@ -136,6 +136,7 @@
   }
   #form-status.success{color:#7ec97e;display:block;}
   #form-status.error{color:#e07070;display:block;}
+  .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;}
 </style>
 <style>/* iPhone : pas de zoom auto sur les champs */@media (max-width:900px){input,select,textarea{font-size:16px!important}}</style>
 <style>/* iPhone : pas de zoom au double appui sur les boutons */button,a,select,label,input,.vc,.seg button,.stp button,.pax-steps button,[onclick]{touch-action:manipulation}</style></head>
@@ -176,6 +177,8 @@
       <label for="message">Message</label>
       <textarea id="message" name="message" placeholder="Adresse de départ, arrivée, nombre de personnes, bagages..."></textarea>
 
+      <div class="hp" aria-hidden="true"><label for="website">Site web</label><input type="text" id="website" name="website" tabindex="-1" autocomplete="off"></div>
+
       <input type="hidden" name="_subject" value="Nouvelle demande - Taxis Van Paris">
 
       <button type="submit">Envoyer la demande</button>
@@ -206,6 +209,22 @@
   </div>
 </main>
 
+<script type="module">
+  // Enregistre aussi la demande dans Firebase (onglet « Demandes » du tableau de bord)
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+  import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+  const app = initializeApp({
+    apiKey: "AIzaSyBN8uBFONIt1tDTH9C-NIQKeulFdJ2m26Q",
+    authDomain: "taxis-van-paris-by-abts.firebaseapp.com",
+    projectId: "taxis-van-paris-by-abts",
+    storageBucket: "taxis-van-paris-by-abts.firebasestorage.app",
+    messagingSenderId: "53887245170",
+    appId: "1:53887245170:web:942537659f6de1041f9beb"
+  });
+  const db = getFirestore(app);
+  window.enregistrerDemande = (data) => addDoc(collection(db, "demandes"), data);
+</script>
+
 <script>
   const form = document.getElementById('contact-form');
   const status = document.getElementById('form-status');
@@ -213,6 +232,26 @@
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const data = new FormData(form);
+
+    // Piège anti-robot : ce champ est invisible pour un humain
+    if ((data.get('website') || '').trim()) {
+      status.textContent = "Merci, votre demande a bien été envoyée. Nous vous répondons rapidement.";
+      status.className = "success";
+      form.reset();
+      return;
+    }
+    data.delete('website');
+
+    // Copie dans le tableau de bord (n'empêche jamais l'envoi de l'email)
+    const demande = {
+      nom: (data.get('name') || '').trim(), email: (data.get('email') || '').trim(),
+      tel: (data.get('phone') || '').trim(), service: data.get('service') || '',
+      date: data.get('date') || '', message: (data.get('message') || '').trim(),
+      statut: 'nouvelle', source: 'contact', date_creation: new Date().toISOString()
+    };
+    if (typeof window.enregistrerDemande === 'function') {
+      await Promise.race([window.enregistrerDemande(demande).catch(err => console.error('Firebase:', err)), new Promise(r => setTimeout(r, 4000))]);
+    }
 
     try {
       // Apps Script en no-cors : la réponse est opaque (illisible),
