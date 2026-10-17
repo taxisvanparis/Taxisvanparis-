@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Taxis Van Paris — Dashboard</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="TVP Réservations">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0B0B0B">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
 <style>
@@ -374,6 +381,15 @@
   .rc .acts .cal-btn{border-color:var(--gold);color:var(--gold-soft)}
   .rc .acts .del{color:var(--red);border-color:transparent}
   .rc .acts .edit{border-color:var(--gold);color:var(--gold-soft)}
+  .rc.nouv{box-shadow:0 0 0 2px var(--gold),0 0 18px rgba(201,162,75,.35);}
+  .rc .nv{display:inline-block;background:var(--gold);color:#141008;font-size:10.5px;font-weight:800;border-radius:999px;padding:3px 8px;letter-spacing:.5px;margin-right:6px;vertical-align:2px}
+  .rc .acts .vu-btn{border-color:var(--gold);background:var(--gold);color:#141008;font-weight:700}
+  .nb{display:none;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:#E5484D;color:#fff;font:700 12px/20px var(--body);text-align:center;margin-left:auto}
+  .nb.on{display:inline-block}
+  #btn-menu{position:relative} #btn-menu .nb{position:absolute;top:-6px;right:-8px;margin:0}
+  .new-bar{display:none;align-items:center;gap:10px;flex-wrap:wrap;background:rgba(201,162,75,.12);border:1px solid var(--gold);border-radius:12px;padding:10px 12px;margin:0 0 12px;font-weight:600}
+  .new-bar.on{display:flex} .new-bar span{flex:1;min-width:160px} .new-bar button{font:600 13px var(--body);padding:7px 11px;border-radius:9px;border:1px solid var(--gold);background:transparent;color:var(--gold-soft);touch-action:manipulation}
+  .new-bar button.pl{background:var(--gold);color:#141008}
   .rc .acts .grp-btn{border-color:var(--wa);color:#0B2414;background:var(--wa);font-weight:700}
   .field select{width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:8px;font-size:15px;background:var(--card);color:var(--text);}
   .rempty{text-align:center;padding:28px 16px;border:1px dashed var(--border);border-radius:14px;color:var(--muted);}
@@ -407,7 +423,7 @@
   <div id="sidebar">
     <h2 class="brand">Taxis Van Paris</h2>
     <span class="brand-sub" style="color:#8B93A7;font-size:12px;margin-bottom:28px;display:block;">Tableau de bord</span>
-    <button class="nav-item active" data-tab="reservations"><span class="dot"></span>Réservations</button>
+    <button class="nav-item active" data-tab="reservations"><span class="dot"></span>Réservations<span class="nb" id="nb-nav"></span></button>
     <button class="nav-item" data-tab="facturation"><span class="dot"></span>Facturation</button>
     <button class="nav-item" data-tab="chauffeurs"><span class="dot"></span>Chauffeurs</button>
     <button class="nav-item" data-tab="partage"><span class="dot"></span>Partage WhatsApp</button>
@@ -420,7 +436,7 @@
   <div id="menu-overlay"></div>
   <div id="main-wrap">
     <div id="topbar">
-      <button id="btn-menu" aria-label="Menu">☰</button>
+      <button id="btn-menu" aria-label="Menu">☰<span class="nb" id="nb-menu"></span></button>
       <div style="flex:1;min-width:0;">
         <h1 id="topbar-title">Réservations</h1>
         <div class="topbar-sub" id="topbar-sub">Toutes les courses en cours et à venir</div>
@@ -455,6 +471,8 @@
           <select id="filter-statut-resa" hidden><option value=""></option></select>
           <span id="resa-cal-all"></span>
         </div>
+        <div class="new-bar push-bar" id="push-bar"><span id="push-bar-txt"></span><button type="button" id="btn-push-plustard">Plus tard</button><button type="button" class="pl" id="btn-push">🔔 Activer</button></div>
+        <div class="new-bar" id="new-bar"><span id="new-bar-txt"></span><button type="button" class="pl" id="btn-tout-vu">Tout marquer comme vu</button></div>
         <div id="resa-list"><div class="rempty">Chargement…</div></div>
       </div>
 
@@ -918,6 +936,7 @@ function anonymise(title,location){
     // est absent ou nommé autrement. On lit tout et on trie dans la page.
     currentUnsubs.push(onSnapshot(collection(db, "reservations"), snap => {
       reservationsCache = sortReservations(snap.docs.map(d => normResa({ id: d.id, ...d.data() })));
+      suivreNouvelles();
       renderReservations();
       renderStatsResa();
       renderShare();
@@ -1204,6 +1223,92 @@ function anonymise(title,location){
   }
   const isHotelR = r => r.source === "hotel" || !!r.hotel;
 
+  // ---------- Nouvelles réservations pas encore vues (mémorisé sur ce téléphone) ----------
+  const VUES_KEY = "tvp_resa_vues", TITRE = document.title;
+  let vues = null, idsConnus = null, ajoutLocal = 0;
+  function sauverVues() { try { localStorage.setItem(VUES_KEY, JSON.stringify([...vues].slice(-3000))); } catch (e) {} }
+  const estNouvelle = r => !!vues && !vues.has(r.id) && r.statut !== "annulée" && r.statut !== "terminée";
+  function marquerVues(ids, sansRendu) { if (!vues) return; ids.forEach(i => vues.add(i)); sauverVues(); majNouvelles(); if (!sansRendu) renderReservations(); }
+  function majNouvelles() {
+    const n = reservationsCache.filter(estNouvelle).length;
+    ["nb-nav", "nb-menu"].forEach(id => { const e = document.getElementById(id); if (e) { e.textContent = n; e.classList.toggle("on", n > 0); } });
+    document.getElementById("new-bar").classList.toggle("on", n > 0);
+    document.getElementById("new-bar-txt").textContent = "🔔 " + n + (n > 1 ? " nouvelles réservations pas encore vues" : " nouvelle réservation pas encore vue");
+    try { if (navigator.setAppBadge) { if (n) navigator.setAppBadge(n); else navigator.clearAppBadge(); } } catch (e) {}
+    try { if (navigator.serviceWorker && navigator.serviceWorker.controller) navigator.serviceWorker.controller.postMessage({ type: "pastille", n }); } catch (e) {}
+    document.title = (n ? "(" + n + ") " : "") + TITRE;
+  }
+  function bip() {
+    try {
+      const A = window.AudioContext || window.webkitAudioContext; if (!A) return;
+      const c = bip.c || (bip.c = new A()), t = c.currentTime;
+      [880, 1175].forEach((f, i) => { const o = c.createOscillator(), g = c.createGain(); o.frequency.value = f; o.connect(g); g.connect(c.destination);
+        g.gain.setValueAtTime(0.0001, t + i * 0.18); g.gain.exponentialRampToValueAtTime(0.35, t + i * 0.18 + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + i * 0.18 + 0.16);
+        o.start(t + i * 0.18); o.stop(t + i * 0.18 + 0.17); });
+    } catch (e) {}
+  }
+  document.addEventListener("click", () => { try { if (bip.c && bip.c.state === "suspended") bip.c.resume(); else if (!bip.c) { const A = window.AudioContext || window.webkitAudioContext; if (A) bip.c = new A(); } } catch (e) {} }, { once: true });
+  function suivreNouvelles() {
+    if (!vues) {
+      try { const s = localStorage.getItem(VUES_KEY); if (s) vues = new Set(JSON.parse(s)); } catch (e) {}
+      if (!vues) { vues = new Set(reservationsCache.map(r => r.id)); sauverVues(); } // 1re ouverture : tout ce qui existe déjà est considéré comme vu
+      else { const n = reservationsCache.filter(estNouvelle).length; if (n) setTimeout(() => toast("🔔 " + n + (n > 1 ? " nouvelles réservations" : " nouvelle réservation") + " depuis ta dernière visite", 5000), 600); }
+    } else {
+      const arrivees = reservationsCache.filter(r => !idsConnus.has(r.id) && !vues.has(r.id));
+      if (arrivees.length && Date.now() - ajoutLocal < 5000) { arrivees.forEach(r => vues.add(r.id)); sauverVues(); }
+      else if (arrivees.length) {
+        const r = arrivees[0], txt = (r.dep || "?") + " → " + (r.arr || "?") + (r.date ? " · " + jourTitre(r.date) : "") + (r.heure ? " " + r.heure.replace(":", "h") : "");
+        bip(); toast("🚖 Nouvelle réservation : " + txt, 6000);
+        try { if ("Notification" in window && Notification.permission === "granted") new Notification("🚖 Nouvelle réservation", { body: txt + (r.nom ? " — " + r.nom : ""), tag: "resa-" + r.id }); } catch (e) {}
+      }
+    }
+    idsConnus = new Set(reservationsCache.map(r => r.id));
+    majNouvelles();
+  }
+  document.getElementById("btn-tout-vu").addEventListener("click", () => marquerVues(reservationsCache.map(r => r.id)));
+
+  // ---------- Notifications sur le téléphone, même appli fermée (Firebase Cloud Messaging, gratuit) ----------
+  const VAPID_KEY = "BOXaMxALtm_gQKauJU91dkR-7d2-vyr90g8ZLpeXlEZH_v8KoQ5L5CDoKg4oC8VtnM7KQq8uEkEUsPeUiGPqwnU";
+  const ua = navigator.userAgent || "", estIOS = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+  const estAppli = () => window.navigator.standalone === true || (window.matchMedia && matchMedia("(display-mode: standalone)").matches);
+  const pushPossible = () => "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
+  if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js", { scope: "./" }).catch(e => console.warn("SW:", e));
+  function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  function majPushBar() {
+    const bar = document.getElementById("push-bar"), txt = document.getElementById("push-bar-txt"), btn = document.getElementById("btn-push");
+    let msg = "", bouton = false;
+    const plusTard = Number(lsGet("tvp_push_plustard") || 0) > Date.now();
+    if (VAPID_KEY.startsWith("COLLE_") || plusTard) msg = "";
+    else if (estIOS && !estAppli()) msg = "📲 Pour recevoir les nouvelles réservations en notification sur cet iPhone : bouton Partager ⬆️ → « Sur l'écran d'accueil », puis ouvre l'appli depuis la nouvelle icône.";
+    else if (!pushPossible()) msg = "";
+    else if (Notification.permission === "denied") msg = "🔕 Notifications bloquées sur cet appareil : autorise-les dans les réglages du téléphone (Notifications → TVP Réservations).";
+    else if (Notification.permission !== "granted" || lsGet("tvp_push_ok") !== "1") { msg = "🔔 Reçois une notification à chaque nouvelle réservation, même quand l'appli est fermée."; bouton = true; }
+    bar.classList.toggle("on", !!msg); txt.textContent = msg; btn.hidden = !bouton;
+  }
+  async function activerPush() {
+    const btn = document.getElementById("btn-push"); btn.disabled = true; btn.textContent = "Activation…";
+    try {
+      const perm = await Notification.requestPermission();
+      if (perm !== "granted") { toast("Notifications refusées — tu peux les autoriser dans les réglages du téléphone", 6000); return; }
+      const reg = await navigator.serviceWorker.ready;
+      const { getMessaging, getToken } = await import("https://www.gstatic.com/firebasejs/10.13.0/firebase-messaging.js");
+      const token = await getToken(getMessaging(app), { vapidKey: VAPID_KEY, serviceWorkerRegistration: reg });
+      if (!token) throw new Error("jeton vide");
+      const idToken = await auth.currentUser.getIdToken();
+      const appareil = /iPhone|iPad|iPod/.test(ua) ? "iPhone" : /Android/.test(ua) ? "Android" : "Ordinateur";
+      const r = await fetch(IA_FACT_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "pushtoken", idToken, token, appareil, nom: document.getElementById("admin-name").textContent }) }).then(x => x.json());
+      if (!r.ok) throw new Error(r.error || "erreur");
+      lsSet("tvp_push_ok", "1");
+      toast("✅ Notifications activées sur ce " + (appareil === "Ordinateur" ? "poste" : "téléphone"), 5000);
+    } catch (e) { toast("Impossible d'activer les notifications (" + (e.message || e) + ")", 7000); }
+    finally { btn.disabled = false; btn.textContent = "🔔 Activer"; majPushBar(); }
+  }
+  document.getElementById("btn-push").addEventListener("click", activerPush);
+  document.getElementById("btn-push-plustard").addEventListener("click", () => { lsSet("tvp_push_plustard", String(Date.now() + 3 * 86400000)); majPushBar(); });
+  majPushBar();
+
   function renderReservations() {
     const aVenir = reservationsCache.filter(r => groupOf(r) === 0 && r.statut !== "annulée");
     document.getElementById("resa-cal-all").innerHTML = aVenir.length ? calLink(aVenir, "📅 Tout ajouter au calendrier", "cal-btn cal-all") : "";
@@ -1220,23 +1325,24 @@ function anonymise(title,location){
     box.innerHTML = parJour.map(g => `<div class="rday"><h2>${esc(jourTitre(g.k))}</h2><span>${g.items.length} course${g.items.length > 1 ? "s" : ""}</span></div><div class="rlist">` +
       g.items.map(r => {
         const [cls, lib] = ST[r.statut] || ST["en attente"];
+        const nouv = estNouvelle(r);
         const hotel = isHotelR(r);
         const nom = esc(r.nom || "—") + (r.chambre ? " · ch. " + esc(r.chambre) : "");
         const meta = [r.pax ? r.pax + " pers." : "", r.bagages ? r.bagages + " valise" + (+r.bagages > 1 ? "s" : "") : "", r.vehicule ? esc(r.vehicule) : "", r.siege && r.siege !== "Aucun" && r.siege !== "Aucune" ? "👶 " + esc(r.siege) : ""].filter(Boolean).join(" · ");
         const vol = volInfo(r) || volCode(r) ? `<div class="mt" style="color:var(--gold-soft)">✈️ ${volInfo(r) || "Vol " + volCode(r)}${volBtn(r)}</div>` : "";
         const note = r.note ? `<div class="nt">${esc(r.note)}</div>` : "";
         const ferme = r.statut === "terminée" || r.statut === "annulée";
-        const boutons = (ferme ? `<button class="no" data-st="en attente" data-id="${esc(r.id)}">Rétablir</button>` :
+        const boutons = (nouv ? `<button class="vu-btn" data-vu="${esc(r.id)}">👁 Vu</button>` : "") + (ferme ? `<button class="no" data-st="en attente" data-id="${esc(r.id)}">Rétablir</button>` :
             (r.statut !== "confirmée" ? `<button class="ok" data-st="confirmée" data-id="${esc(r.id)}">Confirmer</button>` : "") +
             `<button class="done" data-st="terminée" data-id="${esc(r.id)}">Effectuée</button><button class="no" data-st="annulée" data-id="${esc(r.id)}">Annuler</button>`) +
           waClient(r) + waAvis(r) + (groupOf(r) === 0 && r.statut !== "annulée" ? waChauffeur(r) : "") + (groupOf(r) === 0 && r.statut !== "annulée" ? pancarteBtn(r) : "") + (groupOf(r) === 0 && r.statut !== "annulée" ? `<a class="grp-btn" target="_blank" rel="noopener" href="${waLink(shareMessage(shareItem(r)))}">📢 Dispatcher</a>` : "") +
           (groupOf(r) === 0 ? calLink([r], "📅", "cal-btn") : "") +
           (r.statut === "terminée" ? `<button class="edit" data-facture="${esc(r.id)}">🧾 ${r.factureNumero ? "Facture n° " + esc(r.factureNumero) : "Facture"}</button>` : "") +
           `<button class="edit" data-edit="${esc(r.id)}">✏️ Modifier</button><button class="del" data-del="${esc(r.id)}" aria-label="Supprimer">🗑️</button>`;
-        return `<div class="rc s-${cls}">
+        return `<div class="rc s-${cls}${nouv ? " nouv" : ""}" data-rid="${esc(r.id)}">
           <div class="t">${esc(r.heure || "—")}${r.ref ? `<small>${esc(r.ref)}</small>` : ""}</div>
           <div class="m">
-            <div class="l1"><span class="nm">${nom}</span><span class="pill">${lib}</span></div>
+            <div class="l1"><span class="nm">${nouv ? '<span class="nv">NOUVEAU</span>' : ""}${nom}</span><span class="pill">${lib}</span></div>
             ${hotel ? `<div><span class="tag-hotel">🏨 ${esc(r.hotel || "Hôtel partenaire")}</span></div>` : ""}
             <div class="rt">${esc(r.dep || "?")} → <b>${esc(r.arr || "?")}</b></div>
             ${meta ? `<div class="mt">${meta}</div>` : ""}
@@ -1245,7 +1351,8 @@ function anonymise(title,location){
             <div class="l3"><span class="pr">${fmtPrix(r.prix)}${hotel && r.commission ? `<small>dont ${esc(r.commission)} € hôtel</small>` : ""}</span><div class="acts">${boutons}</div></div>
           </div></div>`;
       }).join("") + `</div>`).join("");
-    box.querySelectorAll("[data-st]").forEach(b => b.addEventListener("click", () => updateDoc(doc(db, "reservations", b.dataset.id), { statut: b.dataset.st })));
+    box.querySelectorAll("[data-vu]").forEach(b => b.addEventListener("click", () => marquerVues([b.dataset.vu])));
+    box.querySelectorAll("[data-st]").forEach(b => b.addEventListener("click", () => { marquerVues([b.dataset.id], true); updateDoc(doc(db, "reservations", b.dataset.id), { statut: b.dataset.st }); }));
     box.querySelectorAll("[data-pancarte-send]").forEach(b => b.addEventListener("click", async () => {
       toast("Envoi à la pancarte…", 8000);
       const lent = setTimeout(() => toast("Envoi en attente : vérifie ta connexion internet", 6000), 8000);
@@ -1412,7 +1519,9 @@ function anonymise(title,location){
       return;
     }
     if (noteTxt || dictee) data.note = noteTxt || dictee;
-    await addDoc(collection(db, "reservations"), data);
+    ajoutLocal = Date.now();
+    const nvRef = await addDoc(collection(db, "reservations"), data);
+    if (nvRef && nvRef.id) marquerVues([nvRef.id]);
     document.getElementById("modal-reservation").classList.remove("shown");
   });
 
