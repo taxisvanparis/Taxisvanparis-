@@ -74,6 +74,14 @@ label{display:block;color:var(--mut);font-size:13px;text-transform:uppercase;let
 .empty{color:var(--mut);text-align:center;padding:22px 0}
 .thumb{max-width:100%;border-radius:10px;margin-top:8px}
 .note{font-size:13px;color:var(--mut);margin-top:10px;line-height:1.4}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:5px;margin-bottom:10px}
+.seg button{background:none;border:0;border-radius:10px;padding:10px;font-weight:800;font-size:16px;color:var(--mut)}
+.seg button.on{background:var(--gold);color:#111}
+.day{display:grid;grid-template-columns:1fr auto auto;gap:4px 12px;align-items:center;padding:11px 0;border-top:1px solid var(--line);cursor:pointer}
+.day:first-of-type{border-top:0}
+.day .dn{font-weight:700}.day .dn::first-letter{text-transform:uppercase}.day .dd{color:var(--mut);font-size:13px;grid-column:1}
+.day .g{color:var(--green);font-weight:700;text-align:right;white-space:nowrap}.day .x{color:var(--mut);font-weight:700;text-align:right;white-space:nowrap}
+.day .r{grid-column:2/4;text-align:right;font-weight:800;font-size:17px;white-space:nowrap}
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--gold);color:#111;font-weight:800;padding:12px 18px;border-radius:12px;z-index:20}
 .toast[hidden]{display:none}
 [hidden]{display:none!important}
@@ -86,15 +94,18 @@ label{display:block;color:var(--mut);font-size:13px;text-transform:uppercase;let
     <button class="btn small ghost" id="btnMenu">Export</button>
   </header>
 
+  <div class="seg" id="seg"><button type="button" data-v="jour">Jour</button><button type="button" data-v="mois">Mois</button></div>
   <div class="month"><button id="prev" aria-label="Mois précédent">‹</button><span id="mLabel"></span><button id="next" aria-label="Mois suivant">›</button></div>
 
   <section class="card" id="bilan">
-    <div class="row"><div><div class="lbl">Ce que je gagne</div><div class="big pos" id="rec">0,00 €</div></div><div id="due" style="text-align:right;font-size:14px;color:var(--gold)"></div></div>
+    <div class="row"><div><div class="lbl" id="lblGain">Ce que je gagne</div><div class="big pos" id="rec">0,00 €</div></div><div id="due" style="text-align:right;font-size:14px;color:var(--gold)"></div></div>
     <div class="row" style="margin-top:14px"><div class="lbl">Mes dépenses</div><div id="tot" style="font-weight:800;font-size:22px">0,00 €</div></div>
     <div class="row" style="margin-top:12px;border-top:1px solid var(--line);padding-top:12px"><div class="lbl">Il me reste</div><div class="reste" id="reste">—</div></div>
     <div class="row" style="margin-top:8px"><div class="lbl">TVA sur mes dépenses</div><div id="tva" style="font-weight:800">0,00 €</div></div>
     <div id="vs" class="mut" style="margin-top:8px;font-size:13px"></div>
   </section>
+
+  <section class="card" id="days" hidden></section>
 
   <div class="tabs"><button id="tabRec" class="on">Ce que je gagne</button><button id="tabDep">Mes dépenses</button></div>
 
@@ -187,6 +198,11 @@ const inMonth=m=>items.filter(i=>i.date.slice(0,7)===m);
 const sum=(a,k='amt')=>a.reduce((s,i)=>s+(i[k]||0),0);
 
 let tab=store.get('dep-tab','rec');
+let view=store.get('dep-view','jour');
+let curDay=today();
+const shiftDay=(d,n)=>{const x=new Date(d+'T12:00');x.setDate(x.getDate()+n);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')};
+const dayName=d=>{if(d===today())return "Aujourd'hui";if(d===shiftDay(today(),-1))return 'Hier';return new Date(d+'T12:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})};
+const defDate=()=>view==='jour'?curDay:(today().slice(0,7)===cur?today():cur+'-01');
 const inMonthR=m=>recs.filter(i=>i.date.slice(0,7)===m);
 const dshort=d=>new Date(d+'T12:00').toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
 function waLink(r){
@@ -197,16 +213,30 @@ function waLink(r){
   return 'https://wa.me/'+p+'?text='+encodeURIComponent(txt);
 }
 function render(){
-  $('mLabel').textContent=monthName(cur);
-  const L=inMonth(cur).sort((a,b)=>b.date.localeCompare(a.date)||b.id-a.id);
-  const R=inMonthR(cur).sort((a,b)=>b.date.localeCompare(a.date)||b.id-a.id);
+  const J=view==='jour';
+  $('seg').querySelectorAll('button').forEach(b=>b.className=b.dataset.v===view?'on':'');
+  $('mLabel').textContent=J?dayName(curDay):monthName(cur);
+  $('prev').setAttribute('aria-label',J?'Jour précédent':'Mois précédent');$('next').setAttribute('aria-label',J?'Jour suivant':'Mois suivant');
+  const L=(J?items.filter(i=>i.date===curDay):inMonth(cur)).sort((a,b)=>b.date.localeCompare(a.date)||b.id-a.id);
+  const R=(J?recs.filter(i=>i.date===curDay):inMonthR(cur)).sort((a,b)=>b.date.localeCompare(a.date)||b.id-a.id);
   const tot=sum(L),gain=sum(R.filter(x=>x.paid!==false)),due=sum(R.filter(x=>x.paid===false));
   $('tot').textContent=eur(tot);
   $('rec').textContent=eur(gain);
   $('due').textContent=due?`${eur(due)} à recevoir`:'';
   $('tva').textContent=eur(sum(L,'tva'));
-  const prev=sum(inMonth(shift(cur,-1)));
-  $('vs').textContent=prev?`Dépenses du mois d'avant : ${eur(prev)}`:'';
+  if(J){const y=shiftDay(curDay,-1),yg=sum(recs.filter(x=>x.date===y&&x.paid!==false)),yd=sum(items.filter(x=>x.date===y));
+    $('vs').textContent=(yg||yd)?`La veille : gagné ${eur(yg)} · dépensé ${eur(yd)}`:'';}
+  else{const prev=sum(inMonth(shift(cur,-1)));$('vs').textContent=prev?`Dépenses du mois d'avant : ${eur(prev)}`:'';}
+  // jour par jour (vue mois)
+  const ds=$('days');
+  if(!J){const by={};
+    inMonthR(cur).forEach(x=>{const o=by[x.date]=by[x.date]||{g:0,d:0,due:0};if(x.paid===false)o.due+=x.amt;else o.g+=x.amt});
+    inMonth(cur).forEach(x=>{const o=by[x.date]=by[x.date]||{g:0,d:0,due:0};o.d+=x.amt});
+    const days=Object.keys(by).sort().reverse();
+    ds.hidden=!days.length;
+    ds.innerHTML='<div class="lbl" style="margin-bottom:4px">Jour par jour</div>'+days.map(d=>{const o=by[d],v=o.g-o.d;
+      return `<div class="day" data-day="${d}"><div class="dn">${new Date(d+'T12:00').toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'})}</div><div class="g">${o.g?'+'+eur(o.g):''}</div><div class="x">${o.d?'−'+eur(o.d):''}</div><div class="dd">${o.due?eur(o.due)+' à recevoir':''}</div><div class="r ${v>=0?'pos':'neg'}">${eur(v)}</div></div>`}).join('');
+  }else ds.hidden=true;
   const r=$('reste');
   if(gain||tot){const v=gain-tot;r.textContent=eur(v);r.className='reste '+(v>=0?'pos':'neg')}else{r.textContent='—';r.className='reste'}
   $('tabRec').className=tab==='rec'?'on':'';$('tabDep').className=tab==='dep'?'on':'';
@@ -214,20 +244,22 @@ function render(){
   $('listR').hidden=tab!=='rec';$('list').hidden=tab!=='dep';
   // categories
   const cs=$('cats');
-  if(tab==='dep'&&L.length){
+  if(!J&&tab==='dep'&&L.length){
     const by={};L.forEach(i=>by[i.cat]=(by[i.cat]||0)+i.amt);
     const rows=Object.entries(by).sort((a,b)=>b[1]-a[1]);
     cs.hidden=false;
     cs.innerHTML='<div class="lbl">Par catégorie</div>'+rows.map(([k,v])=>`<div class="catline"><div class="row"><span>${k}</span><b>${eur(v)}</b></div><div class="bar"><i style="width:${Math.round(v/tot*100)}%"></i></div></div>`).join('');
   }else cs.hidden=true;
   // lists
-  $('list').innerHTML=L.length?L.map(i=>`<div class="item" data-id="${i.id}"><div class="d"><div class="t">${i.cat}${i.photo?' 📷':''}</div><div class="s">${dshort(i.date)}${i.note?' · '+esc(i.note):''}</div></div><div class="m">${eur(i.amt)}</div></div>`).join(''):'<div class="empty">Aucune dépense ce mois-ci.</div>';
-  $('listR').innerHTML=R.length?R.map(i=>`<div class="item" data-id="${i.id}"><div class="d"><div class="t">${i.src}${i.paid===false?'<span class="badge due">à recevoir</span>':''}</div><div class="s">${dshort(i.date)}${i.nb?' · '+i.nb+' courses':''}${i.name?' · '+esc(i.name):''}${i.note?' · '+esc(i.note):''}</div></div>${i.paid===false&&i.phone?`<button class="wa" data-wa="${i.id}">Relancer</button>`:''}<div class="m">${eur(i.amt)}</div></div>`).join(''):'<div class="empty">Aucune recette ce mois-ci.</div>';
+  $('list').innerHTML=L.length?L.map(i=>`<div class="item" data-id="${i.id}"><div class="d"><div class="t">${i.cat}${i.photo?' 📷':''}</div><div class="s">${dshort(i.date)}${i.note?' · '+esc(i.note):''}</div></div><div class="m">${eur(i.amt)}</div></div>`).join(''):`<div class="empty">Aucune dépense ${J?'ce jour-là':'ce mois-ci'}.</div>`;
+  $('listR').innerHTML=R.length?R.map(i=>`<div class="item" data-id="${i.id}"><div class="d"><div class="t">${i.src}${i.paid===false?'<span class="badge due">à recevoir</span>':''}</div><div class="s">${dshort(i.date)}${i.nb?' · '+i.nb+' courses':''}${i.name?' · '+esc(i.name):''}${i.note?' · '+esc(i.note):''}</div></div>${i.paid===false&&i.phone?`<button class="wa" data-wa="${i.id}">Relancer</button>`:''}<div class="m">${eur(i.amt)}</div></div>`).join(''):`<div class="empty">Aucune recette ${J?'ce jour-là':'ce mois-ci'}.</div>`;
 }
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-$('prev').onclick=()=>{cur=shift(cur,-1);render()};
-$('next').onclick=()=>{cur=shift(cur,1);render()};
+$('prev').onclick=()=>{if(view==='jour'){curDay=shiftDay(curDay,-1);cur=curDay.slice(0,7)}else cur=shift(cur,-1);render()};
+$('next').onclick=()=>{if(view==='jour'){curDay=shiftDay(curDay,1);cur=curDay.slice(0,7)}else cur=shift(cur,1);render()};
+$('seg').onclick=e=>{const b=e.target.closest('button');if(!b)return;view=b.dataset.v;store.set('dep-view',view);if(view==='jour'&&curDay.slice(0,7)!==cur)curDay=cur===today().slice(0,7)?today():cur+'-01';render()};
+$('days').onclick=e=>{const r=e.target.closest('[data-day]');if(!r)return;curDay=r.dataset.day;cur=curDay.slice(0,7);view='jour';store.set('dep-view',view);render();scrollTo(0,0)};
 $('tabRec').onclick=()=>{tab='rec';store.set('dep-tab',tab);render()};
 $('tabDep').onclick=()=>{tab='dep';store.set('dep-tab',tab);render()};
 
@@ -241,7 +273,7 @@ async function openForm(id){
   $('fTitle').textContent=it?'Modifier la dépense':'Nouvelle dépense';
   fCat=it?it.cat:'Carburant';drawCats();
   $('fAmt').value=it?String(it.amt).replace('.',','):'';
-  $('fDate').value=it?it.date:(today().slice(0,7)===cur?today():cur+'-01');
+  $('fDate').value=it?it.date:defDate();
   $('fTva').value=it&&it.tva?String(it.tva).replace('.',','):'';
   $('fNote').value=it?it.note||'':'';
   $('fPhoto').value='';$('fThumb').hidden=true;$('fRmPhoto').hidden=true;
@@ -263,7 +295,7 @@ $('form').onsubmit=async e=>{
   if(id){const i=items.findIndex(x=>x.id===id);rec.id=id;rec.photo=items[i].photo;items[i]=rec}
   else{id=Date.now();rec.id=id;rec.photo=false;items.push(rec)}
   if(fPhotoChanged){try{if(fPhoto){await pPut(id,fPhoto);rec.photo=true}else{await pDel(id);rec.photo=false}}catch(x){toast('Photo non enregistrée')}}
-  save();cur=rec.date.slice(0,7);$('dForm').hidden=true;render();toast('Enregistré');
+  save();cur=rec.date.slice(0,7);curDay=rec.date;$('dForm').hidden=true;render();toast('Enregistré');
 };
 $('fDel').onclick=()=>{if(!editId||!confirm('Supprimer cette dépense ?'))return;items=items.filter(i=>i.id!==editId);pDel(editId);save();$('dForm').hidden=true;render()};
 $('list').addEventListener('click',()=>{});
@@ -285,7 +317,7 @@ function openRec(id){
   $('rTitle').textContent=it?'Modifier la recette':'Nouvelle recette';
   rSrc=it?it.src:'U';rPaid=it?it.paid!==false:true;
   $('rAmt').value=it?String(it.amt).replace('.',','):'';
-  $('rDate').value=it?it.date:(today().slice(0,7)===cur?today():cur+'-01');
+  $('rDate').value=it?it.date:defDate();
   $('rNb').value=it&&it.nb?it.nb:'';$('rName').value=it?it.name||'':'';$('rPhone').value=it?it.phone||'':'';$('rNote').value=it?it.note||'':'';
   $('rDel').hidden=!it;drawR();$('dRec').hidden=false;if(!it)setTimeout(()=>$('rAmt').focus(),50);
 }
@@ -297,7 +329,7 @@ $('formR').onsubmit=e=>{
   e.preventDefault();const amt=num($('rAmt').value);if(!(amt>0)){toast('Montant ?');return}
   const rec={src:rSrc,amt:Math.round(amt*100)/100,date:$('rDate').value,nb:parseInt($('rNb').value)||0,name:$('rName').value.trim(),phone:$('rPhone').value.trim(),paid:rPaid,note:$('rNote').value.trim()};
   if(rId){rec.id=rId;recs[recs.findIndex(x=>x.id===rId)]=rec}else{rec.id=Date.now();recs.push(rec)}
-  save();cur=rec.date.slice(0,7);tab='rec';store.set('dep-tab',tab);$('dRec').hidden=true;render();toast('Enregistré');
+  save();cur=rec.date.slice(0,7);curDay=rec.date;tab='rec';store.set('dep-tab',tab);$('dRec').hidden=true;render();toast('Enregistré');
 };
 $('rDel').onclick=()=>{if(!rId||!confirm('Supprimer cette recette ?'))return;recs=recs.filter(i=>i.id!==rId);save();$('dRec').hidden=true;render()};
 
