@@ -290,6 +290,7 @@
   #toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:999px;font-weight:600;font-size:14px;z-index:60;display:none;}
   #toast.shown{display:block;}
   .wa-btn{border-color:#25D366 !important;color:#128C7E !important;font-weight:600}
+  .sms-btn{border-color:#0A84FF !important;color:#0A84FF !important;font-weight:600}
   .cal-all{margin-left:8px;font-weight:600}
   .cal-btn{background:none;border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:6px;font-size:12.5px;text-decoration:none;white-space:nowrap;display:inline-block;}
   .action-cal{background:var(--gold-soft);color:#6B4C16;}
@@ -1112,6 +1113,23 @@ function anonymise(title,location){
       `${r.dep ? "\n📍 Départ : " + r.dep : ""}${r.arr ? "\n🏁 Arrivée : " + r.arr : ""}\nJe serai là à l'heure prévue. À bientôt !\nTaxis Van Paris — 06 67 40 20 05`;
     return `<a class="cal-btn wa-btn" target="_blank" rel="noopener" href="https://wa.me/${n}?text=${encodeURIComponent(txt)}">📩 Confirmation client</a> `;
   }
+  // SMS au client : même confirmation, envoyée par l'appli Messages du téléphone (gratuit, via le forfait)
+  function smsClient(r) {
+    const n = waNumClient(r.tel); if (!n) return "";
+    const m = String(r.date || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    const jour = m ? new Date(+m[1], +m[2] - 1, +m[3]).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" }) : "";
+    const nom = String(r.nom || "").replace(/^🏨\s*/, "").replace(/\s*\(.*\)\s*$/, "").trim();
+    const veh = /van|classe v|vito|minivan/i.test(String(r.vehicule || "")) ? "Van" : (r.vehicule ? "Berline" : "");
+    const prix = String(r.prix || "").trim();
+    const txt = `Bonjour${nom ? " " + nom : ""}, votre réservation Taxis Van Paris est confirmée.` +
+      `${jour ? "\nDate : " + jour : ""}${r.heure ? " à " + r.heure.replace(":", "h") : ""}` +
+      `${r.dep ? "\nDépart : " + r.dep : ""}${r.arr ? "\nArrivée : " + r.arr : ""}` +
+      `${veh ? "\nVéhicule : " + veh + (r.pax ? " (" + r.pax + " pers.)" : "") : ""}` +
+      `${prix ? "\nPrix : " + prix.replace(/\s*(€|euros?)\s*$/i, "") + " €" : ""}` +
+      `\nPaiement à bord (CB ou espèces). Annulation gratuite jusqu'à 24 h avant.\nTaxis Van Paris — 06 67 40 20 05`;
+    const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    return `<a class="cal-btn sms-btn" href="sms:+${n}${ios ? "&" : "?"}body=${encodeURIComponent(txt)}">✉️ Confirmation SMS</a> `;
+  }
   // Fiche course pour le chauffeur : sans numéro du client ni prix, avec lien Waze du départ (sauf aéroport)
   const AERO_RX = /\b(cdg|roissy|charles[ -]?de[ -]?gaulle|orly|beauvais|till[ée]|a[ée]roport|airport|terminal)\b/i;
   const sansPrixNiTel = t => String(t || "")
@@ -1335,7 +1353,7 @@ function anonymise(title,location){
         const boutons = (nouv ? `<button class="vu-btn" data-vu="${esc(r.id)}">👁 Vu</button>` : "") + (ferme ? `<button class="no" data-st="en attente" data-id="${esc(r.id)}">Rétablir</button>` :
             (r.statut !== "confirmée" ? `<button class="ok" data-st="confirmée" data-id="${esc(r.id)}">Confirmer</button>` : "") +
             `<button class="done" data-st="terminée" data-id="${esc(r.id)}">Effectuée</button><button class="no" data-st="annulée" data-id="${esc(r.id)}">Annuler</button>`) +
-          waClient(r) + waAvis(r) + (groupOf(r) === 0 && r.statut !== "annulée" ? waChauffeur(r) : "") + (groupOf(r) === 0 && r.statut !== "annulée" ? pancarteBtn(r) : "") + (groupOf(r) === 0 && r.statut !== "annulée" ? `<a class="grp-btn" target="_blank" rel="noopener" href="${waLink(shareMessage(shareItem(r)))}">📢 Dispatcher</a>` : "") +
+          waClient(r) + smsClient(r) + waAvis(r) + (groupOf(r) === 0 && r.statut !== "annulée" ? waChauffeur(r) : "") + (groupOf(r) === 0 && r.statut !== "annulée" ? pancarteBtn(r) : "") + (groupOf(r) === 0 && r.statut !== "annulée" ? `<a class="grp-btn" target="_blank" rel="noopener" href="${waLink(shareMessage(shareItem(r)))}">📢 Dispatcher</a>` : "") +
           (groupOf(r) === 0 ? calLink([r], "📅", "cal-btn") : "") +
           (r.statut === "terminée" ? `<button class="edit" data-facture="${esc(r.id)}">🧾 ${r.factureNumero ? "Facture n° " + esc(r.factureNumero) : "Facture"}</button>` : "") +
           `<button class="edit" data-edit="${esc(r.id)}">✏️ Modifier</button><button class="del" data-del="${esc(r.id)}" aria-label="Supprimer">🗑️</button>`;
