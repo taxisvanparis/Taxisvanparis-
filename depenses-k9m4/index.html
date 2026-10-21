@@ -199,7 +199,7 @@ label{display:block;color:var(--mut);font-size:13px;text-transform:uppercase;let
     <div class="fc-who" id="fcWho"></div>
     <div class="fc-res" id="fcRes"></div>
     <button type="button" class="btn ghost" id="fcRegle" style="width:100%;margin-top:10px"></button>
-    <button type="button" class="btn" id="fcAdd" style="width:100%;margin-top:12px">+ Ajouter un frais commun</button>
+    <button type="button" class="btn" id="fcAdd" style="width:100%;margin-top:12px">+ Ajouter un frais que j'ai payé</button>
     <div id="fcList" style="margin-top:6px"></div>
     <p class="note">Visible par toi et ton associé, enregistré en ligne (sauvegardé même si tu perds ton téléphone). <button type="button" id="fcOut" style="background:none;border:0;color:var(--mut);text-decoration:underline;padding:0;font-size:13px">Se déconnecter</button></p>
   </div>
@@ -212,7 +212,7 @@ label{display:block;color:var(--mut);font-size:13px;text-transform:uppercase;let
     <div><label for="fcfAmt">Montant TTC (€)</label><input id="fcfAmt" inputmode="decimal" placeholder="0,00" required></div>
     <div><label for="fcfDate">Date</label><input id="fcfDate" type="date" required></div>
   </div>
-  <label>Qui a payé ?</label><div class="cats" id="fcfWho"></div>
+  <p class="mut" id="fcfWho" style="margin:12px 0 0"></p>
   <label for="fcfNote">Note — facultatif</label><input id="fcfNote" maxlength="80" placeholder="ex. Total Nanterre, plein du van">
   <div class="two" style="margin-top:20px"><button type="button" class="btn ghost" id="fcfCancel">Annuler</button><button type="submit" class="btn">Enregistrer</button></div>
   <button type="button" class="btn red" id="fcfDel" style="width:100%;margin-top:12px" hidden>Supprimer ce frais</button>
@@ -512,18 +512,17 @@ $('fcRegle').onclick=async()=>{const r=regles[fm]||{};try{await setDoc(doc(db,'f
 /* formulaire */
 let eid=null,fcat='Carburant',fwho=null;
 function drawF(){$('fcfCats').innerHTML=CATS.map(c=>`<button type="button" data-c="${c}" class="${c===fcat?'on':''}">${c}</button>`).join('');
-  $('fcfWho').innerHTML=people.filter(p=>p.lettre).map(p=>`<button type="button" data-w="${p.uid}" class="${p.uid===fwho?'on':''}">${p.lettre}</button>`).join('')}
+  $('fcfWho').textContent='Payé par '+nameOf(fwho)}
 $('fcfCats').onclick=e=>{const b=e.target.closest('button');if(b){fcat=b.dataset.c;drawF()}};
-$('fcfWho').onclick=e=>{const b=e.target.closest('button');if(b){fwho=b.dataset.w;drawF()}};
 function openF(id){eid=id||null;const f=id?all.find(x=>x.id===id):null;
   $('fcfTitle').textContent=f?'Modifier le frais':'Nouveau frais commun';fcat=f?f.cat:'Carburant';fwho=f?f.payePar:user.uid;
   $('fcfAmt').value=f?String(f.montant).replace('.',','):'';$('fcfDate').value=f?f.date:(fm===today().slice(0,7)?today():fm+'-01');$('fcfNote').value=f?f.note||'':'';
   $('fcfDel').hidden=!f;drawF();$('dFCf').hidden=false;if(!f)setTimeout(()=>$('fcfAmt').focus(),50)}
 $('fcAdd').onclick=()=>openF();
-$('fcList').onclick=e=>{const r=e.target.closest('.item');if(r)openF(r.dataset.id)};
+$('fcList').onclick=e=>{const r=e.target.closest('.item');if(!r)return;const f=all.find(x=>x.id===r.dataset.id);if(f&&f.payePar!==user.uid){toast('Seul '+nameOf(f.payePar)+' peut modifier ce frais');return}openF(r.dataset.id)};
 $('fcfCancel').onclick=()=>$('dFCf').hidden=true;
 $('fcForm').onsubmit=e=>{e.preventDefault();const m=Math.round(num($('fcfAmt').value)*100)/100;if(!(m>0)){toast('Montant ?');return}
-  const d={cat:fcat,montant:m,date:$('fcfDate').value,note:$('fcfNote').value.trim(),payePar:fwho||user.uid};
+  const d={cat:fcat,montant:m,date:$('fcfDate').value,note:$('fcfNote').value.trim(),payePar:eid?fwho:user.uid};
   // enregistré tout de suite sur le téléphone, envoyé en ligne dès que possible
   (eid?updateDoc(doc(db,'frais_communs',eid),d):addDoc(collection(db,'frais_communs'),{...d,par:user.uid,cree:serverTimestamp()})).catch(()=>toast('Pas encore envoyé : vérifie la connexion'));
   fm=d.date.slice(0,7);$('dFCf').hidden=true;toast('Enregistré');draw()};
