@@ -88,6 +88,14 @@ label{display:block;color:var(--mut);font-size:13px;text-transform:uppercase;let
 .day .dn{font-weight:700}.day .dn::first-letter{text-transform:uppercase}.day .dd{color:var(--mut);font-size:13px;grid-column:1}
 .day .g{color:var(--green);font-weight:700;text-align:right;white-space:nowrap}.day .x{color:var(--mut);font-weight:700;text-align:right;white-space:nowrap}
 .day .r{grid-column:2/4;text-align:right;font-weight:800;font-size:17px;white-space:nowrap}
+.fc-open{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;margin-top:12px;background:var(--card);border:2px solid var(--gold);border-radius:14px;padding:14px 16px;color:var(--ink);font-weight:800;font-size:17px;text-align:left}
+.fc-open small{display:block;color:var(--mut);font-weight:600;font-size:13px;margin-top:2px}
+.fc-open b{color:var(--gold);white-space:nowrap}
+.fc-who{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.fc-who>div{background:#0b0b0b;border:1px solid var(--line);border-radius:12px;padding:12px}
+.fc-who .v{font-size:22px;font-weight:800;margin-top:4px}
+.fc-res{margin-top:12px;padding:12px;border-radius:12px;background:#1d1606;border:1px solid #4a3a10;color:var(--gold);font-weight:800;font-size:17px;text-align:center}
+.fc-res.ok{background:#0f2a1a;border-color:#1e5a36;color:var(--green)}
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--gold);color:#111;font-weight:800;padding:12px 18px;border-radius:12px;z-index:20}
 .toast[hidden]{display:none}
 [hidden]{display:none!important}
@@ -110,6 +118,8 @@ label{display:block;color:var(--mut);font-size:13px;text-transform:uppercase;let
     <div class="row" style="margin-top:8px"><div class="lbl">TVA sur mes dépenses</div><div id="tva" style="font-weight:800">0,00 €</div></div>
     <div id="vs" class="mut" style="margin-top:8px;font-size:13px"></div>
   </section>
+
+  <button type="button" class="fc-open" id="fcOpen"><span>🤝 Frais communs avec l'associé<small id="fcSub">Frais taxi partagés, comptes en fin de mois</small></span><b id="fcTot"></b></button>
 
   <section class="card" id="days" hidden></section>
 
@@ -173,6 +183,40 @@ label{display:block;color:var(--mut);font-size:13px;text-transform:uppercase;let
   <input type="file" id="xFile" accept="application/json,.json" hidden>
   <button class="btn small" id="mClose" style="width:100%;margin-top:16px;background:#222;color:#fff">Fermer</button>
 </div></div>
+
+<div class="dlg" id="dFC" hidden><div class="sheet" style="max-height:96vh">
+  <div class="row"><h2>🤝 Frais communs</h2><button type="button" class="btn small" id="fcClose" style="background:#222;color:#fff">Fermer</button></div>
+  <div id="fcLogin" hidden>
+    <p class="mut" style="margin:8px 0 0">Connecte-toi une seule fois avec le même e-mail et mot de passe que le tableau de bord.</p>
+    <label for="fcEmail">E-mail</label><input id="fcEmail" type="email" autocomplete="username" inputmode="email">
+    <label for="fcPass">Mot de passe</label><input id="fcPass" type="password" autocomplete="current-password">
+    <button type="button" class="btn" id="fcLog" style="width:100%;margin-top:16px">Se connecter</button>
+    <div id="fcErr" style="color:var(--red);margin-top:10px"></div>
+  </div>
+  <div id="fcMain" hidden>
+    <div class="month" style="margin-top:12px"><button type="button" id="fcPrev" aria-label="Mois précédent">‹</button><span id="fcMonth"></span><button type="button" id="fcNext" aria-label="Mois suivant">›</button></div>
+    <div class="row" style="margin-top:14px"><div class="lbl">Total des frais communs</div><div id="fcTotal" style="font-weight:800;font-size:22px">0,00 €</div></div>
+    <div class="fc-who" id="fcWho"></div>
+    <div class="fc-res" id="fcRes"></div>
+    <button type="button" class="btn ghost" id="fcRegle" style="width:100%;margin-top:10px"></button>
+    <button type="button" class="btn" id="fcAdd" style="width:100%;margin-top:12px">+ Ajouter un frais commun</button>
+    <div id="fcList" style="margin-top:6px"></div>
+    <p class="note">Visible par toi et ton associé, enregistré en ligne (sauvegardé même si tu perds ton téléphone). <button type="button" id="fcOut" style="background:none;border:0;color:var(--mut);text-decoration:underline;padding:0;font-size:13px">Se déconnecter</button></p>
+  </div>
+</div></div>
+
+<div class="dlg" id="dFCf" hidden><form class="sheet" id="fcForm" autocomplete="off">
+  <h2 id="fcfTitle">Nouveau frais commun</h2>
+  <label>Catégorie</label><div class="cats" id="fcfCats"></div>
+  <div class="two">
+    <div><label for="fcfAmt">Montant TTC (€)</label><input id="fcfAmt" inputmode="decimal" placeholder="0,00" required></div>
+    <div><label for="fcfDate">Date</label><input id="fcfDate" type="date" required></div>
+  </div>
+  <label>Qui a payé ?</label><div class="cats" id="fcfWho"></div>
+  <label for="fcfNote">Note — facultatif</label><input id="fcfNote" maxlength="80" placeholder="ex. Total Nanterre, plein du van">
+  <div class="two" style="margin-top:20px"><button type="button" class="btn ghost" id="fcfCancel">Annuler</button><button type="submit" class="btn">Enregistrer</button></div>
+  <button type="button" class="btn red" id="fcfDel" style="width:100%;margin-top:12px" hidden>Supprimer ce frais</button>
+</form></div>
 
 <div class="dlg" id="dPhoto" hidden><div class="sheet"><img id="pImg" class="thumb" alt="Ticket"><button class="btn" id="pClose" style="width:100%;margin-top:14px">Fermer</button></div></div>
 
@@ -405,6 +449,81 @@ showLock();
 
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 render();
+</script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { initializeFirestore, persistentLocalCache, collection, doc, addDoc, updateDoc, deleteDoc, setDoc, getDocs, onSnapshot, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+const app=initializeApp({apiKey:"AIzaSyBN8uBFONIt1tDTH9C-NIQKeulFdJ2m26Q",authDomain:"taxis-van-paris-by-abts.firebaseapp.com",projectId:"taxis-van-paris-by-abts",storageBucket:"taxis-van-paris-by-abts.firebasestorage.app",messagingSenderId:"53887245170",appId:"1:53887245170:web:2a3b785d734c54e01f9beb"},"frais");
+const auth=getAuth(app);
+let db;try{db=initializeFirestore(app,{localCache:persistentLocalCache()})}catch(e){db=initializeFirestore(app,{})}
+const $=id=>document.getElementById(id);
+const eur=n=>(n||0).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
+const num=v=>{const n=parseFloat(String(v||'').replace(/\s/g,'').replace(',','.'));return isFinite(n)?n:0};
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const shift=(m,n)=>{const [y,mo]=m.split('-').map(Number);const d=new Date(y,mo-1+n,1);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')};
+const mName=m=>{const [y,mo]=m.split('-');return new Date(+y,+mo-1,1).toLocaleDateString('fr-FR',{month:'long',year:'numeric'})};
+const toast=t=>{const e=$('toast');e.textContent=t;e.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>e.hidden=true,2600)};
+const CATS=['Carburant','Péage','Entretien','Lavage','Parking','Assurance','Autre'];
+let user=null,people=[],all=[],regles={},fm=today().slice(0,7),unsub=[];
+const nameOf=uid=>(people.find(p=>p.uid===uid)||{}).nom||'Associé';
+function closeAll(){unsub.forEach(u=>u());unsub=[]}
+onAuthStateChanged(auth,async u=>{
+  user=u;closeAll();all=[];regles={};
+  $('fcLogin').hidden=!!u;$('fcMain').hidden=!u;
+  if(!u){$('fcTot').textContent='';$('fcSub').textContent='Frais taxi partagés, comptes en fin de mois';return}
+  try{const snap=await getDocs(collection(db,'users'));
+    people=snap.docs.map(d=>{const o={};Object.entries(d.data()).forEach(([k,v])=>o[k.trim().toLowerCase()]=typeof v==='string'?v.trim():v);return{uid:d.id,nom:o.nom||o.name||o.email||'Associé',role:String(o.role||'').toLowerCase()}}).filter(p=>p.role.startsWith('admin'));
+  }catch(e){people=[{uid:u.uid,nom:'Moi',role:'admin'}]}
+  if(!people.find(p=>p.uid===u.uid))people.unshift({uid:u.uid,nom:'Moi',role:'admin'});
+  people.sort((a,b)=>(a.uid===u.uid?-1:b.uid===u.uid?1:a.nom.localeCompare(b.nom)));
+  unsub.push(onSnapshot(collection(db,'frais_communs'),s=>{all=s.docs.map(d=>({id:d.id,...d.data()}));draw()},e=>{toast('Accès refusé aux frais communs');console.error(e)}));
+  unsub.push(onSnapshot(collection(db,'frais_communs_mois'),s=>{regles={};s.docs.forEach(d=>regles[d.id]=d.data());draw()},()=>{}));
+});
+function draw(){
+  const M=all.filter(f=>String(f.date||'').slice(0,7)===fm).sort((a,b)=>String(b.date).localeCompare(a.date));
+  const tot=M.reduce((s,f)=>s+(f.montant||0),0);
+  // résumé sur l'écran principal : mois en cours
+  const cm=today().slice(0,7),C=all.filter(f=>String(f.date||'').slice(0,7)===cm);
+  $('fcTot').textContent=user?eur(C.reduce((s,f)=>s+(f.montant||0),0)):'';
+  $('fcSub').textContent=user?(C.length?C.length+' frais ce mois-ci':'Aucun frais ce mois-ci'):'Frais taxi partagés, comptes en fin de mois';
+  $('fcMonth').textContent=mName(fm);$('fcTotal').textContent=eur(tot);
+  const P=people.slice(0,2);while(P.length<2)P.push({uid:'?',nom:'Associé'});
+  const paid=P.map(p=>M.filter(f=>f.payePar===p.uid).reduce((s,f)=>s+(f.montant||0),0));
+  $('fcWho').innerHTML=P.map((p,i)=>`<div><div class="lbl">${p.uid===user.uid?"J'ai payé":esc(p.nom)+' a payé'}</div><div class="v">${eur(paid[i])}</div></div>`).join('');
+  const half=tot/2,diff=Math.round((paid[0]-half)*100)/100;
+  const r=regles[fm]||{};
+  const res=$('fcRes');res.className='fc-res'+(r.regle||!tot||Math.abs(diff)<0.01?' ok':'');
+  res.textContent=!tot?'Aucun frais commun ce mois-ci':r.regle?`✓ Mois réglé${r.le?' le '+new Date(r.le).toLocaleDateString('fr-FR'):''}`:Math.abs(diff)<0.01?'Vous êtes à égalité 👍':diff>0?`${P[1].uid===user.uid?'Tu dois':esc(P[1].nom)+' te doit'} ${eur(diff)}${P[1].uid===user.uid?' à '+esc(P[0].nom):''}`:`Tu dois ${eur(-diff)} à ${esc(P[1].nom)}`;
+  $('fcRegle').hidden=!tot;$('fcRegle').textContent=r.regle?'Annuler « mois réglé »':'Mois réglé ✓ (les comptes sont faits)';
+  $('fcList').innerHTML=M.length?M.map(f=>`<div class="item" data-id="${f.id}"><div class="d"><div class="t">${esc(f.cat||'Frais')}</div><div class="s">${new Date(f.date+'T12:00').toLocaleDateString('fr-FR',{day:'numeric',month:'short'})} · payé par ${esc(f.payePar===user.uid?'moi':nameOf(f.payePar))}${f.note?' · '+esc(f.note):''}</div></div><div class="m">${eur(f.montant)}</div></div>`).join(''):'<div class="empty">Aucun frais commun ce mois-ci.</div>';
+}
+$('fcOpen').onclick=()=>{fm=today().slice(0,7);$('dFC').hidden=false;if(user)draw()};
+$('fcClose').onclick=()=>$('dFC').hidden=true;
+$('fcPrev').onclick=()=>{fm=shift(fm,-1);draw()};$('fcNext').onclick=()=>{fm=shift(fm,1);draw()};
+$('fcLog').onclick=async()=>{$('fcErr').textContent='';try{await signInWithEmailAndPassword(auth,$('fcEmail').value.trim(),$('fcPass').value);$('fcPass').value=''}catch(e){$('fcErr').textContent='E-mail ou mot de passe incorrect'}};
+$('fcOut').onclick=()=>{if(confirm('Se déconnecter des frais communs sur ce téléphone ?'))signOut(auth)};
+$('fcRegle').onclick=async()=>{const r=regles[fm]||{};try{await setDoc(doc(db,'frais_communs_mois',fm),r.regle?{regle:false}:{regle:true,le:new Date().toISOString(),par:user.uid})}catch(e){toast('Impossible : pas de connexion ?')}};
+/* formulaire */
+let eid=null,fcat='Carburant',fwho=null;
+function drawF(){$('fcfCats').innerHTML=CATS.map(c=>`<button type="button" data-c="${c}" class="${c===fcat?'on':''}">${c}</button>`).join('');
+  $('fcfWho').innerHTML=people.slice(0,2).map(p=>`<button type="button" data-w="${p.uid}" class="${p.uid===fwho?'on':''}">${esc(p.uid===user.uid?'Moi':p.nom)}</button>`).join('')}
+$('fcfCats').onclick=e=>{const b=e.target.closest('button');if(b){fcat=b.dataset.c;drawF()}};
+$('fcfWho').onclick=e=>{const b=e.target.closest('button');if(b){fwho=b.dataset.w;drawF()}};
+function openF(id){eid=id||null;const f=id?all.find(x=>x.id===id):null;
+  $('fcfTitle').textContent=f?'Modifier le frais':'Nouveau frais commun';fcat=f?f.cat:'Carburant';fwho=f?f.payePar:user.uid;
+  $('fcfAmt').value=f?String(f.montant).replace('.',','):'';$('fcfDate').value=f?f.date:(fm===today().slice(0,7)?today():fm+'-01');$('fcfNote').value=f?f.note||'':'';
+  $('fcfDel').hidden=!f;drawF();$('dFCf').hidden=false;if(!f)setTimeout(()=>$('fcfAmt').focus(),50)}
+$('fcAdd').onclick=()=>openF();
+$('fcList').onclick=e=>{const r=e.target.closest('.item');if(r)openF(r.dataset.id)};
+$('fcfCancel').onclick=()=>$('dFCf').hidden=true;
+$('fcForm').onsubmit=e=>{e.preventDefault();const m=Math.round(num($('fcfAmt').value)*100)/100;if(!(m>0)){toast('Montant ?');return}
+  const d={cat:fcat,montant:m,date:$('fcfDate').value,note:$('fcfNote').value.trim(),payePar:fwho||user.uid};
+  // enregistré tout de suite sur le téléphone, envoyé en ligne dès que possible
+  (eid?updateDoc(doc(db,'frais_communs',eid),d):addDoc(collection(db,'frais_communs'),{...d,par:user.uid,cree:serverTimestamp()})).catch(()=>toast('Pas encore envoyé : vérifie la connexion'));
+  fm=d.date.slice(0,7);$('dFCf').hidden=true;toast('Enregistré');draw()};
+$('fcfDel').onclick=()=>{if(eid&&confirm('Supprimer ce frais commun ?')){deleteDoc(doc(db,'frais_communs',eid)).catch(()=>{});$('dFCf').hidden=true}};
 </script>
 </body>
 </html>
