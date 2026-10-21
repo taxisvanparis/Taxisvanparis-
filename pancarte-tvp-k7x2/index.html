@@ -170,8 +170,8 @@ async function startLink(){
     B.onAuthStateChanged(fbAuth,u=>{
       if(unsub){unsub();unsub=null;}
       if(!u){linkState('non connectée');$('loginRow').hidden=false;return;}
-      $('loginRow').hidden=true; linkState('connectée, en attente d\'un nom');
-      unsub=C.onSnapshot(C.doc(db,'pancarte','courant'),snap=>{
+      $('loginRow').hidden=true; linkState('connectée ('+(u.email||'compte')+'), en attente d\'un nom');
+      unsub=C.onSnapshot(C.doc(db,'pancarte',u.uid),snap=>{
         const d=snap.data(); if(!d||!d.nom)return;
         const ts=d.ts&&d.ts.toMillis?d.ts.toMillis():0, last=store.get('pancarte-ts',0);
         if(ts&&ts<=last)return;

@@ -988,7 +988,7 @@ function anonymise(title,location){
     if (!nom) { toast("Écris le nom du client", 3000); return; }
     toast("Envoi à la pancarte…", 8000);
     const lent = setTimeout(() => toast("Envoi en attente : vérifie ta connexion internet", 6000), 8000);
-    try { await setDoc(doc(db, "pancarte", "courant"), { nom, ligne: "", ts: serverTimestamp() }); clearTimeout(lent); toast("Envoyé à la pancarte ✔ " + nom, 5000); inp.value = ""; }
+    try { await setDoc(doc(db, "pancarte", auth.currentUser.uid), { nom, ligne: "", ts: serverTimestamp() }); clearTimeout(lent); toast("Envoyé à la pancarte ✔ " + nom, 5000); inp.value = ""; }
     catch (e) { clearTimeout(lent); toast("Échec envoi pancarte : " + ((e && e.code) || "erreur") + (e && e.code === "permission-denied" ? " (règle Firebase)" : ""), 8000); }
   });
   document.getElementById("vol-search").addEventListener("submit", ev => {
@@ -1374,7 +1374,7 @@ function anonymise(title,location){
     box.querySelectorAll("[data-pancarte-send]").forEach(b => b.addEventListener("click", async () => {
       toast("Envoi à la pancarte…", 8000);
       const lent = setTimeout(() => toast("Envoi en attente : vérifie ta connexion internet", 6000), 8000);
-      try { await setDoc(doc(db, "pancarte", "courant"), { nom: b.dataset.nom, ligne: b.dataset.ligne || "", ts: serverTimestamp() }); clearTimeout(lent); toast("Envoyé à la pancarte ✔ " + b.dataset.nom, 5000); }
+      try { await setDoc(doc(db, "pancarte", auth.currentUser.uid), { nom: b.dataset.nom, ligne: b.dataset.ligne || "", ts: serverTimestamp() }); clearTimeout(lent); toast("Envoyé à la pancarte ✔ " + b.dataset.nom, 5000); }
       catch (e) { clearTimeout(lent); toast("Échec envoi pancarte : " + ((e && e.code) || "erreur") + (e && e.code === "permission-denied" ? " (règle Firebase)" : ""), 8000); }
     }));
     box.querySelectorAll("[data-avis]").forEach(b => b.addEventListener("click", () => { updateDoc(doc(db, "reservations", b.dataset.avis), { avisDemande: true }).catch(() => {}); }));
