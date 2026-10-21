@@ -95,7 +95,7 @@ label{display:block;color:var(--mut);font-size:13px;text-transform:uppercase;let
 .fc-who>div{background:#0b0b0b;border:1px solid var(--line);border-radius:12px;padding:12px}
 .fc-who .v{font-size:22px;font-weight:800;margin-top:4px}
 .av{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;font-weight:900;font-size:16px;flex:none;box-shadow:0 0 0 2px rgba(255,255,255,.08)}
-.av.A,.av.B{background:#1a1a1a;font-size:22px;line-height:1}.av.A{box-shadow:0 0 0 2px #3b82f6}.av.B{box-shadow:0 0 0 2px #c1272d}.av.sm{font-size:17px}
+.av.A,.av.B{background:#1a1a1a;font-size:16px;line-height:1}.av.A{color:#60a5fa}.av.B{color:#f87171}.av.A{box-shadow:0 0 0 2px #3b82f6}.av.B{box-shadow:0 0 0 2px #c1272d}.av.sm{font-size:17px}
 .av.sm{width:26px;height:26px;font-size:13px}
 .fc-who>div.A{border-color:#2b4f8f;background:linear-gradient(160deg,#0f1a2e,#0b0b0b)}.fc-who>div.B{border-color:#7a1d22;background:linear-gradient(160deg,#2a0d10,#0b0b0b)}
 .fc-who .hd{display:flex;align-items:center;gap:8px}
@@ -103,7 +103,7 @@ label{display:block;color:var(--mut);font-size:13px;text-transform:uppercase;let
 .duel{position:relative;margin-top:14px;border-radius:20px;padding:18px 14px 16px;background:radial-gradient(120% 140% at 0% 0%,rgba(59,130,246,.22),transparent 55%),radial-gradient(120% 140% at 100% 0%,rgba(193,39,45,.24),transparent 55%),#0c0c0c;border:1px solid #2a2a2a}
 .duel .sides{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:6px}
 .duel .side{text-align:center}
-.duel .flag{width:64px;height:64px;margin:0 auto;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:38px;background:#151515}
+.duel .flag{width:64px;height:64px;margin:0 auto;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:900;background:#151515}.duel .A .flag{color:#60a5fa}.duel .B .flag{color:#f87171}
 .duel .A .flag{box-shadow:0 0 0 3px #3b82f6,0 8px 24px rgba(59,130,246,.35)}.duel .B .flag{box-shadow:0 0 0 3px #c1272d,0 8px 24px rgba(193,39,45,.35)}
 .duel .who{margin-top:8px;font-size:13px;color:var(--mut);letter-spacing:.06em;text-transform:uppercase}
 .duel .paid{font-size:24px;font-weight:900;margin-top:2px;font-variant-numeric:tabular-nums}
@@ -120,9 +120,9 @@ label{display:block;color:var(--mut);font-size:13px;text-transform:uppercase;let
 .regle.on{border-style:solid;border-color:#1e5a36;color:var(--green)}
 .fc-day{margin:18px 0 4px;color:var(--mut);font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:700}
 .fc-row{display:flex;align-items:center;gap:12px;padding:12px;margin-top:8px;border-radius:14px;background:#121212;border:1px solid #232323;cursor:pointer}
-.fc-row.A{box-shadow:inset 3px 0 0 #3b82f6}.fc-row.B{box-shadow:inset 3px 0 0 #c1272d}
+.fc-row.A{box-shadow:inset 3px 0 0 #3b82f6}.fc-row.B{box-shadow:inset 3px 0 0 #c1272d}.fc-row.A .ic em{background:#3b82f6}.fc-row.B .ic em{background:#c1272d}
 .fc-row .ic{width:42px;height:42px;border-radius:12px;background:#1b1b1b;display:flex;align-items:center;justify-content:center;font-size:22px;position:relative;flex:none}
-.fc-row .ic em{position:absolute;right:-6px;bottom:-6px;font-style:normal;font-size:15px;background:#0b0b0b;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center}
+.fc-row .ic em{position:absolute;right:-6px;bottom:-6px;font-style:normal;font-size:12px;font-weight:900;color:#fff;background:#0b0b0b;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center}
 .fc-row .d{flex:1;min-width:0}.fc-row .t{font-weight:800}.fc-row .s{color:var(--mut);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .fc-row .m{font-weight:900;font-size:18px;white-space:nowrap;font-variant-numeric:tabular-nums}
 .fc-add{position:sticky;bottom:0;margin-top:14px;padding-top:10px;background:linear-gradient(transparent,#0f0f0f 30%)}
@@ -510,7 +510,7 @@ const CATS=['Carburant','Péage','Entretien','Lavage','Parking','Assurance','Aut
 let user=null,people=[],all=[],regles={},fm=today().slice(0,7),unsub=[],fromCache=false;
 const MAX=5000;
 const locked=m=>!!(regles[m]&&regles[m].regle);
-const FLAG={A:'🇫🇷',B:'🇲🇦'};
+const FLAG={A:'A',B:'B'};
 const nameOf=uid=>(people.find(p=>p.uid===uid)||{}).lettre||'?';
 function closeAll(){unsub.forEach(u=>u());unsub=[]}
 onAuthStateChanged(auth,async u=>{
@@ -548,7 +548,7 @@ function draw(){
   const half=tot/2,diff=Math.round((paid[0]-half)*100)/100;
   const r=regles[fm]||{};
   const res=$('fcRes');const ok=r.regle||!tot||Math.abs(diff)<0.01;res.className='verdict'+(ok?' ok':'');
-  res.innerHTML=!tot?'Aucun frais commun ce mois-ci':r.regle?`✓ Mois réglé${r.le?' le '+new Date(r.le).toLocaleDateString('fr-FR'):''}`:Math.abs(diff)<0.01?'🇫🇷 A et 🇲🇦 B sont à égalité 👍':diff>0?`<span>🇲🇦 B</span><span class="arrow">➜</span><span>🇫🇷 A</span><span class="amt">${eur(diff)}</span>`:`<span>🇫🇷 A</span><span class="arrow">➜</span><span>🇲🇦 B</span><span class="amt">${eur(-diff)}</span>`;
+  res.innerHTML=!tot?'Aucun frais commun ce mois-ci':r.regle?`✓ Mois réglé${r.le?' le '+new Date(r.le).toLocaleDateString('fr-FR'):''}`:Math.abs(diff)<0.01?'A et B sont à égalité 👍':diff>0?`<span>B</span><span class="arrow">➜</span><span>A</span><span class="amt">${eur(diff)}</span>`:`<span>A</span><span class="arrow">➜</span><span>B</span><span class="amt">${eur(-diff)}</span>`;
   if(!ok)res.title=diff>0?'B doit rembourser A':'A doit rembourser B';
   const rg=$('fcRegle');rg.hidden=!tot;rg.className='regle'+(r.regle?' on':'');rg.textContent=r.regle?'✓ Comptes faits — toucher pour annuler':'Marquer le mois comme réglé';
   const ICO={'Carburant':'⛽','Péage':'🛣️','Entretien':'🔧','Lavage':'🧽','Parking':'🅿️','Assurance':'🛡️','Autre':'📦'};
@@ -573,7 +573,7 @@ $('fcRegle').onclick=async()=>{const r=regles[fm]||{};try{await setDoc(doc(db,'f
 let eid=null,fcat='Carburant',fwho=null,fphoto=null;
 const CATSET=new Set(CATS);
 function drawF(){$('fcfCats').innerHTML=CATS.map(c=>`<button type="button" data-c="${c}" class="${c===fcat?'on':''}">${c}</button>`).join('');
-  $('fcfWho').innerHTML=`<span style="display:inline-flex;align-items:center;gap:8px">Payé par <span class="av sm ${nameOf(fwho)}">${FLAG[nameOf(fwho)]||""}</span> ${nameOf(fwho)}</span>`}
+  $('fcfWho').innerHTML=`<span style="display:inline-flex;align-items:center;gap:8px">Payé par <span class="av sm ${nameOf(fwho)}">${nameOf(fwho)}</span></span>`}
 $('fcfCats').onclick=e=>{const b=e.target.closest('button');if(b){fcat=b.dataset.c;drawF()}};
 function openF(id){eid=id||null;const f=id?all.find(x=>x.id===id):null;
   $('fcfTitle').textContent=f?'Modifier le frais':'Nouveau frais commun';fcat=f?f.cat:'Carburant';fwho=f?f.payePar:user.uid;
