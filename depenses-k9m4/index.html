@@ -95,11 +95,11 @@ label{display:block;color:var(--mut);font-size:13px;text-transform:uppercase;let
 .fc-who>div{background:#0b0b0b;border:1px solid var(--line);border-radius:12px;padding:12px}
 .fc-who .v{font-size:22px;font-weight:800;margin-top:4px}
 .av{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;font-weight:900;font-size:16px;flex:none;box-shadow:0 0 0 2px rgba(255,255,255,.08)}
-.av.A{background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff}.av.B{background:linear-gradient(135deg,#e7c86a,#b8902f);color:#111}
+.av.A,.av.B{background:#1a1a1a;font-size:22px;line-height:1}.av.A{box-shadow:0 0 0 2px #3b82f6}.av.B{box-shadow:0 0 0 2px #c1272d}.av.sm{font-size:17px}
 .av.sm{width:26px;height:26px;font-size:13px}
-.fc-who>div.A{border-color:#2b4f8f;background:linear-gradient(160deg,#0f1a2e,#0b0b0b)}.fc-who>div.B{border-color:#5c4a17;background:linear-gradient(160deg,#211a08,#0b0b0b)}
+.fc-who>div.A{border-color:#2b4f8f;background:linear-gradient(160deg,#0f1a2e,#0b0b0b)}.fc-who>div.B{border-color:#7a1d22;background:linear-gradient(160deg,#2a0d10,#0b0b0b)}
 .fc-who .hd{display:flex;align-items:center;gap:8px}
-.fc-item{border-left:4px solid transparent;padding-left:10px;margin-left:-14px}.fc-item.A{border-left-color:#3b82f6}.fc-item.B{border-left-color:#C9A84C}
+.fc-item{border-left:4px solid transparent;padding-left:10px;margin-left:-14px}.fc-item.A{border-left-color:#3b82f6}.fc-item.B{border-left-color:#c1272d}
 .fc-res{margin-top:12px;padding:12px;border-radius:12px;background:#1d1606;border:1px solid #4a3a10;color:var(--gold);font-weight:800;font-size:17px;text-align:center}
 .fc-res.ok{background:#0f2a1a;border-color:#1e5a36;color:var(--green)}
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--gold);color:#111;font-weight:800;padding:12px 18px;border-radius:12px;z-index:20}
@@ -473,6 +473,7 @@ const mName=m=>{const [y,mo]=m.split('-');return new Date(+y,+mo-1,1).toLocaleDa
 const toast=t=>{const e=$('toast');e.textContent=t;e.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>e.hidden=true,2600)};
 const CATS=['Carburant','Péage','Entretien','Lavage','Parking','Assurance','Autre'];
 let user=null,people=[],all=[],regles={},fm=today().slice(0,7),unsub=[];
+const FLAG={A:'🇫🇷',B:'🇲🇦'};
 const nameOf=uid=>(people.find(p=>p.uid===uid)||{}).lettre||'?';
 function closeAll(){unsub.forEach(u=>u());unsub=[]}
 onAuthStateChanged(auth,async u=>{
@@ -501,13 +502,13 @@ function draw(){
   $('fcMonth').textContent=mName(fm);$('fcTotal').textContent=eur(tot);
   const P=[people.find(p=>!p.b)||{uid:'?',lettre:'A'},people.find(p=>p.b)||{uid:'??',lettre:'B'}];
   const paid=P.map(p=>M.filter(f=>f.payePar===p.uid).reduce((s,f)=>s+(f.montant||0),0));
-  $('fcWho').innerHTML=P.map((p,i)=>`<div class="${p.lettre}"><div class="hd"><span class="av ${p.lettre}">${p.lettre}</span><div class="lbl">${p.lettre==='A'?'Associé':'Badr'}${p.uid===user.uid?' (moi)':''}</div></div><div class="v">${eur(paid[i])}</div></div>`).join('');
+  $('fcWho').innerHTML=P.map((p,i)=>`<div class="${p.lettre}"><div class="hd"><span class="av ${p.lettre}">${FLAG[p.lettre]}</span><div class="lbl">${p.lettre==='A'?'Associé':'Badr'}${p.uid===user.uid?' (moi)':''}</div></div><div class="v">${eur(paid[i])}</div></div>`).join('');
   const half=tot/2,diff=Math.round((paid[0]-half)*100)/100;
   const r=regles[fm]||{};
   const res=$('fcRes');res.className='fc-res'+(r.regle||!tot||Math.abs(diff)<0.01?' ok':'');
-  res.textContent=!tot?'Aucun frais commun ce mois-ci':r.regle?`✓ Mois réglé${r.le?' le '+new Date(r.le).toLocaleDateString('fr-FR'):''}`:Math.abs(diff)<0.01?'A et B sont à égalité 👍':diff>0?`B doit ${eur(diff)} à A`:`A doit ${eur(-diff)} à B`;
+  res.textContent=!tot?'Aucun frais commun ce mois-ci':r.regle?`✓ Mois réglé${r.le?' le '+new Date(r.le).toLocaleDateString('fr-FR'):''}`:Math.abs(diff)<0.01?'🇫🇷 A et 🇲🇦 B sont à égalité 👍':diff>0?`🇲🇦 B doit ${eur(diff)} à 🇫🇷 A`:`🇫🇷 A doit ${eur(-diff)} à 🇲🇦 B`;
   $('fcRegle').hidden=!tot;$('fcRegle').textContent=r.regle?'Annuler « mois réglé »':'Mois réglé ✓ (les comptes sont faits)';
-  $('fcList').innerHTML=M.length?M.map(f=>`<div class="item fc-item ${nameOf(f.payePar)}" data-id="${f.id}"><span class="av sm ${nameOf(f.payePar)}">${nameOf(f.payePar)}</span><div class="d"><div class="t">${esc(f.cat||'Frais')}</div><div class="s">${new Date(f.date+'T12:00').toLocaleDateString('fr-FR',{day:'numeric',month:'short'})} · payé par ${nameOf(f.payePar)}${f.note?' · '+esc(f.note):''}</div></div><div class="m">${eur(f.montant)}</div></div>`).join(''):'<div class="empty">Aucun frais commun ce mois-ci.</div>';
+  $('fcList').innerHTML=M.length?M.map(f=>`<div class="item fc-item ${nameOf(f.payePar)}" data-id="${f.id}"><span class="av sm ${nameOf(f.payePar)}">${FLAG[nameOf(f.payePar)]||""}</span><div class="d"><div class="t">${esc(f.cat||'Frais')}</div><div class="s">${new Date(f.date+'T12:00').toLocaleDateString('fr-FR',{day:'numeric',month:'short'})} · payé par ${nameOf(f.payePar)}${f.note?' · '+esc(f.note):''}</div></div><div class="m">${eur(f.montant)}</div></div>`).join(''):'<div class="empty">Aucun frais commun ce mois-ci.</div>';
 }
 $('fcOpen').onclick=()=>{fm=today().slice(0,7);$('dFC').hidden=false;if(user)draw()};
 $('fcClose').onclick=()=>$('dFC').hidden=true;
@@ -518,7 +519,7 @@ $('fcRegle').onclick=async()=>{const r=regles[fm]||{};try{await setDoc(doc(db,'f
 /* formulaire */
 let eid=null,fcat='Carburant',fwho=null;
 function drawF(){$('fcfCats').innerHTML=CATS.map(c=>`<button type="button" data-c="${c}" class="${c===fcat?'on':''}">${c}</button>`).join('');
-  $('fcfWho').innerHTML=`<span style="display:inline-flex;align-items:center;gap:8px">Payé par <span class="av sm ${nameOf(fwho)}">${nameOf(fwho)}</span></span>`}
+  $('fcfWho').innerHTML=`<span style="display:inline-flex;align-items:center;gap:8px">Payé par <span class="av sm ${nameOf(fwho)}">${FLAG[nameOf(fwho)]||""}</span> ${nameOf(fwho)}</span>`}
 $('fcfCats').onclick=e=>{const b=e.target.closest('button');if(b){fcat=b.dataset.c;drawF()}};
 function openF(id){eid=id||null;const f=id?all.find(x=>x.id===id):null;
   $('fcfTitle').textContent=f?'Modifier le frais':'Nouveau frais commun';fcat=f?f.cat:'Carburant';fwho=f?f.payePar:user.uid;
