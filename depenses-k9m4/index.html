@@ -184,7 +184,8 @@ const $=id=>document.getElementById(id);
 const CATS=['Carburant','Péage','Entretien','Lavage','Parking','Téléphone','Autre'];
 const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}}};
 let items=store.get('dep-items',[]);   // {id,cat,amt,tva,date,note,photo:bool}
-let recs=store.get('dep-rec',[]);       // {id,src,amt,date,nb,name,phone,paid,note}
+let recs=store.get('dep-rec',[]);
+if(recs.some(r=>r.src==='Autre prestataire')){recs.forEach(r=>{if(r.src==='Autre prestataire')r.src='En compte'});store.set('dep-rec',recs)}       // {id,src,amt,date,nb,name,phone,paid,note}
 const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 let cur=today().slice(0,7);
 const eur=n=>(n||0).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
@@ -328,7 +329,7 @@ $('fThumb').onclick=()=>{$('pImg').src=$('fThumb').src;$('dPhoto').hidden=false}
 $('pClose').onclick=()=>$('dPhoto').hidden=true;
 
 /* recettes */
-const SRC=['U','Course CB','Espèces','Autre prestataire'];
+const SRC=['U','Course CB','Espèces','En compte'];
 let rId=null,rSrc='U',rPaid=true;
 function drawR(){$('rSrc').innerHTML=SRC.map(c=>`<button type="button" data-c="${c}" class="${c===rSrc?'on':''}">${c}</button>`).join('');
   $('rPaid').innerHTML=`<button type="button" data-p="1" class="${rPaid?'on':''}">Reçu</button><button type="button" data-p="0" class="${rPaid?'':'on'}">À recevoir</button>`;
@@ -339,7 +340,7 @@ $('rPhone').oninput=drawR;
 function openRec(id){
   rId=id||null;const it=id?recs.find(i=>i.id===id):null;
   $('rTitle').textContent=it?'Modifier la recette':'Nouvelle recette';
-  rSrc=it?it.src:(tab==='due'?'Autre prestataire':'U');rPaid=it?it.paid!==false:tab!=='due';
+  rSrc=it?it.src:(tab==='due'?'En compte':'U');rPaid=it?it.paid!==false:tab!=='due';
   $('rAmt').value=it?String(it.amt).replace('.',','):'';
   $('rDate').value=it?it.date:defDate();
   $('rNb').value=it&&it.nb?it.nb:'';$('rName').value=it?it.name||'':'';$('rPhone').value=it?it.phone||'':'';$('rNote').value=it?it.note||'':'';
