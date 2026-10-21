@@ -155,7 +155,7 @@ label{display:block;color:var(--mut);font-size:13px;text-transform:uppercase;let
     <div id="vs" class="mut" style="margin-top:8px;font-size:13px"></div>
   </section>
 
-  <button type="button" class="fc-open" id="fcOpen"><span>🤝 Frais communs avec l'associé<small id="fcSub">Frais taxi partagés, comptes en fin de mois</small></span><b id="fcTot"></b></button>
+  <button type="button" class="fc-open" id="fcOpen"><span>🤝 Frais communs<small id="fcSub">Frais taxi partagés, comptes en fin de mois</small></span><b id="fcTot"></b></button>
 
   <section class="card" id="days" hidden></section>
 
@@ -540,7 +540,7 @@ function draw(){
   const P=[people.find(p=>!p.b)||{uid:'?',lettre:'A'},people.find(p=>p.b)||{uid:'??',lettre:'B'}];
   const paid=P.map(p=>M.filter(f=>f.payePar===p.uid).reduce((s,f)=>s+(f.montant||0),0));
   const pa=tot?Math.round(paid[0]/tot*100):50;
-  const side=(p,i)=>`<div class="side ${p.lettre}"><div class="flag">${FLAG[p.lettre]}</div><div class="who">${p.lettre} · ${p.lettre==='A'?'Associé':'Badr'}${p.uid===user.uid?' (moi)':''}</div><div class="paid">${eur(paid[i])}</div></div>`;
+  const side=(p,i)=>`<div class="side ${p.lettre}"><div class="flag">${FLAG[p.lettre]}</div><div class="who">${p.uid===user.uid?'Moi':'&nbsp;'}</div><div class="paid">${eur(paid[i])}</div></div>`;
   $('fcDuel').innerHTML=`<div class="sides">${side(P[0],0)}<div class="vs">VS</div>${side(P[1],1)}</div>
     <div class="split"><i class="a" style="width:${tot?pa:50}%"></i><i class="b" style="width:${tot?100-pa:50}%"></i></div><div class="split-mid"></div>
     <div class="split-lbl"><span>${tot?pa+' %':''}</span><span>50 / 50</span><span>${tot?(100-pa)+' %':''}</span></div>
@@ -593,7 +593,7 @@ $('fcCsv').onclick=()=>{const M=all.filter(f=>String(f.date||'').slice(0,7)===fm
   const q=v=>'"'+String(v).replace(/"/g,'""')+'"',n=v=>(v||0).toFixed(2).replace('.',',');
   const P=[people.find(p=>!p.b)||{uid:'?'},people.find(p=>p.b)||{uid:'??'}],pa=P.map(p=>M.filter(f=>f.payePar===p.uid).reduce((s,f)=>s+(f.montant||0),0)),tot=pa[0]+pa[1],d=Math.round((pa[0]-tot/2)*100)/100;
   const rows=[['Date','Catégorie','Montant TTC','Payé par','Note','Ticket'].join(';')];
-  M.forEach(f=>rows.push([f.date.split('-').reverse().join('/'),q(f.cat),n(f.montant),nameOf(f.payePar)==='A'?'A (associé)':'B (Badr)',q(f.note||''),f.photo?'oui':'non'].join(';')));
+  M.forEach(f=>rows.push([f.date.split('-').reverse().join('/'),q(f.cat),n(f.montant),nameOf(f.payePar),q(f.note||''),f.photo?'oui':'non'].join(';')));
   rows.push('');rows.push(['Total','',n(tot)].join(';'));rows.push(['Payé par A','',n(pa[0])].join(';'));rows.push(['Payé par B','',n(pa[1])].join(';'));
   rows.push([Math.abs(d)<.01?'Égalité':d>0?'B doit à A':'A doit à B','',n(Math.abs(d))].join(';'));rows.push(['Statut','',locked(fm)?'Mois réglé':'À régler'].join(';'));
   window.dl(`frais-communs-${fm}.csv`,'\ufeff'+rows.join('\r\n'),'text/csv')};
