@@ -88,6 +88,50 @@ label{display:block;color:var(--mut);font-size:13px;text-transform:uppercase;let
 .day .dn{font-weight:700}.day .dn::first-letter{text-transform:uppercase}.day .dd{color:var(--mut);font-size:13px;grid-column:1}
 .day .g{color:var(--green);font-weight:700;text-align:right;white-space:nowrap}.day .x{color:var(--mut);font-weight:700;text-align:right;white-space:nowrap}
 .day .r{grid-column:2/4;text-align:right;font-weight:800;font-size:17px;white-space:nowrap}
+.fc-open{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;margin-top:12px;background:var(--card);border:2px solid var(--gold);border-radius:14px;padding:14px 16px;color:var(--ink);font-weight:800;font-size:17px;text-align:left}
+.fc-open small{display:block;color:var(--mut);font-weight:600;font-size:13px;margin-top:2px}
+.fc-open b{color:var(--gold);white-space:nowrap}
+.fc-who{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.fc-who>div{background:#0b0b0b;border:1px solid var(--line);border-radius:12px;padding:12px}
+.fc-who .v{font-size:22px;font-weight:800;margin-top:4px}
+.av{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;font-weight:900;font-size:16px;flex:none;box-shadow:0 0 0 2px rgba(255,255,255,.08)}
+.av.A,.av.B{background:#1a1a1a;font-size:16px;line-height:1}.av.A{color:#60a5fa}.av.B{color:#f87171}.av.A{box-shadow:0 0 0 2px #3b82f6}.av.B{box-shadow:0 0 0 2px #c1272d}.av.sm{font-size:17px}
+.av.sm{width:26px;height:26px;font-size:13px}
+.fc-who>div.A{border-color:#2b4f8f;background:linear-gradient(160deg,#0f1a2e,#0b0b0b)}.fc-who>div.B{border-color:#7a1d22;background:linear-gradient(160deg,#2a0d10,#0b0b0b)}
+.fc-who .hd{display:flex;align-items:center;gap:8px}
+.fc-item{border-left:4px solid transparent;padding-left:10px;margin-left:-14px}.fc-item.A{border-left-color:#3b82f6}.fc-item.B{border-left-color:#c1272d}
+.duel{position:relative;margin-top:14px;border-radius:20px;padding:18px 14px 16px;background:radial-gradient(120% 140% at 0% 0%,rgba(59,130,246,.22),transparent 55%),radial-gradient(120% 140% at 100% 0%,rgba(193,39,45,.24),transparent 55%),#0c0c0c;border:1px solid #2a2a2a}
+.duel .sides{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:6px}
+.duel .side{text-align:center}
+.duel .flag{width:64px;height:64px;margin:0 auto;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:900;background:#151515}.duel .A .flag{color:#60a5fa}.duel .B .flag{color:#f87171}
+.duel .A .flag{box-shadow:0 0 0 3px #3b82f6,0 8px 24px rgba(59,130,246,.35)}.duel .B .flag{box-shadow:0 0 0 3px #c1272d,0 8px 24px rgba(193,39,45,.35)}
+.duel .who{margin-top:8px;font-size:13px;color:var(--mut);letter-spacing:.06em;text-transform:uppercase}
+.duel .paid{font-size:24px;font-weight:900;margin-top:2px;font-variant-numeric:tabular-nums}
+.duel .vs{font-size:12px;font-weight:900;color:#777;border:1px solid #333;border-radius:999px;padding:6px 8px}
+.split{position:relative;height:12px;border-radius:999px;overflow:hidden;display:flex;margin-top:16px;background:#222}
+.split i{display:block;height:100%}.split .a{background:linear-gradient(90deg,#1d4ed8,#3b82f6)}.split .b{background:linear-gradient(90deg,#c1272d,#e0484d)}
+.split-mid{position:relative;height:0}.split-mid:after{content:"";position:absolute;left:50%;top:-16px;width:2px;height:20px;background:#fff;opacity:.8;transform:translateX(-1px)}
+.split-lbl{display:flex;justify-content:space-between;font-size:12px;color:var(--mut);margin-top:6px}
+.tot-line{display:flex;justify-content:space-between;align-items:baseline;margin-top:12px;color:var(--mut);font-size:14px}.tot-line b{color:var(--ink);font-size:18px}
+.verdict{margin-top:14px;border-radius:16px;padding:14px;display:flex;align-items:center;justify-content:center;gap:10px;font-weight:900;font-size:18px;background:#1d1606;border:1px solid #4a3a10;color:var(--gold)}
+.verdict .arrow{font-size:20px;opacity:.9}.verdict .amt{font-size:22px;color:#fff}
+.verdict.ok{background:#0f2a1a;border-color:#1e5a36;color:var(--green)}
+.regle{margin-top:10px;width:100%;background:none;border:1px dashed #444;color:var(--mut);border-radius:12px;padding:11px;font-weight:700;font-size:15px}
+.regle.on{border-style:solid;border-color:#1e5a36;color:var(--green)}
+.fc-day{margin:18px 0 4px;color:var(--mut);font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:700}
+.fc-row{display:flex;align-items:center;gap:12px;padding:12px;margin-top:8px;border-radius:14px;background:#121212;border:1px solid #232323;cursor:pointer}
+.fc-row.A{box-shadow:inset 3px 0 0 #3b82f6}.fc-row.B{box-shadow:inset 3px 0 0 #c1272d}.fc-row.A .ic em{background:#3b82f6}.fc-row.B .ic em{background:#c1272d}
+.fc-row .ic{width:42px;height:42px;border-radius:12px;background:#1b1b1b;display:flex;align-items:center;justify-content:center;font-size:22px;position:relative;flex:none}
+.fc-row .ic em{position:absolute;right:-6px;bottom:-6px;font-style:normal;font-size:12px;font-weight:900;color:#fff;background:#0b0b0b;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center}
+.fc-row .d{flex:1;min-width:0}.fc-row .t{font-weight:800}.fc-row .s{color:var(--mut);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fc-row .m{font-weight:900;font-size:18px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.fc-add{position:sticky;bottom:0;margin-top:14px;padding-top:10px;background:linear-gradient(transparent,#0f0f0f 30%)}
+.sync{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--mut);margin-top:10px}.sync i{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block}.sync.wait i{background:var(--gold)}.sync.off i{background:var(--red)}
+.fc-row .pend{color:var(--gold);font-size:12px;font-weight:700}
+.fc-tools{display:flex;gap:8px;margin-top:10px}.fc-tools button{flex:1;background:#151515;border:1px solid #2a2a2a;color:var(--ink);border-radius:12px;padding:10px;font-weight:700;font-size:14px}
+.lockmsg{margin-top:10px;text-align:center;color:var(--green);font-size:14px}
+.fc-res{margin-top:12px;padding:12px;border-radius:12px;background:#1d1606;border:1px solid #4a3a10;color:var(--gold);font-weight:800;font-size:17px;text-align:center}
+.fc-res.ok{background:#0f2a1a;border-color:#1e5a36;color:var(--green)}
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--gold);color:#111;font-weight:800;padding:12px 18px;border-radius:12px;z-index:20}
 .toast[hidden]{display:none}
 [hidden]{display:none!important}
@@ -110,6 +154,8 @@ label{display:block;color:var(--mut);font-size:13px;text-transform:uppercase;let
     <div class="row" style="margin-top:8px"><div class="lbl">TVA sur mes dépenses</div><div id="tva" style="font-weight:800">0,00 €</div></div>
     <div id="vs" class="mut" style="margin-top:8px;font-size:13px"></div>
   </section>
+
+  <button type="button" class="fc-open" id="fcOpen"><span>🤝 Frais communs<small id="fcSub">Frais taxi partagés, comptes en fin de mois</small></span><b id="fcTot"></b></button>
 
   <section class="card" id="days" hidden></section>
 
@@ -173,6 +219,45 @@ label{display:block;color:var(--mut);font-size:13px;text-transform:uppercase;let
   <input type="file" id="xFile" accept="application/json,.json" hidden>
   <button class="btn small" id="mClose" style="width:100%;margin-top:16px;background:#222;color:#fff">Fermer</button>
 </div></div>
+
+<div class="dlg" id="dFC" hidden><div class="sheet" style="max-height:96vh">
+  <div class="row"><h2>🤝 Frais communs</h2><button type="button" class="btn small" id="fcClose" style="background:#222;color:#fff">Fermer</button></div>
+  <div id="fcLogin" hidden>
+    <p class="mut" style="margin:8px 0 0">Connecte-toi une seule fois avec le même e-mail et mot de passe que le tableau de bord.</p>
+    <label for="fcEmail">E-mail</label><input id="fcEmail" type="email" autocomplete="username" inputmode="email">
+    <label for="fcPass">Mot de passe</label><input id="fcPass" type="password" autocomplete="current-password">
+    <button type="button" class="btn" id="fcLog" style="width:100%;margin-top:16px">Se connecter</button>
+    <div id="fcErr" style="color:var(--red);margin-top:10px"></div>
+  </div>
+  <div id="fcMain" hidden>
+    <div class="month" style="margin-top:12px"><button type="button" id="fcPrev" aria-label="Mois précédent">‹</button><span id="fcMonth"></span><button type="button" id="fcNext" aria-label="Mois suivant">›</button></div>
+    <div class="sync" id="fcSync"><i></i><span>Synchronisé</span></div>
+    <div class="duel" id="fcDuel"></div>
+    <div class="verdict" id="fcRes"></div>
+    <button type="button" class="regle" id="fcRegle"></button>
+    <div class="fc-tools"><button type="button" id="fcCsv">⬇︎ Exporter le mois</button></div>
+    <div id="fcList"></div>
+    <div class="fc-add"><div class="lockmsg" id="fcLock" hidden>🔒 Mois réglé : plus de modification possible</div><button type="button" class="btn" id="fcAdd" style="width:100%">+ Ajouter un frais que j'ai payé</button></div>
+    <p class="note">Visible par toi et ton associé, enregistré en ligne (sauvegardé même si tu perds ton téléphone). <button type="button" id="fcOut" style="background:none;border:0;color:var(--mut);text-decoration:underline;padding:0;font-size:13px">Se déconnecter</button></p>
+  </div>
+</div></div>
+
+<div class="dlg" id="dFCf" hidden><form class="sheet" id="fcForm" autocomplete="off">
+  <h2 id="fcfTitle">Nouveau frais commun</h2>
+  <label>Catégorie</label><div class="cats" id="fcfCats"></div>
+  <div class="two">
+    <div><label for="fcfAmt">Montant TTC (€)</label><input id="fcfAmt" inputmode="decimal" placeholder="0,00" required></div>
+    <div><label for="fcfDate">Date</label><input id="fcfDate" type="date" required></div>
+  </div>
+  <p class="mut" id="fcfWho" style="margin:12px 0 0"></p>
+  <label for="fcfNote">Note — facultatif</label><input id="fcfNote" maxlength="80" placeholder="ex. Total Nanterre, plein du van">
+  <label>Photo du ticket — facultatif (visible par vous deux)</label>
+  <input id="fcfPhoto" type="file" accept="image/*" capture="environment">
+  <img id="fcfThumb" class="thumb" alt="" hidden>
+  <button type="button" class="btn small red" id="fcfRmPhoto" style="margin-top:8px" hidden>Retirer la photo</button>
+  <div class="two" style="margin-top:20px"><button type="button" class="btn ghost" id="fcfCancel">Annuler</button><button type="submit" class="btn">Enregistrer</button></div>
+  <button type="button" class="btn red" id="fcfDel" style="width:100%;margin-top:12px" hidden>Supprimer ce frais</button>
+</form></div>
 
 <div class="dlg" id="dPhoto" hidden><div class="sheet"><img id="pImg" class="thumb" alt="Ticket"><button class="btn" id="pClose" style="width:100%;margin-top:14px">Fermer</button></div></div>
 
@@ -405,6 +490,124 @@ showLock();
 
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 render();
+</script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { initializeFirestore, persistentLocalCache, collection, doc, addDoc, updateDoc, deleteDoc, setDoc, getDocs, onSnapshot, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+const app=initializeApp({apiKey:"AIzaSyBN8uBFONIt1tDTH9C-NIQKeulFdJ2m26Q",authDomain:"taxis-van-paris-by-abts.firebaseapp.com",projectId:"taxis-van-paris-by-abts",storageBucket:"taxis-van-paris-by-abts.firebasestorage.app",messagingSenderId:"53887245170",appId:"1:53887245170:web:2a3b785d734c54e01f9beb"},"frais");
+const auth=getAuth(app);
+let db;try{db=initializeFirestore(app,{localCache:persistentLocalCache()})}catch(e){db=initializeFirestore(app,{})}
+const $=id=>document.getElementById(id);
+const eur=n=>(n||0).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
+const num=v=>{const n=parseFloat(String(v||'').replace(/\s/g,'').replace(',','.'));return isFinite(n)?n:0};
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const shift=(m,n)=>{const [y,mo]=m.split('-').map(Number);const d=new Date(y,mo-1+n,1);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')};
+const mName=m=>{const [y,mo]=m.split('-');return new Date(+y,+mo-1,1).toLocaleDateString('fr-FR',{month:'long',year:'numeric'})};
+const toast=t=>{const e=$('toast');e.textContent=t;e.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>e.hidden=true,2600)};
+const CATS=['Carburant','Péage','Entretien','Lavage','Parking','Assurance','Autre'];
+let user=null,people=[],all=[],regles={},fm=today().slice(0,7),unsub=[],fromCache=false;
+const MAX=5000;
+const locked=m=>!!(regles[m]&&regles[m].regle);
+const FLAG={A:'A',B:'B'};
+const nameOf=uid=>(people.find(p=>p.uid===uid)||{}).lettre||'?';
+function closeAll(){unsub.forEach(u=>u());unsub=[]}
+onAuthStateChanged(auth,async u=>{
+  user=u;closeAll();all=[];regles={};
+  $('fcLogin').hidden=!!u;$('fcMain').hidden=!u;
+  if(!u){$('fcTot').textContent='';$('fcSub').textContent='Frais taxi partagés, comptes en fin de mois';return}
+  try{const snap=await getDocs(collection(db,'users'));
+    people=snap.docs.map(d=>{const o={};Object.entries(d.data()).forEach(([k,v])=>o[k.trim().toLowerCase()]=typeof v==='string'?v.trim():v);return{uid:d.id,nom:o.nom||o.name||o.email||'Associé',role:String(o.role||'').toLowerCase()}}).filter(p=>p.role.startsWith('admin'));
+  }catch(e){people=[{uid:u.uid,nom:'Moi',role:'admin'}]}
+  if(!people.find(p=>p.uid===u.uid))people.unshift({uid:u.uid,nom:'Moi',role:'admin'});
+  // A = l'associé, B = Badr
+  people.forEach(p=>p.b=/badr/i.test(p.nom));
+  if(!people.some(p=>p.b)&&people.length)people[people.length-1].b=true;
+  people.sort((a,b)=>(a.b===b.b?a.nom.localeCompare(b.nom):a.b?1:-1));
+  people.forEach((p,i)=>p.lettre=p.b?'B':'A');
+  unsub.push(onSnapshot(collection(db,'frais_communs'),{includeMetadataChanges:true},s=>{all=s.docs.map(d=>({id:d.id,...d.data(),_pend:!!(d.metadata&&d.metadata.hasPendingWrites)}));fromCache=!!(s.metadata&&s.metadata.fromCache);draw()},e=>{toast('Accès refusé aux frais communs');console.error(e)}));
+  unsub.push(onSnapshot(collection(db,'frais_communs_mois'),s=>{regles={};s.docs.forEach(d=>regles[d.id]=d.data());draw()},()=>{}));
+});
+function draw(){
+  const M=all.filter(f=>String(f.date||'').slice(0,7)===fm).sort((a,b)=>String(b.date).localeCompare(a.date));
+  const tot=M.reduce((s,f)=>s+(f.montant||0),0);
+  // résumé sur l'écran principal : mois en cours
+  const cm=today().slice(0,7),C=all.filter(f=>String(f.date||'').slice(0,7)===cm);
+  $('fcTot').textContent=user?eur(C.reduce((s,f)=>s+(f.montant||0),0)):'';
+  $('fcSub').textContent=user?(C.length?C.length+' frais ce mois-ci':'Aucun frais ce mois-ci'):'Frais taxi partagés, comptes en fin de mois';
+  $('fcMonth').textContent=mName(fm);
+  const P=[people.find(p=>!p.b)||{uid:'?',lettre:'A'},people.find(p=>p.b)||{uid:'??',lettre:'B'}];
+  const paid=P.map(p=>M.filter(f=>f.payePar===p.uid).reduce((s,f)=>s+(f.montant||0),0));
+  const pa=tot?Math.round(paid[0]/tot*100):50;
+  const side=(p,i)=>`<div class="side ${p.lettre}"><div class="flag">${FLAG[p.lettre]}</div><div class="who">${p.uid===user.uid?'Moi':'&nbsp;'}</div><div class="paid">${eur(paid[i])}</div></div>`;
+  $('fcDuel').innerHTML=`<div class="sides">${side(P[0],0)}<div class="vs">VS</div>${side(P[1],1)}</div>
+    <div class="split"><i class="a" style="width:${tot?pa:50}%"></i><i class="b" style="width:${tot?100-pa:50}%"></i></div><div class="split-mid"></div>
+    <div class="split-lbl"><span>${tot?pa+' %':''}</span><span>50 / 50</span><span>${tot?(100-pa)+' %':''}</span></div>
+    <div class="tot-line"><span>Total des frais du mois</span><b>${eur(tot)}</b></div>`;
+  const half=tot/2,diff=Math.round((paid[0]-half)*100)/100;
+  const r=regles[fm]||{};
+  const res=$('fcRes');const ok=r.regle||!tot||Math.abs(diff)<0.01;res.className='verdict'+(ok?' ok':'');
+  res.innerHTML=!tot?'Aucun frais commun ce mois-ci':r.regle?`✓ Mois réglé${r.le?' le '+new Date(r.le).toLocaleDateString('fr-FR'):''}`:Math.abs(diff)<0.01?'A et B sont à égalité 👍':diff>0?`<span>B</span><span class="arrow">➜</span><span>A</span><span class="amt">${eur(diff)}</span>`:`<span>A</span><span class="arrow">➜</span><span>B</span><span class="amt">${eur(-diff)}</span>`;
+  if(!ok)res.title=diff>0?'B doit rembourser A':'A doit rembourser B';
+  const rg=$('fcRegle');rg.hidden=!tot;rg.className='regle'+(r.regle?' on':'');rg.textContent=r.regle?'✓ Comptes faits — toucher pour annuler':'Marquer le mois comme réglé';
+  const ICO={'Carburant':'⛽','Péage':'🛣️','Entretien':'🔧','Lavage':'🧽','Parking':'🅿️','Assurance':'🛡️','Autre':'📦'};
+  let last='',h='';
+  M.forEach(f=>{const L=nameOf(f.payePar);
+    if(f.date!==last){last=f.date;const dd=new Date(f.date+'T12:00');h+=`<div class="fc-day">${f.date===today()?"Aujourd'hui":dd.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})}</div>`}
+    h+=`<div class="fc-row item ${L}" data-id="${f.id}"><div class="ic">${ICO[f.cat]||'📦'}<em>${FLAG[L]||''}</em></div><div class="d"><div class="t">${esc(f.cat||'Frais')}</div><div class="s">Payé par ${L}${f.photo?' · 📎 ticket':''}${f.note?' · '+esc(f.note):''}${f._pend?' · <span class="pend">⏳ envoi…</span>':''}</div></div><div class="m">${eur(f.montant)}</div></div>`});
+  $('fcList').innerHTML=M.length?h:'<div class="empty">Aucun frais commun ce mois-ci.</div>';
+  const np=all.filter(f=>f._pend).length,sy=$('fcSync');
+  sy.className='sync'+(np?' wait':(!navigator.onLine||fromCache)?' off':'');
+  sy.querySelector('span').textContent=np?`⏳ ${np} frais en attente d'envoi (envoi automatique dès que le réseau revient)`:(!navigator.onLine?'Hors ligne — tes ajouts seront envoyés plus tard':'Synchronisé en temps réel');
+  const lk=locked(fm);$('fcLock').hidden=!lk;$('fcAdd').hidden=lk;$('fcCsv').disabled=!M.length;
+}
+addEventListener('online',()=>user&&draw());addEventListener('offline',()=>user&&draw());
+$('fcOpen').onclick=()=>{fm=today().slice(0,7);$('dFC').hidden=false;if(user)draw()};
+$('fcClose').onclick=()=>$('dFC').hidden=true;
+$('fcPrev').onclick=()=>{fm=shift(fm,-1);draw()};$('fcNext').onclick=()=>{fm=shift(fm,1);draw()};
+$('fcLog').onclick=async()=>{$('fcErr').textContent='';try{await signInWithEmailAndPassword(auth,$('fcEmail').value.trim(),$('fcPass').value);$('fcPass').value=''}catch(e){$('fcErr').textContent='E-mail ou mot de passe incorrect'}};
+$('fcOut').onclick=()=>{if(confirm('Se déconnecter des frais communs sur ce téléphone ?'))signOut(auth)};
+$('fcRegle').onclick=async()=>{const r=regles[fm]||{};try{await setDoc(doc(db,'frais_communs_mois',fm),r.regle?{regle:false}:{regle:true,le:new Date().toISOString(),par:user.uid})}catch(e){toast('Impossible : pas de connexion ?')}};
+/* formulaire */
+let eid=null,fcat='Carburant',fwho=null,fphoto=null;
+const CATSET=new Set(CATS);
+function drawF(){$('fcfCats').innerHTML=CATS.map(c=>`<button type="button" data-c="${c}" class="${c===fcat?'on':''}">${c}</button>`).join('');
+  $('fcfWho').innerHTML=`<span style="display:inline-flex;align-items:center;gap:8px">Payé par <span class="av sm ${nameOf(fwho)}">${nameOf(fwho)}</span></span>`}
+$('fcfCats').onclick=e=>{const b=e.target.closest('button');if(b){fcat=b.dataset.c;drawF()}};
+function openF(id){eid=id||null;const f=id?all.find(x=>x.id===id):null;
+  $('fcfTitle').textContent=f?'Modifier le frais':'Nouveau frais commun';fcat=f?f.cat:'Carburant';fwho=f?f.payePar:user.uid;
+  $('fcfAmt').value=f?String(f.montant).replace('.',','):'';$('fcfDate').value=f?f.date:(fm===today().slice(0,7)?today():fm+'-01');$('fcfNote').value=f?f.note||'':'';
+  fphoto=f&&f.photo||null;$('fcfPhoto').value='';$('fcfThumb').hidden=!fphoto;if(fphoto)$('fcfThumb').src=fphoto;$('fcfRmPhoto').hidden=!fphoto;
+  $('fcfDel').hidden=!f;drawF();$('dFCf').hidden=false;if(!f)setTimeout(()=>$('fcfAmt').focus(),50)}
+$('fcAdd').onclick=()=>openF();
+$('fcList').onclick=e=>{const r=e.target.closest('.item');if(!r)return;const f=all.find(x=>x.id===r.dataset.id);if(!f)return;
+  if(f.payePar!==user.uid||locked(String(f.date).slice(0,7))){if(f.photo){$('pImg').src=f.photo;$('dPhoto').hidden=false}else toast(locked(String(f.date).slice(0,7))?'Mois réglé : frais verrouillé':'Seul '+nameOf(f.payePar)+' peut modifier ce frais');return}
+  openF(r.dataset.id)};
+$('fcfCancel').onclick=()=>$('dFCf').hidden=true;
+async function petit(file){return new Promise((res,rej)=>{const img=new Image(),u=URL.createObjectURL(file);img.onload=()=>{let w=900,q=.6,out='';for(let k=0;k<4;k++){const sc=Math.min(1,w/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=Math.round(img.width*sc);c.height=Math.round(img.height*sc);c.getContext('2d').drawImage(img,0,0,c.width,c.height);out=c.toDataURL('image/jpeg',q);if(out.length<300000)break;w=Math.round(w*.75);q-=.1}URL.revokeObjectURL(u);out.length<300000?res(out):rej()};img.onerror=()=>rej();img.src=u})}
+$('fcfPhoto').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{fphoto=await petit(f);$('fcfThumb').src=fphoto;$('fcfThumb').hidden=false;$('fcfRmPhoto').hidden=false}catch(x){toast('Photo trop lourde ou illisible')}};
+$('fcfRmPhoto').onclick=()=>{fphoto=null;$('fcfThumb').hidden=true;$('fcfRmPhoto').hidden=true;$('fcfPhoto').value=''};
+$('fcfThumb').onclick=()=>{$('pImg').src=$('fcfThumb').src;$('dPhoto').hidden=false};
+$('fcCsv').onclick=()=>{const M=all.filter(f=>String(f.date||'').slice(0,7)===fm).sort((a,b)=>String(a.date).localeCompare(b.date));
+  const q=v=>'"'+String(v).replace(/"/g,'""')+'"',n=v=>(v||0).toFixed(2).replace('.',',');
+  const P=[people.find(p=>!p.b)||{uid:'?'},people.find(p=>p.b)||{uid:'??'}],pa=P.map(p=>M.filter(f=>f.payePar===p.uid).reduce((s,f)=>s+(f.montant||0),0)),tot=pa[0]+pa[1],d=Math.round((pa[0]-tot/2)*100)/100;
+  const rows=[['Date','Catégorie','Montant TTC','Payé par','Note','Ticket'].join(';')];
+  M.forEach(f=>rows.push([f.date.split('-').reverse().join('/'),q(f.cat),n(f.montant),nameOf(f.payePar),q(f.note||''),f.photo?'oui':'non'].join(';')));
+  rows.push('');rows.push(['Total','',n(tot)].join(';'));rows.push(['Payé par A','',n(pa[0])].join(';'));rows.push(['Payé par B','',n(pa[1])].join(';'));
+  rows.push([Math.abs(d)<.01?'Égalité':d>0?'B doit à A':'A doit à B','',n(Math.abs(d))].join(';'));rows.push(['Statut','',locked(fm)?'Mois réglé':'À régler'].join(';'));
+  window.dl(`frais-communs-${fm}.csv`,'\ufeff'+rows.join('\r\n'),'text/csv')};
+$('fcForm').onsubmit=e=>{e.preventDefault();const m=Math.round(num($('fcfAmt').value)*100)/100;if(!(m>0)){toast('Montant ?');return}
+  if(m>MAX){toast('Montant trop élevé (max '+MAX+' €)');return}
+  const dt=$('fcfDate').value;if(!/^\d{4}-\d{2}-\d{2}$/.test(dt)){toast('Date ?');return}
+  if(dt>today()){toast('La date ne peut pas être dans le futur');return}
+  if(locked(dt.slice(0,7))){toast('Ce mois est réglé : annule « mois réglé » pour ajouter un frais');return}
+  if(!CATSET.has(fcat)){toast('Catégorie ?');return}
+  const d={cat:fcat,montant:m,date:dt,note:$('fcfNote').value.trim().slice(0,80),payePar:eid?fwho:user.uid,photo:fphoto||null,modifie:serverTimestamp(),modifiePar:user.uid};
+  // enregistré tout de suite sur le téléphone, envoyé en ligne dès que possible
+  (eid?updateDoc(doc(db,'frais_communs',eid),d):addDoc(collection(db,'frais_communs'),{...d,par:user.uid,cree:serverTimestamp()})).catch(()=>toast('Pas encore envoyé : vérifie la connexion'));
+  fm=d.date.slice(0,7);$('dFCf').hidden=true;toast('Enregistré');draw()};
+$('fcfDel').onclick=()=>{const f=all.find(x=>x.id===eid);if(f&&locked(String(f.date).slice(0,7))){toast('Mois réglé : suppression impossible');return}if(eid&&confirm('Supprimer ce frais commun ?')){deleteDoc(doc(db,'frais_communs',eid)).catch(()=>{});$('dFCf').hidden=true}};
 </script>
 </body>
 </html>
