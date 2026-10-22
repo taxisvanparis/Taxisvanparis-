@@ -264,6 +264,10 @@ const debloquerVoix=()=>{try{const u=new SpeechSynthesisUtterance(' ');u.volume=
 
 /* ---------- Micro (reconnaissance vocale) ---------- */
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+let recEnCours=null;
+function couperMicro(){if(recEnCours){try{recEnCours.abort()}catch(e){}recEnCours=null}document.querySelectorAll('.mic.rec').forEach(b=>{b.classList.remove('rec');b._rec=null})}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState!=='visible')couperMicro()});
+addEventListener('pagehide',couperMicro);addEventListener('blur',couperMicro);
 function ecouter(btn,voix,liveEl,surFin,surEchec){
   if(!SR||store.get('tvp_sr_ko',0)>=2){surEchec&&surEchec();return true}
   if(btn._rec){btn._rec.stop();return true}
@@ -272,12 +276,13 @@ function ecouter(btn,voix,liveEl,surFin,surEchec){
   let final='',tmp='',fini=false,erreur='';
   r.onresult=e=>{tmp='';for(let i=e.resultIndex;i<e.results.length;i++){const t=e.results[i][0].transcript;if(e.results[i].isFinal)final+=t;else tmp+=t}liveEl.textContent=(final+tmp).trim()||'🎙️ …'};
   r.onerror=e=>{erreur=e.error||'x';if(e.error==='not-allowed'||e.error==='service-not-allowed')toast('Autorise le micro et la « Reconnaissance vocale » dans Réglages › Safari');};
-  r.onend=()=>{btn._rec=null;btn.classList.remove('rec');liveEl.textContent='';if(fini)return;fini=true;
+  r.onend=()=>{clearTimeout(btn._t);if(recEnCours===r)recEnCours=null;btn._rec=null;btn.classList.remove('rec');liveEl.textContent='';if(fini)return;fini=true;
     const t=(final||tmp).trim();
     if(t){store.set('tvp_sr_ko',0);surFin(t);return}
     if(erreur==='no-speech'||erreur==='aborted'){toast("Je n'ai rien entendu, réessaie");return}
     store.set('tvp_sr_ko',store.get('tvp_sr_ko',0)+1);surEchec&&surEchec()};
-  btn._rec=r;btn.classList.add('rec');liveEl.textContent='🎙️ …';
+  btn._rec=r;recEnCours=r;btn.classList.add('rec');liveEl.textContent='🎙️ …';
+  clearTimeout(btn._t);btn._t=setTimeout(()=>{try{r.stop()}catch(e){}},15000);
   try{r.start()}catch(e){btn._rec=null;btn.classList.remove('rec');liveEl.textContent='';surEchec&&surEchec()}
   return true;
 }
