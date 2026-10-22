@@ -493,11 +493,11 @@ function qrImg(txt){try{const q=qrcode(0,'M');q.addData(txt);q.make();return `<i
 function majTel(){const b=$('chTel');if(b){b.classList.toggle('on',!!code)}const t=$('chTitre');}
 async function creerTel(){
   const a='abcdefghjkmnpqrstuvwxyz23456789',r=new Uint32Array(14);crypto.getRandomValues(r);const c=Array.from(r,x=>a[x%a.length]).join('');
-  await setDoc(doc(db,'trad_codes',c),{owner:me.uid,actif:true,exp:Timestamp.fromMillis(Date.now()+864e5),t:serverTimestamp()});
-  const b=writeBatch(db);
-  b.set(doc(db,'trad_g',c),{owner:me.uid,langue:null,t:serverTimestamp()});
-  b.set(doc(db,'trad',me.uid),{code:c},{merge:true});
-  await b.commit();return c;
+  const etape=async(n,f)=>{try{await f()}catch(e){e.etape=n;throw e}};
+  await etape(1,()=>setDoc(doc(db,'trad_codes',c),{owner:me.uid,actif:true,exp:Timestamp.fromMillis(Date.now()+864e5),t:serverTimestamp()}));
+  await etape(2,()=>setDoc(doc(db,'trad_g',c),{owner:me.uid,langue:null,t:serverTimestamp()}));
+  await etape(3,()=>setDoc(doc(db,'trad',me.uid),{code:c},{merge:true}));
+  return c;
 }
 async function terminerTel(){
   if(!code)return;const c=code;
@@ -516,7 +516,7 @@ $('chTel').onclick=async()=>{
   if(!code){
     $('shBody').innerHTML=`<div style="padding:16px;display:grid;gap:12px"><p class="mut" style="margin:0">Le client scanne un QR code avec l'appareil photo de son téléphone : une page s'ouvre (sans appli), il choisit sa langue et vous discutez chacun sur votre téléphone. Ton téléphone fait les traductions : garde l'appli ouverte.</p><button class="btn" id="tGo">Créer le QR code</button></div>`;
     $('sheet').hidden=false;
-    $('tGo').onclick=async()=>{$('tGo').disabled=true;try{await creerTel();setTimeout(()=>$('chTel').onclick(),300)}catch(e){toast('Impossible ('+(e.code||'erreur')+') : règles Firebase à ajouter ?');$('tGo').disabled=false}};
+    $('tGo').onclick=async()=>{$('tGo').disabled=true;try{await creerTel();setTimeout(()=>$('chTel').onclick(),300)}catch(e){toast('Impossible, étape '+(e.etape||'?')+' ('+(e.code||'erreur')+') – v10');$('tGo').disabled=false}};
     return;
   }
   const url=lienInvite(code);
@@ -585,7 +585,8 @@ $('fcMenu').onclick=()=>{
 };
 
 if('speechSynthesis' in window)speechSynthesis.onvoiceschanged=()=>{};
-if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(r=>{r.update().catch(()=>{});document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')r.update().catch(()=>{})})}).catch(()=>{});
+  let recharge=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(recharge)return;recharge=true;if(!document.querySelector('.mic.rec'))location.reload()})}
 </script>
 </body>
 </html>
