@@ -52,6 +52,7 @@ nav .nb{position:absolute;top:4px;left:calc(50% + 8px);min-width:20px;height:20p
 /* carte */
 #map{flex:1;background:#111}
 .leaflet-container{background:#111;font:inherit}
+.tuiles{filter:invert(1) hue-rotate(180deg) brightness(.95) contrast(.9)}
 .fab{position:absolute;right:12px;z-index:500;display:flex;flex-direction:column;gap:8px}
 .fab button{width:48px;height:48px;border-radius:14px;border:1px solid var(--line);background:rgba(18,18,18,.95);font-size:22px;color:var(--gold)}
 .pin{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:17px;color:#fff;border:3px solid #fff;box-shadow:0 3px 10px rgba(0,0,0,.6)}
@@ -263,7 +264,7 @@ let map=null, markers={}, sel=null, firstFit=false;
 function initMap(){
   if(map)return;
   map=L.map('map',{zoomControl:false,attributionControl:true}).setView([48.8566,2.3522],11);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:19,subdomains:'abcd',attribution:'&copy; OpenStreetMap &copy; CARTO'}).addTo(map);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,className:'tuiles',attribution:'&copy; OpenStreetMap'}).addTo(map);
   map.on('click',()=>{sel=null;$('sheet').hidden=true});
 }
 const col=uid=>(membres[uid]&&membres[uid].couleur)||'#777';
