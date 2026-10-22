@@ -1277,12 +1277,20 @@ function anonymise(title,location){
   function mcEcouter() {
     if (mcUnsubs.length || !mcCode) return;
     const c = mcCode;
-    mcUnsubs.push(onSnapshot(doc(db, "trad_g", c), s => { const d = s.data() || {}; mcLangue = d.langue || null;
-      document.getElementById("mc-lang").textContent = mcLangue ? "· client en " + (MC_LANGS[mcLangue] || mcLangue) : "· le client n'a pas encore ouvert la page"; }, () => {}));
+    mcUnsubs.push(onSnapshot(doc(db, "trad_g", c), s => { const d = s.data() || {}; mcLangue = d.langue || null; mcMajLangue(); }, () => {}));
     mcUnsubs.push(onSnapshot(query(collection(db, "trad_g", c, "msgs"), orderBy("t", "desc"), limit(80)), s => {
-      mcMsgs = s.docs.map(d => ({ id: d.id, ...d.data() })).reverse(); mcDessiner(); mcTraduireClient();
+      mcMsgs = s.docs.map(d => ({ id: d.id, ...d.data() })).reverse(); mcDessiner(); mcTraduireClient(); mcMajLangue();
     }, e => { document.getElementById("mc-msgs").innerHTML = `<div class="mc-vide">Accès refusé (règle Firebase à ajouter)</div>`; }));
   }
+  // Langue de réponse : celle du dernier message du client (détectée), sinon celle de sa page, sinon anglais
+  function mcCible() {
+    const dern = mcMsgs.filter(m => m.de === "client" && m.langue).pop();
+    if (dern) return { code: dern.langue, pourquoi: "langue de son dernier message" };
+    if (mcLangue) return { code: mcTR(mcLangue), pourquoi: "langue de sa page" };
+    return { code: "en", pourquoi: "par défaut, il n'a pas encore ouvert sa page" };
+  }
+  function mcNomLangue(c) { try { return new Intl.DisplayNames(["fr"], { type: "language" }).of(c); } catch (e) { return MC_LANGS[c] || c; } }
+  function mcMajLangue() { const c = mcCible(); document.getElementById("mc-lang").textContent = "· tes réponses partent en " + mcNomLangue(c.code) + " (" + c.pourquoi + ")"; }
   async function mcTraduire(textes, de, vers) {
     const idToken = await auth.currentUser.getIdToken();
     const r = await fetch(API_TVP, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "traduire", idToken, de, vers, textes }) }).then(x => x.json());
@@ -1343,7 +1351,7 @@ function anonymise(title,location){
   document.getElementById("mc-copy").addEventListener("click", () => { copyText(mcUrl(mcCode)); toast("Lien copié"); });
   document.getElementById("mc-form").addEventListener("submit", async e => {
     e.preventDefault(); const inp = document.getElementById("mc-txt"), texte = inp.value.trim().slice(0, 600); if (!texte || !mcCode) return; inp.value = "";
-    const vers = mcTR(mcLangue || "en-GB");
+    const vers = mcCible().code;
     let tr = texte;
     if (vers !== "fr") { try { [tr] = await mcTraduire([texte], "fr", vers); } catch (x) { tr = null; toast("Traduction impossible, message envoyé en français", 4000); } }
     try { await addDoc(collection(db, "trad_g", mcCode, "msgs"), { de: "chauffeur", texte, langue: "fr", traduction: tr || texte, langueT: vers, t: serverTimestamp() }); }
