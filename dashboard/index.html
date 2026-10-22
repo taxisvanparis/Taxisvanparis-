@@ -1291,7 +1291,7 @@ function anonymise(title,location){
   async function mcTraduireClient() {
     for (const m of mcMsgs) {
       if (m.de !== "client" || m.traduction != null || mcEnTrad.has(m.id)) continue; mcEnTrad.add(m.id);
-      try { const [tr] = await mcTraduire([m.texte], m.langue || "", "fr"); await updateDoc(doc(db, "trad_g", mcCode, "msgs", m.id), { traduction: tr || m.texte }); } catch (e) { mcEnTrad.delete(m.id); }
+      try { const [tr] = await mcTraduire([m.texte], "", "fr"); await updateDoc(doc(db, "trad_g", mcCode, "msgs", m.id), { traduction: tr || m.texte }); } catch (e) { mcEnTrad.delete(m.id); }
     }
   }
   function mcDessiner() {

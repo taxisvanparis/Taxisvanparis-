@@ -227,8 +227,8 @@ $('fSend').onsubmit=async e=>{
   e.preventDefault();const texte=$('txt').value.trim().slice(0,600);if(!texte)return;$('txt').value='';
   const p={de:'client',texte,pend:true,t:null};pend.push(p);dessiner();scrollBas();
   let trad=null;const src=TR(L);
-  if(src!=='fr'){try{const r=await api({textes:[texte],de:src,vers:'fr',push:true,nom:(info.course||{}).nom||''});trad=r.traductions[0]||null}catch(e){}}
-  else{try{await api({textes:[texte],de:'fr',vers:'fr',push:true,nom:(info.course||{}).nom||''})}catch(e){}trad=texte}
+  // langue détectée automatiquement : un client réglé en anglais qui écrit en français arrive bien en français
+  try{const r=await api({textes:[texte],de:'',vers:'fr',push:true,nom:(info.course||{}).nom||''});trad=r.traductions[0]||null}catch(e){}
   try{await addDoc(collection(db,'trad_g',code,'msgs'),{de:'client',texte,langue:src,traduction:trad,langueT:'fr',t:serverTimestamp()})}
   catch(e){toast(t('err'));$('txt').value=texte}
   pend=pend.filter(x=>x!==p);dessiner();
