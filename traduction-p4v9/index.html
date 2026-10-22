@@ -169,7 +169,7 @@ h1{font-size:30px;margin:0 0 6px;font-weight:800;letter-spacing:-.02em}h1 b{back
     <button class="ib on" id="clVoice" aria-label="Voix">🔊</button>
   </div>
   <div id="clPick" class="wrap" style="position:static;flex:1;min-height:0" hidden>
-    <div class="pick-h"><div class="w">Welcome · Bienvenue · أهلاً · 欢迎 · ようこそ · Benvenuto</div><div>Choose your language · Choisissez votre langue · اختر لغتك · 选择语言</div><small>Touch your flag to talk with your driver.</small></div>
+    <div class="pick-h"><div class="w">Welcome · Bienvenue · أهلاً · 欢迎 · ようこそ · Benvenuto · Добро пожаловать</div><div>Choose your language · Choisissez votre langue · اختر لغتك · 选择语言</div><small>Touch your flag to talk with your driver.</small></div>
     <div class="langs" id="clLangs"></div>
   </div>
   <div id="clMain" class="wrap" style="position:static;flex:1;min-height:0">
@@ -221,7 +221,7 @@ const hm=ms=>ms?new Date(ms).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'
 const LANGS=[
  ['en-GB','en-GB','English','🇬🇧','Tap and speak'],['en-US','en-US','English (USA)','🇺🇸','Tap and speak'],['fr','fr-FR','Français','🇫🇷','Touchez et parlez'],
  ['ar','ar-SA','العربية','🇸🇦','اضغط وتكلم'],['zh-CN','zh-CN','中文 (普通话)','🇨🇳','点击并说话'],['ja','ja-JP','日本語','🇯🇵','タップして話す'],
- ['pt','pt-PT','Português','🇵🇹','Toque e fale'],['it','it-IT','Italiano','🇮🇹','Tocchi e parli']
+ ['pt','pt-PT','Português','🇵🇹','Toque e fale'],['it','it-IT','Italiano','🇮🇹','Tocchi e parli'],['ru','ru-RU','Русский','🇷🇺','Нажмите и говорите']
 ].map(([c,v,n,f,p])=>({c,v,n,f,p}));
 const LG=c=>LANGS.find(l=>l.c===c)||null;
 const TC=L=>L.c==='zh-CN'?'zh-CN':L.c.split('-')[0];
