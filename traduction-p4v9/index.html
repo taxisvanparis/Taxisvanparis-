@@ -91,7 +91,7 @@ h1{font-size:30px;margin:0 0 6px;font-weight:800;letter-spacing:-.02em}h1 b{back
 .cl .send{width:62px;height:62px}
 .cl .talk{text-align:center;font-weight:800;font-size:17px;color:var(--gold);letter-spacing:.02em;padding:4px 0 0}
 /* choix de langue */
-.langs{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;padding:16px 18px 24px;overflow-y:auto}
+.langs{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(200px,42vw),1fr));gap:12px;padding:16px 18px 24px;overflow-y:auto}
 .langs button{display:flex;flex-direction:column;align-items:center;gap:8px;background:linear-gradient(180deg,var(--card2),var(--card));border:1.5px solid var(--line);border-radius:22px;padding:18px 8px 16px;font-size:18px;font-weight:800;box-shadow:0 6px 18px rgba(0,0,0,.3)}
 .langs button span{font-size:48px;line-height:1;filter:drop-shadow(0 4px 8px rgba(0,0,0,.4))}
 .langs button:active{border-color:var(--gold);background:rgba(212,178,94,.12)}
@@ -169,7 +169,7 @@ h1{font-size:30px;margin:0 0 6px;font-weight:800;letter-spacing:-.02em}h1 b{back
     <button class="ib on" id="clVoice" aria-label="Voix">🔊</button>
   </div>
   <div id="clPick" class="wrap" style="position:static;flex:1;min-height:0" hidden>
-    <div class="pick-h"><div class="w">Welcome · Bienvenue · Bienvenido · أهلاً · 欢迎</div><div>Choose your language · Elija su idioma · اختر لغتك · 选择语言</div><small>Touch your flag to talk with your driver.</small></div>
+    <div class="pick-h"><div class="w">Welcome · Bienvenue · أهلاً · 欢迎 · ようこそ · Benvenuto</div><div>Choose your language · Choisissez votre langue · اختر لغتك · 选择语言</div><small>Touch your flag to talk with your driver.</small></div>
     <div class="langs" id="clLangs"></div>
   </div>
   <div id="clMain" class="wrap" style="position:static;flex:1;min-height:0">
@@ -219,17 +219,13 @@ const hm=ms=>ms?new Date(ms).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'
 
 /* Langues : code traduction, voix/micro, nom dans la langue, drapeau, phrase « appuyez pour parler » */
 const LANGS=[
- ['en','en-US','English','🇬🇧','Tap and speak'],['es','es-ES','Español','🇪🇸','Toque y hable'],['it','it-IT','Italiano','🇮🇹','Tocchi e parli'],
- ['de','de-DE','Deutsch','🇩🇪','Tippen und sprechen'],['pt','pt-PT','Português','🇵🇹','Toque e fale'],['ar','ar-SA','العربية','🇸🇦','اضغط وتكلم'],
- ['zh-CN','zh-CN','中文','🇨🇳','点击并说话'],['ja','ja-JP','日本語','🇯🇵','タップして話す'],['ko','ko-KR','한국어','🇰🇷','눌러서 말하기'],
- ['ru','ru-RU','Русский','🇷🇺','Нажмите и говорите'],['nl','nl-NL','Nederlands','🇳🇱','Tik en spreek'],['tr','tr-TR','Türkçe','🇹🇷','Dokunun ve konuşun'],
- ['pl','pl-PL','Polski','🇵🇱','Dotknij i mów'],['hi','hi-IN','हिन्दी','🇮🇳','टैप करें और बोलें'],['he','he-IL','עברית','🇮🇱','הקישו ודברו'],
- ['uk','uk-UA','Українська','🇺🇦','Натисніть і говоріть'],['ro','ro-RO','Română','🇷🇴','Atingeți și vorbiți'],['el','el-GR','Ελληνικά','🇬🇷','Πατήστε και μιλήστε'],
- ['th','th-TH','ไทย','🇹🇭','แตะแล้วพูด'],['vi','vi-VN','Tiếng Việt','🇻🇳','Chạm và nói'],['id','id-ID','Bahasa Indonesia','🇮🇩','Ketuk dan bicara'],
- ['sv','sv-SE','Svenska','🇸🇪','Tryck och tala'],['pt-BR','pt-BR','Português (Brasil)','🇧🇷','Toque e fale'],['es-MX','es-MX','Español (México)','🇲🇽','Toque y hable']
+ ['en-GB','en-GB','English','🇬🇧','Tap and speak'],['en-US','en-US','English (USA)','🇺🇸','Tap and speak'],['fr','fr-FR','Français','🇫🇷','Touchez et parlez'],
+ ['ar','ar-SA','العربية','🇸🇦','اضغط وتكلم'],['zh-CN','zh-CN','中文 (普通话)','🇨🇳','点击并说话'],['ja','ja-JP','日本語','🇯🇵','タップして話す'],
+ ['pt','pt-PT','Português','🇵🇹','Toque e fale'],['it','it-IT','Italiano','🇮🇹','Tocchi e parli']
 ].map(([c,v,n,f,p])=>({c,v,n,f,p}));
 const LG=c=>LANGS.find(l=>l.c===c)||null;
-const RTL=['ar','he'];
+const TC=L=>L.c==='zh-CN'?'zh-CN':L.c.split('-')[0];
+const RTL=['ar'];
 
 const PHR_CH=["Bonjour, bienvenue à bord !","Je suis votre chauffeur, je vous attends à la sortie.","Avez-vous d'autres bagages ?","Merci d'attacher votre ceinture.","Nous arrivons dans 10 minutes.","Il y a des bouchons, nous aurons un peu de retard.","Voulez-vous une bouteille d'eau ?","Le Wi-Fi est disponible, le code est sur la tablette.","Le paiement se fait par carte ou en espèces.","Voulez-vous une facture ?","Nous sommes arrivés. Merci et bon voyage !"];
 const PHR_CL=["Bonjour !","Pouvez-vous baisser la climatisation ?","Pouvez-vous monter le chauffage ?","Pouvez-vous faire un arrêt, s'il vous plaît ?","Combien de temps reste-t-il ?","Pouvez-vous mettre de la musique ?","Puis-je payer par carte ?","Merci beaucoup !"];
@@ -311,7 +307,7 @@ function nouveau(m){
 async function envoyer(de,texte){
   texte=texte.trim();if(!texte)return;
   if(!langue){toast(mode==='chauffeur'?'Le client n\'a pas encore choisi sa langue':'Choose your language');if(mode==='chauffeur')choisirLangue();return}
-  const L=LG(langue);const src=de==='chauffeur'?'fr':L.c, dst=de==='chauffeur'?L.c:'fr';
+  const L=LG(langue);const src=de==='chauffeur'?'fr':TC(L), dst=de==='chauffeur'?TC(L):'fr';
   const live=de==='chauffeur'?$('chLive'):$('clLive');live.textContent='Traduction…';
   try{const [tr]=await traduire([texte],src,dst);live.textContent='';
     await addDoc(refMsgs(),{de,texte,langue:src,traduction:tr||texte,langueT:dst,t:serverTimestamp()});
@@ -371,7 +367,7 @@ async function majLangue(){
     $('clTalk').textContent=SR?L.p+' 🎤':'';
     $('clTxt').placeholder=L.p+'…';$('clTxt').dir=RTL.includes(L.c.split('-')[0])?'rtl':'ltr';
     if(quickLang!==L.c){quickLang=L.c;$('clQuick').innerHTML='';
-      try{const tr=await traduire(PHR_CL,'fr',L.c);if(quickLang!==L.c)return;
+      try{const tr=await traduire(PHR_CL,'fr',TC(L));if(quickLang!==L.c)return;
         $('clQuick').innerHTML=tr.map((t,i)=>`<button data-i="${i}">${esc(t||PHR_CL[i])}</button>`).join('');
         $('clQuick').querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>envoyer('client',b.textContent))}catch(e){}}
   }
@@ -440,7 +436,7 @@ function majFace(){
 async function envoyerFace(de,texte){
   const L=LG(fLang);if(!L){choisirFace();return}
   const live=de==='chauffeur'?$('fcBotLive'):$('fcTopLive');live.textContent='…';
-  try{const [tr]=await traduire([texte],de==='chauffeur'?'fr':L.c,de==='chauffeur'?L.c:'fr');live.textContent='';
+  try{const [tr]=await traduire([texte],de==='chauffeur'?'fr':TC(L),de==='chauffeur'?TC(L):'fr');live.textContent='';
     fMsgs.push({de,texte,traduction:tr||texte});fMsgs=fMsgs.slice(-40);majFace();
     parler(tr,de==='chauffeur'?L.v:'fr-FR');
   }catch(e){live.textContent='';toast('Traduction impossible (internet ?)')}
