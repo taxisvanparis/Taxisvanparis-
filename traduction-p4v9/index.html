@@ -476,8 +476,8 @@ function qrImg(txt){try{const q=qrcode(0,'M');q.addData(txt);q.make();return `<i
 function majTel(){const b=$('chTel');if(b){b.classList.toggle('on',!!code)}const t=$('chTitre');}
 async function creerTel(){
   const a='abcdefghjkmnpqrstuvwxyz23456789',r=new Uint32Array(14);crypto.getRandomValues(r);const c=Array.from(r,x=>a[x%a.length]).join('');
+  await setDoc(doc(db,'trad_codes',c),{owner:me.uid,actif:true,exp:Timestamp.fromMillis(Date.now()+864e5),t:serverTimestamp()});
   const b=writeBatch(db);
-  b.set(doc(db,'trad_codes',c),{owner:me.uid,actif:true,exp:Timestamp.fromMillis(Date.now()+864e5),t:serverTimestamp()});
   b.set(doc(db,'trad_g',c),{owner:me.uid,langue:null,t:serverTimestamp()});
   b.set(doc(db,'trad',me.uid),{code:c},{merge:true});
   await b.commit();return c;
