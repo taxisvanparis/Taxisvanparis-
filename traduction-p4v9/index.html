@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#050505">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Traduction">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<title>TVP Traduction</title>
+<style>
+:root{--bg:#050505;--card:#121212;--line:#2a2a2a;--ink:#fff;--mut:#9a9a9a;--gold:#C9A84C;--red:#e5484d;--green:#46c37b;--top:env(safe-area-inset-top);--bot:env(safe-area-inset-bottom)}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,Arial,sans-serif;-webkit-text-size-adjust:100%;overflow:hidden}
+button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+input,textarea{font:inherit;font-size:17px;color:var(--ink);background:#0b0b0b;border:2px solid var(--line);border-radius:12px;padding:12px;width:100%}
+input:focus,textarea:focus{outline:none;border-color:var(--gold)}
+label{display:block;color:var(--mut);font-size:13px;text-transform:uppercase;letter-spacing:.06em;margin:14px 0 6px}
+.btn{background:var(--gold);color:#111;border:0;border-radius:12px;padding:13px 18px;font-weight:800;font-size:17px;min-height:48px;width:100%}
+.btn.ghost{background:transparent;color:var(--gold);border:2px solid var(--gold)}
+.err{color:var(--red);font-weight:700;min-height:20px;margin-top:8px}
+.screen{position:fixed;inset:0;display:flex;flex-direction:column;padding:calc(18px + var(--top)) 18px calc(18px + var(--bot));overflow:auto;background:var(--bg);z-index:50}
+.screen .box{max-width:460px;width:100%;margin:auto}
+h1{font-size:26px;margin:0 0 6px}h1 b{color:var(--gold)}
+.mut{color:var(--mut)}
+.modes{display:grid;gap:12px;margin-top:18px}
+.mode{display:flex;gap:14px;align-items:center;text-align:left;background:var(--card);border:2px solid var(--line);border-radius:16px;padding:16px}
+.mode:active{border-color:var(--gold)}
+.mode span{font-size:34px}.mode b{display:block;font-size:18px}.mode small{color:var(--mut);font-size:14px}
+/* barre du haut */
+.bar{display:flex;align-items:center;gap:10px;padding:calc(8px + var(--top)) 12px 8px;border-bottom:1px solid var(--line);background:var(--bg)}
+.bar .t{flex:1;min-width:0;font-weight:800;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar .t b{color:var(--gold)}
+.ib{flex:none;min-width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--card);font-size:19px;padding:0 10px;font-weight:800}
+.ib.on{border-color:var(--gold);color:var(--gold)}
+.lang{display:inline-flex;align-items:center;gap:6px;background:var(--card);border:2px solid var(--gold);border-radius:999px;padding:6px 12px;font-weight:800;font-size:15px}
+/* vue */
+.wrap{position:fixed;inset:0;display:flex;flex-direction:column}
+.conv{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+.bub{max-width:88%;padding:10px 13px;border-radius:16px;background:var(--card);border:1px solid var(--line);line-height:1.35;word-wrap:break-word}
+.bub .main{font-size:19px;font-weight:600}
+.bub .sub{font-size:14px;color:var(--mut);margin-top:4px}
+.bub .tm{font-size:11px;color:var(--mut);margin-top:4px;display:flex;justify-content:space-between;gap:10px}
+.bub .tm button{background:none;border:0;color:var(--mut);font-size:13px;padding:0}
+.bub.me{align-self:flex-end;background:#2a2311;border-color:#4a3d18}
+.bub.pend{opacity:.6}
+.empty{margin:auto;text-align:center;color:var(--mut);padding:20px;font-size:16px;line-height:1.5}
+.quick{display:flex;gap:8px;overflow-x:auto;padding:8px 12px 4px;scrollbar-width:none}
+.quick::-webkit-scrollbar{display:none}
+.quick button{flex:none;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:9px 14px;font-size:15px;font-weight:700;max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.compose{display:flex;gap:8px;align-items:flex-end;padding:8px 12px calc(10px + var(--bot))}
+.compose textarea{resize:none;height:52px;max-height:130px;border-radius:26px;padding:13px 16px;font-size:17px}
+.send{flex:none;width:52px;height:52px;border-radius:50%;border:0;background:var(--card);border:1px solid var(--line);color:var(--gold);font-size:20px;font-weight:900}
+.mic{flex:none;width:64px;height:64px;border-radius:50%;border:0;background:var(--gold);color:#111;font-size:28px;box-shadow:0 6px 18px rgba(201,168,76,.35)}
+.mic.rec{background:var(--red);color:#fff;animation:pulse 1.2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(229,72,77,.6)}70%{box-shadow:0 0 0 18px rgba(229,72,77,0)}100%{box-shadow:0 0 0 0 rgba(229,72,77,0)}}
+.live{padding:0 14px;color:var(--gold);font-style:italic;min-height:0;font-size:16px}
+.hint{font-size:13px;color:var(--mut);padding:0 14px 4px}
+/* client (tablette) */
+.cl .bub .main{font-size:28px}
+.cl .bub .sub{font-size:17px}
+.cl .bub{max-width:92%}
+.cl .quick button{font-size:19px;padding:12px 18px;max-width:420px}
+.cl .mic{width:96px;height:96px;font-size:40px}
+.cl .compose textarea{font-size:20px;height:60px;border-radius:30px}
+.cl .send{width:60px;height:60px}
+.cl .talk{text-align:center;font-weight:800;font-size:18px;color:var(--gold);padding:2px 0 0}
+/* choix de langue */
+.langs{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;padding:14px;overflow-y:auto}
+.langs button{display:flex;flex-direction:column;align-items:center;gap:6px;background:var(--card);border:2px solid var(--line);border-radius:16px;padding:16px 8px;font-size:18px;font-weight:800}
+.langs button span{font-size:44px;line-height:1}
+.langs button:active{border-color:var(--gold)}
+.pick-h{text-align:center;padding:16px 12px 0}
+.pick-h div{font-size:24px;font-weight:800;line-height:1.35}
+.pick-h small{display:block;color:var(--mut);font-size:16px;margin-top:6px;line-height:1.5}
+/* face à face */
+.half{flex:1;display:flex;flex-direction:column;min-height:0;position:relative}
+.half.top{transform:rotate(180deg);border-bottom:2px dashed var(--line)}
+.half .conv{padding-top:10px}
+.half .row{display:flex;align-items:center;justify-content:center;gap:14px;padding:8px 12px 12px}
+.half .who{font-weight:800;color:var(--mut);font-size:14px}
+.toast{position:fixed;left:50%;bottom:calc(120px + var(--bot));transform:translateX(-50%);background:#222;border:1px solid var(--line);color:#fff;padding:10px 16px;border-radius:12px;font-weight:700;z-index:999;max-width:90%;text-align:center}
+.sheetbg{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:80;display:flex;align-items:flex-end}
+.sheet{width:100%;max-height:85%;background:#0d0d0d;border-top:1px solid var(--line);border-radius:18px 18px 0 0;display:flex;flex-direction:column;padding-bottom:var(--bot)}
+.sheet .sh{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;font-weight:800;font-size:18px;border-bottom:1px solid var(--line)}
+</style>
+</head>
+<body>
+
+<!-- Connexion -->
+<div class="screen" id="sLogin" hidden>
+  <div class="box">
+    <h1>TVP <b>Traduction</b></h1>
+    <p class="mut">Connecte-toi avec ton compte du tableau de bord (le même sur ton téléphone et sur la tablette).</p>
+    <label for="lgEmail">E-mail</label><input id="lgEmail" type="email" autocomplete="email" inputmode="email">
+    <label for="lgPass">Mot de passe</label><input id="lgPass" type="password" autocomplete="current-password">
+    <div class="err" id="lgErr"></div>
+    <button class="btn" id="lgGo">Se connecter</button>
+  </div>
+</div>
+
+<!-- Choix de l'appareil -->
+<div class="screen" id="sMode" hidden>
+  <div class="box">
+    <h1>TVP <b>Traduction</b></h1>
+    <p class="mut">Cet appareil sert à quoi ? (tu pourras changer plus tard)</p>
+    <div class="modes">
+      <button class="mode" data-m="chauffeur"><span>📱</span><div><b>Mon téléphone (chauffeur)</b><small>Je parle en français, le client lit et entend la traduction sur la tablette.</small></div></button>
+      <button class="mode" data-m="client"><span>📲</span><div><b>Tablette du client</b><small>Le client choisit sa langue, voit mes phrases traduites et me répond.</small></div></button>
+      <button class="mode" data-m="face"><span>🔄</span><div><b>Face à face (un seul écran)</b><small>Sans tablette : l'écran est coupé en deux, la moitié du haut est à l'envers pour le client.</small></div></button>
+    </div>
+  </div>
+</div>
+
+<!-- Chauffeur -->
+<div class="wrap" id="vCh" hidden>
+  <div class="bar">
+    <div class="t">TVP <b>Traduction</b></div>
+    <button class="lang" id="chLang">🌍 —</button>
+    <button class="ib on" id="chVoice" title="Lire les réponses à voix haute" aria-label="Lecture à voix haute">🔊</button>
+    <button class="ib" id="chMenu" aria-label="Menu">⋯</button>
+  </div>
+  <div class="conv" id="chConv"></div>
+  <div class="live" id="chLive"></div>
+  <div class="quick" id="chQuick"></div>
+  <div class="hint" id="chHint" hidden>Micro non disponible ici : touche 🎤 sur le clavier pour dicter.</div>
+  <form class="compose" id="chForm">
+    <textarea id="chTxt" rows="1" maxlength="600" placeholder="Écris en français…"></textarea>
+    <button type="submit" class="send" aria-label="Envoyer">➤</button>
+    <button type="button" class="mic" id="chMic" aria-label="Parler">🎤</button>
+  </form>
+</div>
+
+<!-- Client (tablette) -->
+<div class="wrap cl" id="vCl" hidden>
+  <div class="bar">
+    <button class="ib" id="clBack" title="Retour à la pancarte" aria-label="Retour à la pancarte">←</button>
+    <div class="t" id="clTitle">🌍</div>
+    <button class="lang" id="clLang">🌍</button>
+    <button class="ib on" id="clVoice" aria-label="Voix">🔊</button>
+  </div>
+  <div id="clPick" class="wrap" style="position:static;flex:1;min-height:0" hidden>
+    <div class="pick-h"><div>Choose your language · Elija su idioma · اختر لغتك · 选择语言</div><small>Touch your flag to talk with your driver.</small></div>
+    <div class="langs" id="clLangs"></div>
+  </div>
+  <div id="clMain" class="wrap" style="position:static;flex:1;min-height:0">
+    <div class="conv" id="clConv"></div>
+    <div class="live" id="clLive"></div>
+    <div class="quick" id="clQuick"></div>
+    <div class="talk" id="clTalk"></div>
+    <form class="compose" id="clForm">
+      <textarea id="clTxt" rows="1" maxlength="600"></textarea>
+      <button type="submit" class="send" aria-label="Send">➤</button>
+      <button type="button" class="mic" id="clMic" aria-label="Talk">🎤</button>
+    </form>
+  </div>
+</div>
+
+<!-- Face à face -->
+<div class="wrap" id="vFace" hidden>
+  <div class="half top">
+    <div class="conv" id="fcTop"></div>
+    <div class="live" id="fcTopLive"></div>
+    <div class="row"><button class="lang" id="fcLang">🌍</button><button class="mic" id="fcMicTop">🎤</button><span class="who" id="fcTopWho"></span></div>
+  </div>
+  <div class="half">
+    <div class="conv" id="fcBot"></div>
+    <div class="live" id="fcBotLive"></div>
+    <div class="row"><button class="ib" id="fcMenu" aria-label="Menu">⋯</button><button class="mic" id="fcMicBot">🎤</button><span class="who">Moi (français)</span></div>
+  </div>
+</div>
+
+<!-- Feuille : choix de langue / menu -->
+<div class="sheetbg" id="sheet" hidden><div class="sheet"><div class="sh"><span id="shTitle"></span><button class="ib" id="shClose">✕</button></div><div id="shBody" style="overflow-y:auto"></div></div></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, addDoc, deleteDoc, getDocs, collection, query, orderBy, limit, onSnapshot, serverTimestamp, writeBatch } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+const API="https://script.google.com/macros/s/AKfycbynqJeRA8W1AoYiHWQhS-ZPGHrEHyQBW8xp4xFGAYgP68lAugMsNZqWYkleYV1P4Va6/exec";
+const app=initializeApp({apiKey:"AIzaSyBN8uBFONIt1tDTH9C-NIQKeulFdJ2m26Q",authDomain:"taxis-van-paris-by-abts.firebaseapp.com",projectId:"taxis-van-paris-by-abts",storageBucket:"taxis-van-paris-by-abts.firebasestorage.app",messagingSenderId:"53887245170",appId:"1:53887245170:web:2a3b785d734c54e01f9beb"});
+const auth=getAuth(app), db=getFirestore(app);
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const toast=t=>{const d=document.createElement('div');d.className='toast';d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2800)};
+const tsMs=v=>v&&typeof v.toMillis==='function'?v.toMillis():0;
+const hm=ms=>ms?new Date(ms).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'';
+
+/* Langues : code traduction, voix/micro, nom dans la langue, drapeau, phrase « appuyez pour parler » */
+const LANGS=[
+ ['en','en-US','English','🇬🇧','Tap and speak'],['es','es-ES','Español','🇪🇸','Toque y hable'],['it','it-IT','Italiano','🇮🇹','Tocchi e parli'],
+ ['de','de-DE','Deutsch','🇩🇪','Tippen und sprechen'],['pt','pt-PT','Português','🇵🇹','Toque e fale'],['ar','ar-SA','العربية','🇸🇦','اضغط وتكلم'],
+ ['zh-CN','zh-CN','中文','🇨🇳','点击并说话'],['ja','ja-JP','日本語','🇯🇵','タップして話す'],['ko','ko-KR','한국어','🇰🇷','눌러서 말하기'],
+ ['ru','ru-RU','Русский','🇷🇺','Нажмите и говорите'],['nl','nl-NL','Nederlands','🇳🇱','Tik en spreek'],['tr','tr-TR','Türkçe','🇹🇷','Dokunun ve konuşun'],
+ ['pl','pl-PL','Polski','🇵🇱','Dotknij i mów'],['hi','hi-IN','हिन्दी','🇮🇳','टैप करें और बोलें'],['he','he-IL','עברית','🇮🇱','הקישו ודברו'],
+ ['uk','uk-UA','Українська','🇺🇦','Натисніть і говоріть'],['ro','ro-RO','Română','🇷🇴','Atingeți și vorbiți'],['el','el-GR','Ελληνικά','🇬🇷','Πατήστε και μιλήστε'],
+ ['th','th-TH','ไทย','🇹🇭','แตะแล้วพูด'],['vi','vi-VN','Tiếng Việt','🇻🇳','Chạm và nói'],['id','id-ID','Bahasa Indonesia','🇮🇩','Ketuk dan bicara'],
+ ['sv','sv-SE','Svenska','🇸🇪','Tryck och tala'],['pt-BR','pt-BR','Português (Brasil)','🇧🇷','Toque e fale'],['es-MX','es-MX','Español (México)','🇲🇽','Toque y hable']
+].map(([c,v,n,f,p])=>({c,v,n,f,p}));
+const LG=c=>LANGS.find(l=>l.c===c)||null;
+const RTL=['ar','he'];
+
+const PHR_CH=["Bonjour, bienvenue à bord !","Je suis votre chauffeur, je vous attends à la sortie.","Avez-vous d'autres bagages ?","Merci d'attacher votre ceinture.","Nous arrivons dans 10 minutes.","Il y a des bouchons, nous aurons un peu de retard.","Voulez-vous une bouteille d'eau ?","Le Wi-Fi est disponible, le code est sur la tablette.","Le paiement se fait par carte ou en espèces.","Voulez-vous une facture ?","Nous sommes arrivés. Merci et bon voyage !"];
+const PHR_CL=["Bonjour !","Pouvez-vous baisser la climatisation ?","Pouvez-vous monter le chauffage ?","Pouvez-vous faire un arrêt, s'il vous plaît ?","Combien de temps reste-t-il ?","Pouvez-vous mettre de la musique ?","Puis-je payer par carte ?","Merci beaucoup !"];
+
+/* ---------- Traduction (Apps Script, gratuit) ---------- */
+const memo=store.get('tvp_trad_memo',{});
+async function traduire(textes,de,vers){
+  const out=new Array(textes.length),manque=[];
+  textes.forEach((t,i)=>{const k=de+'>'+vers+':'+t;if(memo[k])out[i]=memo[k];else manque.push(i)});
+  if(manque.length){
+    const idToken=await auth.currentUser.getIdToken();
+    const r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'traduire',idToken,de,vers,textes:manque.map(i=>textes[i])})}).then(x=>x.json());
+    if(!r.ok)throw new Error(r.error||'erreur');
+    manque.forEach((i,j)=>{out[i]=r.traductions[j]||'';if(textes[i].length<200&&out[i])memo[de+'>'+vers+':'+textes[i]]=out[i]});
+    const ks=Object.keys(memo);if(ks.length>600)ks.slice(0,ks.length-600).forEach(k=>delete memo[k]);
+    store.set('tvp_trad_memo',memo);
+  }
+  return out;
+}
+
+/* ---------- Voix (lecture) ---------- */
+function parler(texte,voix){
+  try{if(!('speechSynthesis' in window)||!texte)return;const u=new SpeechSynthesisUtterance(texte);u.lang=voix;const vs=speechSynthesis.getVoices();const v=vs.find(x=>x.lang===voix)||vs.find(x=>x.lang&&x.lang.split('-')[0]===voix.split('-')[0]);if(v)u.voice=v;u.rate=.98;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}
+}
+const debloquerVoix=()=>{try{const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u)}catch(e){}};
+
+/* ---------- Micro (reconnaissance vocale) ---------- */
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+function ecouter(btn,voix,liveEl,surFin){
+  if(!SR)return false;
+  if(btn._rec){btn._rec.stop();return true}
+  try{speechSynthesis.cancel()}catch(e){}
+  const r=new SR();r.lang=voix;r.interimResults=true;r.continuous=false;r.maxAlternatives=1;
+  let final='',fini=false;
+  r.onresult=e=>{let tmp='';for(let i=e.resultIndex;i<e.results.length;i++){const t=e.results[i][0].transcript;if(e.results[i].isFinal)final+=t;else tmp+=t}liveEl.textContent=(final+tmp).trim()};
+  r.onerror=e=>{if(e.error==='not-allowed'||e.error==='service-not-allowed')toast('Autorise le micro dans les réglages');else if(e.error==='no-speech')toast('Je n\'ai rien entendu');};
+  r.onend=()=>{btn._rec=null;btn.classList.remove('rec');const t=(final||liveEl.textContent||'').trim();liveEl.textContent='';if(t&&!fini){fini=true;surFin(t)}};
+  btn._rec=r;btn.classList.add('rec');liveEl.textContent='…';
+  try{r.start()}catch(e){btn._rec=null;btn.classList.remove('rec');liveEl.textContent='';return false}
+  return true;
+}
+
+/* ---------- État ---------- */
+let me=null, mode=store.get('tvp_trad_mode',null), langue=null, msgs=[], vus=null, unsubs=[];
+const params=new URLSearchParams(location.search);
+if(params.get('mode'))mode=params.get('mode');
+const refSess=()=>doc(db,'trad',me.uid), refMsgs=()=>collection(db,'trad',me.uid,'msgs');
+
+/* ---------- Connexion ---------- */
+$('lgGo').onclick=async()=>{$('lgErr').textContent='';try{await signInWithEmailAndPassword(auth,$('lgEmail').value.trim(),$('lgPass').value);$('lgPass').value=''}catch(e){$('lgErr').textContent='E-mail ou mot de passe incorrect'}};
+onAuthStateChanged(auth,u=>{
+  unsubs.forEach(f=>{try{f()}catch(e){}});unsubs=[];me=u;
+  ['sLogin','sMode','vCh','vCl','vFace'].forEach(id=>$(id).hidden=true);
+  if(!u){$('sLogin').hidden=false;return}
+  if(!mode){$('sMode').hidden=false;return}
+  lancer();
+});
+document.querySelectorAll('.mode').forEach(b=>b.onclick=()=>{mode=b.dataset.m;store.set('tvp_trad_mode',mode);$('sMode').hidden=true;debloquerVoix();lancer()});
+
+function lancer(){
+  store.set('tvp_trad_mode',mode);
+  if(mode==='face')return lancerFace();
+  unsubs.push(onSnapshot(refSess(),s=>{const d=s.data()||{};langue=d.langue&&LG(d.langue)?d.langue:null;majLangue()},e=>toast('Accès refusé par Firebase (règle à ajouter)')));
+  unsubs.push(onSnapshot(query(refMsgs(),orderBy('t','desc'),limit(60)),{includeMetadataChanges:true},s=>{
+    msgs=s.docs.map(d=>({id:d.id,...d.data({serverTimestamps:'estimate'}),_p:d.metadata.hasPendingWrites})).reverse();
+    if(vus===null){vus=new Set(msgs.map(m=>m.id))}
+    else msgs.forEach(m=>{if(!vus.has(m.id)){vus.add(m.id);nouveau(m)}});
+    dessiner();
+  },e=>{}));
+  if(mode==='chauffeur'){$('vCh').hidden=false;$('chHint').hidden=!!SR;quickCh()}
+  else{$('vCl').hidden=false}
+}
+function nouveau(m){
+  if(mode==='chauffeur'&&m.de==='client'&&store.get('tvp_trad_voix_ch',true))parler(m.traduction,'fr-FR');
+  if(mode==='client'&&m.de==='chauffeur'&&store.get('tvp_trad_voix_cl',true)&&langue)parler(m.traduction,LG(langue).v);
+}
+
+/* ---------- Envoi ---------- */
+async function envoyer(de,texte){
+  texte=texte.trim();if(!texte)return;
+  if(!langue){toast(mode==='chauffeur'?'Le client n\'a pas encore choisi sa langue':'Choose your language');if(mode==='chauffeur')choisirLangue();return}
+  const L=LG(langue);const src=de==='chauffeur'?'fr':L.c, dst=de==='chauffeur'?L.c:'fr';
+  const live=de==='chauffeur'?$('chLive'):$('clLive');live.textContent='Traduction…';
+  try{const [tr]=await traduire([texte],src,dst);live.textContent='';
+    await addDoc(refMsgs(),{de,texte,langue:src,traduction:tr||texte,langueT:dst,t:serverTimestamp()});
+  }catch(e){live.textContent='';toast(e.message==='acces_refuse'?'Traduction refusée : reconnecte-toi':'Traduction impossible (internet ?)')}
+}
+
+/* ---------- Dessin des conversations ---------- */
+function bulle(m,pourClient){
+  const mine=pourClient?m.de==='client':m.de==='chauffeur';
+  const L=LG(langue);
+  const main=pourClient?(m.de==='chauffeur'?m.traduction:m.texte):(m.de==='client'?m.traduction:m.texte);
+  const sub=pourClient?(m.de==='chauffeur'?'':m.traduction):(m.de==='client'?m.texte:m.traduction);
+  const dirMain=pourClient&&L&&RTL.includes(L.c.split('-')[0])?' dir="rtl"':'';
+  const dirSub=!pourClient&&L&&RTL.includes(L.c.split('-')[0])?' dir="rtl"':'';
+  const lire=pourClient?(m.de==='chauffeur'?`<button data-say="${m.id}">🔊</button>`:''):(m.de==='client'?`<button data-say="${m.id}">🔊</button>`:`<button data-del="${m.id}">✕ effacer</button>`);
+  return `<div class="bub${mine?' me':''}${m._p?' pend':''}"><div class="main"${dirMain}>${esc(main)}</div>${sub?`<div class="sub"${dirSub}>${esc(sub)}</div>`:''}<div class="tm"><span>${hm(tsMs(m.t))}</span>${lire}</div></div>`;
+}
+function dessiner(){
+  if(mode==='chauffeur'){
+    const c=$('chConv');c.innerHTML=msgs.length?msgs.map(m=>bulle(m,false)).join(''):`<div class="empty">${langue?'Parle en français avec 🎤 :<br>le client voit et entend la traduction sur la tablette.':'En attente du client :<br>il touche son drapeau sur la tablette,<br>ou choisis sa langue avec 🌍 en haut.'}</div>`;
+    c.querySelectorAll('[data-say]').forEach(b=>b.onclick=()=>{const m=msgs.find(x=>x.id===b.dataset.say);parler(m.traduction,'fr-FR')});
+    c.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>deleteDoc(doc(db,'trad',me.uid,'msgs',b.dataset.del)).catch(()=>{}));
+    c.scrollTop=c.scrollHeight;
+  }else if(mode==='client'){
+    const c=$('clConv');const L=LG(langue);
+    c.innerHTML=msgs.length?msgs.map(m=>bulle(m,true)).join(''):`<div class="empty" style="font-size:22px">${L?esc(L.f+' '+L.p)+' 🎤':''}</div>`;
+    c.querySelectorAll('[data-say]').forEach(b=>b.onclick=()=>{const m=msgs.find(x=>x.id===b.dataset.say);parler(m.traduction,L.v)});
+    c.scrollTop=c.scrollHeight;
+  }
+}
+
+/* ---------- Langue du client ---------- */
+async function setLangue(c){
+  langue=c;majLangue();
+  try{await setDoc(refSess(),{langue:c,t:serverTimestamp()},{merge:true})}catch(e){}
+}
+function grilleLangues(cible,onPick){
+  cible.innerHTML=LANGS.map(l=>`<button data-l="${l.c}"><span>${l.f}</span>${esc(l.n)}</button>`).join('');
+  cible.querySelectorAll('[data-l]').forEach(b=>b.onclick=()=>{debloquerVoix();onPick(b.dataset.l)});
+}
+function choisirLangue(){
+  $('shTitle').textContent='Langue du client';$('shBody').innerHTML='<div class="langs" id="shLangs"></div>';
+  grilleLangues($('shLangs'),c=>{fermer();setLangue(c)});$('sheet').hidden=false;
+}
+const fermer=()=>{$('sheet').hidden=true};
+$('shClose').onclick=fermer;$('sheet').onclick=e=>{if(e.target.id==='sheet')fermer()};
+let quickLang=null;
+async function majLangue(){
+  const L=LG(langue);
+  $('chLang').textContent=L?L.f+' '+L.n:'🌍 Langue ?';
+  if(mode==='client'){
+    $('clPick').hidden=!!L;$('clMain').hidden=!L;
+    if(!L){grilleLangues($('clLangs'),setLangue);$('clTitle').textContent='🌍';return}
+    $('clLang').textContent=L.f+' '+L.n;$('clTitle').textContent='Taxis Van Paris';
+    $('clTalk').textContent=SR?L.p+' 🎤':'';
+    $('clTxt').placeholder=L.p+'…';$('clTxt').dir=RTL.includes(L.c.split('-')[0])?'rtl':'ltr';
+    if(quickLang!==L.c){quickLang=L.c;$('clQuick').innerHTML='';
+      try{const tr=await traduire(PHR_CL,'fr',L.c);if(quickLang!==L.c)return;
+        $('clQuick').innerHTML=tr.map((t,i)=>`<button data-i="${i}">${esc(t||PHR_CL[i])}</button>`).join('');
+        $('clQuick').querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>envoyer('client',b.textContent))}catch(e){}}
+  }
+  dessiner();
+}
+
+/* ---------- Écran chauffeur ---------- */
+function quickCh(){
+  const perso=store.get('tvp_trad_phr',[]);
+  $('chQuick').innerHTML=[...perso,...PHR_CH].map(p=>`<button>${esc(p)}</button>`).join('')+'<button data-add="1">＋ Ajouter</button>';
+  $('chQuick').querySelectorAll('button').forEach(b=>b.onclick=()=>{
+    if(b.dataset.add){const t=prompt('Nouvelle phrase rapide (en français) :');if(t&&t.trim()){store.set('tvp_trad_phr',[t.trim(),...perso].slice(0,15));quickCh()}return}
+    envoyer('chauffeur',b.textContent)});
+}
+$('chLang').onclick=choisirLangue;
+$('chVoice').classList.toggle('on',store.get('tvp_trad_voix_ch',true));
+$('chVoice').onclick=()=>{const v=!store.get('tvp_trad_voix_ch',true);store.set('tvp_trad_voix_ch',v);$('chVoice').classList.toggle('on',v);$('chVoice').textContent=v?'🔊':'🔇';if(v)debloquerVoix()};
+$('chForm').onsubmit=e=>{e.preventDefault();const t=$('chTxt').value;$('chTxt').value='';$('chTxt').style.height='';envoyer('chauffeur',t)};
+$('chTxt').addEventListener('input',e=>{e.target.style.height='';e.target.style.height=Math.min(130,e.target.scrollHeight)+'px'});
+$('chMic').onclick=()=>{debloquerVoix();if(!ecouter($('chMic'),'fr-FR',$('chLive'),t=>envoyer('chauffeur',t))){$('chHint').hidden=false;$('chTxt').focus()}};
+$('chMenu').onclick=()=>{
+  $('shTitle').textContent='Menu';
+  $('shBody').innerHTML=`<div style="padding:14px;display:grid;gap:10px">
+   <button class="btn" id="mNew">🧹 Nouveau client (effacer la conversation)</button>
+   <button class="btn ghost" id="mLang">🌍 Changer la langue du client</button>
+   <button class="btn ghost" id="mPhr">✏️ Supprimer mes phrases rapides ajoutées</button>
+   <button class="btn ghost" id="mMode">🔁 Changer l'usage de cet appareil</button>
+   <button class="btn ghost" id="mOut">Se déconnecter</button></div>`;
+  $('sheet').hidden=false;
+  $('mNew').onclick=()=>{fermer();nouveauClient()};
+  $('mLang').onclick=()=>{fermer();choisirLangue()};
+  $('mPhr').onclick=()=>{store.set('tvp_trad_phr',[]);quickCh();fermer();toast('Phrases supprimées')};
+  $('mMode').onclick=()=>{store.set('tvp_trad_mode',null);location.href=location.pathname};
+  $('mOut').onclick=()=>signOut(auth);
+};
+async function nouveauClient(){
+  if(!confirm('Effacer la conversation et attendre un nouveau client ?'))return;
+  try{const s=await getDocs(refMsgs());const b=writeBatch(db);s.docs.forEach(d=>b.delete(d.ref));b.set(refSess(),{langue:null,t:serverTimestamp()});await b.commit();toast('Prêt pour un nouveau client')}catch(e){toast('Impossible ('+(e.code||'erreur')+')')}
+}
+
+/* ---------- Écran client (tablette) ---------- */
+$('clLang').onclick=()=>{setLangue(null)};
+$('clBack').onclick=()=>{location.href='../pancarte-tvp-k7x2/'};
+$('clVoice').onclick=()=>{const v=!store.get('tvp_trad_voix_cl',true);store.set('tvp_trad_voix_cl',v);$('clVoice').textContent=v?'🔊':'🔇';$('clVoice').classList.toggle('on',v);if(v)debloquerVoix()};
+$('clVoice').textContent=store.get('tvp_trad_voix_cl',true)?'🔊':'🔇';
+$('clForm').onsubmit=e=>{e.preventDefault();const t=$('clTxt').value;$('clTxt').value='';envoyer('client',t)};
+$('clMic').onclick=()=>{debloquerVoix();const L=LG(langue);if(!L)return;if(!ecouter($('clMic'),L.v,$('clLive'),t=>envoyer('client',t)))$('clTxt').focus()};
+
+/* ---------- Face à face (un seul écran, sans Firebase) ---------- */
+let fLang=store.get('tvp_trad_face_lang',null), fMsgs=[];
+function lancerFace(){
+  $('vFace').hidden=false;majFace();
+  if(!fLang)choisirFace();
+}
+function choisirFace(){
+  $('shTitle').textContent='Langue du client';$('shBody').innerHTML='<div class="langs" id="shLangs"></div>';
+  grilleLangues($('shLangs'),c=>{fermer();fLang=c;store.set('tvp_trad_face_lang',c);majFace()});$('sheet').hidden=false;
+}
+function majFace(){
+  const L=LG(fLang);$('fcLang').textContent=L?L.f+' '+L.n:'🌍';$('fcTopWho').textContent=L?L.p:'';
+  const rtl=L&&RTL.includes(L.c.split('-')[0])?' dir="rtl"':'';
+  $('fcTop').innerHTML=fMsgs.map(m=>m.de==='client'?`<div class="bub me"><div class="main"${rtl}>${esc(m.texte)}</div></div>`:`<div class="bub"><div class="main"${rtl}>${esc(m.traduction)}</div></div>`).join('')||(L?`<div class="empty" style="font-size:20px">${esc(L.f+' '+L.p)} 🎤</div>`:'');
+  $('fcBot').innerHTML=fMsgs.map(m=>m.de==='chauffeur'?`<div class="bub me"><div class="main">${esc(m.texte)}</div><div class="sub"${rtl}>${esc(m.traduction)}</div></div>`:`<div class="bub"><div class="main">${esc(m.traduction)}</div><div class="sub"${rtl}>${esc(m.texte)}</div></div>`).join('')||'<div class="empty">Appuie sur 🎤 et parle en français.<br>Le client parle avec le 🎤 du haut.</div>';
+  $('fcTop').scrollTop=$('fcTop').scrollHeight;$('fcBot').scrollTop=$('fcBot').scrollHeight;
+}
+async function envoyerFace(de,texte){
+  const L=LG(fLang);if(!L){choisirFace();return}
+  const live=de==='chauffeur'?$('fcBotLive'):$('fcTopLive');live.textContent='…';
+  try{const [tr]=await traduire([texte],de==='chauffeur'?'fr':L.c,de==='chauffeur'?L.c:'fr');live.textContent='';
+    fMsgs.push({de,texte,traduction:tr||texte});fMsgs=fMsgs.slice(-40);majFace();
+    parler(tr,de==='chauffeur'?L.v:'fr-FR');
+  }catch(e){live.textContent='';toast('Traduction impossible (internet ?)')}
+}
+$('fcLang').onclick=choisirFace;
+$('fcMicBot').onclick=()=>{debloquerVoix();if(!ecouter($('fcMicBot'),'fr-FR',$('fcBotLive'),t=>envoyerFace('chauffeur',t))){const t=prompt('Ta phrase en français :');if(t)envoyerFace('chauffeur',t)}};
+$('fcMicTop').onclick=()=>{debloquerVoix();const L=LG(fLang);if(!L)return choisirFace();if(!ecouter($('fcMicTop'),L.v,$('fcTopLive'),t=>envoyerFace('client',t))){const t=prompt(L.p+' :');if(t)envoyerFace('client',t)}};
+$('fcMenu').onclick=()=>{
+  $('shTitle').textContent='Menu';
+  $('shBody').innerHTML=`<div style="padding:14px;display:grid;gap:10px"><button class="btn" id="mNewF">🧹 Nouveau client</button><button class="btn ghost" id="mLangF">🌍 Changer la langue du client</button><button class="btn ghost" id="mModeF">🔁 Changer l'usage de cet appareil</button></div>`;
+  $('sheet').hidden=false;
+  $('mNewF').onclick=()=>{fMsgs=[];fLang=null;store.set('tvp_trad_face_lang',null);fermer();majFace();choisirFace()};
+  $('mLangF').onclick=()=>{fermer();choisirFace()};
+  $('mModeF').onclick=()=>{store.set('tvp_trad_mode',null);location.href=location.pathname};
+};
+
+if('speechSynthesis' in window)speechSynthesis.onvoiceschanged=()=>{};
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
