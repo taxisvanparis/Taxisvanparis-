@@ -137,6 +137,15 @@ html,body{max-width:100%;overflow-x:hidden}
   </div>
 </div>
 
+<!-- Invité : conversation terminée -->
+<div class="screen" id="sFin" hidden>
+  <div class="box" style="text-align:center">
+    <div class="logo" style="margin:0 auto 16px">TVP</div>
+    <h1>Taxis <b>Van Paris</b></h1>
+    <p class="mut" id="finTxt">Conversation ended · Conversation terminée<br>Thank you! · Merci !</p>
+  </div>
+</div>
+
 <!-- Choix de l'appareil -->
 <div class="screen" id="sMode" hidden>
   <div class="box">
@@ -157,6 +166,7 @@ html,body{max-width:100%;overflow-x:hidden}
     <div class="t"><b>Traduction</b></div>
     <button class="lang" id="chLang">🌍 —</button>
     <button class="ib on" id="chVoice" title="Lire les réponses à voix haute" aria-label="Lecture à voix haute">🔊</button>
+    <button class="ib" id="chTel" title="Client sur son téléphone" aria-label="Client sur son téléphone">📲</button>
     <button class="ib" id="chMenu" aria-label="Menu">⋯</button>
   </div>
   <div class="conv" id="chConv"></div>
@@ -212,10 +222,11 @@ html,body{max-width:100%;overflow-x:hidden}
 <!-- Feuille : choix de langue / menu -->
 <div class="sheetbg" id="sheet" hidden><div class="sheet"><div class="sh"><span id="shTitle"></span><button class="ib" id="shClose">✕</button></div><div id="shBody" style="overflow-y:auto"></div></div></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-import { getFirestore, doc, setDoc, addDoc, updateDoc, deleteDoc, getDocs, collection, query, orderBy, limit, onSnapshot, serverTimestamp, writeBatch } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, signInAnonymously, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, addDoc, updateDoc, deleteDoc, getDocs, collection, query, orderBy, limit, onSnapshot, serverTimestamp, writeBatch, Timestamp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
 const API="https://script.google.com/macros/s/AKfycbynqJeRA8W1AoYiHWQhS-ZPGHrEHyQBW8xp4xFGAYgP68lAugMsNZqWYkleYV1P4Va6/exec";
 const app=initializeApp({apiKey:"AIzaSyBN8uBFONIt1tDTH9C-NIQKeulFdJ2m26Q",authDomain:"taxis-van-paris-by-abts.firebaseapp.com",projectId:"taxis-van-paris-by-abts",storageBucket:"taxis-van-paris-by-abts.firebasestorage.app",messagingSenderId:"53887245170",appId:"1:53887245170:web:2a3b785d734c54e01f9beb"});
@@ -292,16 +303,19 @@ function dictee(txt,hint,msg){
 }
 
 /* ---------- État ---------- */
-let me=null, mode=store.get('tvp_trad_mode',null), langue=null, msgs=[], vus=null, unsubs=[];
+let me=null, mode=store.get('tvp_trad_mode',null), langue=null, msgs=[], vus=null, unsubs=[], subsConv=[], code=null;
 const params=new URLSearchParams(location.search);
 if(params.get('mode'))mode=params.get('mode');
-const refSess=()=>doc(db,'trad',me.uid), refMsgs=()=>collection(db,'trad',me.uid,'msgs');
+const invite=(params.get('g')||'').replace(/[^a-z0-9]/gi,'').slice(0,40);
+if(invite){mode='invite';code=invite}
+const refSess=()=>code?doc(db,'trad_g',code):doc(db,'trad',me.uid), refMsgs=()=>code?collection(db,'trad_g',code,'msgs'):collection(db,'trad',me.uid,'msgs');
 
 /* ---------- Connexion ---------- */
 $('lgGo').onclick=async()=>{$('lgErr').textContent='';try{await signInWithEmailAndPassword(auth,$('lgEmail').value.trim(),$('lgPass').value);$('lgPass').value=''}catch(e){$('lgErr').textContent='E-mail ou mot de passe incorrect'}};
 onAuthStateChanged(auth,u=>{
-  unsubs.forEach(f=>{try{f()}catch(e){}});unsubs=[];me=u;
-  ['sLogin','sMode','vCh','vCl','vFace'].forEach(id=>$(id).hidden=true);
+  unsubs.forEach(f=>{try{f()}catch(e){}});unsubs=[];subsConv.forEach(f=>{try{f()}catch(e){}});subsConv=[];me=u;
+  ['sLogin','sMode','vCh','vCl','vFace','sFin'].forEach(id=>$(id).hidden=true);
+  if(!u&&mode==='invite'){signInAnonymously(auth).catch(e=>{$('sFin').hidden=false;$('finTxt').innerHTML='Connexion impossible ('+esc(e.code||'erreur')+')'});return}
   if(!u){$('sLogin').hidden=false;return}
   if(!mode){$('sMode').hidden=false;return}
   lancer();
@@ -315,22 +329,31 @@ async function prechauffer(){
 }
 setInterval(prechauffer,60000);document.addEventListener('visibilitychange',prechauffer);
 function lancer(){
+  if(mode==='invite')return lancerInvite();
   prechauffer();
   store.set('tvp_trad_mode',mode);
   if(mode==='face')return lancerFace();
-  unsubs.push(onSnapshot(refSess(),s=>{const d=s.data()||{};langue=d.langue&&LG(d.langue)?d.langue:null;majLangue()},e=>toast('Accès refusé par Firebase (règle à ajouter)')));
-  unsubs.push(onSnapshot(query(refMsgs(),orderBy('t','desc'),limit(60)),{includeMetadataChanges:true},s=>{
-    msgs=s.docs.map(d=>({id:d.id,...d.data({serverTimestamps:'estimate'}),_p:d.metadata.hasPendingWrites})).reverse();
-    if(vus===null){vus=new Set(msgs.filter(m=>m.traduction).map(m=>m.id))}
-    else msgs.forEach(m=>{if(!vus.has(m.id)&&m.traduction){vus.add(m.id);nouveau(m)}});
-    dessiner();
-  },e=>{}));
+  if(mode==='chauffeur'){
+    let premier=true;
+    unsubs.push(onSnapshot(doc(db,'trad',me.uid),s=>{const c=(s.data()||{}).code||null;if(premier||c!==code){premier=false;code=c;abonner()}majTel()},e=>{premier=false;abonner()}));
+  }else abonner();
   if(mode==='chauffeur'){$('vCh').hidden=false;$('chHint').hidden=!!SR;quickCh()}
   else{$('vCl').hidden=false}
 }
+function abonner(){
+  subsConv.forEach(f=>{try{f()}catch(e){}});subsConv=[];msgs=[];vus=null;langue=null;dessiner();
+  subsConv.push(onSnapshot(refSess(),s=>{const d=s.data()||{};langue=d.langue&&LG(d.langue)?d.langue:null;majLangue()},e=>toast('Accès refusé par Firebase (règle à ajouter)')));
+  subsConv.push(onSnapshot(query(refMsgs(),orderBy('t','desc'),limit(60)),{includeMetadataChanges:true},s=>{
+    msgs=s.docs.map(d=>({id:d.id,...d.data({serverTimestamps:'estimate'}),_p:d.metadata.hasPendingWrites})).reverse();
+    if(vus===null){vus=new Set(msgs.filter(m=>m.traduction).map(m=>m.id))}
+    else msgs.forEach(m=>{if(!vus.has(m.id)&&m.traduction){vus.add(m.id);nouveau(m)}});
+    if(mode==='chauffeur'&&code)traduireInvite();
+    dessiner();
+  },e=>{}));
+}
 function nouveau(m){
   if(mode==='chauffeur'&&m.de==='client'&&store.get('tvp_trad_voix_ch',true))parler(m.traduction,'fr-FR');
-  if(mode==='client'&&m.de==='chauffeur'&&store.get('tvp_trad_voix_cl',true)&&langue)parler(m.traduction,LG(langue).v);
+  if((mode==='client'||mode==='invite')&&m.de==='chauffeur'&&store.get('tvp_trad_voix_cl',true)&&langue)parler(m.traduction,LG(langue).v);
 }
 
 /* ---------- Envoi ---------- */
@@ -338,6 +361,7 @@ async function envoyer(de,texte){
   texte=texte.trim();if(!texte)return;
   if(!langue){toast(mode==='chauffeur'?'Le client n\'a pas encore choisi sa langue':'Choose your language');if(mode==='chauffeur')choisirLangue();return}
   const L=LG(langue);const src=de==='chauffeur'?'fr':TC(L), dst=de==='chauffeur'?TC(L):'fr';
+  if(mode==='invite'){try{await addDoc(refMsgs(),{de:'client',texte:texte.slice(0,600),langue:TC(L),traduction:null,langueT:'fr',t:serverTimestamp()})}catch(e){toast('⚠️ '+(e.code||'erreur'))}return}
   // 1) la phrase part tout de suite (l'autre écran la voit et attend la traduction)
   let ref=null;
   try{ref=await addDoc(refMsgs(),{de,texte,langue:src,traduction:null,langueT:dst,t:serverTimestamp()})}catch(e){toast('Envoi impossible (internet ?)');return}
@@ -363,9 +387,9 @@ function dessiner(){
   if(mode==='chauffeur'){
     const c=$('chConv');c.innerHTML=msgs.length?msgs.map(m=>bulle(m,false)).join(''):`<div class="empty">${langue?'<i>🎙️</i><b>Prêt à traduire</b>Parle en français avec 🎤 : le client voit et entend la traduction sur la tablette.':'<i>🌍</i><b>En attente du client</b>Il touche son drapeau sur la tablette, ou choisis sa langue avec le bouton en haut.'}</div>`;
     c.querySelectorAll('[data-say]').forEach(b=>b.onclick=()=>{const m=msgs.find(x=>x.id===b.dataset.say);parler(m.traduction,'fr-FR')});
-    c.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>deleteDoc(doc(db,'trad',me.uid,'msgs',b.dataset.del)).catch(()=>{}));
+    c.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>deleteDoc(doc(refMsgs(),b.dataset.del)).catch(()=>{}));
     c.scrollTop=c.scrollHeight;
-  }else if(mode==='client'){
+  }else if(mode==='client'||mode==='invite'){
     const c=$('clConv');const L=LG(langue);
     c.innerHTML=msgs.length?msgs.map(m=>bulle(m,true)).join(''):`<div class="empty" style="font-size:22px"><i style="width:96px;height:96px;font-size:48px">${L?L.f:'🌍'}</i>${L?esc(L.p)+' 🎤':''}</div>`;
     c.querySelectorAll('[data-say]').forEach(b=>b.onclick=()=>{const m=msgs.find(x=>x.id===b.dataset.say);parler(m.traduction,L.v)});
@@ -392,14 +416,15 @@ let quickLang=null;
 async function majLangue(){
   const L=LG(langue);
   $('chLang').textContent=L?L.f+' '+L.n:'🌍 Langue ?';
-  if(mode==='client'){
+  if(mode==='client'||mode==='invite'){
     $('clPick').hidden=!!L;$('clMain').hidden=!L;
     $('clLang').hidden=!L;
     if(!L){grilleLangues($('clLangs'),setLangue);$('clTitle').textContent='Taxis Van Paris';return}
     $('clLang').textContent=L.f+' '+L.n;$('clTitle').textContent='Taxis Van Paris';
     $('clTalk').textContent=SR?L.p+' 🎤':'';
     $('clTxt').placeholder=L.p+'…';$('clTxt').dir=RTL.includes(L.c.split('-')[0])?'rtl':'ltr';
-    if(quickLang!==L.c){quickLang=L.c;$('clQuick').innerHTML='';
+    if(mode==='invite'){$('clQuick').hidden=true}
+    else if(quickLang!==L.c){quickLang=L.c;$('clQuick').innerHTML='';
       try{const tr=await traduire(PHR_CL,'fr',TC(L));if(quickLang!==L.c)return;
         $('clQuick').innerHTML=tr.map((t,i)=>`<button data-i="${i}">${esc(t||PHR_CL[i])}</button>`).join('');
         $('clQuick').querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>envoyer('client',b.textContent))}catch(e){}}
@@ -440,9 +465,63 @@ $('chMenu').onclick=()=>{
 };
 async function nouveauClient(){
   if(!confirm('Effacer la conversation et attendre un nouveau client ?'))return;
+  if(code){await terminerTel();toast('Prêt pour un nouveau client');return}
   try{const s=await getDocs(refMsgs());const b=writeBatch(db);s.docs.forEach(d=>b.delete(d.ref));b.set(refSess(),{langue:null,t:serverTimestamp()});await b.commit();toast('Prêt pour un nouveau client')}catch(e){toast('Impossible ('+(e.code||'erreur')+')')}
 }
 
+
+/* ---------- Client sur son propre téléphone (QR code) ---------- */
+const lienInvite=c=>location.origin+location.pathname+'?g='+c;
+function qrImg(txt){try{const q=qrcode(0,'M');q.addData(txt);q.make();return `<img alt="QR" style="width:100%;height:auto;display:block" src="${q.createDataURL(8,0)}">`}catch(e){return ''}}
+function majTel(){const b=$('chTel');if(b){b.classList.toggle('on',!!code)}const t=$('chTitre');}
+async function creerTel(){
+  const a='abcdefghjkmnpqrstuvwxyz23456789',r=new Uint32Array(14);crypto.getRandomValues(r);const c=Array.from(r,x=>a[x%a.length]).join('');
+  const b=writeBatch(db);
+  b.set(doc(db,'trad_codes',c),{owner:me.uid,actif:true,exp:Timestamp.fromMillis(Date.now()+864e5),t:serverTimestamp()});
+  b.set(doc(db,'trad_g',c),{owner:me.uid,langue:null,t:serverTimestamp()});
+  b.set(doc(db,'trad',me.uid),{code:c},{merge:true});
+  await b.commit();return c;
+}
+async function terminerTel(){
+  if(!code)return;const c=code;
+  try{const b=writeBatch(db);b.update(doc(db,'trad_codes',c),{actif:false});b.set(doc(db,'trad',me.uid),{code:null},{merge:true});await b.commit()}catch(e){toast('Impossible ('+(e.code||'erreur')+')')}
+}
+const enTrad=new Set();
+async function traduireInvite(){
+  for(const m of msgs){
+    if(m.de!=='client'||m.traduction!=null||enTrad.has(m.id))continue;enTrad.add(m.id);
+    const src=langue?TC(LG(langue)):'';
+    try{const [tr]=await traduire([m.texte],src,'fr');await updateDoc(doc(refMsgs(),m.id),{traduction:tr||m.texte})}catch(e){enTrad.delete(m.id)}
+  }
+}
+$('chTel').onclick=async()=>{
+  $('shTitle').textContent='📲 Client sur son téléphone';
+  if(!code){
+    $('shBody').innerHTML=`<div style="padding:16px;display:grid;gap:12px"><p class="mut" style="margin:0">Le client scanne un QR code avec l'appareil photo de son téléphone : une page s'ouvre (sans appli), il choisit sa langue et vous discutez chacun sur votre téléphone. Ton téléphone fait les traductions : garde l'appli ouverte.</p><button class="btn" id="tGo">Créer le QR code</button></div>`;
+    $('sheet').hidden=false;
+    $('tGo').onclick=async()=>{$('tGo').disabled=true;try{await creerTel();setTimeout(()=>$('chTel').onclick(),300)}catch(e){toast('Impossible ('+(e.code||'erreur')+') : règles Firebase à ajouter ?');$('tGo').disabled=false}};
+    return;
+  }
+  const url=lienInvite(code);
+  $('shBody').innerHTML=`<div style="padding:16px;display:grid;gap:12px;justify-items:center;text-align:center">
+    <div style="background:#fff;border-radius:18px;padding:14px;width:min(280px,72vw)">${qrImg(url)}</div>
+    <b style="font-size:18px">Scan me 📷 · Scannez-moi</b>
+    <small class="mut" style="word-break:break-all">${esc(url)}</small>
+    <button class="btn ghost" id="tCopy">Copier / partager le lien</button>
+    <button class="btn" id="tEnd" style="background:var(--card2);color:var(--red);border:1.5px solid var(--red);box-shadow:none">✕ Terminer (nouveau client)</button>
+    <p class="mut" style="margin:0;font-size:13px">Le lien marche 24 h maximum. « Terminer » le coupe tout de suite.</p></div>`;
+  $('sheet').hidden=false;
+  $('tCopy').onclick=async()=>{try{if(navigator.share){await navigator.share({title:'Taxis Van Paris',text:'Traduction / Translation',url})}else{await navigator.clipboard.writeText(url);toast('Lien copié')}}catch(e){}};
+  $('tEnd').onclick=async()=>{if(!confirm('Terminer la conversation avec ce client ?'))return;await terminerTel();fermer();toast('Conversation terminée')};
+};
+function lancerInvite(){
+  $('clBack').hidden=true;$('clQuick').hidden=true;
+  unsubs.push(onSnapshot(doc(db,'trad_codes',code),s=>{
+    const d=s.exists()?s.data():null;const ok=d&&d.actif&&tsMs(d.exp)>Date.now();
+    if(!ok){subsConv.forEach(f=>{try{f()}catch(e){}});subsConv=[];$('vCl').hidden=true;$('sFin').hidden=false;try{speechSynthesis.cancel()}catch(e){}return}
+    if(!subsConv.length){$('sFin').hidden=true;$('vCl').hidden=false;abonner()}
+  },e=>{$('vCl').hidden=true;$('sFin').hidden=false}));
+}
 /* ---------- Écran client (tablette) ---------- */
 $('clLang').onclick=()=>{setLangue(null)};
 $('clBack').onclick=()=>{location.href='../pancarte-tvp-k7x2/'};
