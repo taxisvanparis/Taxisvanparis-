@@ -593,7 +593,7 @@
 <div class="modal-overlay" id="modal-lien">
   <div class="modal mc">
     <div class="mc-h"><h2 id="mc-titre">🔗 Lien client</h2><button class="btn-ghost" id="mc-close" aria-label="Fermer">✕</button></div>
-    <p class="mc-aide">Le client reçoit une page dans sa langue : course, chauffeur, véhicule, point de rendez-vous et un chat traduit avec toi.</p>
+    <p class="mc-aide" id="mc-aide">Le client reçoit une page dans sa langue : course, chauffeur, véhicule, point de rendez-vous et un chat traduit avec toi.</p>
     <details id="mc-infos" open><summary>🚖 Infos affichées au client</summary>
       <div class="grid2">
         <div class="field"><label>Prénom du chauffeur</label><input id="mc-prenom" type="text"></div>
@@ -1243,8 +1243,17 @@ function anonymise(title,location){
   }
   function mcUrl(c) { return new URL("../ma-course/?c=" + c, location.href).href; }
   function mcStop() { mcUnsubs.forEach(f => { try { f(); } catch (e) {} }); mcUnsubs = []; }
+  // Conversation d'un lien « Traduction » (QR / lien partagé) : pas de réservation liée
+  function ouvrirConvSeule(c) {
+    mcStop(); mcR = null; mcCode = c; mcMsgs = []; mcLangue = null;
+    document.getElementById("mc-titre").textContent = "💬 Client (Traduction)";
+    ["mc-aide", "mc-infos", "mc-send", "mc-stop"].forEach(id => { const e = document.getElementById(id); if (e) e.hidden = true; });
+    document.getElementById("mc-chat").hidden = false;
+    mcEcouter(); document.getElementById("modal-lien").classList.add("shown");
+  }
   function ouvrirLien(id) {
     const r = reservationsCache.find(x => x.id === id); if (!r) return;
+    ["mc-aide", "mc-infos", "mc-stop"].forEach(id => { const e = document.getElementById(id); if (e) e.hidden = false; });
     mcStop(); mcR = r; mcCode = r.lienCourse || null; mcMsgs = []; mcLangue = null;
     const pr = mcProfil(), ch = chauffeurDe(r);
     const prenomCh = ch && ch.nom ? String(ch.nom).trim().split(/\s+/)[0] : "";
@@ -1365,7 +1374,7 @@ function anonymise(title,location){
   // Notification « nouveau message client » : ouvre directement la conversation
   function ouvrirConv(c) {
     if (!c) return; let n = 0;
-    const essai = () => { const r = reservationsCache.find(x => x.lienCourse === c); if (r) ouvrirLien(r.id); else if (++n < 30) setTimeout(essai, 700); };
+    const essai = () => { const r = reservationsCache.find(x => x.lienCourse === c); if (r) ouvrirLien(r.id); else if (++n < 8) setTimeout(essai, 700); else ouvrirConvSeule(c); };
     essai();
   }
   if ("serviceWorker" in navigator) navigator.serviceWorker.addEventListener("message", e => { if (e.data && e.data.type === "conv") ouvrirConv(e.data.code); });
