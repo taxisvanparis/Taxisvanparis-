@@ -152,7 +152,7 @@ h1{font-size:30px;margin:0 0 6px;font-weight:800;letter-spacing:-.02em}h1 b{back
   <div class="conv" id="chConv"></div>
   <div class="live" id="chLive"></div>
   <div class="quick" id="chQuick"></div>
-  <div class="hint" id="chHint" hidden>Micro non disponible ici : touche 🎤 sur le clavier pour dicter.</div>
+  <div class="hint" id="chHint" hidden>Micro direct indisponible : touche le 🎤 du clavier pour dicter, puis ➤.</div>
   <div class="dock"><form class="compose" id="chForm">
     <textarea id="chTxt" rows="1" maxlength="600" placeholder="Écris en français…"></textarea>
     <button type="submit" class="send" aria-label="Envoyer">➤</button>
@@ -254,18 +254,26 @@ const debloquerVoix=()=>{try{const u=new SpeechSynthesisUtterance(' ');u.volume=
 
 /* ---------- Micro (reconnaissance vocale) ---------- */
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-function ecouter(btn,voix,liveEl,surFin){
-  if(!SR)return false;
+function ecouter(btn,voix,liveEl,surFin,surEchec){
+  if(!SR||store.get('tvp_sr_ko',0)>=2){surEchec&&surEchec();return true}
   if(btn._rec){btn._rec.stop();return true}
   try{speechSynthesis.cancel()}catch(e){}
   const r=new SR();r.lang=voix;r.interimResults=true;r.continuous=false;r.maxAlternatives=1;
-  let final='',fini=false;
-  r.onresult=e=>{let tmp='';for(let i=e.resultIndex;i<e.results.length;i++){const t=e.results[i][0].transcript;if(e.results[i].isFinal)final+=t;else tmp+=t}liveEl.textContent=(final+tmp).trim()};
-  r.onerror=e=>{if(e.error==='not-allowed'||e.error==='service-not-allowed')toast('Autorise le micro dans les réglages');else if(e.error==='no-speech')toast('Je n\'ai rien entendu');};
-  r.onend=()=>{btn._rec=null;btn.classList.remove('rec');const t=(final||liveEl.textContent||'').trim();liveEl.textContent='';if(t&&!fini){fini=true;surFin(t)}};
-  btn._rec=r;btn.classList.add('rec');liveEl.textContent='…';
-  try{r.start()}catch(e){btn._rec=null;btn.classList.remove('rec');liveEl.textContent='';return false}
+  let final='',tmp='',fini=false,erreur='';
+  r.onresult=e=>{tmp='';for(let i=e.resultIndex;i<e.results.length;i++){const t=e.results[i][0].transcript;if(e.results[i].isFinal)final+=t;else tmp+=t}liveEl.textContent=(final+tmp).trim()||'🎙️ …'};
+  r.onerror=e=>{erreur=e.error||'x';if(e.error==='not-allowed'||e.error==='service-not-allowed')toast('Autorise le micro et la « Reconnaissance vocale » dans Réglages › Safari');};
+  r.onend=()=>{btn._rec=null;btn.classList.remove('rec');liveEl.textContent='';if(fini)return;fini=true;
+    const t=(final||tmp).trim();
+    if(t){store.set('tvp_sr_ko',0);surFin(t);return}
+    if(erreur==='no-speech'||erreur==='aborted'){toast("Je n'ai rien entendu, réessaie");return}
+    store.set('tvp_sr_ko',store.get('tvp_sr_ko',0)+1);surEchec&&surEchec()};
+  btn._rec=r;btn.classList.add('rec');liveEl.textContent='🎙️ …';
+  try{r.start()}catch(e){btn._rec=null;btn.classList.remove('rec');liveEl.textContent='';surEchec&&surEchec()}
   return true;
+}
+function dictee(txt,hint,msg){
+  if(hint)hint.hidden=false;
+  txt.focus();toast(msg||'Touche le 🎤 du clavier pour dicter, puis ➤');
 }
 
 /* ---------- État ---------- */
@@ -387,18 +395,20 @@ $('chVoice').classList.toggle('on',store.get('tvp_trad_voix_ch',true));
 $('chVoice').onclick=()=>{const v=!store.get('tvp_trad_voix_ch',true);store.set('tvp_trad_voix_ch',v);$('chVoice').classList.toggle('on',v);$('chVoice').textContent=v?'🔊':'🔇';if(v)debloquerVoix()};
 $('chForm').onsubmit=e=>{e.preventDefault();const t=$('chTxt').value;$('chTxt').value='';$('chTxt').style.height='';envoyer('chauffeur',t)};
 $('chTxt').addEventListener('input',e=>{e.target.style.height='';e.target.style.height=Math.min(130,e.target.scrollHeight)+'px'});
-$('chMic').onclick=()=>{debloquerVoix();if(!ecouter($('chMic'),'fr-FR',$('chLive'),t=>envoyer('chauffeur',t))){$('chHint').hidden=false;$('chTxt').focus()}};
+$('chMic').onclick=()=>{debloquerVoix();ecouter($('chMic'),'fr-FR',$('chLive'),t=>envoyer('chauffeur',t),()=>dictee($('chTxt'),$('chHint')))};
 $('chMenu').onclick=()=>{
   $('shTitle').textContent='Menu';
   $('shBody').innerHTML=`<div style="padding:14px;display:grid;gap:10px">
    <button class="btn" id="mNew">🧹 Nouveau client (effacer la conversation)</button>
    <button class="btn ghost" id="mLang">🌍 Changer la langue du client</button>
+   <button class="btn ghost" id="mMic">🎤 Réessayer le micro direct</button>
    <button class="btn ghost" id="mPhr">✏️ Supprimer mes phrases rapides ajoutées</button>
    <button class="btn ghost" id="mMode">🔁 Changer l'usage de cet appareil</button>
    <button class="btn ghost" id="mOut">Se déconnecter</button></div>`;
   $('sheet').hidden=false;
   $('mNew').onclick=()=>{fermer();nouveauClient()};
   $('mLang').onclick=()=>{fermer();choisirLangue()};
+  $('mMic').onclick=()=>{store.set('tvp_sr_ko',0);fermer();toast('Micro direct réactivé')};
   $('mPhr').onclick=()=>{store.set('tvp_trad_phr',[]);quickCh();fermer();toast('Phrases supprimées')};
   $('mMode').onclick=()=>{store.set('tvp_trad_mode',null);location.href=location.pathname};
   $('mOut').onclick=()=>signOut(auth);
@@ -414,7 +424,7 @@ $('clBack').onclick=()=>{location.href='../pancarte-tvp-k7x2/'};
 $('clVoice').onclick=()=>{const v=!store.get('tvp_trad_voix_cl',true);store.set('tvp_trad_voix_cl',v);$('clVoice').textContent=v?'🔊':'🔇';$('clVoice').classList.toggle('on',v);if(v)debloquerVoix()};
 $('clVoice').textContent=store.get('tvp_trad_voix_cl',true)?'🔊':'🔇';
 $('clForm').onsubmit=e=>{e.preventDefault();const t=$('clTxt').value;$('clTxt').value='';envoyer('client',t)};
-$('clMic').onclick=()=>{debloquerVoix();const L=LG(langue);if(!L)return;if(!ecouter($('clMic'),L.v,$('clLive'),t=>envoyer('client',t)))$('clTxt').focus()};
+$('clMic').onclick=()=>{debloquerVoix();const L=LG(langue);if(!L)return;ecouter($('clMic'),L.v,$('clLive'),t=>envoyer('client',t),()=>dictee($('clTxt'),null,'⌨️ 🎤'))};
 
 /* ---------- Face à face (un seul écran, sans Firebase) ---------- */
 let fLang=store.get('tvp_trad_face_lang',null), fMsgs=[];
@@ -442,8 +452,8 @@ async function envoyerFace(de,texte){
   }catch(e){live.textContent='';toast('Traduction impossible (internet ?)')}
 }
 $('fcLang').onclick=choisirFace;
-$('fcMicBot').onclick=()=>{debloquerVoix();if(!ecouter($('fcMicBot'),'fr-FR',$('fcBotLive'),t=>envoyerFace('chauffeur',t))){const t=prompt('Ta phrase en français :');if(t)envoyerFace('chauffeur',t)}};
-$('fcMicTop').onclick=()=>{debloquerVoix();const L=LG(fLang);if(!L)return choisirFace();if(!ecouter($('fcMicTop'),L.v,$('fcTopLive'),t=>envoyerFace('client',t))){const t=prompt(L.p+' :');if(t)envoyerFace('client',t)}};
+$('fcMicBot').onclick=()=>{debloquerVoix();ecouter($('fcMicBot'),'fr-FR',$('fcBotLive'),t=>envoyerFace('chauffeur',t),()=>{const t=prompt('Ta phrase en français (🎤 du clavier pour dicter) :');if(t)envoyerFace('chauffeur',t)})};
+$('fcMicTop').onclick=()=>{debloquerVoix();const L=LG(fLang);if(!L)return choisirFace();ecouter($('fcMicTop'),L.v,$('fcTopLive'),t=>envoyerFace('client',t),()=>{const t=prompt(L.p+' :');if(t)envoyerFace('client',t)})};
 $('fcMenu').onclick=()=>{
   $('shTitle').textContent='Menu';
   $('shBody').innerHTML=`<div style="padding:14px;display:grid;gap:10px"><button class="btn" id="mNewF">🧹 Nouveau client</button><button class="btn ghost" id="mLangF">🌍 Changer la langue du client</button><button class="btn ghost" id="mModeF">🔁 Changer l'usage de cet appareil</button></div>`;
