@@ -202,6 +202,21 @@
     padding:28px 30px;
   }
   .modal h2{font-size:19px;margin:0 0 20px;color:var(--heading);}
+  .mc{max-width:560px}
+  .mc-h{display:flex;justify-content:space-between;align-items:center;gap:10px}.mc-h h2{margin:0}
+  .mc-aide{color:var(--muted);font-size:13.5px;margin:8px 0 14px;line-height:1.45}
+  #modal-lien details summary{cursor:pointer;font-weight:700;margin-bottom:12px;color:var(--heading)}
+  .mc-ta{width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--text);font:inherit;resize:vertical}
+  .mc-row{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 4px}
+  .mc-ct{font-weight:700;margin:18px 0 8px;color:var(--heading)}.mc-ct span{font-weight:500;color:var(--muted);font-size:13px}
+  .mc-msgs{display:flex;flex-direction:column;gap:8px;max-height:42vh;overflow-y:auto;padding:10px;background:var(--soft);border:1px solid var(--border);border-radius:10px;min-height:70px}
+  .mc-b{max-width:85%;padding:8px 11px;border-radius:14px 14px 14px 4px;background:var(--card);border:1px solid var(--border);font-size:15px;line-height:1.35}
+  .mc-b.moi{align-self:flex-end;border-radius:14px 14px 4px 14px;background:var(--bubble)}
+  .mc-b small{display:block;color:var(--muted);font-size:12px;margin-top:4px}
+  .mc-vide{color:var(--muted);font-size:13.5px;text-align:center;padding:10px}
+  .mc-form{display:flex;gap:8px;margin-top:10px}.mc-form input{flex:1;min-width:0;padding:11px 12px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--text);font:inherit;font-size:16px}
+  .mc-stop{background:none;border:0;color:var(--red);font-size:13px;text-decoration:underline;margin-top:14px;cursor:pointer;padding:0}
+  .lien-btn.actif{background:var(--green-bg)!important;color:var(--green)!important;border-color:var(--green)!important}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
   .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:22px;}
   .btn-ghost{background:none;border:1px solid var(--border);padding:10px 16px;border-radius:8px;font-size:14px;color:var(--muted);}
@@ -573,6 +588,38 @@
   </div>
 </div>
 
+
+<!-- ===================== MODAL LIEN CLIENT « MA COURSE » ===================== -->
+<div class="modal-overlay" id="modal-lien">
+  <div class="modal mc">
+    <div class="mc-h"><h2 id="mc-titre">🔗 Lien client</h2><button class="btn-ghost" id="mc-close" aria-label="Fermer">✕</button></div>
+    <p class="mc-aide">Le client reçoit une page dans sa langue : course, chauffeur, véhicule, point de rendez-vous et un chat traduit avec toi.</p>
+    <details id="mc-infos" open><summary>🚖 Infos affichées au client</summary>
+      <div class="grid2">
+        <div class="field"><label>Prénom du chauffeur</label><input id="mc-prenom" type="text"></div>
+        <div class="field"><label>Téléphone du chauffeur</label><input id="mc-tel" type="tel"></div>
+        <div class="field"><label>Véhicule (modèle + couleur)</label><input id="mc-modele" type="text" placeholder="Mercedes Classe V noire"></div>
+        <div class="field"><label>Plaque</label><input id="mc-plaque" type="text" autocapitalize="characters" placeholder="AB-123-CD"></div>
+        <div class="field" style="grid-column:1/-1"><label>Point de rendez-vous (en français, traduit automatiquement)</label><textarea id="mc-rdv" rows="3" class="mc-ta"></textarea></div>
+      </div>
+      <button class="btn-gold" id="mc-save" style="width:100%">Créer le lien</button>
+    </details>
+    <div id="mc-send" hidden>
+      <div class="mc-row">
+        <a class="cal-btn wa-btn" id="mc-wa" target="_blank" rel="noopener">💬 Envoyer par WhatsApp</a>
+        <a class="cal-btn sms-btn" id="mc-sms">✉️ Par SMS</a>
+        <button type="button" class="cal-btn" id="mc-copy">📋 Copier le lien</button>
+        <a class="cal-btn" id="mc-voir" target="_blank" rel="noopener">👁 Voir la page client</a>
+      </div>
+    </div>
+    <div id="mc-chat" hidden>
+      <div class="mc-ct">💬 Conversation <span id="mc-lang"></span></div>
+      <div class="mc-msgs" id="mc-msgs"></div>
+      <form id="mc-form" class="mc-form"><input id="mc-txt" type="text" autocomplete="off" placeholder="Écris en français (ou dicte avec le micro du clavier)" maxlength="600"><button class="btn-gold" type="submit">Envoyer</button></form>
+      <button type="button" class="mc-stop" id="mc-stop">Désactiver le lien</button>
+    </div>
+  </div>
+</div>
 <!-- ===================== MODAL REGLAGES FACTURE ===================== -->
 <div class="modal-overlay" id="modal-reglages">
   <div class="modal">
@@ -735,7 +782,7 @@ function anonymise(title,location){
   } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
   import {
     getFirestore, collection, doc, addDoc, updateDoc, deleteDoc,
-    onSnapshot, query, where, orderBy, getDoc, setDoc, serverTimestamp
+    onSnapshot, query, where, orderBy, getDoc, setDoc, serverTimestamp, limit, Timestamp
   } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
   // ============================================================
@@ -1176,6 +1223,146 @@ function anonymise(title,location){
     return `<a class="cal-btn" target="_blank" rel="noopener" href="${href}">🪧 Pancarte</a> ` +
       `<button type="button" class="cal-btn" style="font-family:inherit;cursor:pointer" data-pancarte-send data-nom="${esc(nom)}" data-ligne="${esc(ligne)}">📲 Envoyer à la pancarte</button> `;
   }
+  // ===== Lien client « Ma course » : page client traduite + chat traduit =====
+  const API_TVP = "https://script.google.com/macros/s/AKfycbynqJeRA8W1AoYiHWQhS-ZPGHrEHyQBW8xp4xFGAYgP68lAugMsNZqWYkleYV1P4Va6/exec";
+  const MC_LANGS = { "en-GB": "anglais", "en-US": "anglais", fr: "français", ar: "arabe", "zh-CN": "chinois", ja: "japonais", pt: "portugais", it: "italien", ru: "russe", es: "espagnol", de: "allemand" };
+  const mcTR = c => c === "zh-CN" ? "zh-CN" : String(c || "en").split("-")[0];
+  let mcR = null, mcCode = null, mcLangue = null, mcMsgs = [], mcUnsubs = [], mcEnTrad = new Set();
+  function lienBtn(r) {
+    return `<button type="button" class="cal-btn lien-btn${r.lienCourse ? " actif" : ""}" style="font-family:inherit;cursor:pointer" data-lien="${esc(r.id)}">${r.lienCourse ? "💬 Lien client ✓" : "🔗 Lien client"}</button> `;
+  }
+  function mcProfil() { try { return JSON.parse(localStorage.getItem("tvp_mc_prof") || "{}"); } catch (e) { return {}; } }
+  function rdvDefaut(r) {
+    const d = String(r.dep || "") + " " + String(r.depZone || "");
+    const vol = r.vol ? " (vol " + r.vol + ")" : "";
+    if (/\b(cdg|roissy|charles[ -]?de[ -]?gaulle)\b/i.test(d)) return `Aéroport Charles-de-Gaulle${vol} : je vous attends dans le hall des arrivées, à la sortie de la zone bagages, avec une pancarte à votre nom.\nÉcrivez-moi ici dès que vous avez récupéré vos bagages.`;
+    if (/\borly\b/i.test(d)) return `Aéroport d'Orly${vol} : je vous attends dans le hall des arrivées, à la sortie de la zone bagages, avec une pancarte à votre nom.\nÉcrivez-moi ici dès que vous avez récupéré vos bagages.`;
+    if (/\bbeauvais\b/i.test(d)) return `Aéroport de Beauvais${vol} : je vous attends à la sortie du terminal des arrivées, avec une pancarte à votre nom.\nÉcrivez-moi ici dès que vous avez récupéré vos bagages.`;
+    if (/\bgare\b|station/i.test(d)) return `${r.dep} : je vous attends en bout de quai, à l'arrivée de votre train, avec une pancarte à votre nom.\nÉcrivez-moi ici quand votre train arrive.`;
+    return `Je viens vous chercher à l'adresse indiquée : ${r.dep || "…"}.\nJe vous préviens ici dès que je suis devant.`;
+  }
+  function mcUrl(c) { return new URL("../ma-course/?c=" + c, location.href).href; }
+  function mcStop() { mcUnsubs.forEach(f => { try { f(); } catch (e) {} }); mcUnsubs = []; }
+  function ouvrirLien(id) {
+    const r = reservationsCache.find(x => x.id === id); if (!r) return;
+    mcStop(); mcR = r; mcCode = r.lienCourse || null; mcMsgs = []; mcLangue = null;
+    const pr = mcProfil(), ch = chauffeurDe(r);
+    const prenomCh = ch && ch.nom ? String(ch.nom).trim().split(/\s+/)[0] : "";
+    document.getElementById("mc-titre").textContent = "🔗 Lien client — " + (String(r.nom || "").replace(/^🏨\s*/, "").trim() || "client");
+    document.getElementById("mc-prenom").value = (r.lien && r.lien.prenom) || prenomCh || pr.prenom || "";
+    document.getElementById("mc-tel").value = (r.lien && r.lien.tel) || (ch && ch.tel) || pr.tel || "06 67 40 20 05";
+    document.getElementById("mc-modele").value = (r.lien && r.lien.modele) || pr["modele_" + (vehLabel(r.vehicule) || "x")] || pr.modele || (vehLabel(r.vehicule) === "Van" ? "Mercedes Classe V noire" : "");
+    document.getElementById("mc-plaque").value = (r.lien && r.lien.plaque) || pr["plaque_" + (vehLabel(r.vehicule) || "x")] || pr.plaque || "";
+    document.getElementById("mc-rdv").value = (r.lien && r.lien.rdv) || rdvDefaut(r);
+    document.getElementById("mc-save").textContent = mcCode ? "Mettre à jour la page client" : "Créer le lien";
+    document.getElementById("mc-infos").open = !mcCode;
+    majLienUI();
+    document.getElementById("modal-lien").classList.add("shown");
+  }
+  function majLienUI() {
+    const has = !!mcCode, r = mcR;
+    document.getElementById("mc-send").hidden = !has; document.getElementById("mc-chat").hidden = !has;
+    if (!has) return;
+    const url = mcUrl(mcCode), n = waNumClient(r.tel);
+    const nom = String(r.nom || "").replace(/^🏨\s*/, "").replace(/\s*\(.*\)\s*$/, "").trim();
+    const fr = !n || n.startsWith("33");
+    const txt = fr ? `Bonjour${nom ? " " + nom : ""}, voici la page de votre course Taxis Van Paris 🚖\nChauffeur, véhicule, point de rendez-vous, et vous pouvez m'écrire directement :\n${url}`
+      : `Hello${nom ? " " + nom : ""}, here is your Taxis Van Paris ride page 🚖\nDriver, vehicle, meeting point — and you can message me in your own language 🌍 :\n${url}`;
+    const wa = document.getElementById("mc-wa"); wa.href = "https://wa.me/" + (n || "") + "?text=" + encodeURIComponent(txt);
+    const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    const sms = document.getElementById("mc-sms"); sms.hidden = !n; sms.href = "sms:+" + n + (ios ? "&" : "?") + "body=" + encodeURIComponent(txt);
+    document.getElementById("mc-voir").href = url;
+    mcEcouter();
+  }
+  function mcEcouter() {
+    if (mcUnsubs.length || !mcCode) return;
+    const c = mcCode;
+    mcUnsubs.push(onSnapshot(doc(db, "trad_g", c), s => { const d = s.data() || {}; mcLangue = d.langue || null;
+      document.getElementById("mc-lang").textContent = mcLangue ? "· client en " + (MC_LANGS[mcLangue] || mcLangue) : "· le client n'a pas encore ouvert la page"; }, () => {}));
+    mcUnsubs.push(onSnapshot(query(collection(db, "trad_g", c, "msgs"), orderBy("t", "desc"), limit(80)), s => {
+      mcMsgs = s.docs.map(d => ({ id: d.id, ...d.data() })).reverse(); mcDessiner(); mcTraduireClient();
+    }, e => { document.getElementById("mc-msgs").innerHTML = `<div class="mc-vide">Accès refusé (règle Firebase à ajouter)</div>`; }));
+  }
+  async function mcTraduire(textes, de, vers) {
+    const idToken = await auth.currentUser.getIdToken();
+    const r = await fetch(API_TVP, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "traduire", idToken, de, vers, textes }) }).then(x => x.json());
+    if (!r.ok) throw new Error(r.error || "erreur"); return r.traductions;
+  }
+  async function mcTraduireClient() {
+    for (const m of mcMsgs) {
+      if (m.de !== "client" || m.traduction != null || mcEnTrad.has(m.id)) continue; mcEnTrad.add(m.id);
+      try { const [tr] = await mcTraduire([m.texte], m.langue || "", "fr"); await updateDoc(doc(db, "trad_g", mcCode, "msgs", m.id), { traduction: tr || m.texte }); } catch (e) { mcEnTrad.delete(m.id); }
+    }
+  }
+  function mcDessiner() {
+    const box = document.getElementById("mc-msgs");
+    if (!mcMsgs.length) { box.innerHTML = `<div class="mc-vide">Aucun message. Le client peut t'écrire depuis sa page.</div>`; return; }
+    const hm = v => { const ms = v && v.toMillis ? v.toMillis() : 0; return ms ? new Date(ms).toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }) : "…"; };
+    box.innerHTML = mcMsgs.map(m => m.de === "client"
+      ? `<div class="mc-b"><b>${esc(m.traduction || "…")}</b>${m.langue && m.langue !== "fr" ? `<small>🌍 ${esc(m.texte)}</small>` : ""}<small>${hm(m.t)}</small></div>`
+      : `<div class="mc-b moi">${esc(m.texte)}${m.traduction && m.traduction !== m.texte ? `<small>→ ${esc(m.traduction)}</small>` : ""}<small>${hm(m.t)}</small></div>`).join("");
+    box.scrollTop = box.scrollHeight;
+  }
+  document.getElementById("mc-close").addEventListener("click", () => { mcStop(); document.getElementById("modal-lien").classList.remove("shown"); });
+  document.getElementById("mc-save").addEventListener("click", async () => {
+    const r = mcR; if (!r) return;
+    const v = id => document.getElementById(id).value.trim();
+    const lien = { prenom: v("mc-prenom"), tel: v("mc-tel"), modele: v("mc-modele"), plaque: v("mc-plaque").toUpperCase(), rdv: v("mc-rdv") };
+    const pr = mcProfil(), vk = vehLabel(r.vehicule) || "x";
+    Object.assign(pr, { prenom: lien.prenom, tel: lien.tel, modele: lien.modele, plaque: lien.plaque, ["modele_" + vk]: lien.modele, ["plaque_" + vk]: lien.plaque });
+    try { localStorage.setItem("tvp_mc_prof", JSON.stringify(pr)); } catch (e) {}
+    const m = String(r.date || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    const fin = m ? new Date(+m[1], +m[2] - 1, +m[3] + 2, 23, 59).getTime() : 0;
+    const exp = Math.max(fin, Date.now() + 2 * 864e5);
+    const nom = String(r.nom || "").replace(/^🏨\s*/, "").replace(/\s*\(.*\)\s*$/, "").trim().split(/\s+/).filter(x => !/^(m|mr|mme|mlle|monsieur|madame|mrs|ms|miss)\.?$/i.test(x))[0] || "";
+    const data = {
+      type: "course",
+      course: { nom: nom.length > 1 ? nom.charAt(0).toUpperCase() + nom.slice(1) : "", date: r.date || "", heure: r.heure || "", dep: r.dep || "", arr: r.arr || "", pax: r.pax || "", bagages: r.bagages || "", vol: volCode(r) || r.vol || "" },
+      chauffeur: { prenom: lien.prenom, tel: lien.tel.replace(/[^\d+]/g, "").replace(/^0/, "+33") },
+      vehicule: { modele: lien.modele, plaque: lien.plaque },
+      rdv: { texte: lien.rdv, lieu: r.dep || "" }, t: serverTimestamp()
+    };
+    const btn = document.getElementById("mc-save"); btn.disabled = true;
+    try {
+      let c = mcCode;
+      if (!c) {
+        const a = "abcdefghjkmnpqrstuvwxyz23456789", rr = new Uint32Array(14); crypto.getRandomValues(rr); c = Array.from(rr, x => a[x % a.length]).join("");
+        await setDoc(doc(db, "trad_codes", c), { owner: auth.currentUser.uid, actif: true, exp: Timestamp.fromMillis(exp), t: serverTimestamp() });
+        await setDoc(doc(db, "trad_g", c), { owner: auth.currentUser.uid, langue: null, ...data });
+      } else {
+        await setDoc(doc(db, "trad_codes", c), { owner: auth.currentUser.uid, actif: true, exp: Timestamp.fromMillis(exp) }, { merge: true });
+        await setDoc(doc(db, "trad_g", c), data, { merge: true });
+      }
+      await updateDoc(doc(db, "reservations", r.id), { lienCourse: c, lien });
+      mcCode = c; r.lienCourse = c; r.lien = lien;
+      btn.textContent = "Mettre à jour la page client"; document.getElementById("mc-infos").open = false;
+      majLienUI(); toast("✔ Page client prête — envoie-la par WhatsApp", 3500);
+    } catch (e) { toast("Impossible : " + ((e && e.code) || "erreur") + (e && e.code === "permission-denied" ? " (règle Firebase)" : ""), 6000); }
+    btn.disabled = false;
+  });
+  document.getElementById("mc-copy").addEventListener("click", () => { copyText(mcUrl(mcCode)); toast("Lien copié"); });
+  document.getElementById("mc-form").addEventListener("submit", async e => {
+    e.preventDefault(); const inp = document.getElementById("mc-txt"), texte = inp.value.trim().slice(0, 600); if (!texte || !mcCode) return; inp.value = "";
+    const vers = mcTR(mcLangue || "en-GB");
+    let tr = texte;
+    if (vers !== "fr") { try { [tr] = await mcTraduire([texte], "fr", vers); } catch (x) { tr = null; toast("Traduction impossible, message envoyé en français", 4000); } }
+    try { await addDoc(collection(db, "trad_g", mcCode, "msgs"), { de: "chauffeur", texte, langue: "fr", traduction: tr || texte, langueT: vers, t: serverTimestamp() }); }
+    catch (x) { inp.value = texte; toast("Envoi impossible : " + ((x && x.code) || "erreur"), 5000); }
+  });
+  document.getElementById("mc-stop").addEventListener("click", async () => {
+    if (!mcCode || !confirm("Désactiver ce lien ? Le client ne pourra plus voir sa page ni t'écrire.")) return;
+    try { await setDoc(doc(db, "trad_codes", mcCode), { owner: auth.currentUser.uid, actif: false }, { merge: true }); await updateDoc(doc(db, "reservations", mcR.id), { lienCourse: null }); toast("Lien désactivé"); mcStop(); document.getElementById("modal-lien").classList.remove("shown"); }
+    catch (x) { toast("Impossible : " + ((x && x.code) || "erreur"), 5000); }
+  });
+  // Notification « nouveau message client » : ouvre directement la conversation
+  function ouvrirConv(c) {
+    if (!c) return; let n = 0;
+    const essai = () => { const r = reservationsCache.find(x => x.lienCourse === c); if (r) ouvrirLien(r.id); else if (++n < 30) setTimeout(essai, 700); };
+    essai();
+  }
+  if ("serviceWorker" in navigator) navigator.serviceWorker.addEventListener("message", e => { if (e.data && e.data.type === "conv") ouvrirConv(e.data.code); });
+  const convParam = new URLSearchParams(location.search).get("conv");
+  if (convParam) ouvrirConv(convParam.replace(/[^a-z0-9]/g, ""));
   // Demande d'avis Google au client après la course
   const AVIS_LINK = "https://g.page/r/CWXImdGQDnt4ECE/review";
   const TRIP_FR = "https://www.tripadvisor.fr/UserReviewEdit-d34709392?m=68676";
@@ -1353,7 +1540,7 @@ function anonymise(title,location){
         const boutons = (nouv ? `<button class="vu-btn" data-vu="${esc(r.id)}">👁 Vu</button>` : "") + (ferme ? `<button class="no" data-st="en attente" data-id="${esc(r.id)}">Rétablir</button>` :
             (r.statut !== "confirmée" ? `<button class="ok" data-st="confirmée" data-id="${esc(r.id)}">Confirmer</button>` : "") +
             `<button class="done" data-st="terminée" data-id="${esc(r.id)}">Effectuée</button><button class="no" data-st="annulée" data-id="${esc(r.id)}">Annuler</button>`) +
-          waClient(r) + smsClient(r) + waAvis(r) + (groupOf(r) === 0 && r.statut !== "annulée" ? waChauffeur(r) : "") + (groupOf(r) === 0 && r.statut !== "annulée" ? pancarteBtn(r) : "") + (groupOf(r) === 0 && r.statut !== "annulée" ? `<a class="grp-btn" target="_blank" rel="noopener" href="${waLink(shareMessage(shareItem(r)))}">📢 Dispatcher</a>` : "") +
+          waClient(r) + smsClient(r) + waAvis(r) + (groupOf(r) === 0 && r.statut !== "annulée" ? waChauffeur(r) : "") + (groupOf(r) === 0 && r.statut !== "annulée" ? pancarteBtn(r) : "") + (groupOf(r) === 0 && r.statut !== "annulée" ? lienBtn(r) : "") + (groupOf(r) === 0 && r.statut !== "annulée" ? `<a class="grp-btn" target="_blank" rel="noopener" href="${waLink(shareMessage(shareItem(r)))}">📢 Dispatcher</a>` : "") +
           (groupOf(r) === 0 ? calLink([r], "📅", "cal-btn") : "") +
           (r.statut === "terminée" ? `<button class="edit" data-facture="${esc(r.id)}">🧾 ${r.factureNumero ? "Facture n° " + esc(r.factureNumero) : "Facture"}</button>` : "") +
           `<button class="edit" data-edit="${esc(r.id)}">✏️ Modifier</button><button class="del" data-del="${esc(r.id)}" aria-label="Supprimer">🗑️</button>`;
@@ -1377,6 +1564,7 @@ function anonymise(title,location){
       try { await setDoc(doc(db, "pancarte", auth.currentUser.uid), { nom: b.dataset.nom, ligne: b.dataset.ligne || "", ts: serverTimestamp() }); clearTimeout(lent); toast("Envoyé à la pancarte ✔ " + b.dataset.nom, 5000); }
       catch (e) { clearTimeout(lent); toast("Échec envoi pancarte : " + ((e && e.code) || "erreur") + (e && e.code === "permission-denied" ? " (règle Firebase)" : ""), 8000); }
     }));
+    box.querySelectorAll("[data-lien]").forEach(b => b.addEventListener("click", () => ouvrirLien(b.dataset.lien)));
     box.querySelectorAll("[data-avis]").forEach(b => b.addEventListener("click", () => { updateDoc(doc(db, "reservations", b.dataset.avis), { avisDemande: true }).catch(() => {}); }));
     box.querySelectorAll("[data-avistrip]").forEach(b => b.addEventListener("click", () => { updateDoc(doc(db, "reservations", b.dataset.avistrip), { avisTripDemande: true }).catch(() => {}); }));
     box.querySelectorAll("[data-edit]").forEach(b => b.addEventListener("click", () => openEditResa(b.dataset.edit)));

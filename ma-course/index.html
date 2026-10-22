@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#070605">
+<link rel="icon" href="../traduction-p4v9/icon-192.png">
+<link rel="apple-touch-icon" href="../traduction-p4v9/icon-192.png">
+<title>Taxis Van Paris – My ride</title>
+<style>
+:root{--bg:#070605;--card:#141210;--card2:#1b1813;--line:#2b2620;--ink:#f7f3ea;--mut:#9b9384;--gold:#d4b25e;--gold2:#a8842f;--red:#ef4b4f;--green:#46c37b;--top:env(safe-area-inset-top);--bot:env(safe-area-inset-bottom)}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+html{background:var(--bg)}
+body{margin:0;min-height:100vh;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,Inter,Arial,sans-serif;-webkit-text-size-adjust:100%;
+ background:radial-gradient(120% 50% at 50% -10%,rgba(212,178,94,.16),transparent 60%),var(--bg);overflow-x:hidden}
+button,a.b{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .12s ease}
+button:active,a.b:active{transform:scale(.97)}
+.wrap{max-width:520px;margin:0 auto;padding:calc(12px + var(--top)) 16px calc(110px + var(--bot))}
+.top{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.top .lg{flex:none;width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#1a1408;background:linear-gradient(145deg,#ecd08a,var(--gold) 50%,var(--gold2))}
+.top .nm{flex:1;min-width:0;font-weight:800;font-size:16px;line-height:1.15}.top .nm small{display:block;color:var(--mut);font-weight:600;font-size:12.5px}
+.lang{flex:none;display:inline-flex;align-items:center;gap:6px;background:rgba(212,178,94,.1);border:1.5px solid rgba(212,178,94,.55);border-radius:999px;padding:8px 13px;font-weight:800;font-size:14px;max-width:46vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+h1{font-size:26px;line-height:1.15;margin:4px 0 4px;font-weight:800;letter-spacing:-.02em}
+.sub{color:var(--mut);margin:0 0 16px;line-height:1.45}
+.card{background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:20px;padding:16px;margin-bottom:12px}
+.card h2{margin:0 0 12px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);font-weight:800}
+.when{font-size:20px;font-weight:800;margin-bottom:10px}
+.route{display:grid;grid-template-columns:18px 1fr;gap:4px 10px;font-size:16px;line-height:1.35}
+.route i{font-style:normal;display:flex;justify-content:center;padding-top:3px}
+.route .dot{width:10px;height:10px;border-radius:50%;border:2px solid var(--gold);margin-top:3px}
+.route .dot.f{background:var(--gold)}
+.route .ln{width:2px;background:linear-gradient(var(--gold),rgba(212,178,94,.2));margin:0 auto;min-height:14px}
+.route small{display:block;color:var(--mut);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.chip{background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:999px;padding:6px 11px;font-size:14px;font-weight:650}
+.drv{display:flex;gap:14px;align-items:center}
+.av{flex:none;width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:#1a1408;background:linear-gradient(145deg,#ecd08a,var(--gold) 50%,var(--gold2));box-shadow:0 8px 22px rgba(212,178,94,.25)}
+.drv b{font-size:20px;display:block}.drv span{color:var(--mut);font-size:15px}
+.plate{display:inline-flex;align-items:stretch;margin-top:12px;border-radius:7px;overflow:hidden;border:2px solid #222;background:#fff;color:#111;font-family:"SF Mono",Menlo,Consolas,monospace;font-weight:800;font-size:21px;letter-spacing:.06em;box-shadow:0 4px 14px rgba(0,0,0,.4)}
+.plate::before{content:"F";display:flex;align-items:flex-end;justify-content:center;width:24px;padding-bottom:3px;background:#1d48b8;color:#fff;font-size:12px;font-family:inherit;letter-spacing:0}
+.plate span{padding:4px 12px}
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.b{display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;border-radius:14px;font-weight:800;font-size:16px;text-decoration:none;border:1.5px solid rgba(212,178,94,.55);color:var(--gold);background:transparent}
+.b.g{background:linear-gradient(180deg,#e2c477,var(--gold) 45%,var(--gold2));color:#1a1408;border:0}
+.b.w{border-color:rgba(70,195,123,.6);color:var(--green)}
+.meet{font-size:17px;line-height:1.5;white-space:pre-line}
+.orig{margin-top:10px;font-size:13px;color:var(--mut);background:none;border:0;padding:0;text-decoration:underline}
+.origt{margin-top:6px;font-size:14px;color:var(--mut);white-space:pre-line}
+.chat .hint{color:var(--mut);font-size:14.5px;line-height:1.45;margin:-4px 0 12px}
+.msgs{display:flex;flex-direction:column;gap:9px}
+.bub{max-width:86%;padding:10px 13px 7px;border-radius:18px 18px 18px 6px;background:#201c17;border:1px solid var(--line);line-height:1.38;word-wrap:break-word;font-size:16.5px;animation:in .25s ease both}
+@keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.bub.me{align-self:flex-end;border-radius:18px 18px 6px 18px;background:linear-gradient(160deg,rgba(212,178,94,.24),rgba(212,178,94,.1));border-color:rgba(212,178,94,.35)}
+.bub .tm{font-size:11px;color:var(--mut);margin-top:4px;text-align:right}
+.bub.pend{opacity:.6}
+.empty{color:var(--mut);font-size:14px;text-align:center;padding:8px 0}
+.dock{position:fixed;left:0;right:0;bottom:0;z-index:20;background:rgba(7,6,5,.88);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border-top:1px solid rgba(255,255,255,.07);padding:10px 12px calc(10px + var(--bot))}
+.dock form{max-width:520px;margin:0 auto;display:flex;gap:8px}
+.dock input{flex:1;min-width:0;font:inherit;font-size:17px;color:var(--ink);background:rgba(255,255,255,.05);border:1.5px solid var(--line);border-radius:999px;padding:12px 16px}
+.dock input:focus{outline:none;border-color:var(--gold)}
+.dock button{flex:none;width:50px;height:50px;border-radius:50%;border:0;font-size:20px;background:linear-gradient(180deg,#e2c477,var(--gold) 45%,var(--gold2));color:#1a1408;font-weight:900}
+.sheet{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center}
+.sheet .in{width:100%;max-width:520px;background:var(--card);border-radius:22px 22px 0 0;padding:18px 16px calc(18px + var(--bot));border-top:1px solid var(--line)}
+.sheet h3{margin:0 0 12px;font-size:16px;text-align:center}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid button{background:rgba(255,255,255,.04);border:1.5px solid var(--line);border-radius:14px;padding:14px 10px;font-weight:750;font-size:16px}
+.grid button.on{border-color:var(--gold);color:var(--gold)}
+.center{min-height:80vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px;color:var(--mut)}
+.center .lg{width:64px;height:64px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-weight:900;color:#1a1408;background:linear-gradient(145deg,#ecd08a,var(--gold) 50%,var(--gold2))}
+.toast{position:fixed;left:50%;bottom:calc(84px + var(--bot));transform:translateX(-50%);background:#2a241b;border:1px solid rgba(212,178,94,.4);color:var(--ink);padding:10px 16px;border-radius:999px;font-size:14px;z-index:60;max-width:90vw}
+[dir=rtl] .route,[dir=rtl] .drv{direction:rtl}
+</style>
+</head>
+<body>
+<div id="load" class="center"><div class="lg">TVP</div><div id="loadT">…</div></div>
+
+<div id="fin" class="center" hidden><div class="lg">TVP</div><h1 id="finT" style="color:var(--ink)"></h1><p id="finS"></p><a class="b g" id="finWa" style="padding:0 22px" href="https://wa.me/33667402005">💬 WhatsApp</a></div>
+
+<main class="wrap" id="app" hidden>
+  <div class="top"><div class="lg">TVP</div><div class="nm">Taxis Van Paris<small>Paris · CDG · Orly</small></div><button class="lang" id="bLang"></button></div>
+  <h1 id="hello"></h1>
+  <p class="sub" id="helloS"></p>
+
+  <section class="card"><h2 id="tRide"></h2>
+    <div class="when" id="when"></div>
+    <div class="route" id="route"></div>
+    <div class="chips" id="chips"></div>
+  </section>
+
+  <section class="card" id="cDrv"><h2 id="tDrv"></h2>
+    <div class="drv"><div class="av" id="av"></div><div><b id="drvN"></b><span id="drvV"></span></div></div>
+    <div class="plate" id="plate" hidden><span id="plateT"></span></div>
+    <div class="acts"><a class="b" id="bCall">📞 <span id="tCall"></span></a><a class="b w" id="bWa" target="_blank" rel="noopener">💬 WhatsApp</a></div>
+  </section>
+
+  <section class="card" id="cMeet"><h2 id="tMeet"></h2>
+    <div class="meet" id="meet"></div>
+    <button class="orig" id="bOrig" hidden></button><div class="origt" id="origT" hidden></div>
+    <div class="acts" id="mapActs" style="grid-template-columns:1fr"><a class="b" id="bMap" target="_blank" rel="noopener">🗺️ <span id="tMap"></span></a></div>
+  </section>
+
+  <section class="card chat"><h2 id="tChat"></h2>
+    <p class="hint" id="chatHint"></p>
+    <div class="msgs" id="msgs"></div>
+  </section>
+</main>
+
+<div class="dock" id="dock" hidden><form id="fSend"><input id="txt" autocomplete="off" enterkeyhint="send" maxlength="600"><button aria-label="Send">➤</button></form></div>
+
+<div class="sheet" id="sheet" hidden><div class="in"><h3 id="tLang">🌍</h3><div class="grid" id="grid"></div></div></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, addDoc, collection, query, orderBy, limit, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+const API="https://script.google.com/macros/s/AKfycbynqJeRA8W1AoYiHWQhS-ZPGHrEHyQBW8xp4xFGAYgP68lAugMsNZqWYkleYV1P4Va6/exec";
+const app=initializeApp({apiKey:"AIzaSyBN8uBFONIt1tDTH9C-NIQKeulFdJ2m26Q",authDomain:"taxis-van-paris-by-abts.firebaseapp.com",projectId:"taxis-van-paris-by-abts",storageBucket:"taxis-van-paris-by-abts.firebasestorage.app",messagingSenderId:"53887245170",appId:"1:53887245170:web:2a3b785d734c54e01f9beb"});
+const auth=getAuth(app), db=getFirestore(app);
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+const toast=t=>{const d=document.createElement('div');d.className='toast';d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),3000)};
+const tsMs=v=>v&&typeof v.toMillis==='function'?v.toMillis():(v&&v.seconds?v.seconds*1000:0);
+
+/* Langues (mêmes codes que l'appli TVP Traduction) */
+const LANGS=[['en-GB','English','en'],['fr','Français','fr'],['ar','العربية','ar'],['zh-CN','中文','zh-CN'],['ja','日本語','ja'],['pt','Português','pt'],['it','Italiano','it'],['ru','Русский','ru'],['es','Español','es'],['de','Deutsch','de']];
+const T={
+ en:{load:'Loading your ride…',hello:'Hello {n} 👋',hello0:'Hello 👋',helloS:'Everything about your ride is here. You can write to your driver in your language.',ride:'Your ride',drv:'Your driver',meet:'Meeting point',chat:'Message your driver',hint:'Write in your language: your driver receives it translated, and his replies appear here in your language.',ph:'Your message…',call:'Call',map:'Open in Maps',orig:'Show original (French)',pax:'passengers',bags:'bags',flight:'Flight',from:'Pick-up',to:'Drop-off',empty:'No messages yet.',err:'Could not send. Please try again.',fin:'This link is no longer active',finS:'Thank you for riding with Taxis Van Paris. Need another ride? Contact us on WhatsApp.',lang:'Choose your language',drv0:'Your driver will be confirmed soon'},
+ fr:{load:'Chargement de votre course…',hello:'Bonjour {n} 👋',hello0:'Bonjour 👋',helloS:'Toutes les infos de votre course sont ici. Vous pouvez écrire à votre chauffeur dans votre langue.',ride:'Votre course',drv:'Votre chauffeur',meet:'Point de rendez-vous',chat:'Écrire à votre chauffeur',hint:'Écrivez dans votre langue : votre chauffeur reçoit la traduction, et ses réponses s\'affichent ici dans votre langue.',ph:'Votre message…',call:'Appeler',map:'Ouvrir le plan',orig:'Voir le texte original',pax:'passagers',bags:'bagages',flight:'Vol',from:'Départ',to:'Arrivée',empty:'Aucun message pour le moment.',err:'Envoi impossible, réessayez.',fin:'Ce lien n\'est plus actif',finS:'Merci d\'avoir voyagé avec Taxis Van Paris. Besoin d\'une autre course ? Écrivez-nous sur WhatsApp.',lang:'Choisissez votre langue',drv0:'Votre chauffeur sera confirmé bientôt'},
+ ar:{load:'جارٍ تحميل رحلتك…',hello:'مرحباً {n} 👋',hello0:'مرحباً 👋',helloS:'كل معلومات رحلتك هنا. يمكنك مراسلة السائق بلغتك.',ride:'رحلتك',drv:'سائقك',meet:'نقطة اللقاء',chat:'راسل سائقك',hint:'اكتب بلغتك: يستلم السائق رسالتك مترجمة، وتظهر ردوده هنا بلغتك.',ph:'رسالتك…',call:'اتصال',map:'فتح الخريطة',orig:'عرض النص الأصلي (بالفرنسية)',pax:'ركاب',bags:'حقائب',flight:'الرحلة',from:'الانطلاق',to:'الوصول',empty:'لا توجد رسائل بعد.',err:'تعذّر الإرسال، حاول مرة أخرى.',fin:'هذا الرابط لم يعد نشطاً',finS:'شكراً لسفرك مع Taxis Van Paris. هل تحتاج رحلة أخرى؟ راسلنا على واتساب.',lang:'اختر لغتك',drv0:'سيتم تأكيد السائق قريباً'},
+ 'zh-CN':{load:'正在加载您的行程…',hello:'您好 {n} 👋',hello0:'您好 👋',helloS:'您的行程信息都在这里。您可以用自己的语言给司机发消息。',ride:'您的行程',drv:'您的司机',meet:'接机/集合地点',chat:'给司机发消息',hint:'请用您的语言书写：司机会收到翻译，他的回复也会以您的语言显示在这里。',ph:'输入消息…',call:'致电',map:'打开地图',orig:'查看原文（法语）',pax:'位乘客',bags:'件行李',flight:'航班',from:'上车地点',to:'目的地',empty:'暂无消息。',err:'发送失败，请重试。',fin:'此链接已失效',finS:'感谢您乘坐 Taxis Van Paris。需要再次用车？请通过 WhatsApp 联系我们。',lang:'选择语言',drv0:'司机信息即将确认'},
+ ja:{load:'ご予約を読み込み中…',hello:'{n} 様、こんにちは 👋',hello0:'こんにちは 👋',helloS:'ご予約の情報はすべてこちらです。ドライバーにご自身の言語でメッセージを送れます。',ride:'ご予約内容',drv:'担当ドライバー',meet:'待ち合わせ場所',chat:'ドライバーにメッセージ',hint:'ご自身の言語で入力してください。ドライバーには翻訳されて届き、返信もこちらにご自身の言語で表示されます。',ph:'メッセージを入力…',call:'電話する',map:'地図を開く',orig:'原文（フランス語）を表示',pax:'名',bags:'個の荷物',flight:'便名',from:'お迎え場所',to:'目的地',empty:'まだメッセージはありません。',err:'送信できませんでした。もう一度お試しください。',fin:'このリンクは無効になりました',finS:'Taxis Van Paris をご利用いただきありがとうございました。またのご予約は WhatsApp でどうぞ。',lang:'言語を選択',drv0:'ドライバーはまもなく確定します'},
+ pt:{load:'A carregar a sua viagem…',hello:'Olá {n} 👋',hello0:'Olá 👋',helloS:'Todas as informações da sua viagem estão aqui. Pode escrever ao seu motorista na sua língua.',ride:'A sua viagem',drv:'O seu motorista',meet:'Ponto de encontro',chat:'Escrever ao motorista',hint:'Escreva na sua língua: o motorista recebe a tradução e as respostas dele aparecem aqui na sua língua.',ph:'A sua mensagem…',call:'Ligar',map:'Abrir no mapa',orig:'Ver texto original (francês)',pax:'passageiros',bags:'malas',flight:'Voo',from:'Partida',to:'Chegada',empty:'Ainda não há mensagens.',err:'Não foi possível enviar. Tente novamente.',fin:'Este link já não está ativo',finS:'Obrigado por viajar com a Taxis Van Paris. Precisa de outra viagem? Fale connosco no WhatsApp.',lang:'Escolha a sua língua',drv0:'O seu motorista será confirmado em breve'},
+ it:{load:'Caricamento della corsa…',hello:'Buongiorno {n} 👋',hello0:'Buongiorno 👋',helloS:'Tutte le informazioni sulla sua corsa sono qui. Può scrivere al suo autista nella sua lingua.',ride:'La sua corsa',drv:'Il suo autista',meet:'Punto d\'incontro',chat:'Scrivi all\'autista',hint:'Scriva nella sua lingua: l\'autista riceve la traduzione e le sue risposte appaiono qui nella sua lingua.',ph:'Il suo messaggio…',call:'Chiama',map:'Apri la mappa',orig:'Mostra testo originale (francese)',pax:'passeggeri',bags:'bagagli',flight:'Volo',from:'Partenza',to:'Arrivo',empty:'Ancora nessun messaggio.',err:'Invio non riuscito, riprovi.',fin:'Questo link non è più attivo',finS:'Grazie per aver viaggiato con Taxis Van Paris. Serve un\'altra corsa? Ci scriva su WhatsApp.',lang:'Scelga la lingua',drv0:'Il suo autista sarà confermato a breve'},
+ ru:{load:'Загрузка поездки…',hello:'Здравствуйте, {n} 👋',hello0:'Здравствуйте 👋',helloS:'Вся информация о вашей поездке здесь. Вы можете писать водителю на своём языке.',ride:'Ваша поездка',drv:'Ваш водитель',meet:'Место встречи',chat:'Написать водителю',hint:'Пишите на своём языке: водитель получит перевод, а его ответы появятся здесь на вашем языке.',ph:'Ваше сообщение…',call:'Позвонить',map:'Открыть карту',orig:'Показать оригинал (на французском)',pax:'пасс.',bags:'багаж',flight:'Рейс',from:'Откуда',to:'Куда',empty:'Сообщений пока нет.',err:'Не удалось отправить. Попробуйте ещё раз.',fin:'Эта ссылка больше не активна',finS:'Спасибо, что выбрали Taxis Van Paris. Нужна ещё поездка? Напишите нам в WhatsApp.',lang:'Выберите язык',drv0:'Водитель скоро будет подтверждён'},
+ es:{load:'Cargando su trayecto…',hello:'Hola {n} 👋',hello0:'Hola 👋',helloS:'Toda la información de su trayecto está aquí. Puede escribir a su conductor en su idioma.',ride:'Su trayecto',drv:'Su conductor',meet:'Punto de encuentro',chat:'Escribir al conductor',hint:'Escriba en su idioma: el conductor recibe la traducción y sus respuestas aparecen aquí en su idioma.',ph:'Su mensaje…',call:'Llamar',map:'Abrir el mapa',orig:'Ver texto original (francés)',pax:'pasajeros',bags:'maletas',flight:'Vuelo',from:'Recogida',to:'Destino',empty:'Aún no hay mensajes.',err:'No se pudo enviar. Inténtelo de nuevo.',fin:'Este enlace ya no está activo',finS:'Gracias por viajar con Taxis Van Paris. ¿Necesita otro trayecto? Escríbanos por WhatsApp.',lang:'Elija su idioma',drv0:'Su conductor se confirmará pronto'},
+ de:{load:'Ihre Fahrt wird geladen…',hello:'Hallo {n} 👋',hello0:'Hallo 👋',helloS:'Alle Infos zu Ihrer Fahrt finden Sie hier. Sie können Ihrem Fahrer in Ihrer Sprache schreiben.',ride:'Ihre Fahrt',drv:'Ihr Fahrer',meet:'Treffpunkt',chat:'Dem Fahrer schreiben',hint:'Schreiben Sie in Ihrer Sprache: Ihr Fahrer erhält die Übersetzung, seine Antworten erscheinen hier in Ihrer Sprache.',ph:'Ihre Nachricht…',call:'Anrufen',map:'Karte öffnen',orig:'Originaltext anzeigen (Französisch)',pax:'Fahrgäste',bags:'Gepäckstücke',flight:'Flug',from:'Abholung',to:'Ziel',empty:'Noch keine Nachrichten.',err:'Senden fehlgeschlagen. Bitte erneut versuchen.',fin:'Dieser Link ist nicht mehr aktiv',finS:'Danke, dass Sie mit Taxis Van Paris gefahren sind. Noch eine Fahrt? Schreiben Sie uns auf WhatsApp.',lang:'Sprache wählen',drv0:'Ihr Fahrer wird bald bestätigt'}
+};
+const LG=c=>LANGS.find(l=>l[0]===c)||null;
+const TK=c=>({'en-GB':'en','en-US':'en'})[c]||c;          // clé du dictionnaire
+const TR=c=>(LG(c)||LANGS[0])[2];                          // code de traduction
+function langueAuto(){
+  const nav=(navigator.languages||[navigator.language||'en']).map(x=>String(x).toLowerCase());
+  for(const n of nav){const b=n.split('-')[0];if(b==='zh')return 'zh-CN';if(b==='en')return 'en-GB';const f=LANGS.find(l=>l[0]===b);if(f)return f[0]}
+  return 'en-GB';
+}
+const code=(new URLSearchParams(location.search).get('c')||'').replace(/[^a-z0-9]/g,'').slice(0,30);
+let L=LG(ls.get('tvp_mc_lang'))?ls.get('tvp_mc_lang'):langueAuto();
+let info=null,msgs=[],pend=[],tradInfo={},tradEnCours='';
+const t=k=>(T[TK(L)]||T.en)[k]||T.en[k];
+
+function appliquerLangue(){
+  document.documentElement.lang=TR(L);document.documentElement.dir=L==='ar'?'rtl':'ltr';
+  $('bLang').textContent='🌍 '+LG(L)[1];$('loadT').textContent=t('load');
+  $('txt').placeholder=t('ph');
+  ['ride','drv','meet','chat'].forEach(k=>{$('t'+k[0].toUpperCase()+k.slice(1)).textContent=t(k)});
+  $('chatHint').textContent=t('hint');$('tCall').textContent=t('call');$('tMap').textContent=t('map');$('tLang').textContent='🌍 '+t('lang');
+  $('finT').textContent=t('fin');$('finS').textContent=t('finS');
+  if(info)rendre();
+}
+$('bLang').onclick=()=>{
+  $('grid').innerHTML=LANGS.map(l=>`<button data-l="${l[0]}" class="${l[0]===L?'on':''}">${esc(l[1])}</button>`).join('');
+  $('grid').querySelectorAll('button').forEach(b=>b.onclick=()=>{L=b.dataset.l;ls.set('tvp_mc_lang',L);$('sheet').hidden=true;appliquerLangue();envoyerLangue()});
+  $('sheet').hidden=false;
+};
+$('sheet').onclick=e=>{if(e.target===$('sheet'))$('sheet').hidden=true};
+
+async function api(body){
+  const idToken=await auth.currentUser.getIdToken();
+  const ctl=new AbortController();const to=setTimeout(()=>ctl.abort(),9000);
+  try{const r=await fetch(API,{method:'POST',signal:ctl.signal,headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({...body,action:'course',idToken,code})}).then(x=>x.json());if(!r.ok)throw new Error(r.error||'erreur');return r}
+  finally{clearTimeout(to)}
+}
+let langEnvoyee='';
+async function envoyerLangue(){if(!info||langEnvoyee===L)return;langEnvoyee=L;try{await setDoc(doc(db,'trad_g',code),{langue:L,t:serverTimestamp()},{merge:true})}catch(e){}}
+
+const fmtDate=(d,h)=>{const m=String(d||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);if(!m)return h||'';
+  const dt=new Date(+m[1],+m[2]-1,+m[3]);let s=dt.toLocaleDateString(TR(L),{weekday:'long',day:'numeric',month:'long'});s=s.charAt(0).toUpperCase()+s.slice(1);
+  if(h){const [hh,mm]=h.split(':');const x=new Date(+m[1],+m[2]-1,+m[3],+hh,+mm||0);s+=' · '+x.toLocaleTimeString(TR(L),{hour:'2-digit',minute:'2-digit'})}return s};
+
+async function traduireInfo(){
+  const tr=TR(L);if(tr==='fr'||!info)return;
+  const textes=[info.rdv&&info.rdv.texte,info.vehicule&&info.vehicule.modele].map(x=>String(x||''));
+  const cle=tr+'|'+textes.join('|');if(tradInfo[cle]||tradEnCours===cle)return;tradEnCours=cle;
+  try{const r=await api({textes,de:'fr',vers:tr,push:false});tradInfo[cle]=r.traductions;rendre()}catch(e){}finally{tradEnCours=''}
+}
+function rendre(){
+  const c=info.course||{},ch=info.chauffeur||{},v=info.vehicule||{},rdv=info.rdv||{};
+  const tr=TR(L),cle=tr+'|'+[rdv.texte,v.modele].map(x=>String(x||'')).join('|'),ti=tr==='fr'?[rdv.texte,v.modele]:tradInfo[cle];
+  if(tr!=='fr'&&!ti)traduireInfo();
+  const prenom=String(c.nom||'').trim();
+  $('hello').textContent=prenom?t('hello').replace('{n}',prenom):t('hello0');$('helloS').textContent=t('helloS');
+  $('when').textContent=fmtDate(c.date,c.heure);
+  $('route').innerHTML=`<i><span class="dot"></span></i><div><small>${esc(t('from'))}</small>${esc(c.dep||'—')}</div><i><span class="ln"></span></i><div></div><i><span class="dot f"></span></i><div><small>${esc(t('to'))}</small>${esc(c.arr||'—')}</div>`;
+  $('chips').innerHTML=[c.pax&&`👥 ${esc(c.pax)} ${esc(t('pax'))}`,+c.bagages>0&&`🧳 ${esc(c.bagages)} ${esc(t('bags'))}`,c.vol&&`✈️ ${esc(t('flight'))} ${esc(c.vol)}`].filter(Boolean).map(x=>`<span class="chip">${x}</span>`).join('');
+  // chauffeur
+  const pn=String(ch.prenom||'').trim();
+  $('av').textContent=pn?pn[0].toUpperCase():'🚖';$('drvN').textContent=pn||t('drv0');
+  $('drvV').textContent=(ti?ti[1]:v.modele)||v.modele||'';
+  $('plate').hidden=!v.plaque;$('plateT').textContent=String(v.plaque||'').toUpperCase();
+  const tel=String(ch.tel||'+33667402005').replace(/[^\d+]/g,''),wa=tel.replace(/^\+/,'').replace(/^0/,'33');
+  $('bCall').href='tel:'+tel;$('bWa').href='https://wa.me/'+wa;$('finWa').href='https://wa.me/'+wa;
+  // rendez-vous
+  $('cMeet').hidden=!rdv.texte;
+  $('meet').textContent=ti?(ti[0]||rdv.texte||''):(rdv.texte||'');
+  $('bOrig').hidden=tr==='fr'||!rdv.texte;$('bOrig').textContent=t('orig');$('origT').textContent=rdv.texte||'';
+  const lieu=rdv.lieu||c.dep;$('mapActs').hidden=!lieu;$('bMap').href='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(lieu||'');
+  dessiner();
+}
+$('bOrig').onclick=()=>{$('origT').hidden=!$('origT').hidden};
+
+const hm=ms=>ms?new Date(ms).toLocaleTimeString(TR(L),{hour:'2-digit',minute:'2-digit'}):'';
+function dessiner(){
+  const liste=msgs.concat(pend);
+  if(!liste.length){$('msgs').innerHTML=`<div class="empty">${esc(t('empty'))}</div>`;return}
+  $('msgs').innerHTML=liste.map(m=>{
+    const moi=m.de==='client';const txt=moi?m.texte:(m.traduction||m.texte);
+    return `<div class="bub ${moi?'me':''} ${m.pend?'pend':''}">${esc(txt)}<div class="tm">${m.pend?'…':hm(tsMs(m.t))}${moi&&!m.pend?' ✓':''}</div></div>`;
+  }).join('');
+}
+function finir(){$('app').hidden=true;$('dock').hidden=true;$('load').hidden=true;$('fin').hidden=false}
+
+$('fSend').onsubmit=async e=>{
+  e.preventDefault();const texte=$('txt').value.trim().slice(0,600);if(!texte)return;$('txt').value='';
+  const p={de:'client',texte,pend:true,t:null};pend.push(p);dessiner();scrollBas();
+  let trad=null;const src=TR(L);
+  if(src!=='fr'){try{const r=await api({textes:[texte],de:src,vers:'fr',push:true,nom:(info.course||{}).nom||''});trad=r.traductions[0]||null}catch(e){}}
+  else{try{await api({textes:[texte],de:'fr',vers:'fr',push:true,nom:(info.course||{}).nom||''})}catch(e){}trad=texte}
+  try{await addDoc(collection(db,'trad_g',code,'msgs'),{de:'client',texte,langue:src,traduction:trad,langueT:'fr',t:serverTimestamp()})}
+  catch(e){toast(t('err'));$('txt').value=texte}
+  pend=pend.filter(x=>x!==p);dessiner();
+};
+const scrollBas=()=>setTimeout(()=>window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'}),60);
+
+appliquerLangue();
+if(!code){finir()}
+else{
+  onAuthStateChanged(auth,u=>{
+    if(!u){signInAnonymously(auth).catch(()=>finir());return}
+    onSnapshot(doc(db,'trad_codes',code),s=>{const d=s.exists()?s.data():null;if(!d||!d.actif||tsMs(d.exp)<Date.now())finir()},()=>finir());
+    onSnapshot(doc(db,'trad_g',code),s=>{
+      if(!s.exists()){finir();return}
+      info=s.data();$('load').hidden=true;$('app').hidden=false;$('dock').hidden=false;rendre();envoyerLangue();
+    },()=>finir());
+    let premier=true;
+    onSnapshot(query(collection(db,'trad_g',code,'msgs'),orderBy('t','desc'),limit(80)),s=>{
+      const n=msgs.length;msgs=s.docs.map(d=>({id:d.id,...d.data()})).reverse();dessiner();
+      if(!premier&&msgs.length>n&&msgs[msgs.length-1].de!=='client'){scrollBas();try{navigator.vibrate&&navigator.vibrate(120)}catch(e){}}
+      premier=false;
+    },()=>{});
+  });
+}
+</script>
+</body>
+</html>

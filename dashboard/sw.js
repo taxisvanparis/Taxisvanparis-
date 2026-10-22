@@ -12,9 +12,7 @@ self.addEventListener('push', e => {
   try { p = e.data ? e.data.json() : {}; } catch (x) { p = { body: e.data ? e.data.text() : '' }; }
   const d = p.data || (p.notification ? { title: p.notification.title, body: p.notification.body } : p);
   e.waitUntil((async () => {
-    const n = (await lireN()) + 1;
-    await ecrireN(n);
-    await pastille(n);
+    if (!String(d.tag || '').startsWith('conv-')) { const n = (await lireN()) + 1; await ecrireN(n); await pastille(n); }
     await self.registration.showNotification(d.title || '🚖 Nouvelle réservation', {
       body: d.body || '', icon: 'icon-192.png', badge: 'badge-96.png', tag: d.tag || ('resa-' + Date.now()),
       data: { url: d.url || './' }
@@ -25,9 +23,11 @@ self.addEventListener('push', e => {
 self.addEventListener('notificationclick', e => {
   e.notification.close();
   e.waitUntil((async () => {
+    const url = (e.notification.data && e.notification.data.url) || './';
+    const conv = (String(url).match(/[?&]conv=([a-z0-9]+)/) || [])[1];
     const liste = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
-    for (const c of liste) { if (c.url.includes('/dashboard')) { try { await c.focus(); return; } catch (x) {} } }
-    await self.clients.openWindow('./');
+    for (const c of liste) { if (c.url.includes('/dashboard')) { try { await c.focus(); if (conv) c.postMessage({ type: 'conv', code: conv }); return; } catch (x) {} } }
+    await self.clients.openWindow(conv ? './?conv=' + conv : './');
   })());
 });
 
