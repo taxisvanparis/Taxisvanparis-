@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#050505">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Équipe">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<title>TVP Équipe</title>
+<style>
+:root{--bg:#050505;--card:#121212;--line:#2a2a2a;--ink:#fff;--mut:#9a9a9a;--gold:#C9A84C;--red:#e5484d;--green:#46c37b;--top:env(safe-area-inset-top);--bot:env(safe-area-inset-bottom)}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,Arial,sans-serif;-webkit-text-size-adjust:100%;overflow:hidden}
+button{font:inherit;color:inherit;cursor:pointer}
+input,textarea{font:inherit;font-size:17px;color:var(--ink);background:#0b0b0b;border:2px solid var(--line);border-radius:12px;padding:12px;width:100%}
+input:focus,textarea:focus{outline:none;border-color:var(--gold)}
+label{display:block;color:var(--mut);font-size:13px;text-transform:uppercase;letter-spacing:.06em;margin:14px 0 6px}
+.btn{background:var(--gold);color:#111;border:0;border-radius:12px;padding:13px 18px;font-weight:800;font-size:17px;min-height:48px;width:100%}
+.btn.ghost{background:transparent;color:var(--gold);border:2px solid var(--gold)}
+.btn.red{background:transparent;color:var(--red);border:2px solid var(--red)}
+.btn.sm{width:auto;padding:8px 12px;font-size:14px;min-height:38px;border-radius:10px}
+.err{color:var(--red);font-weight:700;min-height:20px;margin-top:8px}
+.mut{color:var(--mut)}
+/* écrans plein */
+.screen{position:fixed;inset:0;display:flex;flex-direction:column;padding:calc(18px + var(--top)) 18px calc(18px + var(--bot));overflow:auto;background:var(--bg);z-index:50}
+.screen .box{max-width:420px;width:100%;margin:auto}
+.screen h1{font-size:26px;margin:0 0 6px}.screen h1 b{color:var(--gold)}
+/* app */
+#app{position:fixed;inset:0;display:flex;flex-direction:column}
+header{padding:calc(8px + var(--top)) 14px 8px;display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--bg);border-bottom:1px solid var(--line);z-index:5}
+header h1{font-size:19px;margin:0;font-weight:800}header h1 b{color:var(--gold)}
+.share{display:flex;align-items:center;gap:8px;background:var(--card);border:2px solid var(--line);border-radius:999px;padding:6px 12px 6px 8px;font-weight:800;font-size:14px}
+.share i{width:12px;height:12px;border-radius:50%;background:#555}
+.share.on{border-color:var(--green)}.share.on i{background:var(--green);box-shadow:0 0 0 0 rgba(70,195,123,.7);animation:pl 1.8s infinite}
+@keyframes pl{70%{box-shadow:0 0 0 8px rgba(70,195,123,0)}100%{box-shadow:0 0 0 0 rgba(70,195,123,0)}}
+main{flex:1;position:relative;min-height:0}
+.view{position:absolute;inset:0;display:none;flex-direction:column}
+.view.on{display:flex}
+nav{display:grid;grid-template-columns:1fr 1fr 1fr;border-top:1px solid var(--line);background:#0a0a0a;padding-bottom:var(--bot)}
+nav button{background:none;border:0;padding:10px 4px 8px;color:var(--mut);font-weight:800;font-size:13px;position:relative}
+nav button span{display:block;font-size:22px;line-height:1.1}
+nav button.on{color:var(--gold)}
+nav .nb{position:absolute;top:4px;left:calc(50% + 8px);min-width:20px;height:20px;border-radius:999px;background:var(--red);color:#fff;font-size:12px;line-height:20px;padding:0 6px}
+/* carte */
+#map{flex:1;background:#111}
+.leaflet-container{background:#111;font:inherit}
+.fab{position:absolute;right:12px;z-index:500;display:flex;flex-direction:column;gap:8px}
+.fab button{width:48px;height:48px;border-radius:14px;border:1px solid var(--line);background:rgba(18,18,18,.95);font-size:22px;color:var(--gold)}
+.pin{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:17px;color:#fff;border:3px solid #fff;box-shadow:0 3px 10px rgba(0,0,0,.6)}
+.pin.old{filter:grayscale(1);opacity:.65}
+.pin.me{outline:3px solid rgba(201,168,76,.6);outline-offset:3px}
+.strip{position:absolute;left:0;right:0;bottom:0;z-index:500;display:flex;gap:8px;overflow-x:auto;padding:10px 12px;background:linear-gradient(transparent,rgba(5,5,5,.92) 30%)}
+.chip{flex:none;display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:8px 12px 8px 8px;text-align:left}
+.chip .dot{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff}
+.chip b{display:block;font-size:14px}.chip small{color:var(--mut);font-size:12px}
+.sheet{position:absolute;left:10px;right:10px;bottom:76px;z-index:600;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;box-shadow:0 10px 30px rgba(0,0,0,.6)}
+.sheet .acts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px}
+.sheet a,.sheet .acts button{display:flex;align-items:center;justify-content:center;text-decoration:none;border-radius:10px;padding:10px 6px;font-weight:800;font-size:14px;background:#0b0b0b;border:2px solid var(--line);color:var(--ink);min-height:44px}
+/* messages */
+#msgs{flex:1;overflow-y:auto;padding:12px 12px 6px;display:flex;flex-direction:column;gap:6px}
+.day{align-self:center;color:var(--mut);font-size:12px;font-weight:700;margin:8px 0 2px;text-transform:capitalize}
+.bub{max-width:82%;padding:9px 12px;border-radius:16px;background:var(--card);border:1px solid var(--line);font-size:16px;line-height:1.35;word-wrap:break-word;white-space:pre-wrap}
+.bub .who{font-size:12px;font-weight:800;margin-bottom:2px}
+.bub .tm{font-size:11px;color:var(--mut);text-align:right;margin-top:3px}
+.bub.me{align-self:flex-end;background:#2a2311;border-color:#4a3d18}
+.bub .loc{display:inline-block;margin-top:4px;color:var(--gold);font-weight:800;text-decoration:none}
+.compose{display:flex;gap:8px;padding:8px 10px;border-top:1px solid var(--line);background:#0a0a0a;align-items:flex-end}
+.compose textarea{resize:none;height:46px;max-height:120px;border-radius:22px;padding:11px 14px;font-size:16px}
+.compose button{flex:none;width:46px;height:46px;border-radius:50%;border:0;background:var(--gold);color:#111;font-size:20px;font-weight:900}
+.compose button.loc{background:var(--card);border:1px solid var(--line);color:var(--gold)}
+.empty{color:var(--mut);text-align:center;margin:auto;padding:30px}
+/* équipe */
+.pad{flex:1;overflow-y:auto;padding:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
+.mem{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
+.mem:first-child{border-top:0}
+.mem .dot{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;flex:none}
+.mem .d{flex:1;min-width:0}.mem b{display:block}.mem small{color:var(--mut)}
+.mem .x{background:none;border:0;color:var(--red);font-size:14px;font-weight:800;padding:8px}
+.inv{display:flex;align-items:center;gap:8px;border-top:1px solid var(--line);padding:10px 0}
+.inv:first-child{border-top:0}.inv .d{flex:1}.inv small{color:var(--mut)}
+.toggle{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 0}
+.sw{position:relative;width:52px;height:30px;flex:none}.sw input{opacity:0;width:0;height:0}
+.sw span{position:absolute;inset:0;background:#333;border-radius:999px;transition:.2s}
+.sw span::before{content:"";position:absolute;width:24px;height:24px;left:3px;top:3px;border-radius:50%;background:#fff;transition:.2s}
+.sw input:checked+span{background:var(--green)}.sw input:checked+span::before{transform:translateX(22px)}
+.note{font-size:13px;color:var(--mut);line-height:1.45}
+.toast{position:fixed;left:50%;bottom:calc(90px + var(--bot));transform:translateX(-50%);background:#222;border:1px solid var(--line);color:#fff;padding:10px 16px;border-radius:12px;font-weight:700;z-index:999;max-width:90%;text-align:center}
+</style>
+</head>
+<body>
+
+<!-- Connexion -->
+<div class="screen" id="sLogin" hidden>
+  <div class="box">
+    <h1>TVP <b>Équipe</b></h1>
+    <p class="mut" id="lgIntro">Connecte-toi avec ton compte Taxis Van Paris.</p>
+    <div id="lgNomWrap" hidden><label for="lgNom">Ton prénom (visible par l'équipe)</label><input id="lgNom" autocomplete="given-name" maxlength="20"></div>
+    <label for="lgEmail">E-mail</label><input id="lgEmail" type="email" autocomplete="email" inputmode="email">
+    <label for="lgPass">Mot de passe</label><input id="lgPass" type="password" autocomplete="current-password">
+    <div class="err" id="lgErr"></div>
+    <button class="btn" id="lgGo">Se connecter</button>
+    <p style="text-align:center;margin-top:16px"><button class="btn ghost" id="lgSwitch" hidden>Je n'ai pas de compte : en créer un</button></p>
+  </div>
+</div>
+
+<!-- Pas encore membre -->
+<div class="screen" id="sWait" hidden>
+  <div class="box" style="text-align:center">
+    <h1>TVP <b>Équipe</b></h1>
+    <p id="waitTxt" class="mut">Tu n'es pas encore dans l'équipe. Demande un lien d'invitation à Badr ou à son associé.</p>
+    <div class="err" id="waitErr"></div>
+    <button class="btn ghost" id="waitOut" style="margin-top:14px">Se déconnecter</button>
+  </div>
+</div>
+
+<div id="app" hidden>
+  <header>
+    <h1>TVP <b>Équipe</b></h1>
+    <button class="share" id="shareBtn" aria-pressed="false"><i></i><span id="shareTxt">Position coupée</span></button>
+  </header>
+  <main>
+    <section class="view on" id="vMap">
+      <div id="map"></div>
+      <div class="fab" style="top:12px"><button id="fMe" title="Me centrer" aria-label="Me centrer">◎</button><button id="fAll" title="Voir tout le monde" aria-label="Voir tout le monde">⤢</button></div>
+      <div class="strip" id="strip"></div>
+      <div class="sheet" id="sheet" hidden></div>
+    </section>
+    <section class="view" id="vChat">
+      <div id="msgs"><div class="empty">Aucun message pour l'instant.</div></div>
+      <form class="compose" id="cForm">
+        <button type="button" class="loc" id="cLoc" title="Envoyer ma position" aria-label="Envoyer ma position">📍</button>
+        <textarea id="cTxt" rows="1" maxlength="500" placeholder="Message à l'équipe…"></textarea>
+        <button type="submit" aria-label="Envoyer">➤</button>
+      </form>
+    </section>
+    <section class="view" id="vTeam">
+      <div class="pad">
+        <div class="card"><div class="lbl mut" style="font-size:13px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">L'équipe</div><div id="mems"></div></div>
+        <div class="card" id="admCard" hidden>
+          <div style="font-weight:800;font-size:17px">➕ Ajouter une personne</div>
+          <label for="invNom">Prénom de la personne</label>
+          <input id="invNom" maxlength="20" placeholder="ex. Karim">
+          <button class="btn" id="invGo" style="margin-top:12px">Créer le lien d'invitation</button>
+          <p class="note">Le lien est valable 7 jours et ne marche qu'une fois. La personne crée son compte (ou se connecte) et rejoint l'équipe.</p>
+          <div id="invs"></div>
+        </div>
+        <div class="card">
+          <div class="toggle"><div><b>Partager ma position</b><div class="note">Visible uniquement par l'équipe.</div></div><label class="sw"><input type="checkbox" id="tShare"><span></span></label></div>
+          <div class="toggle"><div><b>Garder l'écran allumé</b><div class="note">Conseillé dans la voiture, téléphone sur le support.</div></div><label class="sw"><input type="checkbox" id="tWake"><span></span></label></div>
+          <p class="note">⚠️ Sur iPhone, la position n'est envoyée que quand l'appli est ouverte à l'écran. Si tu passes sur Waze, ton point s'arrête et devient gris après 5 minutes.</p>
+        </div>
+        <div class="card"><div class="note" id="meInfo"></div><button class="btn ghost" id="outBtn" style="margin-top:10px">Se déconnecter</button></div>
+      </div>
+    </section>
+  </main>
+  <nav>
+    <button class="on" data-v="vMap"><span>🗺️</span>Carte</button>
+    <button data-v="vChat"><span>💬</span>Messages<em class="nb" id="nbMsg" hidden></em></button>
+    <button data-v="vTeam"><span>👥</span>Équipe</button>
+  </nav>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, deleteDoc, addDoc, collection, query, orderBy, limit, where, onSnapshot, serverTimestamp, writeBatch, Timestamp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+const app=initializeApp({apiKey:"AIzaSyBN8uBFONIt1tDTH9C-NIQKeulFdJ2m26Q",authDomain:"taxis-van-paris-by-abts.firebaseapp.com",projectId:"taxis-van-paris-by-abts",storageBucket:"taxis-van-paris-by-abts.firebasestorage.app",messagingSenderId:"53887245170",appId:"1:53887245170:web:2a3b785d734c54e01f9beb"});
+const auth=getAuth(app), db=getFirestore(app);
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const COLORS=['#3b82f6','#c1272d','#16a34a','#9333ea','#ea580c','#0891b2','#db2777','#65a30d'];
+const OLD=5*60*1000;
+const toast=t=>{const d=document.createElement('div');d.className='toast';d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2600)};
+const tsMs=v=>v&&typeof v.toMillis==='function'?v.toMillis():(typeof v==='number'?v:(v instanceof Date?v.getTime():0));
+const ago=ms=>{if(!ms)return'—';const s=Math.max(0,(Date.now()-ms)/1000);if(s<60)return"à l'instant";if(s<3600)return'il y a '+Math.round(s/60)+' min';if(s<86400)return'il y a '+Math.round(s/3600)+' h';return new Date(ms).toLocaleDateString('fr-FR',{day:'numeric',month:'short'})};
+const hm=ms=>new Date(ms).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+
+let me=null, isAdmin=false, membres={}, positions={}, unsubs=[], mapReady=false;
+const params=new URLSearchParams(location.search);
+let inviteCode=params.get('invite')||store.get('tvp_invite',null);
+if(params.get('invite')) store.set('tvp_invite',inviteCode);
+
+/* ---------- Connexion ---------- */
+let creating=false;
+function showLogin(){
+  $('sLogin').hidden=false;$('sWait').hidden=true;$('app').hidden=true;
+  $('lgSwitch').hidden=!inviteCode;
+  if(inviteCode)$('lgIntro').textContent="Tu as été invité dans l'équipe Taxis Van Paris. Connecte-toi, ou crée ton compte.";
+}
+$('lgSwitch').onclick=()=>{creating=!creating;$('lgNomWrap').hidden=!creating;$('lgGo').textContent=creating?'Créer mon compte':'Se connecter';$('lgSwitch').textContent=creating?"J'ai déjà un compte : me connecter":"Je n'ai pas de compte : en créer un";$('lgPass').autocomplete=creating?'new-password':'current-password';$('lgErr').textContent=''};
+$('lgGo').onclick=async()=>{
+  const e=$('lgEmail').value.trim(),p=$('lgPass').value;$('lgErr').textContent='';
+  if(!e||!p){$('lgErr').textContent='E-mail et mot de passe obligatoires';return}
+  if(creating){const n=$('lgNom').value.trim();if(!n){$('lgErr').textContent='Indique ton prénom';return}if(p.length<6){$('lgErr').textContent='Mot de passe : 6 caractères minimum';return}store.set('tvp_nom',n)}
+  $('lgGo').disabled=true;
+  try{creating?await createUserWithEmailAndPassword(auth,e,p):await signInWithEmailAndPassword(auth,e,p);$('lgPass').value=''}
+  catch(err){const c=err.code||'';$('lgErr').textContent=c.includes('email-already')?'Ce compte existe déjà : connecte-toi':c.includes('weak')?'Mot de passe trop faible':c.includes('operation-not-allowed')?"La création de compte n'est pas activée":'E-mail ou mot de passe incorrect'}
+  finally{$('lgGo').disabled=false}
+};
+$('waitOut').onclick=$('outBtn').onclick=async()=>{stopShare(true);await signOut(auth)};
+
+onAuthStateChanged(auth,async u=>{
+  unsubs.forEach(f=>{try{f()}catch(e){}});unsubs=[];
+  me=u;
+  if(!u){showLogin();return}
+  $('sLogin').hidden=true;
+  try{const p=await getDoc(doc(db,'users',u.uid));const d=p.exists()?p.data():{};const r=String(d.role??d.Role??'').trim().toLowerCase();isAdmin=r.startsWith('admin');var nomUser=d.nom||d.name||d.Nom||''}catch(e){isAdmin=false}
+  let m=null;try{const s=await getDoc(doc(db,'equipe_membres',u.uid));m=s.exists()?s.data():null}catch(e){}
+  if(!m&&inviteCode){m=await rejoindre(u,inviteCode)}
+  if(!m&&isAdmin){
+    const nom=(nomUser||store.get('tvp_nom','')||(u.email||'').split('@')[0]).slice(0,20);
+    try{await setDoc(doc(db,'equipe_membres',u.uid),{nom,couleur:COLORS[/badr/i.test(nom)?1:0],t:serverTimestamp(),par:u.uid});m={nom}}catch(e){}
+  }
+  if(!m){$('sWait').hidden=false;$('app').hidden=true;return}
+  $('sWait').hidden=true;$('app').hidden=false;
+  $('admCard').hidden=!isAdmin;
+  $('meInfo').textContent='Connecté : '+(u.email||'')+(isAdmin?' · administrateur':'');
+  demarrer();
+});
+
+async function rejoindre(u,code){
+  try{
+    const iv=await getDoc(doc(db,'equipe_invites',code));
+    if(!iv.exists()){$('waitErr').textContent="Ce lien d'invitation n'existe pas.";store.set('tvp_invite',null);inviteCode=null;return null}
+    const d=iv.data();
+    if(d.utilisePar&&d.utilisePar!==u.uid){$('waitErr').textContent='Ce lien a déjà été utilisé. Demande-en un nouveau.';store.set('tvp_invite',null);inviteCode=null;return null}
+    if(tsMs(d.expire)<Date.now()){$('waitErr').textContent='Ce lien a expiré. Demande-en un nouveau.';store.set('tvp_invite',null);inviteCode=null;return null}
+    const nom=(store.get('tvp_nom','')||d.nom||(u.email||'').split('@')[0]).slice(0,20);
+    const b=writeBatch(db);
+    b.update(doc(db,'equipe_invites',code),{utilisePar:u.uid});
+    b.set(doc(db,'equipe_membres',u.uid),{nom,couleur:d.couleur||COLORS[2],t:serverTimestamp(),par:d.par||'',invite:code});
+    await b.commit();
+    store.set('tvp_invite',null);inviteCode=null;history.replaceState(null,'',location.pathname);
+    toast('Bienvenue dans l\'équipe, '+nom+' 👋');
+    return {nom};
+  }catch(e){$('waitErr').textContent="Impossible de rejoindre l'équipe ("+(e.code||'erreur')+').';return null}
+}
+
+/* ---------- Navigation ---------- */
+let curView='vMap';
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
+  curView=b.dataset.v;
+  document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id===curView));
+  if(curView==='vMap'&&map)setTimeout(()=>map.invalidateSize(),50);
+  if(curView==='vChat'){marquerLu();setTimeout(()=>{const m=$('msgs');m.scrollTop=m.scrollHeight},30)}
+});
+
+/* ---------- Carte ---------- */
+let map=null, markers={}, sel=null, firstFit=false;
+function initMap(){
+  if(map)return;
+  map=L.map('map',{zoomControl:false,attributionControl:true}).setView([48.8566,2.3522],11);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:19,subdomains:'abcd',attribution:'&copy; OpenStreetMap &copy; CARTO'}).addTo(map);
+  map.on('click',()=>{sel=null;$('sheet').hidden=true});
+}
+const col=uid=>(membres[uid]&&membres[uid].couleur)||'#777';
+const nomDe=uid=>(membres[uid]&&membres[uid].nom)||'?';
+const ini=n=>(String(n).trim()[0]||'?').toUpperCase();
+function drawMap(){
+  if(!map)return;
+  const now=Date.now();
+  Object.keys(markers).forEach(uid=>{const p=positions[uid];if(!p||!p.partage||!membres[uid]){map.removeLayer(markers[uid]);delete markers[uid]}});
+  Object.entries(positions).forEach(([uid,p])=>{
+    if(!p.partage||!membres[uid]||typeof p.lat!=='number')return;
+    const old=now-tsMs(p.t)>OLD;
+    const html=`<div class="pin${old?' old':''}${uid===me.uid?' me':''}" style="background:${col(uid)}">${esc(ini(nomDe(uid)))}</div>`;
+    const icon=L.divIcon({html,className:'',iconSize:[40,40],iconAnchor:[20,20]});
+    if(markers[uid]){markers[uid].setLatLng([p.lat,p.lng]);markers[uid].setIcon(icon)}
+    else{markers[uid]=L.marker([p.lat,p.lng],{icon}).addTo(map).on('click',e=>{L.DomEvent.stopPropagation(e);ouvrir(uid)})}
+  });
+  if(!firstFit&&Object.keys(markers).length){firstFit=true;toutVoir()}
+  if(sel)ouvrir(sel,true);
+  drawStrip();
+}
+function drawStrip(){
+  const ids=Object.keys(membres).sort((a,b)=>(a===me.uid?-1:b===me.uid?1:nomDe(a).localeCompare(nomDe(b))));
+  $('strip').innerHTML=ids.map(uid=>{const p=positions[uid];const on=p&&p.partage&&typeof p.lat==='number';const old=on&&Date.now()-tsMs(p.t)>OLD;
+    return `<button class="chip" data-u="${uid}"><span class="dot" style="background:${col(uid)}${on&&!old?'':';opacity:.45'}">${esc(ini(nomDe(uid)))}</span><span><b>${esc(nomDe(uid))}${uid===me.uid?' (moi)':''}</b><small>${on?(old?'⚪ ':'🟢 ')+ago(tsMs(p.t)):'Position coupée'}</small></span></button>`}).join('');
+  $('strip').querySelectorAll('.chip').forEach(c=>c.onclick=()=>{const u=c.dataset.u;const p=positions[u];if(p&&p.partage&&typeof p.lat==='number'){map.setView([p.lat,p.lng],15);ouvrir(u)}else toast(nomDe(u)+" ne partage pas sa position")});
+}
+function ouvrir(uid,refresh){
+  const p=positions[uid];if(!p||!p.partage)return;sel=uid;
+  const vit=typeof p.vit==='number'&&p.vit>0.5?' · '+Math.round(p.vit*3.6)+' km/h':'';
+  const g=`${p.lat.toFixed(6)},${p.lng.toFixed(6)}`;
+  $('sheet').innerHTML=`<div style="display:flex;align-items:center;gap:10px"><span class="pin" style="width:34px;height:34px;font-size:15px;border-width:2px;background:${col(uid)}">${esc(ini(nomDe(uid)))}</span><div><b style="font-size:17px">${esc(nomDe(uid))}${uid===me.uid?' (moi)':''}</b><div class="note">Mis à jour ${ago(tsMs(p.t))}${vit}${p.acc?' · précision ~'+Math.round(p.acc)+' m':''}</div></div></div>
+  <div class="acts"><a href="https://waze.com/ul?ll=${g}&navigate=yes" target="_blank" rel="noopener">Waze</a><a href="https://www.google.com/maps/dir/?api=1&destination=${g}" target="_blank" rel="noopener">Maps</a><button id="shMsg">Message</button></div>`;
+  $('sheet').hidden=false;
+  $('shMsg').onclick=()=>{document.querySelector('nav button[data-v="vChat"]').click();$('cTxt').value='@'+nomDe(uid)+' ';$('cTxt').focus()};
+}
+function toutVoir(){const pts=Object.values(markers).map(m=>m.getLatLng());if(!pts.length)return;if(pts.length===1)map.setView(pts[0],14);else map.fitBounds(L.latLngBounds(pts),{padding:[50,50],maxZoom:15})}
+$('fAll').onclick=toutVoir;
+$('fMe').onclick=()=>{const p=positions[me.uid];if(lastFix)map.setView([lastFix.lat,lastFix.lng],15);else if(p&&typeof p.lat==='number')map.setView([p.lat,p.lng],15);else toast('Active « Partager ma position »')};
+setInterval(()=>{if(me&&map)drawMap()},30000);
+
+/* ---------- Partage de position ---------- */
+let watchId=null, lastFix=null, lastSent=0, lastSentPos=null, wakeLock=null;
+const dist=(a,b)=>{const R=6371e3,t=Math.PI/180,dl=(b.lat-a.lat)*t,dn=(b.lng-a.lng)*t;const x=Math.sin(dl/2)**2+Math.cos(a.lat*t)*Math.cos(b.lat*t)*Math.sin(dn/2)**2;return 2*R*Math.asin(Math.sqrt(x))};
+function majShareUI(){const on=watchId!==null;$('shareBtn').classList.toggle('on',on);$('shareBtn').setAttribute('aria-pressed',on);$('shareTxt').textContent=on?'Position partagée':'Position coupée';$('tShare').checked=on}
+async function envoyerPos(f,force){
+  const now=Date.now();
+  if(!force&&lastSentPos&&now-lastSent<15000&&dist(lastSentPos,f)<30)return;
+  if(!force&&now-lastSent<5000)return;
+  lastSent=now;lastSentPos=f;
+  try{await setDoc(doc(db,'equipe_pos',me.uid),{lat:f.lat,lng:f.lng,acc:f.acc,vit:f.vit,cap:f.cap,partage:true,t:serverTimestamp()})}catch(e){console.warn(e)}
+}
+function startShare(){
+  if(!('geolocation' in navigator)){toast('Localisation non disponible sur cet appareil');return}
+  if(watchId!==null)return;
+  watchId=navigator.geolocation.watchPosition(pos=>{
+    const c=pos.coords;lastFix={lat:c.latitude,lng:c.longitude,acc:Math.round(c.accuracy||0),vit:typeof c.speed==='number'?c.speed:null,cap:typeof c.heading==='number'?c.heading:null};
+    envoyerPos(lastFix,false);
+  },err=>{
+    if(err.code===1){toast("Autorise la localisation pour l'appli dans les réglages");stopShare(false)}
+  },{enableHighAccuracy:true,maximumAge:5000,timeout:20000});
+  store.set('tvp_share',true);majShareUI();
+}
+async function stopShare(persist){
+  if(watchId!==null){navigator.geolocation.clearWatch(watchId);watchId=null}
+  if(persist!==false)store.set('tvp_share',false);
+  majShareUI();
+  if(me){try{await setDoc(doc(db,'equipe_pos',me.uid),{partage:false,t:serverTimestamp()})}catch(e){}}
+}
+$('shareBtn').onclick=()=>watchId===null?startShare():stopShare(true);
+$('tShare').onchange=e=>e.target.checked?startShare():stopShare(true);
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='visible'){if(lastFix&&watchId!==null)envoyerPos(lastFix,true);if($('tWake').checked)garderEcran(true)}
+});
+setInterval(()=>{if(watchId!==null&&lastFix&&document.visibilityState==='visible'&&Date.now()-lastSent>60000)envoyerPos(lastFix,true)},20000);
+async function garderEcran(on){
+  try{if(on){if('wakeLock' in navigator){wakeLock=await navigator.wakeLock.request('screen')}else toast("Ton téléphone ne permet pas de garder l'écran allumé")}else if(wakeLock){await wakeLock.release();wakeLock=null}}catch(e){}
+  store.set('tvp_wake',!!on);
+}
+$('tWake').onchange=e=>garderEcran(e.target.checked);
+
+/* ---------- Messages ---------- */
+let msgs=[];
+function marquerLu(){const last=msgs.length?tsMs(msgs[msgs.length-1].t)||Date.now():Date.now();store.set('tvp_lu',Math.max(store.get('tvp_lu',0),last));majBadge()}
+function majBadge(){const lu=store.get('tvp_lu',0);const n=msgs.filter(m=>m.de!==me.uid&&tsMs(m.t)>lu).length;$('nbMsg').hidden=!n;$('nbMsg').textContent=n>9?'9+':n;try{if('setAppBadge' in navigator)n?navigator.setAppBadge(n):navigator.clearAppBadge()}catch(e){}}
+function drawMsgs(){
+  const box=$('msgs');const bas=box.scrollHeight-box.scrollTop-box.clientHeight<80;
+  if(!msgs.length){box.innerHTML='<div class="empty">Aucun message pour l\'instant.<br>Écris le premier 👋</div>';return}
+  let h='',jour='';
+  msgs.forEach(m=>{const ms=tsMs(m.t)||Date.now();const j=new Date(ms).toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+    if(j!==jour){jour=j;h+=`<div class="day">${esc(j)}</div>`}
+    const mine=m.de===me.uid;
+    const loc=typeof m.lat==='number'?`<a class="loc" href="#" data-lat="${m.lat}" data-lng="${m.lng}">📍 Voir la position sur la carte</a>`:'';
+    h+=`<div class="bub${mine?' me':''}">${mine?'':`<div class="who" style="color:${col(m.de)}">${esc(m.nom||nomDe(m.de))}</div>`}${esc(m.texte||'')}${loc}<div class="tm">${hm(ms)}${m._pend?' · ⏳':''}</div></div>`});
+  box.innerHTML=h;
+  box.querySelectorAll('.loc').forEach(a=>a.onclick=e=>{e.preventDefault();document.querySelector('nav button[data-v="vMap"]').click();const ll=[+a.dataset.lat,+a.dataset.lng];setTimeout(()=>{map.setView(ll,16);L.popup().setLatLng(ll).setContent('Position envoyée').openOn(map)},80)});
+  if(bas||curView!=='vChat')box.scrollTop=box.scrollHeight;
+}
+async function envoyerMsg(texte,extra){
+  texte=texte.trim();if(!texte&&!extra)return;
+  try{await addDoc(collection(db,'equipe_msgs'),{de:me.uid,nom:nomDe(me.uid),texte:texte.slice(0,500),t:serverTimestamp(),...(extra||{})})}catch(e){toast("Message non envoyé ("+(e.code||'erreur')+')')}
+}
+$('cForm').onsubmit=e=>{e.preventDefault();const t=$('cTxt').value;$('cTxt').value='';$('cTxt').style.height='';envoyerMsg(t)};
+$('cTxt').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!/iPhone|iPad|Android/i.test(navigator.userAgent)){e.preventDefault();$('cForm').requestSubmit()}});
+$('cTxt').addEventListener('input',e=>{e.target.style.height='';e.target.style.height=Math.min(120,e.target.scrollHeight)+'px'});
+$('cLoc').onclick=()=>{
+  const send=f=>envoyerMsg('📍 Je suis ici',{lat:+f.lat.toFixed(6),lng:+f.lng.toFixed(6)});
+  if(lastFix)return send(lastFix);
+  if(!navigator.geolocation)return toast('Localisation non disponible');
+  navigator.geolocation.getCurrentPosition(p=>send({lat:p.coords.latitude,lng:p.coords.longitude}),()=>toast("Autorise la localisation pour l'appli"),{enableHighAccuracy:true,timeout:15000});
+};
+
+/* ---------- Équipe & invitations ---------- */
+function drawMembres(){
+  const ids=Object.keys(membres).sort((a,b)=>nomDe(a).localeCompare(nomDe(b)));
+  $('mems').innerHTML=ids.map(uid=>{const p=positions[uid];const on=p&&p.partage;
+    return `<div class="mem"><span class="dot" style="background:${col(uid)}">${esc(ini(nomDe(uid)))}</span><div class="d"><b>${esc(nomDe(uid))}${uid===me.uid?' (moi)':''}</b><small>${on?'Position partagée · '+ago(tsMs(p.t)):'Position coupée'}</small></div>${isAdmin&&uid!==me.uid?`<button class="x" data-rm="${uid}">Retirer</button>`:''}</div>`}).join('')||'<p class="mut">Personne pour l\'instant.</p>';
+  $('mems').querySelectorAll('[data-rm]').forEach(b=>b.onclick=async()=>{const u=b.dataset.rm;if(!confirm('Retirer '+nomDe(u)+" de l'équipe ? Il ne verra plus la carte ni les messages."))return;
+    try{const bt=writeBatch(db);bt.delete(doc(db,'equipe_membres',u));bt.delete(doc(db,'equipe_pos',u));await bt.commit();toast(nomDe(u)+' a été retiré')}catch(e){toast('Impossible ('+(e.code||'erreur')+')')}});
+}
+const lienInv=c=>location.origin+location.pathname+'?invite='+c;
+function drawInvites(list){
+  $('invs').innerHTML=list.length?'<label>Invitations en attente</label>'+list.map(i=>`<div class="inv"><div class="d"><b>${esc(i.nom)}</b><br><small>Expire ${new Date(tsMs(i.expire)).toLocaleDateString('fr-FR',{day:'numeric',month:'short'})}</small></div><button class="btn sm" data-wa="${i.id}">WhatsApp</button><button class="btn sm ghost" data-cp="${i.id}">Copier</button><button class="btn sm red" data-del="${i.id}">✕</button></div>`).join(''):'';
+  $('invs').querySelectorAll('[data-wa]').forEach(b=>b.onclick=()=>{const i=list.find(x=>x.id===b.dataset.wa);window.open('https://wa.me/?text='+encodeURIComponent(`Salut ${i.nom} 👋 Rejoins l'équipe Taxis Van Paris (carte en direct et messages) avec ce lien : ${lienInv(i.id)}\nAprès l'avoir ouvert, ajoute l'appli sur ton écran d'accueil.`),'_blank')});
+  $('invs').querySelectorAll('[data-cp]').forEach(b=>b.onclick=async()=>{try{await navigator.clipboard.writeText(lienInv(b.dataset.cp));toast('Lien copié')}catch(e){prompt('Copie ce lien :',lienInv(b.dataset.cp))}});
+  $('invs').querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{try{await deleteDoc(doc(db,'equipe_invites',b.dataset.del))}catch(e){toast('Impossible')}});
+}
+function code(){const a='abcdefghjkmnpqrstuvwxyz23456789';const r=new Uint32Array(12);crypto.getRandomValues(r);return Array.from(r,x=>a[x%a.length]).join('')}
+$('invGo').onclick=async()=>{
+  const nom=$('invNom').value.trim().slice(0,20);if(!nom){toast('Indique un prénom');return}
+  const used=Object.values(membres).map(m=>m.couleur);const couleur=COLORS.find(c=>!used.includes(c))||COLORS[Object.keys(membres).length%COLORS.length];
+  try{const c=code();await setDoc(doc(db,'equipe_invites',c),{nom,couleur,par:me.uid,cree:serverTimestamp(),expire:Timestamp.fromMillis(Date.now()+7*864e5),utilisePar:null});$('invNom').value='';toast("Lien créé : envoie-le à "+nom)}catch(e){toast('Impossible ('+(e.code||'erreur')+')')}
+};
+
+/* ---------- Démarrage ---------- */
+function demarrer(){
+  initMap();setTimeout(()=>map.invalidateSize(),60);
+  unsubs.push(onSnapshot(collection(db,'equipe_membres'),s=>{membres={};s.docs.forEach(d=>membres[d.id]=d.data());
+    if(me&&!membres[me.uid]&&!isAdmin){stopShare(true);signOut(auth);return}
+    drawMembres();drawMap();drawMsgs()},e=>console.warn(e)));
+  unsubs.push(onSnapshot(collection(db,'equipe_pos'),s=>{positions={};s.docs.forEach(d=>positions[d.id]=d.data({serverTimestamps:'estimate'}));drawMap();drawMembres()},e=>console.warn(e)));
+  unsubs.push(onSnapshot(query(collection(db,'equipe_msgs'),orderBy('t','desc'),limit(150)),{includeMetadataChanges:true},s=>{
+    msgs=s.docs.map(d=>({id:d.id,...d.data({serverTimestamps:'estimate'}),_pend:d.metadata&&d.metadata.hasPendingWrites})).reverse();
+    drawMsgs();if(curView==='vChat'&&document.visibilityState==='visible')marquerLu();else majBadge()},e=>console.warn(e)));
+  if(isAdmin)unsubs.push(onSnapshot(query(collection(db,'equipe_invites'),where('utilisePar','==',null)),s=>{drawInvites(s.docs.map(d=>({id:d.id,...d.data({serverTimestamps:'estimate'})})).filter(i=>tsMs(i.expire)>Date.now()))},e=>console.warn(e)));
+  if(store.get('tvp_share',false))startShare();else majShareUI();
+  if(store.get('tvp_wake',false)){$('tWake').checked=true;garderEcran(true)}
+}
+
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
