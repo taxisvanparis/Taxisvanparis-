@@ -112,6 +112,26 @@ h1{font-size:30px;margin:0 0 6px;font-weight:800;letter-spacing:-.02em}h1 b{back
 .sheet .sh{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;font-weight:800;font-size:19px;border-bottom:1px solid var(--line)}
 @keyframes blink{0%,100%{opacity:.25}50%{opacity:1}}
 .wait{display:inline-block;letter-spacing:.2em;color:var(--gold);animation:blink 1s infinite}
+/* écrans client : fin de course / retour */
+.ov{position:fixed;inset:0;z-index:90;display:flex;padding:calc(20px + var(--top)) 20px calc(20px + var(--bot));background:radial-gradient(120% 70% at 50% 0%,rgba(212,178,94,.2),transparent 60%),rgba(7,6,5,.97);animation:in .35s ease both;overflow:auto}
+.ovx{position:absolute;top:calc(14px + var(--top));right:16px;width:48px;height:48px;border-radius:50%;border:1px solid var(--line);background:rgba(255,255,255,.05);font-size:20px;color:var(--mut)}
+.ovin{width:100%;max-width:1000px;text-align:center;margin:auto}
+.ovh{font-size:clamp(28px,5vw,46px);font-weight:800;letter-spacing:-.02em;line-height:1.15;background:linear-gradient(90deg,#f6e2a6,var(--gold) 60%,#e8c46f);-webkit-background-clip:text;background-clip:text;color:transparent}
+.ovh small{display:block;font-size:clamp(16px,2.4vw,22px);font-weight:600;color:var(--mut);-webkit-text-fill-color:var(--mut);margin-top:8px;letter-spacing:0}
+.ovtot{margin:22px auto 0;display:inline-flex;flex-direction:column;gap:4px;padding:16px 34px;border-radius:22px;border:1.5px solid rgba(212,178,94,.5);background:rgba(212,178,94,.08)}
+.ovtot span{font-size:15px;color:var(--mut);text-transform:uppercase;letter-spacing:.12em;font-weight:700}
+.ovtot b{font-size:clamp(44px,8vw,72px);line-height:1;color:var(--ink)}
+.ovpay{margin-top:12px;color:var(--mut);font-size:16px;font-weight:600}
+.qrs{display:flex;flex-wrap:wrap;justify-content:center;gap:14px;margin-top:22px}
+.ovtot{margin-top:18px!important}
+.qr{width:min(215px,40vw);background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:22px;padding:16px 14px 14px;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.qr .code{background:#fff;border-radius:14px;padding:10px;aspect-ratio:1;display:flex;align-items:center;justify-content:center}
+.qr .code svg,.qr .code img{width:100%;height:100%;display:block}
+.qr b{display:block;font-size:16px;margin-top:12px;line-height:1.3}
+.qr small{display:block;color:var(--mut);font-size:13px;margin-top:3px}
+.qr.star{border-color:rgba(212,178,94,.55);box-shadow:0 10px 30px rgba(212,178,94,.18)}
+.fin-f label{margin-top:12px}
+.fin-f .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
 /* anti-débordement (anciens iPad / Safari) */
 html,body{max-width:100%;overflow-x:hidden}
 .wrap{width:100%;max-width:100vw;overflow:hidden}
@@ -157,6 +177,7 @@ html,body{max-width:100%;overflow-x:hidden}
     <div class="t"><b>Traduction</b></div>
     <button class="lang" id="chLang">🌍 —</button>
     <button class="ib on" id="chVoice" title="Lire les réponses à voix haute" aria-label="Lecture à voix haute">🔊</button>
+    <button class="ib" id="chFin" title="Fin de course / écrans client" aria-label="Fin de course">🏁</button>
     <button class="ib" id="chMenu" aria-label="Menu">⋯</button>
   </div>
   <div class="conv" id="chConv"></div>
@@ -210,8 +231,18 @@ html,body{max-width:100%;overflow-x:hidden}
 </div>
 
 <!-- Feuille : choix de langue / menu -->
+<div class="ov" id="ov" hidden>
+  <button class="ovx" id="ovx" aria-label="Fermer">✕</button>
+  <div class="ovin">
+    <div class="ovh" id="ovh"></div>
+    <div class="ovtot" id="ovtot" hidden></div>
+    <div class="ovpay" id="ovpay" hidden></div>
+    <div class="qrs" id="qrs"></div>
+  </div>
+</div>
 <div class="sheetbg" id="sheet" hidden><div class="sheet"><div class="sh"><span id="shTitle"></span><button class="ib" id="shClose">✕</button></div><div id="shBody" style="overflow-y:auto"></div></div></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
@@ -318,7 +349,7 @@ function lancer(){
   prechauffer();
   store.set('tvp_trad_mode',mode);
   if(mode==='face')return lancerFace();
-  unsubs.push(onSnapshot(refSess(),s=>{const d=s.data()||{};langue=d.langue&&LG(d.langue)?d.langue:null;majLangue()},e=>toast('Accès refusé par Firebase (règle à ajouter)')));
+  unsubs.push(onSnapshot(refSess(),s=>{const d=s.data()||{};langue=d.langue&&LG(d.langue)?d.langue:null;ecran=d.ecran||null;majLangue();majEcran()},e=>toast('Accès refusé par Firebase (règle à ajouter)')));
   unsubs.push(onSnapshot(query(refMsgs(),orderBy('t','desc'),limit(60)),{includeMetadataChanges:true},s=>{
     msgs=s.docs.map(d=>({id:d.id,...d.data({serverTimestamps:'estimate'}),_p:d.metadata.hasPendingWrites})).reverse();
     if(vus===null){vus=new Set(msgs.filter(m=>m.traduction).map(m=>m.id))}
@@ -440,7 +471,7 @@ $('chMenu').onclick=()=>{
 };
 async function nouveauClient(){
   if(!confirm('Effacer la conversation et attendre un nouveau client ?'))return;
-  try{const s=await getDocs(refMsgs());const b=writeBatch(db);s.docs.forEach(d=>b.delete(d.ref));b.set(refSess(),{langue:null,t:serverTimestamp()});await b.commit();toast('Prêt pour un nouveau client')}catch(e){toast('Impossible ('+(e.code||'erreur')+')')}
+  try{const s=await getDocs(refMsgs());const b=writeBatch(db);s.docs.forEach(d=>b.delete(d.ref));b.set(refSess(),{langue:null,ecran:null,t:serverTimestamp()});await b.commit();toast('Prêt pour un nouveau client')}catch(e){toast('Impossible ('+(e.code||'erreur')+')')}
 }
 
 /* ---------- Écran client (tablette) ---------- */
@@ -451,6 +482,55 @@ $('clVoice').textContent=store.get('tvp_trad_voix_cl',true)?'🔊':'🔇';
 $('clForm').onsubmit=e=>{e.preventDefault();const t=$('clTxt').value;$('clTxt').value='';envoyer('client',t)};
 $('clMic').onclick=()=>{debloquerVoix();const L=LG(langue);if(!L)return;ecouter($('clMic'),L.v,$('clLive'),t=>envoyer('client',t),()=>dictee($('clTxt'),null,'⌨️ 🎤'))};
 
+
+/* ---------- Écrans client : fin de course & réservez votre retour ---------- */
+const AVIS='https://g.page/r/CWXImdGQDnt4ECE/review', RESA='https://taxisvanparis.fr/#reserver';
+const VCARD='BEGIN:VCARD\nVERSION:3.0\nN:Taxis Van Paris;Badr;;;\nFN:Taxis Van Paris – Badr\nORG:Taxis Van Paris by ABTS\nTEL;TYPE=CELL,VOICE:+33667402005\nEMAIL:taxisvanparis@gmail.com\nURL:https://taxisvanparis.fr\nNOTE:Taxi & van 8 places – CDG, Orly, Beauvais, gares, Disneyland – 24h/24\nEND:VCARD';
+const TX_FIN=["Merci et bon voyage !","Merci d'avoir choisi Taxis Van Paris.","Total à payer","Carte bancaire, Apple Pay, Google Pay ou espèces","Laissez-nous un avis","30 secondes sur Google, merci !","Enregistrez notre numéro","Pour votre prochain trajet","Payer par carte en ligne","Scannez avec l'appareil photo","Réservez votre retour","Prix fixe garanti, 24h/24"];
+const TX_RET=["Besoin d'un taxi pour votre retour ?","Aéroports, gares, Disneyland Paris : prix fixe garanti, 24h/24.","Réservez votre retour","Prix fixe garanti, 24h/24","Enregistrez notre numéro","Pour votre prochain trajet"];
+let ecran=null, ecranCache={}, ovMasque=store.get('tvp_ov_masque',0), dernierMouv=Date.now(), ovLocal=false;
+function qrImg(txt){try{const q=qrcode(0,'M');q.addData(unescape(encodeURIComponent(txt)));q.make();return `<img alt="" src="${q.createDataURL(8,0)}">`}catch(e){return '<span style="color:#111;font-weight:800">QR</span>'}}
+async function textes(liste){const L=LG(langue);if(!L||TC(L)==='fr')return liste;const k=TC(L)+'|'+liste[0];if(ecranCache[k])return ecranCache[k];
+  try{const t=await traduire(liste,'fr',TC(L));const r=t.map((x,i)=>x||liste[i]);ecranCache[k]=r;return r}catch(e){return liste}}
+const tuile=(url,titre,sous,star)=>`<div class="qr${star?' star':''}"><div class="code">${qrImg(url)}</div><b>${esc(titre)}</b><small>${esc(sous)}</small></div>`;
+async function majEcran(){
+  if(mode!=='client'){majFinBtn();return}
+  const e=ecran&&Number(ecran.t)!==ovMasque?ecran:(ovLocal?{type:'retour'}:null);
+  if(!e||!langue){$('ov').hidden=true;return}
+  const L=LG(langue),rtl=RTL.includes(TC(L).split('-')[0])?'rtl':'ltr';$('ov').dir=rtl;
+  if(e.type==='fin'){
+    const T=await textes(TX_FIN);
+    $('ovh').innerHTML=`${esc(T[0])}<small>${esc(T[1])}</small>`;
+    const m=Number(e.montant);$('ovtot').hidden=!(m>0);$('ovpay').hidden=!(m>0);
+    if(m>0){$('ovtot').innerHTML=`<span>${esc(T[2])}</span><b>${m.toLocaleString('fr-FR',{minimumFractionDigits:m%1?2:0,maximumFractionDigits:2})} €</b>`;$('ovpay').textContent='💳 '+T[3]}
+    $('qrs').innerHTML=tuile(AVIS,'⭐ '+T[4],T[5],true)+(e.pay?tuile(e.pay,'💳 '+T[8],T[9]):'')+tuile(VCARD,'📇 '+T[6],T[7])+tuile(RESA,'🔁 '+T[10],T[11]);
+  }else{
+    const T=await textes(TX_RET);
+    $('ovh').innerHTML=`${esc(T[0])}<small>${esc(T[1])}</small>`;$('ovtot').hidden=true;$('ovpay').hidden=true;
+    $('qrs').innerHTML=tuile(RESA,'🔁 '+T[2],T[3],true)+tuile(VCARD,'📇 '+T[4],T[5]);
+  }
+  $('ov').hidden=false;
+}
+$('ovx').onclick=()=>{if(ecran){ovMasque=Number(ecran.t);store.set('tvp_ov_masque',ovMasque)}ovLocal=false;dernierMouv=Date.now();$('ov').hidden=true};
+['pointerdown','keydown'].forEach(ev=>document.addEventListener(ev,()=>{dernierMouv=Date.now()},{passive:true}));
+setInterval(()=>{if(mode==='client'&&langue&&!ecran&&!ovLocal&&$('ov').hidden&&Date.now()-dernierMouv>180000){ovLocal=true;majEcran()}},15000);
+async function setEcran(v){try{await setDoc(refSess(),{ecran:v},{merge:true})}catch(e){toast('Impossible ('+(e.code||'erreur')+')')}}
+function majFinBtn(){const b=$('chFin');if(!b)return;b.classList.toggle('on',!!ecran);b.textContent=ecran?(ecran.type==='fin'?'🏁':'🔁'):'🏁'}
+$('chFin').onclick=()=>{
+  const pay=store.get('tvp_lien_paiement','');
+  $('shTitle').textContent='Écran du client';
+  $('shBody').innerHTML=`<div class="fin-f" style="padding:14px 16px 18px">
+   <label for="fMont">Montant de la course (€) — facultatif</label><input id="fMont" type="number" inputmode="decimal" min="0" step="0.5" placeholder="ex. 85">
+   <label for="fPay">Mon lien de paiement par carte — facultatif</label><input id="fPay" type="url" inputmode="url" placeholder="ex. lien SumUp, Stripe, PayPal…" value="${esc(pay)}">
+   <div class="row2"><button class="btn" id="fFin">🏁 Fin de course</button><button class="btn ghost" id="fRet">🔁 Réservez votre retour</button></div>
+   <button class="btn ghost" id="fOff" style="margin-top:10px;border-color:rgba(255,255,255,.18);color:var(--ink)" ${ecran?'':'disabled'}>✕ Retirer l'écran de la tablette</button>
+   <p class="mut" style="font-size:13px;margin:12px 2px 0">« Fin de course » affiche sur la tablette, dans la langue du client : merci, le total, les QR codes avis Google ⭐, ton contact 📇, ton lien de paiement 💳 et « réservez votre retour » 🔁.</p></div>`;
+  $('sheet').hidden=false;
+  const lien=()=>{let v=$('fPay').value.trim();if(v&&!/^https?:\/\//i.test(v))v='https://'+v;store.set('tvp_lien_paiement',v);return v};
+  $('fFin').onclick=()=>{const m=parseFloat(String($('fMont').value).replace(',','.'));setEcran({type:'fin',montant:m>0?Math.round(m*100)/100:null,pay:lien()||null,t:Date.now()});fermer();toast('Écran « Fin de course » affiché sur la tablette')};
+  $('fRet').onclick=()=>{lien();setEcran({type:'retour',t:Date.now()});fermer();toast('Écran « Réservez votre retour » affiché')};
+  $('fOff').onclick=()=>{setEcran(null);fermer()};
+};
 /* ---------- Face à face (un seul écran, sans Firebase) ---------- */
 let fLang=store.get('tvp_trad_face_lang',null), fMsgs=[];
 function lancerFace(){
