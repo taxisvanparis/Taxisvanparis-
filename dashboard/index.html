@@ -195,7 +195,7 @@
     align-items:center;justify-content:center;z-index:50;padding:20px;
   }
   .modal-overlay.shown{display:flex;}
-  #tab-facturation table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  #tab-facturation table,#tab-chauffeurs table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
   #tab-facturation td,#tab-facturation th{white-space:nowrap}
   .modal{
     background:var(--card);color:var(--text);border-radius:14px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;
@@ -336,6 +336,13 @@
   #toast{background:var(--gold);color:#141008;}
 
   /* Réservations en cartes, groupées par jour */
+  .dsp-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;border:1.5px solid var(--border);border-radius:14px;padding:10px 12px;margin:0 0 14px;max-width:560px;background:var(--card)}
+  .dsp-bar b{font-size:15px}.dsp-bar small{color:var(--muted);flex-basis:100%;font-size:12.5px;line-height:1.4}
+  .dsp-sw{margin-left:auto;border:0;border-radius:999px;padding:8px 14px;font-weight:800;font-size:14px;cursor:pointer;font-family:inherit;background:var(--hover);color:var(--muted)}
+  .dsp-bar.on{border-color:var(--green);background:var(--green-bg)}.dsp-bar.on .dsp-sw{background:var(--green);color:#fff}
+  .dsp-tag{display:inline-block;font-size:12.5px;font-weight:600;border-radius:999px;padding:2px 9px;margin-top:4px;background:var(--blue-bg);color:var(--blue)}
+  .dsp-tag.pris{background:var(--green-bg);color:var(--green)}.dsp-tag.alerte{background:var(--amber-bg);color:var(--amber)}
+  .com-box{margin-top:22px}.com-box h3{margin:0 0 6px;font-size:16px;color:var(--heading)}.com-box p{color:var(--muted);font-size:13px;margin:0 0 10px}
   .kpis4{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;max-width:560px;}
   .vol-search{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:8px 8px 8px 12px;margin:0 0 12px;}
   .vol-search .vs-ic{font-size:16px}
@@ -448,6 +455,7 @@
     <div id="main">
       <!-- RÉSERVATIONS -->
       <div class="tab-panel active" id="tab-reservations">
+        <div class="dsp-bar" id="dsp-bar"><b>🤖 Dispatch auto</b><button type="button" class="dsp-sw" id="dsp-sw">…</button><small id="dsp-info">Les nouvelles réservations sont proposées sur Telegram à tes chauffeurs : le premier qui accepte a la course. Paiement à bord, commission 10 € par course.</small></div>
         <div class="kpis4">
           <div class="stat-card alert"><div class="label">à confirmer</div><div class="value" id="stat-attente">0</div></div>
           <div class="stat-card"><div class="label">courses à venir</div><div class="value" id="stat-avenir">0</div></div>
@@ -507,9 +515,11 @@
           <div></div>
         </div>
         <table>
-          <thead><tr><th>Nom</th><th>Téléphone</th><th>Véhicule</th><th>Statut</th><th>Compte app chauffeur</th><th></th></tr></thead>
-          <tbody id="chauffeur-tbody"><tr class="empty-row"><td colspan="6">Chargement…</td></tr></tbody>
+          <thead><tr><th>Nom</th><th>Telegram</th><th>Téléphone</th><th>Véhicule</th><th>Statut</th><th>Compte app chauffeur</th><th></th></tr></thead>
+          <tbody id="chauffeur-tbody"><tr class="empty-row"><td colspan="7">Chargement…</td></tr></tbody>
         </table>
+        <div class="com-box"><h3>🧾 Commissions à encaisser</h3><p>10 € par course prise via le dispatch auto (courses passées, non annulées).</p>
+          <table><thead><tr><th>Chauffeur</th><th>Courses</th><th>À payer</th><th></th></tr></thead><tbody id="com-tbody"><tr class="empty-row"><td colspan="4">Aucune commission en attente.</td></tr></tbody></table></div>
       </div>
 
       <!-- PARTAGE WHATSAPP -->
@@ -941,7 +951,9 @@ function anonymise(title,location){
       renderReservations();
       renderStatsResa();
       renderShare();
+      renderCommissions();
     }, onErr));
+    dspEtat();
 
     currentUnsubs.push(onSnapshot(collection(db, "factures"), snap => {
       const tous = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -1365,7 +1377,7 @@ function anonymise(title,location){
             <div class="rt">${esc(r.dep || "?")} → <b>${esc(r.arr || "?")}</b></div>
             ${meta ? `<div class="mt">${meta}</div>` : ""}
             ${r.tel ? `<div class="mt"><a href="tel:${esc(r.tel)}">${esc(r.tel)}</a>${waNumClient(r.tel) ? ` · <a class="wa-direct" target="_blank" rel="noopener" href="https://wa.me/${waNumClient(r.tel)}">💬 WhatsApp</a>` : ""}${r.chauffeurNom ? " · Chauffeur : " + esc(r.chauffeurNom) : ""}</div>` : (r.chauffeurNom ? `<div class="mt">Chauffeur : ${esc(r.chauffeurNom)}</div>` : "")}
-            ${vol}${note}
+            ${vol}${note}${dspTag(r)}
             <div class="l3"><span class="pr">${fmtPrix(r.prix)}${hotel && r.commission ? `<small>dont ${esc(r.commission)} € hôtel</small>` : ""}</span><div class="acts">${boutons}</div></div>
           </div></div>`;
       }).join("") + `</div>`).join("");
@@ -1460,15 +1472,87 @@ function anonymise(title,location){
     return `<span class="badge ${map[statut] || "dispo"}">${statut}</span>`;
   }
 
+  // ===== Dispatch auto (robot Telegram) =====
+  const API_DSP = "https://script.google.com/macros/s/AKfycbynqJeRA8W1AoYiHWQhS-ZPGHrEHyQBW8xp4xFGAYgP68lAugMsNZqWYkleYV1P4Va6/exec";
+  let dsp = { actif: false, bot: "", pret: false, commission: 10, charge: false };
+  async function dspAppel(op) {
+    const idToken = await auth.currentUser.getIdToken();
+    const r = await fetch(API_DSP, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "dispatch", op, idToken }) }).then(x => x.json());
+    if (!r.ok) throw new Error(r.error || "erreur");
+    dsp = { ...r, charge: true }; dspMaj(); renderChauffeurs(); return r;
+  }
+  function dspMaj() {
+    const bar = document.getElementById("dsp-bar"), sw = document.getElementById("dsp-sw"), info = document.getElementById("dsp-info");
+    if (!bar) return;
+    bar.classList.toggle("on", !!dsp.actif);
+    sw.textContent = !dsp.charge ? "…" : dsp.actif ? "ACTIVÉ" : "DÉSACTIVÉ";
+    const relies = chauffeursCache.filter(c => c.telegramChat).length;
+    info.textContent = !dsp.charge ? "Chargement…" : !dsp.pret ? "Robot pas encore installé (jeton Telegram manquant dans Apps Script)."
+      : (dsp.actif ? "✅ Les nouvelles réservations partent automatiquement sur Telegram. " : "Les réservations restent à attribuer à la main. ")
+        + relies + " chauffeur" + (relies > 1 ? "s" : "") + " relié" + (relies > 1 ? "s" : "") + " à Telegram · commission " + dsp.commission + " € par course.";
+  }
+  async function dspEtat() { try { await dspAppel("etat"); } catch (e) { dsp.charge = true; dsp.pret = false; dspMaj(); } }
+  document.getElementById("dsp-sw").addEventListener("click", async () => {
+    if (!dsp.charge) return;
+    if (!dsp.pret) { toast("Robot pas encore installé dans Apps Script", 4000); return; }
+    const on = !dsp.actif;
+    if (on && !chauffeursCache.some(c => c.telegramChat)) { if (!confirm("Aucun chauffeur n'est relié à Telegram. Activer quand même ?")) return; }
+    if (!confirm(on ? "Activer le dispatch auto ?\nLes NOUVELLES réservations seront proposées à tes chauffeurs sur Telegram." : "Désactiver le dispatch auto ?")) return;
+    const sw = document.getElementById("dsp-sw"); sw.disabled = true;
+    try { await dspAppel(on ? "activer" : "desactiver"); toast(on ? "🤖 Dispatch auto activé" : "Dispatch auto désactivé", 3000); }
+    catch (e) { toast("Impossible : " + e.message, 5000); }
+    sw.disabled = false;
+  });
+  function dspTag(r) {
+    const d = r.dispatch; if (!d || !d.etat) return "";
+    if (d.etat === "prise") return `<div><span class="dsp-tag pris">🤖 Prise par ${esc(d.chauffeurNom || "?")} · commission ${esc(d.commission || 10)} €${d.commissionPayee ? " ✓ payée" : ""}</span></div>`;
+    if (d.etat === "envoyee") return `<div><span class="dsp-tag${d.alerte ? " alerte" : ""}">🤖 ${d.alerte ? "Personne ne l'a prise : à attribuer" : "Proposée à " + (d.nb || 0) + " chauffeur" + ((d.nb || 0) > 1 ? "s" : "") + ", en attente"}</span></div>`;
+    return "";
+  }
+  function telegramCell(c) {
+    if (c.telegramChat) return `<span class="badge dispo">✅ Relié</span>`;
+    if (!dsp.bot) return `<span style="color:var(--muted);font-size:12.5px">Robot non installé</span>`;
+    const lien = "https://t.me/" + dsp.bot + "?start=" + encodeURIComponent(c.id);
+    const n = waNumClient(c.tel), prenom = String(c.nom || "").split(" ")[0];
+    const txt = `Salut ${prenom} 👋 Pour recevoir les courses Taxis Van Paris, ouvre ce lien dans Telegram puis touche « Démarrer » :\n${lien}\nLe premier qui touche « ✅ Je prends » a la course. Paiement à bord, commission 10 € par course.`;
+    return `<a class="cal-btn wa-btn" target="_blank" rel="noopener" href="https://wa.me/${n}?text=${encodeURIComponent(txt)}">📲 Envoyer le lien</a>`;
+  }
+  function renderCommissions() {
+    const tb = document.getElementById("com-tbody"); if (!tb) return;
+    const auj = todayStr(), parCh = {};
+    reservationsCache.forEach(r => {
+      const d = r.dispatch;
+      if (!d || d.etat !== "prise" || d.commissionPayee || r.statut === "annulée" || (r.date && r.date > auj)) return;
+      const k = d.chauffeurId || d.chauffeurNom; (parCh[k] = parCh[k] || { nom: d.chauffeurNom, id: d.chauffeurId, courses: [] }).courses.push(r);
+    });
+    const lignes = Object.values(parCh);
+    if (!lignes.length) { tb.innerHTML = `<tr class="empty-row"><td colspan="4">Aucune commission en attente.</td></tr>`; return; }
+    tb.innerHTML = lignes.map(l => {
+      const total = l.courses.reduce((t, r) => t + (Number(r.dispatch.commission) || 10), 0);
+      const ch = chauffeursCache.find(c => c.id === l.id), n = ch ? waNumClient(ch.tel) : "";
+      const detail = l.courses.map(r => "• " + (r.date || "").split("-").reverse().join("/") + " " + (r.heure || "") + " — " + (r.dispatch.commission || 10) + " €").join("\n");
+      const txt = `Salut ${String(l.nom || "").split(" ")[0]} 👋 Commissions Taxis Van Paris :\n${detail}\nTotal : ${total} € (${l.courses.length} course${l.courses.length > 1 ? "s" : ""}). Merci pour le virement !`;
+      return `<tr><td>${esc(l.nom || "?")}</td><td>${l.courses.length}</td><td><b>${total} €</b></td><td>
+        <a class="cal-btn wa-btn" target="_blank" rel="noopener" href="https://wa.me/${n}?text=${encodeURIComponent(txt)}">📩 Demander</a>
+        <button type="button" class="cal-btn" style="font-family:inherit;cursor:pointer" data-com-paye="${esc(l.courses.map(r => r.id).join(","))}">✅ Payé</button></td></tr>`;
+    }).join("");
+    tb.querySelectorAll("[data-com-paye]").forEach(b => b.addEventListener("click", async () => {
+      if (!confirm("Marquer ces commissions comme payées ?")) return;
+      try { await Promise.all(b.dataset.comPaye.split(",").map(id => updateDoc(doc(db, "reservations", id), { "dispatch.commissionPayee": true }))); toast("Commissions marquées payées ✓", 3000); }
+      catch (e) { toast("Impossible : " + ((e && e.code) || "erreur"), 5000); }
+    }));
+  }
+
   function renderChauffeurs() {
     const tbody = document.getElementById("chauffeur-tbody");
     if (chauffeursCache.length === 0) {
-      tbody.innerHTML = `<tr class="empty-row"><td colspan="6">Aucun chauffeur enregistré.</td></tr>`;
+      tbody.innerHTML = `<tr class="empty-row"><td colspan="7">Aucun chauffeur enregistré.</td></tr>`; renderCommissions();
       return;
     }
     tbody.innerHTML = chauffeursCache.map(c => `
       <tr>
         <td>${c.nom || ""}</td>
+        <td>${telegramCell(c)}</td>
         <td>${c.tel || ""}</td>
         <td>${c.vehicule || ""}</td>
         <td>${badgeChauffeur(c.statut || "disponible")}</td>
@@ -1476,6 +1560,7 @@ function anonymise(title,location){
         <td><button class="icon-btn danger" data-id="${c.id}" data-kind="del-chauffeur">Suppr.</button></td>
       </tr>
     `).join("");
+    renderCommissions();
     tbody.querySelectorAll('[data-kind="del-chauffeur"]').forEach(btn => {
       btn.addEventListener("click", () => {
         if (confirm("Supprimer ce chauffeur ?")) deleteDoc(doc(db, "chauffeurs", btn.dataset.id));
