@@ -217,11 +217,12 @@
     try {
       // Apps Script en no-cors : la réponse est opaque (illisible),
       // on considère l'envoi réussi si aucune exception réseau n'est levée.
-      await fetch(form.action, {
-        method: 'POST',
-        mode: 'no-cors',
-        body: data
-      });
+      await (async function(){ /* alerte WhatsApp + notification via le script principal ; sinon ancien script (e-mail) */
+        var o={action:'contact',langue:(document.documentElement.lang||'fr').slice(0,2),page:location.pathname};
+        data.forEach(function(v,k){o[{name:'nom',phone:'tel'}[k]||k]=v;});
+        try{var r=await fetch('https://script.google.com/macros/s/AKfycbynqJeRA8W1AoYiHWQhS-ZPGHrEHyQBW8xp4xFGAYgP68lAugMsNZqWYkleYV1P4Va6/exec',{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(o)});var j=await r.json();if(j&&j.ok)return;}catch(x){}
+        await fetch(form.action,{method:'POST',mode:'no-cors',body:data});
+      })();
 
       status.textContent = "Merci, votre demande a bien été envoyée. Nous vous répondons rapidement.";
       status.className = "success";

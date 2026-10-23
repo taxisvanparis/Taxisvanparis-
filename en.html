@@ -1162,7 +1162,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     var status = document.getElementById('form-status');
     var data = new FormData(form);
     try {
-      await fetch(form.action, { method:'POST', mode:'no-cors', body:data });
+      await (async function(){ /* alerte WhatsApp + notification via le script principal ; sinon ancien script (e-mail) */
+        var o={action:'contact',langue:(document.documentElement.lang||'fr').slice(0,2),page:location.pathname};
+        data.forEach(function(v,k){o[{name:'nom',phone:'tel'}[k]||k]=v;});
+        try{var r=await fetch('https://script.google.com/macros/s/AKfycbynqJeRA8W1AoYiHWQhS-ZPGHrEHyQBW8xp4xFGAYgP68lAugMsNZqWYkleYV1P4Va6/exec',{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(o)});var j=await r.json();if(j&&j.ok)return;}catch(x){}
+        await fetch(form.action,{method:'POST',mode:'no-cors',body:data});
+      })();
       status.style.color = '#7ec97e';
       status.textContent = "Thank you, your request has been sent.";
       form.reset();
