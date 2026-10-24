@@ -338,8 +338,13 @@
   /* Réservations en cartes, groupées par jour */
   .dsp-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;border:1.5px solid var(--border);border-radius:14px;padding:10px 12px;margin:0 0 14px;max-width:560px;background:var(--card)}
   .dsp-bar b{font-size:15px}.dsp-bar small{color:var(--muted);flex-basis:100%;font-size:12.5px;line-height:1.4}
-  .dsp-sw{margin-left:auto;border:0;border-radius:999px;padding:8px 14px;font-weight:800;font-size:14px;cursor:pointer;font-family:inherit;background:var(--hover);color:var(--muted)}
-  .dsp-bar.on{border-color:var(--green);background:var(--green-bg)}.dsp-bar.on .dsp-sw{background:var(--green);color:#fff}
+  .dsp-etat{margin-left:auto;font-size:12.5px;font-weight:800;border-radius:999px;padding:4px 10px;background:var(--hover);color:var(--muted)}
+  .dsp-bar.on{border-color:var(--green)}.dsp-bar.on .dsp-etat{background:var(--green);color:#fff}
+  .dsp-modes{display:flex;gap:6px;flex-basis:100%}.dsp-modes button{flex:1;border:1.5px solid var(--border);background:var(--soft);color:var(--text);border-radius:10px;padding:9px 6px;font:inherit;font-weight:700;font-size:14px;cursor:pointer}
+  .dsp-modes button.sel{border-color:var(--gold);background:rgba(201,151,74,.16);color:var(--heading)}
+  .dsp-h{flex-basis:100%;display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:14px}.dsp-h input{font:inherit;padding:6px 8px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--text)}
+  .dsp-h button{border:0;border-radius:8px;padding:7px 12px;font:inherit;font-weight:700;background:var(--gold);color:#141008;cursor:pointer}
+  .dsp-admin{font-size:13px;font-weight:700;color:var(--blue);text-decoration:none}
   .dsp-tag{display:inline-block;font-size:12.5px;font-weight:600;border-radius:999px;padding:2px 9px;margin-top:4px;background:var(--blue-bg);color:var(--blue)}
   .dsp-tag.pris{background:var(--green-bg);color:var(--green)}.dsp-tag.alerte{background:var(--amber-bg);color:var(--amber)}
   .com-box{margin-top:22px}.com-box h3{margin:0 0 6px;font-size:16px;color:var(--heading)}.com-box p{color:var(--muted);font-size:13px;margin:0 0 10px}
@@ -455,7 +460,11 @@
     <div id="main">
       <!-- RÉSERVATIONS -->
       <div class="tab-panel active" id="tab-reservations">
-        <div class="dsp-bar" id="dsp-bar"><b>🤖 Dispatch auto</b><button type="button" class="dsp-sw" id="dsp-sw">…</button><small id="dsp-info">Les nouvelles réservations sont proposées sur Telegram à tes chauffeurs : le premier qui accepte a la course. Paiement à bord, commission 10 € par course.</small></div>
+        <div class="dsp-bar" id="dsp-bar"><b>🤖 Dispatch auto</b><span class="dsp-etat" id="dsp-etat">…</span>
+          <div class="dsp-modes" id="dsp-modes"><button type="button" data-m="off">Désactivé</button><button type="button" data-m="auto">Horaires</button><button type="button" data-m="on">Toujours</button></div>
+          <div class="dsp-h" id="dsp-h" hidden>De <input type="time" id="dsp-debut" value="20:00"> à <input type="time" id="dsp-fin" value="07:00"> <button type="button" id="dsp-h-ok">Enregistrer</button></div>
+          <small id="dsp-info">Les nouvelles réservations sont proposées sur Telegram à tes chauffeurs : le premier qui accepte a la course. Paiement à bord, commission 10 € par course.</small>
+          <a class="dsp-admin" id="dsp-admin" target="_blank" rel="noopener" hidden>📲 Recevoir les alertes sur mon Telegram</a></div>
         <div class="kpis4">
           <div class="stat-card alert"><div class="label">à confirmer</div><div class="value" id="stat-attente">0</div></div>
           <div class="stat-card"><div class="label">courses à venir</div><div class="value" id="stat-avenir">0</div></div>
@@ -1482,31 +1491,53 @@ function anonymise(title,location){
     dsp = { ...r, charge: true }; dspMaj(); renderChauffeurs(); return r;
   }
   function dspMaj() {
-    const bar = document.getElementById("dsp-bar"), sw = document.getElementById("dsp-sw"), info = document.getElementById("dsp-info");
-    if (!bar) return;
+    const bar = document.getElementById("dsp-bar"); if (!bar) return;
+    const etat = document.getElementById("dsp-etat"), info = document.getElementById("dsp-info"), adm = document.getElementById("dsp-admin");
     bar.classList.toggle("on", !!dsp.actif);
-    sw.textContent = !dsp.charge ? "…" : dsp.actif ? "ACTIVÉ" : "DÉSACTIVÉ";
+    document.querySelectorAll("#dsp-modes button").forEach(x => x.classList.toggle("sel", dsp.charge && x.dataset.m === (dsp.mode || "off")));
+    document.getElementById("dsp-h").hidden = dsp.mode !== "auto";
+    if (dsp.debut) document.getElementById("dsp-debut").value = dsp.debut;
+    if (dsp.fin) document.getElementById("dsp-fin").value = dsp.fin;
+    etat.textContent = !dsp.charge ? "…" : dsp.actif ? "EN SERVICE" : "À LA MAIN";
     const relies = chauffeursCache.filter(c => c.telegramChat).length;
     info.textContent = !dsp.charge ? "Chargement…" : !dsp.pret ? "Robot pas encore installé (jeton Telegram manquant dans Apps Script)."
-      : (dsp.actif ? "✅ Les nouvelles réservations partent automatiquement sur Telegram. " : "Les réservations restent à attribuer à la main. ")
-        + relies + " chauffeur" + (relies > 1 ? "s" : "") + " relié" + (relies > 1 ? "s" : "") + " à Telegram · commission " + dsp.commission + " € par course.";
+      : (dsp.mode === "auto" ? `Automatique chaque jour de ${dsp.debut} à ${dsp.fin}. ` : dsp.mode === "on" ? "Automatique en permanence. " : "Les réservations sont à attribuer à la main. ")
+        + relies + " chauffeur" + (relies > 1 ? "s" : "") + " relié" + (relies > 1 ? "s" : "") + " · commission " + dsp.commission + " € par course"
+        + (dsp.pret ? (dsp.admins ? " · alertes Telegram ✓" : "") : "") + ".";
+    adm.hidden = !dsp.adminLien || dsp.admins > 0; if (dsp.adminLien) adm.href = dsp.adminLien;
   }
   async function dspEtat() { try { await dspAppel("etat"); } catch (e) { dsp.charge = true; dsp.pret = false; dspMaj(); } }
-  document.getElementById("dsp-sw").addEventListener("click", async () => {
+  async function dspMode(mode, debut, fin) {
+    const idToken = await auth.currentUser.getIdToken();
+    const r = await fetch(API_DSP, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "dispatch", op: "mode", mode, debut, fin, idToken }) }).then(x => x.json());
+    if (!r.ok) throw new Error(r.error || "erreur"); dsp = { ...r, charge: true }; dspMaj(); renderChauffeurs();
+  }
+  document.querySelectorAll("#dsp-modes button").forEach(b => b.addEventListener("click", async () => {
     if (!dsp.charge) return;
     if (!dsp.pret) { toast("Robot pas encore installé dans Apps Script", 4000); return; }
-    const on = !dsp.actif;
-    if (on && !chauffeursCache.some(c => c.telegramChat)) { if (!confirm("Aucun chauffeur n'est relié à Telegram. Activer quand même ?")) return; }
-    if (!confirm(on ? "Activer le dispatch auto ?\nLes NOUVELLES réservations seront proposées à tes chauffeurs sur Telegram." : "Désactiver le dispatch auto ?")) return;
-    const sw = document.getElementById("dsp-sw"); sw.disabled = true;
-    try { await dspAppel(on ? "activer" : "desactiver"); toast(on ? "🤖 Dispatch auto activé" : "Dispatch auto désactivé", 3000); }
+    const m = b.dataset.m; if (m === dsp.mode) return;
+    if (m !== "off" && !chauffeursCache.some(c => c.telegramChat) && !confirm("Aucun chauffeur n'est relié à Telegram. Continuer ?")) return;
+    const txt = { off: "Désactiver le dispatch auto ?", on: "Dispatch auto en permanence ?\nLes NOUVELLES réservations partent aux chauffeurs sur Telegram.", auto: "Dispatch auto aux horaires choisis ?" }[m];
+    if (!confirm(txt)) return;
+    try { await dspMode(m, document.getElementById("dsp-debut").value, document.getElementById("dsp-fin").value); toast({ off: "Dispatch auto désactivé", on: "🤖 Dispatch auto en permanence", auto: "🤖 Dispatch auto aux horaires" }[m], 3000); }
     catch (e) { toast("Impossible : " + e.message, 5000); }
-    sw.disabled = false;
+  }));
+  document.getElementById("dsp-h-ok").addEventListener("click", async () => {
+    const d = document.getElementById("dsp-debut").value, f = document.getElementById("dsp-fin").value;
+    if (!d || !f || d === f) { toast("Choisis une heure de début et de fin différentes", 4000); return; }
+    try { await dspMode("auto", d, f); toast(`Horaires enregistrés : ${d} → ${f}`, 3000); } catch (e) { toast("Impossible : " + e.message, 5000); }
   });
   function dspTag(r) {
     const d = r.dispatch; if (!d || !d.etat) return "";
-    if (d.etat === "prise") return `<div><span class="dsp-tag pris">🤖 Prise par ${esc(d.chauffeurNom || "?")} · commission ${esc(d.commission || 10)} €${d.commissionPayee ? " ✓ payée" : ""}</span></div>`;
-    if (d.etat === "envoyee") return `<div><span class="dsp-tag${d.alerte ? " alerte" : ""}">🤖 ${d.alerte ? "Personne ne l'a prise : à attribuer" : "Proposée à " + (d.nb || 0) + " chauffeur" + ((d.nb || 0) > 1 ? "s" : "") + ", en attente"}</span></div>`;
+    const ETAPE = { acceptee: "acceptée", route: "en route 🚗", place: "sur place 📍", terminee: "terminée 🏁" };
+    if (d.etat === "prise") return `<div><span class="dsp-tag pris">🤖 ${esc(d.chauffeurNom || "?")} · ${ETAPE[d.etape] || "acceptée"} · commission ${esc(d.commission || 10)} €${d.commissionPayee ? " ✓ payée" : ""}</span></div>`;
+    if (d.etat === "envoyee") {
+      const lim = d.limite ? new Date(d.limite) : null;
+      const limTxt = lim && !isNaN(lim) ? " · annulation auto " + lim.toLocaleString("fr-FR", { weekday: "short", hour: "2-digit", minute: "2-digit" }) : "";
+      return `<div><span class="dsp-tag${d.alerte ? " alerte" : ""}">🤖 ${d.alerte ? "Personne ne l'a prise (relance " + (d.relances || 1) + ")" : "Proposée à " + (d.nb || 0) + " chauffeur" + ((d.nb || 0) > 1 ? "s" : "")}${limTxt}</span></div>`;
+    }
+    if (d.etat === "expiree") return `<div><span class="dsp-tag alerte">🤖 Annulée faute de chauffeur · client prévenu</span></div>`;
+    if (d.etat === "manuelle") return `<div><span class="dsp-tag">🤖 Retirée du dispatch (attribuée à la main)</span></div>`;
     return "";
   }
   function telegramCell(c) {
