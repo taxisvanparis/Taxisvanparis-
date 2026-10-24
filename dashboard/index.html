@@ -202,6 +202,14 @@
     padding:28px 30px;
   }
   .modal h2{font-size:19px;margin:0 0 20px;color:var(--heading);}
+  .pa{max-width:520px}.pa-h{display:flex;justify-content:space-between;align-items:center}.pa-h h2{margin:0}
+  .pa-montant{margin:14px 0 6px;font-size:34px;font-weight:800;color:var(--heading)}.pa-montant small{display:block;font-size:13.5px;font-weight:500;color:var(--muted);margin-top:2px}
+  .pa-etapes{padding-left:20px;margin:12px 0 0;display:grid;gap:14px;font-size:14.5px;line-height:1.45}
+  .pa-etapes input{width:100%;box-sizing:border-box;margin-top:8px;padding:11px 12px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--text);font:inherit;font-size:16px}
+  .pa-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+  .pa-etat{margin-top:14px;font-size:13.5px;color:var(--muted)}
+  .pay-btn.envoye{background:var(--blue-bg)!important;color:var(--blue)!important;border-color:var(--blue)!important}
+  .pay-btn.paye{background:var(--green-bg)!important;color:var(--green)!important;border-color:var(--green)!important}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
   .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:22px;}
   .btn-ghost{background:none;border:1px solid var(--border);padding:10px 16px;border-radius:8px;font-size:14px;color:var(--muted);}
@@ -573,6 +581,23 @@
   </div>
 </div>
 
+<!-- ===================== MODAL PAIEMENT myPOS ===================== -->
+<div class="modal-overlay" id="modal-paie">
+  <div class="modal pa">
+    <div class="pa-h"><h2 id="pa-titre">💳 Paiement</h2><button class="btn-ghost" id="pa-close" aria-label="Fermer">✕</button></div>
+    <div class="pa-montant"><span id="pa-montant">—</span><small id="pa-course"></small></div>
+    <ol class="pa-etapes">
+      <li><b>Crée la demande de paiement dans myPOS</b> (appli myPOS → Payment Request / Demande de paiement), avec ce montant.
+        <div class="pa-row"><button type="button" class="cal-btn" id="pa-copier">📋 Copier le montant</button><a class="cal-btn" id="pa-mypos" href="https://www.mypos.com/fr-fr" target="_blank" rel="noopener">↗ Ouvrir myPOS</a></div></li>
+      <li><b>Colle ici le lien que myPOS t'a donné</b>
+        <input id="pa-lien" type="url" inputmode="url" autocomplete="off" placeholder="https://…"></li>
+      <li><b>Envoie-le au client</b> (message prêt, dans sa langue)
+        <div class="pa-row"><a class="cal-btn wa-btn" id="pa-wa" target="_blank" rel="noopener">💬 WhatsApp</a><a class="cal-btn sms-btn" id="pa-sms">✉️ SMS</a></div></li>
+    </ol>
+    <div class="pa-etat" id="pa-etat"></div>
+    <div class="modal-actions" style="justify-content:space-between"><button class="btn-ghost" id="pa-annuler-paie">Remettre à zéro</button><button class="btn-gold" id="pa-paye">✅ Marquer payé</button></div>
+  </div>
+</div>
 <!-- ===================== MODAL REGLAGES FACTURE ===================== -->
 <div class="modal-overlay" id="modal-reglages">
   <div class="modal">
@@ -1176,6 +1201,71 @@ function anonymise(title,location){
     return `<a class="cal-btn" target="_blank" rel="noopener" href="${href}">🪧 Pancarte</a> ` +
       `<button type="button" class="cal-btn" style="font-family:inherit;cursor:pointer" data-pancarte-send data-nom="${esc(nom)}" data-ligne="${esc(ligne)}">📲 Envoyer à la pancarte</button> `;
   }
+  // ===== Paiement myPOS : demande de paiement envoyée au client + suivi =====
+  let paR = null;
+  function payBtn(r) {
+    const e = r.paiementEtat;
+    const lib = e === "payé" ? "💳 Payé ✓" : e === "lien envoyé" ? "💳 Lien envoyé" : "💳 Paiement";
+    return `<button type="button" class="cal-btn pay-btn${e === "payé" ? " paye" : e === "lien envoyé" ? " envoye" : ""}" style="font-family:inherit;cursor:pointer" data-pay="${esc(r.id)}">${lib}</button> `;
+  }
+  function paMessage(r, lien) {
+    const n = waNumClient(r.tel), fr = !n || n.startsWith("33");
+    const nom = String(r.nom || "").replace(/^🏨\s*/, "").replace(/\s*\(.*\)\s*$/, "").trim();
+    const m = String(r.date || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    const jour = m ? new Date(+m[1], +m[2] - 1, +m[3]).toLocaleDateString(fr ? "fr-FR" : "en-GB", { weekday: "long", day: "numeric", month: "long" }) : "";
+    const prix = fmtPrix(r.prix);
+    return fr
+      ? `Bonjour${nom ? " " + nom : ""}, voici le lien sécurisé pour régler votre course Taxis Van Paris${jour ? " du " + jour : ""}${r.heure ? " à " + r.heure.replace(":", "h") : ""} (${prix}) par carte bancaire, Apple Pay ou Google Pay :\n${lien}\nMerci et à bientôt !\nTaxis Van Paris — 06 67 40 20 05`
+      : `Hello${nom ? " " + nom : ""}, here is the secure link to pay for your Taxis Van Paris ride${jour ? " on " + jour : ""}${r.heure ? " at " + r.heure : ""} (${prix}) by card, Apple Pay or Google Pay:\n${lien}\nThank you, see you soon!\nTaxis Van Paris — +33 6 67 40 20 05`;
+  }
+  function paMaj() {
+    const r = paR; if (!r) return;
+    const lien = document.getElementById("pa-lien").value.trim(), ok = /^https?:\/\/\S+$/.test(lien);
+    const n = waNumClient(r.tel), txt = paMessage(r, lien);
+    const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    const wa = document.getElementById("pa-wa"), sms = document.getElementById("pa-sms");
+    wa.href = "https://wa.me/" + (n || "") + "?text=" + encodeURIComponent(txt);
+    sms.href = "sms:" + (n ? "+" + n : "") + (ios ? "&" : "?") + "body=" + encodeURIComponent(txt);
+    [wa, sms].forEach(a => { a.style.opacity = ok ? "" : ".45"; a.style.pointerEvents = ok ? "" : "none"; });
+    sms.hidden = !n;
+    const e = r.paiementEtat, le = r.paiementLe && r.paiementLe.toDate ? r.paiementLe.toDate() : null;
+    document.getElementById("pa-etat").textContent = e === "payé" ? "✅ Payé" + (le ? " le " + le.toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }) : "")
+      : e === "lien envoyé" ? "📨 Lien envoyé au client" + (le ? " le " + le.toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }) : "") + ". Marque-le payé quand myPOS te confirme le paiement."
+      : "Pas encore de demande de paiement pour cette course.";
+  }
+  function ouvrirPaiement(id) {
+    const r = reservationsCache.find(x => x.id === id); if (!r) return;
+    paR = r;
+    document.getElementById("pa-titre").textContent = "💳 Paiement — " + (String(r.nom || "").replace(/^🏨\s*/, "").trim() || "client");
+    document.getElementById("pa-montant").textContent = fmtPrix(r.prix);
+    document.getElementById("pa-course").textContent = [jourTitre(r.date || ""), r.heure, (r.dep || "?") + " → " + (r.arr || "?")].filter(Boolean).join(" · ");
+    document.getElementById("pa-lien").value = r.paiementLien || "";
+    paMaj();
+    document.getElementById("modal-paie").classList.add("shown");
+  }
+  document.getElementById("pa-close").addEventListener("click", () => document.getElementById("modal-paie").classList.remove("shown"));
+  document.getElementById("pa-lien").addEventListener("input", paMaj);
+  document.getElementById("pa-copier").addEventListener("click", () => {
+    const n = parseFloat(String(paR && paR.prix || "").replace(",", ".").replace(/[^\d.]/g, ""));
+    copyText(isFinite(n) ? String(n).replace(".", ",") : String(paR && paR.prix || "")); toast("Montant copié");
+  });
+  ["pa-wa", "pa-sms"].forEach(id => document.getElementById(id).addEventListener("click", async () => {
+    const lien = document.getElementById("pa-lien").value.trim(); if (!paR || !/^https?:\/\/\S+$/.test(lien)) return;
+    if (paR.paiementEtat === "payé") return;
+    try { await updateDoc(doc(db, "reservations", paR.id), { paiementLien: lien, paiementEtat: "lien envoyé", paiementLe: serverTimestamp() }); paR.paiementEtat = "lien envoyé"; paMaj(); } catch (e) { toast("Enregistrement impossible : " + ((e && e.code) || "erreur"), 5000); }
+  }));
+  document.getElementById("pa-paye").addEventListener("click", async () => {
+    if (!paR) return;
+    try { await updateDoc(doc(db, "reservations", paR.id), { paiementEtat: "payé", paiementLe: serverTimestamp(), ...(document.getElementById("pa-lien").value.trim() ? { paiementLien: document.getElementById("pa-lien").value.trim() } : {}) });
+      paR.paiementEtat = "payé"; paMaj(); toast("✅ Course marquée payée", 2500); document.getElementById("modal-paie").classList.remove("shown"); }
+    catch (e) { toast("Impossible : " + ((e && e.code) || "erreur"), 5000); }
+  });
+  document.getElementById("pa-annuler-paie").addEventListener("click", async () => {
+    if (!paR || !confirm("Effacer le lien et le statut de paiement de cette course ?")) return;
+    try { await updateDoc(doc(db, "reservations", paR.id), { paiementLien: "", paiementEtat: "", paiementLe: null }); paR.paiementEtat = ""; paR.paiementLien = ""; document.getElementById("pa-lien").value = ""; paMaj(); }
+    catch (e) { toast("Impossible : " + ((e && e.code) || "erreur"), 5000); }
+  });
+
   // Demande d'avis Google au client après la course
   const AVIS_LINK = "https://g.page/r/CWXImdGQDnt4ECE/review";
   const TRIP_FR = "https://www.tripadvisor.fr/UserReviewEdit-d34709392?m=68676";
@@ -1353,7 +1443,7 @@ function anonymise(title,location){
         const boutons = (nouv ? `<button class="vu-btn" data-vu="${esc(r.id)}">👁 Vu</button>` : "") + (ferme ? `<button class="no" data-st="en attente" data-id="${esc(r.id)}">Rétablir</button>` :
             (r.statut !== "confirmée" ? `<button class="ok" data-st="confirmée" data-id="${esc(r.id)}">Confirmer</button>` : "") +
             `<button class="done" data-st="terminée" data-id="${esc(r.id)}">Effectuée</button><button class="no" data-st="annulée" data-id="${esc(r.id)}">Annuler</button>`) +
-          waClient(r) + smsClient(r) + waAvis(r) + (groupOf(r) === 0 && r.statut !== "annulée" ? waChauffeur(r) : "") + (groupOf(r) === 0 && r.statut !== "annulée" ? pancarteBtn(r) : "") + (groupOf(r) === 0 && r.statut !== "annulée" ? `<a class="grp-btn" target="_blank" rel="noopener" href="${waLink(shareMessage(shareItem(r)))}">📢 Dispatcher</a>` : "") +
+          waClient(r) + smsClient(r) + waAvis(r) + (groupOf(r) === 0 && r.statut !== "annulée" ? waChauffeur(r) : "") + (groupOf(r) === 0 && r.statut !== "annulée" ? pancarteBtn(r) : "") + (r.statut !== "annulée" ? payBtn(r) : "") + (groupOf(r) === 0 && r.statut !== "annulée" ? `<a class="grp-btn" target="_blank" rel="noopener" href="${waLink(shareMessage(shareItem(r)))}">📢 Dispatcher</a>` : "") +
           (groupOf(r) === 0 ? calLink([r], "📅", "cal-btn") : "") +
           (r.statut === "terminée" ? `<button class="edit" data-facture="${esc(r.id)}">🧾 ${r.factureNumero ? "Facture n° " + esc(r.factureNumero) : "Facture"}</button>` : "") +
           `<button class="edit" data-edit="${esc(r.id)}">✏️ Modifier</button><button class="del" data-del="${esc(r.id)}" aria-label="Supprimer">🗑️</button>`;
@@ -1377,6 +1467,7 @@ function anonymise(title,location){
       try { await setDoc(doc(db, "pancarte", auth.currentUser.uid), { nom: b.dataset.nom, ligne: b.dataset.ligne || "", ts: serverTimestamp() }); clearTimeout(lent); toast("Envoyé à la pancarte ✔ " + b.dataset.nom, 5000); }
       catch (e) { clearTimeout(lent); toast("Échec envoi pancarte : " + ((e && e.code) || "erreur") + (e && e.code === "permission-denied" ? " (règle Firebase)" : ""), 8000); }
     }));
+    box.querySelectorAll("[data-pay]").forEach(b => b.addEventListener("click", () => ouvrirPaiement(b.dataset.pay)));
     box.querySelectorAll("[data-avis]").forEach(b => b.addEventListener("click", () => { updateDoc(doc(db, "reservations", b.dataset.avis), { avisDemande: true }).catch(() => {}); }));
     box.querySelectorAll("[data-avistrip]").forEach(b => b.addEventListener("click", () => { updateDoc(doc(db, "reservations", b.dataset.avistrip), { avisTripDemande: true }).catch(() => {}); }));
     box.querySelectorAll("[data-edit]").forEach(b => b.addEventListener("click", () => openEditResa(b.dataset.edit)));
