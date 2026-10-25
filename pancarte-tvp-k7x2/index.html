@@ -60,6 +60,39 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline
 .recent button{font-size:14px;padding:6px 12px;border-color:var(--line);color:var(--ink);font-weight:500}
 .avisbtn{display:flex;align-items:center;gap:.15em;flex:none;font:inherit;font-weight:800;font-size:clamp(13px,2vw,20px);color:#C9A84C;background:transparent;border:2px solid #C9A84C;border-radius:999px;padding:.35em .9em;cursor:pointer}
 .avisbtn svg{width:1em;height:1em}
+/* Version B : pancarte fond noir, nom blanc, 2e ligne dorée */
+body{background:#050505}
+.stage{background:#050505}
+#name{color:#ffffff}
+#sub{color:var(--gold)}
+.hint{color:#8a8a8a}
+.arrbtn{display:flex;align-items:center;gap:.35em;flex:none;font:inherit;font-weight:800;font-size:clamp(13px,2vw,20px);color:#fff;background:transparent;border:2px solid rgba(255,255,255,.55);border-radius:999px;padding:.35em .9em;cursor:pointer;margin-left:auto}
+.band .avisbtn{margin-left:0}
+.arr{position:fixed;inset:0;z-index:40;background:#f3f4f6;display:flex;flex-direction:column;font-family:var(--f);color:var(--ink)}
+.arr[hidden]{display:none}
+.arr-top{background:var(--brand);color:#fff;border-bottom:3px solid var(--gold);display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  padding:14px max(16px,env(safe-area-inset-right,0px)) 14px max(16px,env(safe-area-inset-left,0px))}
+.arr-top h2{margin:0;font-size:clamp(20px,3vw,30px);font-weight:900;display:flex;align-items:center;gap:.4em}
+.arr-top small{display:block;color:var(--gold);font-weight:500;font-size:13px;letter-spacing:.06em;text-transform:uppercase}
+.arr-tabs{display:flex;gap:6px;margin-left:auto}
+.arr-tabs button,.arr-close{border:2px solid rgba(255,255,255,.4);background:transparent;color:#fff;font-size:15px;padding:8px 14px;border-radius:999px}
+.arr-tabs button.on{background:var(--gold);border-color:var(--gold);color:#111}
+.arr-close{border-color:var(--gold);color:var(--gold)}
+.arr-list{flex:1;overflow-y:auto;padding:14px max(14px,env(safe-area-inset-right,0px)) calc(14px + env(safe-area-inset-bottom,0px)) max(14px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:10px}
+.arr-row{display:grid;grid-template-columns:auto 1fr auto;gap:6px 16px;align-items:center;background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:14px 16px;cursor:pointer;text-align:left;font:inherit;color:inherit;width:100%}
+.arr-row:active{transform:scale(.995)}
+.arr-row.next{border-color:var(--gold);box-shadow:0 0 0 2px rgba(201,168,76,.35)}
+.arr-row.past{opacity:.5}
+.arr-h{font-size:clamp(24px,3.4vw,34px);font-weight:900;line-height:1;min-width:3.2em}
+.arr-h small{display:block;font-size:13px;font-weight:500;color:var(--muted);margin-top:5px}
+.arr-main b{font-size:clamp(18px,2.4vw,24px);font-weight:900;display:block}
+.arr-main span{display:block;color:var(--muted);font-size:15px;margin-top:3px;font-weight:500}
+.arr-acts{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.arr-badge{font-size:13px;font-weight:800;border-radius:999px;padding:4px 10px;background:#eef1f5;color:#4b5563;white-space:nowrap}
+.arr-badge.ok{background:#e7f3ec;color:#2f6b47}.arr-badge.wait{background:#fbf0dd;color:#8a5a12}
+.arr-suivre{font-size:13px;font-weight:800;color:#2F5AA8;text-decoration:none;border:1.5px solid #c9d6ef;border-radius:999px;padding:4px 10px;white-space:nowrap}
+.arr-empty{text-align:center;color:var(--muted);padding:40px 20px;font-size:17px;line-height:1.5}
+.arr-foot{font-size:12.5px;color:var(--muted);text-align:center;padding:4px 0 2px}
 .avis{position:fixed;inset:0;z-index:50;background:radial-gradient(ellipse at 30% 50%,#1b1608 0%,#050505 62%);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:24px}
 .avis[hidden]{display:none}
 .avis .wrap{display:flex;align-items:center;justify-content:center;gap:clamp(24px,6vw,80px);flex-wrap:wrap;max-width:100%}
@@ -80,7 +113,7 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline
 <div class="sign">
   <header class="band">
     <div class="brand"><span>Taxis <b>Van</b> Paris</span><small>By ABTS</small></div>
-    <button type="button" class="avisbtn" id="btnAvis" aria-label="Afficher le QR code des avis"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l3 6.9 7.5.7-5.7 5 1.7 7.4L12 18l-6.5 4 1.7-7.4-5.7-5 7.5-.7z"/></svg><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l3 6.9 7.5.7-5.7 5 1.7 7.4L12 18l-6.5 4 1.7-7.4-5.7-5 7.5-.7z"/></svg><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l3 6.9 7.5.7-5.7 5 1.7 7.4L12 18l-6.5 4 1.7-7.4-5.7-5 7.5-.7z"/></svg><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l3 6.9 7.5.7-5.7 5 1.7 7.4L12 18l-6.5 4 1.7-7.4-5.7-5 7.5-.7z"/></svg><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l3 6.9 7.5.7-5.7 5 1.7 7.4L12 18l-6.5 4 1.7-7.4-5.7-5 7.5-.7z"/></svg></button>
+    <button type="button" class="arrbtn" id="btnArr" aria-label="Arrivées du jour">✈️ Arrivées</button><button type="button" class="avisbtn" id="btnAvis" aria-label="Afficher le QR code des avis"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l3 6.9 7.5.7-5.7 5 1.7 7.4L12 18l-6.5 4 1.7-7.4-5.7-5 7.5-.7z"/></svg><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l3 6.9 7.5.7-5.7 5 1.7 7.4L12 18l-6.5 4 1.7-7.4-5.7-5 7.5-.7z"/></svg><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l3 6.9 7.5.7-5.7 5 1.7 7.4L12 18l-6.5 4 1.7-7.4-5.7-5 7.5-.7z"/></svg><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l3 6.9 7.5.7-5.7 5 1.7 7.4L12 18l-6.5 4 1.7-7.4-5.7-5 7.5-.7z"/></svg><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l3 6.9 7.5.7-5.7 5 1.7 7.4L12 18l-6.5 4 1.7-7.4-5.7-5 7.5-.7z"/></svg></button>
   </header>
   <main class="stage" id="stage" aria-label="Toucher pour modifier">
     <div id="name">M. DUPONT</div>
@@ -90,6 +123,12 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline
 <div class="hint" id="hint">Touchez l'écran pour modifier</div>
 
 <div class="avis" id="avis" hidden><div class="wrap"><div class="qrbox"><svg viewBox="-1 -1 31 31" shape-rendering="crispEdges" role="img" aria-label="QR code avis Google"><path fill="#050505" d="M0 0h1v1h-1zM1 0h1v1h-1zM2 0h1v1h-1zM3 0h1v1h-1zM4 0h1v1h-1zM5 0h1v1h-1zM6 0h1v1h-1zM8 0h1v1h-1zM9 0h1v1h-1zM13 0h1v1h-1zM16 0h1v1h-1zM18 0h1v1h-1zM19 0h1v1h-1zM20 0h1v1h-1zM22 0h1v1h-1zM23 0h1v1h-1zM24 0h1v1h-1zM25 0h1v1h-1zM26 0h1v1h-1zM27 0h1v1h-1zM28 0h1v1h-1zM0 1h1v1h-1zM6 1h1v1h-1zM8 1h1v1h-1zM11 1h1v1h-1zM14 1h1v1h-1zM17 1h1v1h-1zM18 1h1v1h-1zM22 1h1v1h-1zM28 1h1v1h-1zM0 2h1v1h-1zM2 2h1v1h-1zM3 2h1v1h-1zM4 2h1v1h-1zM6 2h1v1h-1zM9 2h1v1h-1zM11 2h1v1h-1zM12 2h1v1h-1zM13 2h1v1h-1zM14 2h1v1h-1zM15 2h1v1h-1zM19 2h1v1h-1zM20 2h1v1h-1zM22 2h1v1h-1zM24 2h1v1h-1zM25 2h1v1h-1zM26 2h1v1h-1zM28 2h1v1h-1zM0 3h1v1h-1zM2 3h1v1h-1zM3 3h1v1h-1zM4 3h1v1h-1zM6 3h1v1h-1zM8 3h1v1h-1zM9 3h1v1h-1zM11 3h1v1h-1zM12 3h1v1h-1zM13 3h1v1h-1zM14 3h1v1h-1zM15 3h1v1h-1zM16 3h1v1h-1zM19 3h1v1h-1zM22 3h1v1h-1zM24 3h1v1h-1zM25 3h1v1h-1zM26 3h1v1h-1zM28 3h1v1h-1zM0 4h1v1h-1zM2 4h1v1h-1zM3 4h1v1h-1zM4 4h1v1h-1zM6 4h1v1h-1zM9 4h1v1h-1zM10 4h1v1h-1zM11 4h1v1h-1zM14 4h1v1h-1zM15 4h1v1h-1zM16 4h1v1h-1zM17 4h1v1h-1zM19 4h1v1h-1zM22 4h1v1h-1zM24 4h1v1h-1zM25 4h1v1h-1zM26 4h1v1h-1zM28 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM10 5h1v1h-1zM11 5h1v1h-1zM13 5h1v1h-1zM14 5h1v1h-1zM17 5h1v1h-1zM18 5h1v1h-1zM19 5h1v1h-1zM20 5h1v1h-1zM22 5h1v1h-1zM28 5h1v1h-1zM0 6h1v1h-1zM1 6h1v1h-1zM2 6h1v1h-1zM3 6h1v1h-1zM4 6h1v1h-1zM5 6h1v1h-1zM6 6h1v1h-1zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM20 6h1v1h-1zM22 6h1v1h-1zM23 6h1v1h-1zM24 6h1v1h-1zM25 6h1v1h-1zM26 6h1v1h-1zM27 6h1v1h-1zM28 6h1v1h-1zM8 7h1v1h-1zM9 7h1v1h-1zM16 7h1v1h-1zM17 7h1v1h-1zM18 7h1v1h-1zM20 7h1v1h-1zM0 8h1v1h-1zM2 8h1v1h-1zM3 8h1v1h-1zM5 8h1v1h-1zM6 8h1v1h-1zM7 8h1v1h-1zM10 8h1v1h-1zM14 8h1v1h-1zM16 8h1v1h-1zM18 8h1v1h-1zM22 8h1v1h-1zM25 8h1v1h-1zM27 8h1v1h-1zM28 8h1v1h-1zM2 9h1v1h-1zM7 9h1v1h-1zM8 9h1v1h-1zM9 9h1v1h-1zM10 9h1v1h-1zM12 9h1v1h-1zM14 9h1v1h-1zM16 9h1v1h-1zM20 9h1v1h-1zM21 9h1v1h-1zM22 9h1v1h-1zM23 9h1v1h-1zM24 9h1v1h-1zM28 9h1v1h-1zM2 10h1v1h-1zM5 10h1v1h-1zM6 10h1v1h-1zM7 10h1v1h-1zM9 10h1v1h-1zM11 10h1v1h-1zM13 10h1v1h-1zM17 10h1v1h-1zM20 10h1v1h-1zM21 10h1v1h-1zM26 10h1v1h-1zM27 10h1v1h-1zM2 11h1v1h-1zM3 11h1v1h-1zM4 11h1v1h-1zM5 11h1v1h-1zM8 11h1v1h-1zM9 11h1v1h-1zM11 11h1v1h-1zM12 11h1v1h-1zM13 11h1v1h-1zM14 11h1v1h-1zM15 11h1v1h-1zM16 11h1v1h-1zM18 11h1v1h-1zM19 11h1v1h-1zM21 11h1v1h-1zM28 11h1v1h-1zM3 12h1v1h-1zM5 12h1v1h-1zM6 12h1v1h-1zM11 12h1v1h-1zM12 12h1v1h-1zM15 12h1v1h-1zM16 12h1v1h-1zM19 12h1v1h-1zM20 12h1v1h-1zM25 12h1v1h-1zM26 12h1v1h-1zM0 13h1v1h-1zM1 13h1v1h-1zM4 13h1v1h-1zM7 13h1v1h-1zM8 13h1v1h-1zM10 13h1v1h-1zM11 13h1v1h-1zM12 13h1v1h-1zM13 13h1v1h-1zM14 13h1v1h-1zM15 13h1v1h-1zM16 13h1v1h-1zM17 13h1v1h-1zM22 13h1v1h-1zM26 13h1v1h-1zM27 13h1v1h-1zM28 13h1v1h-1zM1 14h1v1h-1zM4 14h1v1h-1zM6 14h1v1h-1zM7 14h1v1h-1zM8 14h1v1h-1zM10 14h1v1h-1zM11 14h1v1h-1zM14 14h1v1h-1zM18 14h1v1h-1zM19 14h1v1h-1zM20 14h1v1h-1zM21 14h1v1h-1zM22 14h1v1h-1zM26 14h1v1h-1zM27 14h1v1h-1zM28 14h1v1h-1zM4 15h1v1h-1zM9 15h1v1h-1zM10 15h1v1h-1zM12 15h1v1h-1zM13 15h1v1h-1zM16 15h1v1h-1zM18 15h1v1h-1zM19 15h1v1h-1zM20 15h1v1h-1zM24 15h1v1h-1zM27 15h1v1h-1zM0 16h1v1h-1zM2 16h1v1h-1zM3 16h1v1h-1zM5 16h1v1h-1zM6 16h1v1h-1zM8 16h1v1h-1zM9 16h1v1h-1zM11 16h1v1h-1zM15 16h1v1h-1zM18 16h1v1h-1zM24 16h1v1h-1zM25 16h1v1h-1zM27 16h1v1h-1zM1 17h1v1h-1zM8 17h1v1h-1zM10 17h1v1h-1zM13 17h1v1h-1zM15 17h1v1h-1zM16 17h1v1h-1zM17 17h1v1h-1zM19 17h1v1h-1zM20 17h1v1h-1zM23 17h1v1h-1zM25 17h1v1h-1zM26 17h1v1h-1zM27 17h1v1h-1zM0 18h1v1h-1zM2 18h1v1h-1zM6 18h1v1h-1zM7 18h1v1h-1zM8 18h1v1h-1zM9 18h1v1h-1zM10 18h1v1h-1zM11 18h1v1h-1zM12 18h1v1h-1zM15 18h1v1h-1zM16 18h1v1h-1zM17 18h1v1h-1zM20 18h1v1h-1zM22 18h1v1h-1zM26 18h1v1h-1zM5 19h1v1h-1zM9 19h1v1h-1zM10 19h1v1h-1zM16 19h1v1h-1zM17 19h1v1h-1zM19 19h1v1h-1zM20 19h1v1h-1zM21 19h1v1h-1zM22 19h1v1h-1zM24 19h1v1h-1zM26 19h1v1h-1zM1 20h1v1h-1zM3 20h1v1h-1zM4 20h1v1h-1zM6 20h1v1h-1zM7 20h1v1h-1zM8 20h1v1h-1zM11 20h1v1h-1zM12 20h1v1h-1zM13 20h1v1h-1zM16 20h1v1h-1zM17 20h1v1h-1zM18 20h1v1h-1zM19 20h1v1h-1zM20 20h1v1h-1zM21 20h1v1h-1zM22 20h1v1h-1zM23 20h1v1h-1zM24 20h1v1h-1zM25 20h1v1h-1zM26 20h1v1h-1zM8 21h1v1h-1zM9 21h1v1h-1zM13 21h1v1h-1zM14 21h1v1h-1zM15 21h1v1h-1zM16 21h1v1h-1zM20 21h1v1h-1zM24 21h1v1h-1zM25 21h1v1h-1zM26 21h1v1h-1zM27 21h1v1h-1zM28 21h1v1h-1zM0 22h1v1h-1zM1 22h1v1h-1zM2 22h1v1h-1zM3 22h1v1h-1zM4 22h1v1h-1zM5 22h1v1h-1zM6 22h1v1h-1zM8 22h1v1h-1zM10 22h1v1h-1zM11 22h1v1h-1zM13 22h1v1h-1zM16 22h1v1h-1zM17 22h1v1h-1zM18 22h1v1h-1zM20 22h1v1h-1zM22 22h1v1h-1zM24 22h1v1h-1zM25 22h1v1h-1zM27 22h1v1h-1zM0 23h1v1h-1zM6 23h1v1h-1zM8 23h1v1h-1zM9 23h1v1h-1zM15 23h1v1h-1zM16 23h1v1h-1zM20 23h1v1h-1zM24 23h1v1h-1zM25 23h1v1h-1zM27 23h1v1h-1zM0 24h1v1h-1zM2 24h1v1h-1zM3 24h1v1h-1zM4 24h1v1h-1zM6 24h1v1h-1zM11 24h1v1h-1zM14 24h1v1h-1zM15 24h1v1h-1zM17 24h1v1h-1zM18 24h1v1h-1zM20 24h1v1h-1zM21 24h1v1h-1zM22 24h1v1h-1zM23 24h1v1h-1zM24 24h1v1h-1zM26 24h1v1h-1zM0 25h1v1h-1zM2 25h1v1h-1zM3 25h1v1h-1zM4 25h1v1h-1zM6 25h1v1h-1zM8 25h1v1h-1zM9 25h1v1h-1zM12 25h1v1h-1zM13 25h1v1h-1zM14 25h1v1h-1zM16 25h1v1h-1zM17 25h1v1h-1zM18 25h1v1h-1zM19 25h1v1h-1zM21 25h1v1h-1zM23 25h1v1h-1zM24 25h1v1h-1zM25 25h1v1h-1zM28 25h1v1h-1zM0 26h1v1h-1zM2 26h1v1h-1zM3 26h1v1h-1zM4 26h1v1h-1zM6 26h1v1h-1zM8 26h1v1h-1zM13 26h1v1h-1zM14 26h1v1h-1zM18 26h1v1h-1zM20 26h1v1h-1zM21 26h1v1h-1zM26 26h1v1h-1zM28 26h1v1h-1zM0 27h1v1h-1zM6 27h1v1h-1zM10 27h1v1h-1zM14 27h1v1h-1zM15 27h1v1h-1zM16 27h1v1h-1zM18 27h1v1h-1zM20 27h1v1h-1zM21 27h1v1h-1zM23 27h1v1h-1zM25 27h1v1h-1zM27 27h1v1h-1zM0 28h1v1h-1zM1 28h1v1h-1zM2 28h1v1h-1zM3 28h1v1h-1zM4 28h1v1h-1zM5 28h1v1h-1zM6 28h1v1h-1zM8 28h1v1h-1zM10 28h1v1h-1zM11 28h1v1h-1zM13 28h1v1h-1zM17 28h1v1h-1zM18 28h1v1h-1zM20 28h1v1h-1zM22 28h1v1h-1zM27 28h1v1h-1z"/></svg></div><div class="txt"><div class="abrand">Taxis <b>Van</b> Paris</div><div class="aby">By ABTS</div><div class="stars" aria-hidden="true"><svg width="1em" height="1em" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l3 6.9 7.5.7-5.7 5 1.7 7.4L12 18l-6.5 4 1.7-7.4-5.7-5 7.5-.7z"/></svg><svg width="1em" height="1em" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l3 6.9 7.5.7-5.7 5 1.7 7.4L12 18l-6.5 4 1.7-7.4-5.7-5 7.5-.7z"/></svg><svg width="1em" height="1em" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l3 6.9 7.5.7-5.7 5 1.7 7.4L12 18l-6.5 4 1.7-7.4-5.7-5 7.5-.7z"/></svg><svg width="1em" height="1em" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l3 6.9 7.5.7-5.7 5 1.7 7.4L12 18l-6.5 4 1.7-7.4-5.7-5 7.5-.7z"/></svg><svg width="1em" height="1em" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l3 6.9 7.5.7-5.7 5 1.7 7.4L12 18l-6.5 4 1.7-7.4-5.7-5 7.5-.7z"/></svg></div><h2>Merci pour votre confiance</h2><p>Votre avis nous aide beaucoup. Il suffit de quelques mots.</p><div class="how">Scannez avec l'appareil photo</div></div></div><div class="back">Toucher l'écran pour revenir</div></div>
+<div class="arr" id="arr" hidden>
+  <div class="arr-top"><h2>🛬 Arrivées<small id="arrSub">Taxis Van Paris</small></h2>
+    <div class="arr-tabs"><button type="button" data-j="0" class="on">Aujourd'hui</button><button type="button" data-j="1">Demain</button></div>
+    <button type="button" class="arr-close" id="arrClose">✕ Fermer</button></div>
+  <div class="arr-list" id="arrList"><div class="arr-empty">Chargement…</div></div>
+</div>
 <form class="panel" id="panel" hidden autocomplete="off">
   <div class="row">
     <label for="inName">Nom du client
@@ -161,7 +200,7 @@ setInterval(keepAwake,20000);keepAwake();
 /* ---- Réception du nom envoyé depuis le tableau de bord (Firebase, gratuit) ---- */
 const FB_CFG={apiKey:"AIzaSyBN8uBFONIt1tDTH9C-NIQKeulFdJ2m26Q",authDomain:"taxis-van-paris-by-abts.firebaseapp.com",projectId:"taxis-van-paris-by-abts",storageBucket:"taxis-van-paris-by-abts.firebasestorage.app",messagingSenderId:"53887245170",appId:"1:53887245170:web:2a3b785d734c54e01f9beb"};
 const linkState=t=>{$('linkState').textContent=t};
-let fbAuth=null,fbSignIn=null,unsub=null;
+let fbAuth=null,fbSignIn=null,unsub=null,unsubArr=null;
 async function startLink(){
   try{
     const V='https://www.gstatic.com/firebasejs/10.13.0/';
@@ -169,8 +208,10 @@ async function startLink(){
     const app=A.initializeApp(FB_CFG); fbAuth=B.getAuth(app); fbSignIn=B.signInWithEmailAndPassword; const db=C.getFirestore(app);
     B.onAuthStateChanged(fbAuth,u=>{
       if(unsub){unsub();unsub=null;}
-      if(!u){linkState('non connectée');$('loginRow').hidden=false;return;}
+      if(!u){linkState('non connectée');$('loginRow').hidden=false;arrErr='Tablette non connectée : touche l\'écran de la pancarte puis connecte-toi avec le compte du tableau de bord.';arrRendre();return;}
       $('loginRow').hidden=true; linkState('connectée ('+(u.email||'compte')+'), en attente d\'un nom');
+      if(unsubArr){unsubArr();unsubArr=null;}
+      unsubArr=C.onSnapshot(C.collection(db,'reservations'),snap=>{arrResas=snap.docs.map(d=>({id:d.id,...d.data()}));arrRendre();},err=>{arrErr='Accès aux réservations refusé : connecte la tablette avec le compte du tableau de bord.';arrRendre();});
       unsub=C.onSnapshot(C.doc(db,'pancarte',u.uid),snap=>{
         const d=snap.data(); if(!d||!d.nom)return;
         const ts=d.ts&&d.ts.toMillis?d.ts.toMillis():0, last=store.get('pancarte-ts',0);
@@ -187,6 +228,56 @@ $('btnLogin').addEventListener('click',async()=>{
   try{linkState('connexion…');await fbSignIn(fbAuth,$('inMail').value.trim(),$('inPass').value);$('inPass').value='';}
   catch(e){linkState('email ou mot de passe incorrect');}
 });
+
+/* ---- Arrivées du jour : courses au départ d'un aéroport (lues dans le tableau de bord) ---- */
+let arrResas=null,arrErr='',arrJour=0;
+const AERO=[[/cdg|roissy|charles[ -]?de[ -]?gaulle/i,'CDG'],[/orly/i,'Orly'],[/beauvais|till[ée]/i,'Beauvais']];
+const pk=(d,...k)=>{for(const x of k){const v=d[x];if(v!==undefined&&v!==null&&String(v).trim()!=='')return String(v)}return ''};
+function arrDate(v){const s=String(v||'');let m=s.match(/^(\d{4})-(\d{2})-(\d{2})/);if(m)return m[1]+'-'+m[2]+'-'+m[3];m=s.match(/^(\d{2})\/(\d{2})\/(\d{4})/);return m?m[3]+'-'+m[2]+'-'+m[1]:''}
+function jourStr(dec){const d=new Date(Date.now()+dec*864e5);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function terminal(dep,aero){const t=String(dep||'');let m=t.match(/(?:terminal|term\.?|T)\s?([1-4][A-G]?|2[A-G])\b/i);if(m)return aero+' T'+m[1].toUpperCase();m=t.match(/orly\s?([1-4])/i);if(m)return 'Orly '+m[1];return aero}
+function nomPancarte(n){return String(n||'').replace(/^🏨\s*/,'').replace(/\s*\(.*?\)\s*/g,' ').replace(/(?:\+|\b0)\d[\d .-]{7,}/g,'').replace(/\s{2,}/g,' ').trim()}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function arrListe(){
+  if(!arrResas)return [];
+  const jour=jourStr(arrJour);
+  return arrResas.map(d=>{
+    const dep=pk(d,'dep','depart','départ','from'),z=pk(d,'dep_zone');const a=AERO.find(x=>x[0].test(dep+' '+z));
+    return {id:d.id,a:a&&a[1],dep,date:arrDate(pk(d,'date','dateCourse','jour')),heure:pk(d,'heure','time').slice(0,5),nom:nomPancarte(pk(d,'nom','name','client')),
+      vol:pk(d,'vol','flight','numeroVol').replace(/\s+/g,'').toUpperCase(),prov:pk(d,'vol_provenance','flight_from'),arrVol:pk(d,'vol_arrivee'),
+      ch:pk(d,'chauffeurNom'),statut:pk(d,'statut','status')||'en attente',pax:pk(d,'pax','passagers')}
+  }).filter(r=>r.a&&r.date===jour&&r.statut!=='annulée').sort((x,y)=>(x.heure||'99').localeCompare(y.heure||'99'));
+}
+function dansMin(h){if(arrJour!==0||!/^\d{1,2}:\d{2}$/.test(h))return '';const [a,b]=h.split(':').map(Number),n=new Date(),t=new Date(n.getFullYear(),n.getMonth(),n.getDate(),a,b);const m=Math.round((t-n)/60000);
+  if(m<-30)return 'passé';if(m<=0)return 'maintenant';if(m<60)return 'dans '+m+' min';return 'dans '+Math.floor(m/60)+' h '+String(m%60).padStart(2,'0')}
+function arrRendre(){
+  const box=$('arrList'); if(!box)return;
+  const d=new Date(Date.now()+arrJour*864e5);$('arrSub').textContent='Taxis Van Paris · '+d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+  if(arrErr&&!arrResas){box.innerHTML='<div class="arr-empty">'+esc(arrErr)+'</div>';return}
+  if(!arrResas){box.innerHTML='<div class="arr-empty">Chargement…</div>';return}
+  const L=arrListe();
+  if(!L.length){box.innerHTML='<div class="arr-empty">Aucune prise en charge à l\'aéroport '+(arrJour?'demain':'aujourd\'hui')+'.<br>Les courses au départ de CDG, Orly ou Beauvais du tableau de bord s\'affichent ici.</div>';return}
+  let prochaine=-1; L.forEach((r,i)=>{if(prochaine<0&&dansMin(r.heure)!=='passé')prochaine=i});
+  box.innerHTML=L.map((r,i)=>{
+    const dm=dansMin(r.heure),passe=dm==='passé';
+    const badge=r.statut==='terminée'?'<span class="arr-badge ok">Terminée</span>':r.statut==='confirmée'?'<span class="arr-badge ok">Confirmée</span>':'<span class="arr-badge wait">À confirmer</span>';
+    const suivre=r.vol?'<a class="arr-suivre" target="_blank" rel="noopener" href="https://www.flightradar24.com/data/flights/'+encodeURIComponent(r.vol.toLowerCase())+'" data-stop>✈️ Suivre</a>':'';
+    return '<button type="button" class="arr-row'+(i===prochaine?' next':'')+(passe?' past':'')+'" data-i="'+i+'">'+
+      '<div class="arr-h">'+esc(r.heure||'—')+'<small>'+esc(dm)+'</small></div>'+
+      '<div class="arr-main"><b>'+esc(r.vol?r.vol+(r.prov?' · '+r.prov:''):'Vol non indiqué')+'</b><span>'+esc([terminal(r.dep,r.a),r.nom,r.pax?r.pax+' pers.':'',r.ch].filter(Boolean).join(' · '))+'</span></div>'+
+      '<div class="arr-acts">'+badge+suivre+'</div></button>';
+  }).join('')+'<div class="arr-foot">Touchez une ligne pour afficher la pancarte du client. L\'heure est celle de la prise en charge prévue.</div>';
+  box.querySelectorAll('[data-stop]').forEach(a=>a.addEventListener('click',e=>e.stopPropagation()));
+  box.querySelectorAll('.arr-row').forEach(b=>b.addEventListener('click',()=>{
+    const r=L[+b.dataset.i]; if(!r||!r.nom)return;
+    state={name:r.nom.slice(0,40),sub:(r.vol?'Vol '+r.vol+' · ':'')+'Welcome to Paris'}; store.set('pancarte',state); render();
+    $('arr').hidden=true;
+  }));
+}
+$('btnArr').addEventListener('click',()=>{$('arr').hidden=false;arrRendre()});
+$('arrClose').addEventListener('click',()=>{$('arr').hidden=true});
+document.querySelectorAll('.arr-tabs button').forEach(b=>b.addEventListener('click',()=>{arrJour=+b.dataset.j;document.querySelectorAll('.arr-tabs button').forEach(x=>x.classList.toggle('on',x===b));arrRendre()}));
+setInterval(()=>{if(!$('arr').hidden)arrRendre()},30000);
 startLink();
 addEventListener('resize',fit);
 document.fonts?.ready.then(fit);
