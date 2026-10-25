@@ -233,7 +233,12 @@ $('btnLogin').addEventListener('click',async()=>{
 let arrResas=null,arrErr='',arrJour=0;
 const AERO=[[/cdg|roissy|charles[ -]?de[ -]?gaulle/i,'CDG'],[/orly/i,'Orly'],[/beauvais|till[ée]/i,'Beauvais']];
 const pk=(d,...k)=>{for(const x of k){const v=d[x];if(v!==undefined&&v!==null&&String(v).trim()!=='')return String(v)}return ''};
-function arrDate(v){const s=String(v||'');let m=s.match(/^(\d{4})-(\d{2})-(\d{2})/);if(m)return m[1]+'-'+m[2]+'-'+m[3];m=s.match(/^(\d{2})\/(\d{2})\/(\d{4})/);return m?m[3]+'-'+m[2]+'-'+m[1]:''}
+function arrDate(v){if(!v)return '';if(typeof v.toDate==='function'){const d=v.toDate();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+  const s=String(v).trim();let m=s.match(/(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})/);if(m)return m[3]+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0');
+  m=s.match(/(\d{4})-(\d{2})-(\d{2})/);if(m)return m[0];
+  const MOIS=['janv','févr','mars','avr','mai','juin','juil','août','sept','oct','nov','déc'];m=s.toLowerCase().replace('fevr','févr').replace('aout','août').replace('dec','déc').match(/(\d{1,2})\s+([a-zéû]+)\.?\s+(\d{4})/);
+  if(m){const i=MOIS.findIndex(x=>m[2].startsWith(x));if(i>=0)return m[3]+'-'+String(i+1).padStart(2,'0')+'-'+m[1].padStart(2,'0')}return ''}
+function arrHeure(v){if(!v)return '';if(typeof v.toDate==='function'){const d=v.toDate();return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}const m=String(v).trim().match(/^(\d{1,2})[:hH](\d{2})/);return m?m[1].padStart(2,'0')+':'+m[2]:''}
 function jourStr(dec){const d=new Date(Date.now()+dec*864e5);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 function terminal(dep,aero){const t=String(dep||'');let m=t.match(/(?:terminal|term\.?|T)\s?([1-4][A-G]?|2[A-G])\b/i);if(m)return aero+' T'+m[1].toUpperCase();m=t.match(/orly\s?([1-4])/i);if(m)return 'Orly '+m[1];return aero}
 function nomPancarte(n){return String(n||'').replace(/^🏨\s*/,'').replace(/\s*\(.*?\)\s*/g,' ').replace(/(?:\+|\b0)\d[\d .-]{7,}/g,'').replace(/\s{2,}/g,' ').trim()}
@@ -243,20 +248,22 @@ function arrListe(){
   const jour=jourStr(arrJour);
   return arrResas.map(d=>{
     const dep=pk(d,'dep','depart','départ','from'),z=pk(d,'dep_zone');const a=AERO.find(x=>x[0].test(dep+' '+z));
-    return {id:d.id,a:a&&a[1],dep,date:arrDate(pk(d,'date','dateCourse','jour')),heure:pk(d,'heure','time').slice(0,5),nom:nomPancarte(pk(d,'nom','name','client')),
-      vol:pk(d,'vol','flight','numeroVol').replace(/\s+/g,'').toUpperCase(),prov:pk(d,'vol_provenance','flight_from'),arrVol:pk(d,'vol_arrivee'),
+    return {id:d.id,a:a&&a[1],dep,date:arrDate(d.date||d.dateCourse||d.jour),heure:arrHeure(d.heure||d.time),nom:nomPancarte(pk(d,'nom','name','client')),
+      vol:(pk(d,'vol','flight','numeroVol')||((pk(d,'note','notes').match(/\b([A-Z0-9]{2}\s?\d{2,4})\b/i)||[])[1]||'')).replace(/\s+/g,'').toUpperCase(),prov:pk(d,'vol_provenance','flight_from'),arrVol:pk(d,'vol_arrivee'),
       ch:pk(d,'chauffeurNom'),statut:pk(d,'statut','status')||'en attente',pax:pk(d,'pax','passagers')}
   }).filter(r=>r.a&&r.date===jour&&r.statut!=='annulée').sort((x,y)=>(x.heure||'99').localeCompare(y.heure||'99'));
 }
 function dansMin(h){if(arrJour!==0||!/^\d{1,2}:\d{2}$/.test(h))return '';const [a,b]=h.split(':').map(Number),n=new Date(),t=new Date(n.getFullYear(),n.getMonth(),n.getDate(),a,b);const m=Math.round((t-n)/60000);
   if(m<-30)return 'passé';if(m<=0)return 'maintenant';if(m<60)return 'dans '+m+' min';return 'dans '+Math.floor(m/60)+' h '+String(m%60).padStart(2,'0')}
+function arrLienDemain(){const b=$('arrDemain');if(b)b.addEventListener('click',()=>{arrJour=1;document.querySelectorAll('.arr-tabs button').forEach(x=>x.classList.toggle('on',x.dataset.j==='1'));arrRendre()})}
 function arrRendre(){
   const box=$('arrList'); if(!box)return;
   const d=new Date(Date.now()+arrJour*864e5);$('arrSub').textContent='Taxis Van Paris · '+d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
   if(arrErr&&!arrResas){box.innerHTML='<div class="arr-empty">'+esc(arrErr)+'</div>';return}
   if(!arrResas){box.innerHTML='<div class="arr-empty">Chargement…</div>';return}
   const L=arrListe();
-  if(!L.length){box.innerHTML='<div class="arr-empty">Aucune prise en charge à l\'aéroport '+(arrJour?'demain':'aujourd\'hui')+'.<br>Les courses au départ de CDG, Orly ou Beauvais du tableau de bord s\'affichent ici.</div>';return}
+  let demainTxt='';if(arrJour===0){arrJour=1;const n=arrListe().length;arrJour=0;if(n)demainTxt='<button type="button" class="arr-suivre" id="arrDemain" style="align-self:center;font-size:15px;padding:8px 16px">➜ '+n+' course'+(n>1?'s':'')+' demain : voir</button>'}
+  if(!L.length){box.innerHTML='<div class="arr-empty">Aucune prise en charge à l\'aéroport '+(arrJour?'demain':'aujourd\'hui')+'.<br>Les courses au départ de CDG, Orly ou Beauvais du tableau de bord s\'affichent ici.</div>'+demainTxt;arrLienDemain();return}
   let prochaine=-1; L.forEach((r,i)=>{if(prochaine<0&&dansMin(r.heure)!=='passé')prochaine=i});
   box.innerHTML=L.map((r,i)=>{
     const dm=dansMin(r.heure),passe=dm==='passé';
@@ -266,7 +273,8 @@ function arrRendre(){
       '<div class="arr-h">'+esc(r.heure||'—')+'<small>'+esc(dm)+'</small></div>'+
       '<div class="arr-main"><b>'+esc(r.vol?r.vol+(r.prov?' · '+r.prov:''):'Vol non indiqué')+'</b><span>'+esc([terminal(r.dep,r.a),r.nom,r.pax?r.pax+' pers.':'',r.ch].filter(Boolean).join(' · '))+'</span></div>'+
       '<div class="arr-acts">'+badge+suivre+'</div></button>';
-  }).join('')+'<div class="arr-foot">Touchez une ligne pour afficher la pancarte du client. L\'heure est celle de la prise en charge prévue.</div>';
+  }).join('')+demainTxt+'<div class="arr-foot">Touchez une ligne pour afficher la pancarte du client. L\'heure est celle de la prise en charge prévue.</div>';
+  arrLienDemain();
   box.querySelectorAll('[data-stop]').forEach(a=>a.addEventListener('click',e=>e.stopPropagation()));
   box.querySelectorAll('.arr-row').forEach(b=>b.addEventListener('click',()=>{
     const r=L[+b.dataset.i]; if(!r||!r.nom)return;
