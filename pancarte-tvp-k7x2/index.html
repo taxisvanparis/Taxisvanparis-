@@ -107,13 +107,29 @@ body{background:#050505}
 .avis p{font-size:clamp(16px,2.6vmin,24px);line-height:1.4;color:#d4d4d4;margin:16px 0 0}
 .avis .how{margin-top:24px;display:inline-block;border:2px solid #C9A84C;color:#C9A84C;border-radius:999px;padding:10px 22px;font-size:clamp(14px,2.2vmin,20px);font-weight:700}
 .avis .back{position:fixed;right:20px;bottom:calc(14px + env(safe-area-inset-bottom,0px));font-size:14px;color:#888}
+.photobtn{display:flex;align-items:center;gap:.35em;flex:none;font:inherit;font-weight:800;font-size:clamp(13px,2vw,20px);color:#fff;background:transparent;border:2px solid rgba(255,255,255,.55);border-radius:999px;padding:.35em .9em;cursor:pointer}
+.ph{position:fixed;inset:0;z-index:45;background:#000;color:#fff;font-family:var(--f);display:flex;flex-direction:column}
+.ph[hidden]{display:none}
+.ph-view{flex:1;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.ph-view video,.ph-view img{max-width:100%;max-height:100%;object-fit:contain;display:block}
+.ph-count{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:30vmin;font-weight:900;color:#fff;text-shadow:0 0 40px rgba(0,0,0,.8);pointer-events:none}
+.ph-bar{display:flex;gap:12px;justify-content:center;align-items:center;flex-wrap:wrap;padding:14px 16px calc(14px + env(safe-area-inset-bottom,0px));background:#050505;border-top:3px solid var(--gold)}
+.ph-bar button{font:inherit;font-weight:800;font-size:clamp(15px,2.2vw,22px);border-radius:999px;padding:.55em 1.3em;cursor:pointer;border:2px solid rgba(255,255,255,.5);background:transparent;color:#fff}
+.ph-bar button.go{background:var(--gold);border-color:var(--gold);color:#050505}
+.ph-bar button[hidden]{display:none}
+.ph-msg{color:#C9A84C;font-size:15px;width:100%;text-align:center}
+.ph-qr{display:flex;align-items:center;justify-content:center;gap:5vmin;flex-wrap:wrap;padding:4vmin;text-align:center}
+.ph-qr .q{background:#fff;padding:18px;border-radius:20px;width:min(46vmin,420px)}
+.ph-qr h2{font-family:"Playfair Display",Georgia,serif;font-size:clamp(28px,5.5vmin,54px);margin:0;line-height:1.1}
+.ph-qr p{color:#d4d4d4;font-size:clamp(16px,2.6vmin,24px);margin:14px 0 0}
+.ph-qr .mini{width:min(40vmin,360px);border:3px solid var(--gold);border-radius:10px;display:block;margin:0 auto 14px}
 </style>
 </head>
 <body>
 <div class="sign">
   <header class="band">
     <div class="brand"><span>Taxis <b>Van</b> Paris</span><small>By ABTS</small></div>
-    <button type="button" class="arrbtn" id="btnArr" aria-label="Arrivées du jour">✈️ Arrivées</button><button type="button" class="avisbtn" id="btnAvis" aria-label="Afficher le QR code des avis"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l3 6.9 7.5.7-5.7 5 1.7 7.4L12 18l-6.5 4 1.7-7.4-5.7-5 7.5-.7z"/></svg><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l3 6.9 7.5.7-5.7 5 1.7 7.4L12 18l-6.5 4 1.7-7.4-5.7-5 7.5-.7z"/></svg><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l3 6.9 7.5.7-5.7 5 1.7 7.4L12 18l-6.5 4 1.7-7.4-5.7-5 7.5-.7z"/></svg><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l3 6.9 7.5.7-5.7 5 1.7 7.4L12 18l-6.5 4 1.7-7.4-5.7-5 7.5-.7z"/></svg><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l3 6.9 7.5.7-5.7 5 1.7 7.4L12 18l-6.5 4 1.7-7.4-5.7-5 7.5-.7z"/></svg></button>
+    <button type="button" class="arrbtn" id="btnArr" aria-label="Arrivées du jour">✈️ Arrivées</button><button type="button" class="photobtn" id="btnPh" aria-label="Photo souvenir">📸 Photo</button><button type="button" class="avisbtn" id="btnAvis" aria-label="Afficher le QR code des avis"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l3 6.9 7.5.7-5.7 5 1.7 7.4L12 18l-6.5 4 1.7-7.4-5.7-5 7.5-.7z"/></svg><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l3 6.9 7.5.7-5.7 5 1.7 7.4L12 18l-6.5 4 1.7-7.4-5.7-5 7.5-.7z"/></svg><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l3 6.9 7.5.7-5.7 5 1.7 7.4L12 18l-6.5 4 1.7-7.4-5.7-5 7.5-.7z"/></svg><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l3 6.9 7.5.7-5.7 5 1.7 7.4L12 18l-6.5 4 1.7-7.4-5.7-5 7.5-.7z"/></svg><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l3 6.9 7.5.7-5.7 5 1.7 7.4L12 18l-6.5 4 1.7-7.4-5.7-5 7.5-.7z"/></svg></button>
   </header>
   <main class="stage" id="stage" aria-label="Toucher pour modifier">
     <div id="name">M. DUPONT</div>
@@ -128,6 +144,17 @@ body{background:#050505}
     <div class="arr-tabs"><button type="button" data-j="0" class="on">Aujourd'hui</button><button type="button" data-j="1">Demain</button></div>
     <button type="button" class="arr-close" id="arrClose">✕ Fermer</button></div>
   <div class="arr-list" id="arrList"><div class="arr-empty">Chargement…</div></div>
+</div>
+<div class="ph" id="ph" hidden>
+  <div class="ph-view" id="phView"><video id="phVid" playsinline muted autoplay></video><img id="phImg" alt="Photo souvenir" hidden><div class="ph-count" id="phCount"></div>
+    <div class="ph-qr" id="phQr" hidden><div><img class="mini" id="phMini" alt=""><div class="q" id="phQrBox"></div></div>
+      <div style="max-width:480px;text-align:left"><h2>Votre photo souvenir 📸<br><span style="color:#C9A84C">Your Paris souvenir</span></h2><p>Scannez avec l'appareil photo de votre téléphone pour la récupérer.<br><i>Scan with your phone camera to get your photo.</i></p></div></div></div>
+  <div class="ph-bar"><div class="ph-msg" id="phMsg"></div>
+    <button type="button" id="phCam">🔄 Caméra</button>
+    <button type="button" class="go" id="phShoot">📸 Prendre la photo</button>
+    <button type="button" id="phAgain" hidden>↺ Reprendre</button>
+    <button type="button" class="go" id="phSend" hidden>📲 Donner au client</button>
+    <button type="button" id="phClose">✕ Fermer</button></div>
 </div>
 <form class="panel" id="panel" hidden autocomplete="off">
   <div class="row">
@@ -200,12 +227,12 @@ setInterval(keepAwake,20000);keepAwake();
 /* ---- Réception du nom envoyé depuis le tableau de bord (Firebase, gratuit) ---- */
 const FB_CFG={apiKey:"AIzaSyBN8uBFONIt1tDTH9C-NIQKeulFdJ2m26Q",authDomain:"taxis-van-paris-by-abts.firebaseapp.com",projectId:"taxis-van-paris-by-abts",storageBucket:"taxis-van-paris-by-abts.firebasestorage.app",messagingSenderId:"53887245170",appId:"1:53887245170:web:2a3b785d734c54e01f9beb"};
 const linkState=t=>{$('linkState').textContent=t};
-let fbAuth=null,fbSignIn=null,unsub=null,unsubArr=null;
+let fbAuth=null,fbSignIn=null,unsub=null,unsubArr=null,fbC=null,fbDb=null;
 async function startLink(){
   try{
     const V='https://www.gstatic.com/firebasejs/10.13.0/';
     const [A,B,C]=await Promise.all([import(V+'firebase-app.js'),import(V+'firebase-auth.js'),import(V+'firebase-firestore.js')]);
-    const app=A.initializeApp(FB_CFG); fbAuth=B.getAuth(app); fbSignIn=B.signInWithEmailAndPassword; const db=C.getFirestore(app);
+    const app=A.initializeApp(FB_CFG); fbAuth=B.getAuth(app); fbSignIn=B.signInWithEmailAndPassword; const db=C.getFirestore(app); fbC=C; fbDb=db;
     B.onAuthStateChanged(fbAuth,u=>{
       if(unsub){unsub();unsub=null;}
       if(!u){linkState('non connectée');$('loginRow').hidden=false;arrErr='Tablette non connectée : touche l\'écran de la pancarte puis connecte-toi avec le compte du tableau de bord.';arrRendre();return;}
@@ -287,6 +314,53 @@ $('arrClose').addEventListener('click',()=>{$('arr').hidden=true});
 document.querySelectorAll('.arr-tabs button').forEach(b=>b.addEventListener('click',()=>{arrJour=+b.dataset.j;document.querySelectorAll('.arr-tabs button').forEach(x=>x.classList.toggle('on',x===b));arrRendre()}));
 setInterval(()=>{if(!$('arr').hidden)arrRendre()},30000);
 startLink();
+
+/* ---- Photo souvenir : photo encadrée « Paris · taxisvanparis.fr », récupérée par le client avec un QR code ---- */
+let phStream=null,phFacing='environment',phData='';
+const phMsg=t=>{$('phMsg').textContent=t||''};
+function phMode(m){ // 'cam' | 'pre' | 'qr'
+  $('phVid').hidden=m!=='cam';$('phImg').hidden=m!=='pre';$('phQr').hidden=m!=='qr';
+  $('phCam').hidden=$('phShoot').hidden=m!=='cam';$('phAgain').hidden=m==='cam';$('phSend').hidden=m!=='pre';
+  $('phAgain').textContent=m==='qr'?'📸 Nouvelle photo':'↺ Reprendre';}
+async function phStart(){
+  phStop();phMode('cam');phMsg('');
+  try{phStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:phFacing,width:{ideal:1920},height:{ideal:1440}},audio:false});
+    $('phVid').srcObject=phStream;await $('phVid').play().catch(()=>{});}
+  catch(e){phMsg("Caméra non autorisée : Réglages › Safari › Appareil photo › Autoriser.");}}
+function phStop(){if(phStream){phStream.getTracks().forEach(t=>t.stop());phStream=null;}}
+function phCompose(){
+  const v=$('phVid'),vw=v.videoWidth,vh=v.videoHeight;if(!vw)return '';
+  const W=1600,PH=1200,BAND=170,c=document.createElement('canvas');c.width=W;c.height=PH+BAND;const x=c.getContext('2d');
+  const r=Math.max(W/vw,PH/vh),sw=W/r,sh=PH/r;
+  if(phFacing==='user'){x.save();x.translate(W,0);x.scale(-1,1);}
+  x.drawImage(v,(vw-sw)/2,(vh-sh)/2,sw,sh,0,0,W,PH);if(phFacing==='user')x.restore();
+  x.strokeStyle='rgba(201,168,76,.9)';x.lineWidth=6;x.strokeRect(24,24,W-48,PH-48);
+  x.fillStyle='#050505';x.fillRect(0,PH,W,BAND);x.fillStyle='#C9A84C';x.fillRect(0,PH,W,6);
+  x.textBaseline='middle';x.fillStyle='#fff';x.font='italic 900 84px "Playfair Display",Georgia,serif';x.fillText('Paris',50,PH+78);
+  const d=new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
+  x.fillStyle='#C9A84C';x.font='600 30px Archivo,Arial,sans-serif';x.fillText(d,54,PH+136);
+  x.textAlign='right';x.fillStyle='#fff';x.font='900 50px Archivo,Arial,sans-serif';x.fillText('Taxis Van Paris',W-50,PH+70);
+  x.fillStyle='#C9A84C';x.font='700 38px Archivo,Arial,sans-serif';x.fillText('taxisvanparis.fr',W-50,PH+128);
+  let q=.85,u=c.toDataURL('image/jpeg',q);while(u.length>900000&&q>.4){q-=.1;u=c.toDataURL('image/jpeg',q);}
+  return u;}
+$('btnPh').addEventListener('click',()=>{$('ph').hidden=false;phStart();keepAwake();});
+$('phClose').addEventListener('click',()=>{phStop();$('ph').hidden=true;});
+$('phCam').addEventListener('click',()=>{phFacing=phFacing==='environment'?'user':'environment';phStart();});
+$('phShoot').addEventListener('click',()=>{let n=3;const el=$('phCount');el.textContent=n;$('phShoot').disabled=true;
+  const t=setInterval(()=>{n--;if(n>0){el.textContent=n;return;}clearInterval(t);el.textContent='';$('phShoot').disabled=false;
+    phData=phCompose();if(!phData)return phMsg('Photo impossible, réessaie.');$('phImg').src=phData;phStop();phMode('pre');},1000);});
+$('phAgain').addEventListener('click',phStart);
+$('phSend').addEventListener('click',async()=>{
+  if(!fbC||!fbDb||!fbAuth||!fbAuth.currentUser)return phMsg("Tablette non connectée : touche la pancarte et connecte-toi avec le compte du tableau de bord.");
+  $('phSend').disabled=true;phMsg('Envoi…');
+  let ref=null;
+  try{ref=await fbC.addDoc(fbC.collection(fbDb,'souvenirs'),{img:phData,t:fbC.serverTimestamp(),uid:fbAuth.currentUser.uid});}
+  catch(e){phMsg("Envoi refusé par Firebase : la règle « souvenirs » n'est pas encore ajoutée.");}
+  if(ref){const url='https://taxisvanparis.fr/souvenir/?p='+ref.id;
+    try{const q=qrcode(0,'M');q.addData(url);q.make();$('phQrBox').innerHTML=q.createSvgTag({cellSize:8,margin:0,scalable:true});}
+    catch(e){$('phQrBox').innerHTML='<div style="color:#050505;font-weight:800;word-break:break-all">'+url+'</div>';}
+    $('phMini').src=phData;phMode('qr');phMsg('');}
+  $('phSend').disabled=false;});
 addEventListener('resize',fit);
 document.fonts?.ready.then(fit);
 
@@ -299,5 +373,6 @@ applyLogo();
 render();
 if('serviceWorker' in navigator){addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{});});}
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 </body>
 </html>

@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Photo souvenir · Taxis Van Paris</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#050505">
+<link rel="icon" href="/favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&family=Playfair+Display:ital,wght@1,900&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#C9A84C;--bg:#050505;--card:#121212;--ink:#fff;--mut:#bdbdbd}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Archivo,"Helvetica Neue",Arial,sans-serif;min-height:100vh;padding:0 16px calc(24px + env(safe-area-inset-bottom,0px))}
+header{text-align:center;padding:22px 0 8px}
+.brand{font-weight:800;font-size:20px;letter-spacing:.02em}.brand b{color:var(--gold)}
+h1{font-family:"Playfair Display",Georgia,serif;font-style:italic;font-weight:900;font-size:clamp(28px,8vw,40px);margin:10px 0 4px;text-align:center;line-height:1.1}
+.sub{text-align:center;color:var(--mut);margin:0 0 18px;font-size:15px}
+main{max-width:720px;margin:0 auto}
+.photo{border:3px solid var(--gold);border-radius:12px;overflow:hidden;background:var(--card);min-height:200px;display:flex;align-items:center;justify-content:center}
+.photo img{width:100%;height:auto;display:block;-webkit-touch-callout:default}
+.btns{display:flex;flex-direction:column;gap:10px;margin-top:16px}
+button,.cta{font:inherit;font-weight:800;font-size:17px;border-radius:999px;padding:15px 20px;cursor:pointer;text-align:center;text-decoration:none;display:block}
+.save{background:var(--gold);color:#050505;border:0}
+.share{background:transparent;color:#fff;border:2px solid rgba(255,255,255,.5)}
+.tip{color:var(--mut);font-size:13px;text-align:center;margin:10px 0 0}
+.cta-box{margin-top:26px;border-top:1px solid #2a2a2a;padding-top:22px;text-align:center}
+.cta-box p{margin:0 0 12px;color:var(--mut)}
+.cta{border:2px solid var(--gold);color:var(--gold)}
+.err{color:var(--mut);padding:30px;text-align:center}
+</style>
+</head>
+<body>
+<header><div class="brand">Taxis <b>Van</b> Paris</div></header>
+<main>
+  <h1 id="t">Votre photo souvenir</h1>
+  <p class="sub" id="s">Paris</p>
+  <div class="photo" id="box"><div class="err" id="load">…</div></div>
+  <div class="btns" id="btns" hidden>
+    <button type="button" class="save" id="save"></button>
+    <button type="button" class="share" id="share" hidden></button>
+  </div>
+  <p class="tip" id="tip" hidden></p>
+  <div class="cta-box"><p id="ctaT"></p><a class="cta" id="cta" href="https://taxisvanparis.fr/"></a></div>
+</main>
+<script>
+const L={
+ fr:{t:'Votre photo souvenir',s:'Merci d\'avoir voyagé avec nous à Paris',save:'Enregistrer la photo',share:'Partager',tip:'Sur iPhone : appuyez longuement sur la photo puis « Enregistrer dans Photos ».',ctaT:'Besoin d\'un taxi pendant votre séjour ?',cta:'Réserver sur taxisvanparis.fr',err:'Photo introuvable ou expirée.',load:'Chargement…'},
+ en:{t:'Your Paris souvenir photo',s:'Thank you for riding with us in Paris',save:'Save the photo',share:'Share',tip:'On iPhone: press and hold the photo, then "Save to Photos".',ctaT:'Need a ride during your stay?',cta:'Book on taxisvanparis.fr',err:'Photo not found or expired.',load:'Loading…'},
+ es:{t:'Tu foto recuerdo de París',s:'Gracias por viajar con nosotros en París',save:'Guardar la foto',share:'Compartir',tip:'En iPhone: mantén pulsada la foto y luego «Guardar en Fotos».',ctaT:'¿Necesitas un taxi durante tu estancia?',cta:'Reserva en taxisvanparis.fr',err:'Foto no encontrada o caducada.',load:'Cargando…'},
+ it:{t:'La tua foto ricordo di Parigi',s:'Grazie per aver viaggiato con noi a Parigi',save:'Salva la foto',share:'Condividi',tip:'Su iPhone: tieni premuta la foto e poi «Salva in Foto».',ctaT:'Ti serve un taxi durante il soggiorno?',cta:'Prenota su taxisvanparis.fr',err:'Foto non trovata o scaduta.',load:'Caricamento…'},
+ de:{t:'Ihr Paris-Erinnerungsfoto',s:'Danke, dass Sie mit uns in Paris gefahren sind',save:'Foto speichern',share:'Teilen',tip:'Auf dem iPhone: Foto lange drücken, dann „In Fotos sichern".',ctaT:'Brauchen Sie ein Taxi während Ihres Aufenthalts?',cta:'Buchen auf taxisvanparis.fr',err:'Foto nicht gefunden oder abgelaufen.',load:'Wird geladen…'},
+ pt:{t:'A sua foto lembrança de Paris',s:'Obrigado por viajar connosco em Paris',save:'Guardar a foto',share:'Partilhar',tip:'No iPhone: toque longamente na foto e depois «Guardar em Fotografias».',ctaT:'Precisa de um táxi durante a estadia?',cta:'Reserve em taxisvanparis.fr',err:'Foto não encontrada ou expirada.',load:'A carregar…'},
+ zh:{t:'您的巴黎纪念照',s:'感谢您在巴黎乘坐我们的车',save:'保存照片',share:'分享',tip:'iPhone：长按照片，然后选择"存储到照片"。',ctaT:'在巴黎期间需要用车吗？',cta:'在 taxisvanparis.fr 预订',err:'照片不存在或已过期。',load:'加载中…'}
+};
+const lg=(navigator.language||'fr').slice(0,2).toLowerCase(),T=L[lg]||L.en;
+document.documentElement.lang=L[lg]?lg:'en';
+const $=id=>document.getElementById(id);
+['t','s','save','share','tip','ctaT','cta','load'].forEach(k=>{$(k).textContent=T[k]});
+const id=(new URLSearchParams(location.search).get('p')||'').replace(/[^A-Za-z0-9]/g,'').slice(0,40);
+let blob=null;
+function fail(){$('box').innerHTML='<div class="err">'+T.err+'</div>'}
+(async()=>{
+  if(!id)return fail();
+  try{
+    const r=await fetch('https://firestore.googleapis.com/v1/projects/taxis-van-paris-by-abts/databases/(default)/documents/souvenirs/'+id+'?key=AIzaSyBN8uBFONIt1tDTH9C-NIQKeulFdJ2m26Q');
+    if(!r.ok)return fail();
+    const j=await r.json(),img=j.fields&&j.fields.img&&j.fields.img.stringValue;
+    if(!img||!/^data:image\/jpeg;base64,/.test(img))return fail();
+    const el=new Image();el.alt=T.t;el.src=img;$('box').innerHTML='';$('box').appendChild(el);
+    blob=await (await fetch(img)).blob();
+    $('btns').hidden=false;$('tip').hidden=!/iPhone|iPad|iPod/.test(navigator.userAgent);
+    const f=new File([blob],'paris-taxis-van-paris.jpg',{type:'image/jpeg'});
+    if(navigator.canShare&&navigator.canShare({files:[f]})){$('share').hidden=false;
+      $('share').onclick=()=>navigator.share({files:[f],title:'Paris',text:'Paris · taxisvanparis.fr'}).catch(()=>{});
+      $('save').onclick=()=>navigator.share({files:[f]}).catch(()=>{});}
+    else $('save').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='paris-taxis-van-paris.jpg';document.body.appendChild(a);a.click();a.remove();};
+  }catch(e){fail()}
+})();
+</script>
+</body>
+</html>
