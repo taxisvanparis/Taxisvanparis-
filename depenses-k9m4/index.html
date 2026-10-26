@@ -148,7 +148,8 @@ label{display:block;color:var(--mut);font-size:13px;text-transform:uppercase;let
   <div class="month"><button id="prev" aria-label="Mois précédent">‹</button><span id="mLabel"></span><button id="next" aria-label="Mois suivant">›</button></div>
 
   <section class="card" id="bilan">
-    <div class="row"><div><div class="lbl" id="lblGain">Ce que je gagne</div><div class="big pos" id="rec">0,00 €</div></div><div id="due" style="text-align:right;font-size:14px;color:var(--gold);cursor:pointer;text-decoration:underline"></div></div>
+    <div class="row" style="margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--line)"><div><div class="lbl" id="lblCa">Chiffre d'affaires du jour</div><div id="caSub" class="mut" style="font-size:13px;margin-top:2px"></div></div><div id="ca" style="font-weight:800;font-size:30px;color:var(--gold)">0,00 €</div></div>
+    <div class="row"><div><div class="lbl" id="lblGain">Déjà encaissé</div><div class="big pos" id="rec">0,00 €</div></div><div id="due" style="text-align:right;font-size:14px;color:var(--gold);cursor:pointer;text-decoration:underline"></div></div>
     <div class="row" style="margin-top:14px"><div class="lbl">Mes dépenses</div><div id="tot" style="font-weight:800;font-size:22px">0,00 €</div></div>
     <div class="row" style="margin-top:12px;border-top:1px solid var(--line);padding-top:12px"><div class="lbl">Il me reste</div><div class="reste" id="reste">—</div></div>
     <div class="row" style="margin-top:8px"><div class="lbl">TVA sur mes dépenses</div><div id="tva" style="font-weight:800">0,00 €</div></div>
@@ -316,6 +317,10 @@ function render(){
   const tot=sum(L),gain=sum(R.filter(x=>x.paid!==false)),due=sum(R.filter(x=>x.paid===false));
   $('tot').textContent=eur(tot);
   $('rec').textContent=eur(gain);
+  const nbC=R.reduce((n,x)=>n+(Number(x.nb)||1),0);
+  $('lblCa').textContent=J?"Chiffre d'affaires du jour":"Chiffre d'affaires du mois";
+  $('ca').textContent=eur(gain+due);
+  $('caSub').textContent=R.length?nbC+' course'+(nbC>1?'s':'')+(due?' · dont '+eur(due)+' à recevoir':''):'';
   $('due').textContent=due?`${eur(due)} à recevoir`:'';
   $('tva').textContent=eur(sum(L,'tva'));
   if(J){const y=shiftDay(curDay,-1),yg=sum(recs.filter(x=>x.date===y&&x.paid!==false)),yd=sum(items.filter(x=>x.date===y));
