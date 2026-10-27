@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Annonce Express</title>
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0f766e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Annonce">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+:root{--bg:#f6f7f7;--card:#fff;--ink:#14201f;--mut:#5d6b6a;--line:#e1e6e5;--acc:#0f766e;--acc2:#e6f3f1;--warn:#b45309}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;font-size:16px;line-height:1.45;padding:0 16px calc(28px + env(safe-area-inset-bottom,0px))}
+header{display:flex;align-items:center;justify-content:space-between;padding:calc(14px + env(safe-area-inset-top,0px)) 0 10px;max-width:640px;margin:0 auto}
+h1{font-size:22px;margin:0;font-weight:800;letter-spacing:-.01em}h1 b{color:var(--acc)}
+.icon-btn{background:none;border:0;font-size:22px;padding:6px;cursor:pointer;color:var(--ink)}
+main{max-width:640px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-top:14px}
+.step{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--acc);margin:0 0 8px}
+h2{font-size:18px;margin:0 0 10px}
+.pick{display:flex;gap:10px}
+.pick label{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border:2px dashed #b9cfcc;border-radius:14px;padding:18px 8px;background:var(--acc2);color:var(--acc);font-weight:700;cursor:pointer;text-align:center}
+.pick label span{font-size:28px}
+.pick input{display:none}
+.opts{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;align-items:center}
+.chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 12px;font:inherit;font-size:14px;cursor:pointer;color:var(--ink)}
+.chip.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.sw{display:inline-block;width:16px;height:16px;border-radius:50%;border:1px solid #ccd;vertical-align:-3px;margin-right:4px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}
+.ph{position:relative;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:#eee;aspect-ratio:3/4}
+.ph img{width:100%;height:100%;object-fit:cover;display:block}
+.ph .st{position:absolute;left:6px;bottom:6px;right:6px;background:rgba(20,32,31,.78);color:#fff;font-size:12px;border-radius:8px;padding:4px 7px;text-align:center}
+.ph .tg{position:absolute;top:6px;left:6px;display:flex;gap:4px}
+.ph .tg button{font:inherit;font-size:11px;font-weight:700;border:0;border-radius:999px;padding:4px 8px;background:rgba(255,255,255,.92);color:var(--ink);cursor:pointer}
+.ph .tg button.on{background:var(--acc);color:#fff}
+.ph .x{position:absolute;top:6px;right:6px;border:0;background:rgba(255,255,255,.92);border-radius:50%;width:26px;height:26px;font-size:14px;cursor:pointer}
+.btn{display:block;width:100%;border:0;border-radius:14px;padding:15px;font:inherit;font-weight:800;font-size:17px;cursor:pointer;margin-top:12px}
+.btn.main{background:var(--acc);color:#fff}
+.btn.sec{background:#fff;color:var(--acc);border:2px solid var(--acc)}
+.btn:disabled{opacity:.5}
+textarea,input[type=text],input[type=password]{width:100%;font:inherit;font-size:16px;border:1px solid var(--line);border-radius:12px;padding:11px 12px;background:#fff;color:var(--ink)}
+textarea{min-height:64px;resize:vertical}
+.mut{color:var(--mut);font-size:14px}
+.field{border-top:1px solid var(--line);padding:12px 0}
+.field:first-of-type{border-top:0}
+.fh{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.fl{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
+.fv{margin-top:4px;white-space:pre-wrap;word-break:break-word}
+.cp{border:1px solid var(--line);background:#fff;border-radius:999px;padding:5px 11px;font:inherit;font-size:13px;font-weight:700;color:var(--acc);cursor:pointer;flex:none}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+.price{font-size:28px;font-weight:800;color:var(--acc)}
+.warn{color:var(--warn);font-size:14px;margin-top:8px}
+.hist{display:flex;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line);cursor:pointer}
+.hist:first-child{border-top:0}
+.hist img{width:48px;height:64px;object-fit:cover;border-radius:8px;flex:none;background:#eee}
+.hist b{display:block;font-size:15px}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:999px;font-size:15px;z-index:50;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.on{opacity:1}
+dialog{border:0;border-radius:18px;padding:20px;max-width:520px;width:calc(100% - 32px)}
+dialog::backdrop{background:rgba(0,0,0,.4)}
+ol{padding-left:20px;margin:8px 0}
+[hidden]{display:none!important}
+.spin{display:inline-block;width:16px;height:16px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:r .8s linear infinite;vertical-align:-3px;margin-right:6px}
+@keyframes r{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<header><h1>Annonce <b>Express</b></h1><button class="icon-btn" id="bSet" aria-label="Réglages">⚙️</button></header>
+<main>
+  <section class="card">
+    <p class="step">1 · Photos</p>
+    <div class="pick">
+      <label><span>📷</span>Prendre une photo<input type="file" accept="image/*" capture="environment" id="fCam"></label>
+      <label><span>🖼️</span>Choisir dans Photos<input type="file" accept="image/*" multiple id="fLib"></label>
+    </div>
+    <div class="opts" id="bgOpts">
+      <span class="mut">Fond :</span>
+      <button class="chip on" data-bg="#ffffff"><span class="sw" style="background:#fff"></span>Blanc</button>
+      <button class="chip" data-bg="#f1f1f0"><span class="sw" style="background:#f1f1f0"></span>Gris clair</button>
+      <button class="chip" data-bg="#efe7dc"><span class="sw" style="background:#efe7dc"></span>Beige</button>
+    </div>
+    <div class="opts"><label class="mut" style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="auto" checked style="width:20px;height:20px"> Détourer automatiquement (fond enlevé)</label></div>
+    <div class="grid" id="grid"></div>
+    <button class="btn sec" id="bSave" hidden>💾 Enregistrer les photos</button>
+  </section>
+
+  <section class="card">
+    <p class="step">2 · L'annonce</p>
+    <textarea id="note" placeholder="Facultatif : ce que tu sais (ex. taille M, porté 2 fois, petit défaut sur la manche)"></textarea>
+    <button class="btn main" id="bGen" disabled>✨ Écrire l'annonce</button>
+    <p class="mut" id="genMsg" style="margin:8px 0 0"></p>
+  </section>
+
+  <section class="card" id="res" hidden>
+    <p class="step">3 · À copier dans Vinted</p>
+    <div id="fields"></div>
+    <button class="btn main" id="bAll">📋 Tout copier</button>
+    <p class="warn">Vérifie la marque, la taille et l'état avant de publier : l'IA peut se tromper.</p>
+  </section>
+
+  <section class="card" id="histBox" hidden>
+    <p class="step">Mes dernières annonces</p>
+    <div id="hist"></div>
+  </section>
+</main>
+
+<dialog id="dSet">
+  <h2>Réglages</h2>
+  <p class="mut">Pour écrire les annonces, l'appli utilise l'IA gratuite de Google (Gemini). Il faut une clé gratuite, une seule fois :</p>
+  <ol class="mut">
+    <li>Ouvre <b>aistudio.google.com/apikey</b> avec ton compte Google.</li>
+    <li>Appuie sur <b>Create API key</b>, puis copie la clé.</li>
+    <li>Colle-la ici. Elle reste uniquement sur ton téléphone.</li>
+  </ol>
+  <input type="password" id="key" placeholder="Clé Gemini (AIza…)" autocomplete="off" autocapitalize="off" spellcheck="false">
+  <button class="btn main" id="bKey">Enregistrer</button>
+  <button class="btn sec" id="bClose">Fermer</button>
+</dialog>
+<div class="toast" id="toast"></div>
+
+<script type="module">
+const $=id=>document.getElementById(id);
+const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const toast=t=>{const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('on'),2200)};
+const W=1200,H=1600;
+let bg=store.get('ae-bg','#ffffff'), photos=[], idn=0, rbg=null;
+
+/* ---------- Réglages ---------- */
+$('bSet').onclick=()=>{$('key').value=store.get('ae-key','');$('dSet').showModal()};
+$('bClose').onclick=()=>$('dSet').close();
+$('bKey').onclick=()=>{store.set('ae-key',$('key').value.trim());$('dSet').close();toast('Clé enregistrée');};
+$('auto').checked=store.get('ae-auto',true);
+$('auto').onchange=()=>store.set('ae-auto',$('auto').checked);
+document.querySelectorAll('#bgOpts .chip').forEach(b=>{b.classList.toggle('on',b.dataset.bg===bg);
+  b.onclick=async()=>{bg=b.dataset.bg;store.set('ae-bg',bg);document.querySelectorAll('#bgOpts .chip').forEach(x=>x.classList.toggle('on',x===b));
+    for(const p of photos){if(p.cut)p.white=await compose(p.cut,true);}draw();}});
+
+/* ---------- Photos ---------- */
+async function load(file){
+  try{return await createImageBitmap(file,{imageOrientation:'from-image'})}catch(e){}
+  return await new Promise((ok,ko)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=ko;i.src=URL.createObjectURL(file)});
+}
+function canvas(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;return c}
+// Photo améliorée sans détourage : recadrée 3:4 + lumière
+function enhance(img){
+  const c=canvas(W,H),x=c.getContext('2d'),iw=img.width,ih=img.height,r=Math.max(W/iw,H/ih);
+  x.filter='brightness(1.06) contrast(1.06) saturate(1.04)';
+  x.drawImage(img,(iw-W/r)/2,(ih-H/r)/2,W/r,H/r,0,0,W,H);
+  return c.toDataURL('image/jpeg',.9);
+}
+// Sujet détouré posé sur le fond choisi, centré, avec une ombre douce
+async function compose(cut,keep){
+  const img=cut instanceof Blob?await load(cut):cut;
+  const t=canvas(img.width,img.height),tx=t.getContext('2d');tx.drawImage(img,0,0);
+  const d=tx.getImageData(0,0,t.width,t.height).data;let x0=t.width,y0=t.height,x1=0,y1=0;
+  for(let y=0;y<t.height;y+=2)for(let x=0;x<t.width;x+=2)if(d[(y*t.width+x)*4+3]>40){if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y;}
+  if(x1<=x0||y1<=y0){x0=0;y0=0;x1=t.width;y1=t.height}
+  const sw=x1-x0,sh=y1-y0,r=Math.min(W*.84/sw,H*.84/sh),dw=sw*r,dh=sh*r,dx=(W-dw)/2,dy=(H-dh)/2;
+  const c=canvas(W,H),x=c.getContext('2d');x.fillStyle=bg;x.fillRect(0,0,W,H);
+  x.save();x.shadowColor='rgba(0,0,0,.18)';x.shadowBlur=40;x.shadowOffsetY=18;x.filter='brightness(1.04) contrast(1.05)';
+  x.drawImage(t,x0,y0,sw,sh,dx,dy,dw,dh);x.restore();
+  return c.toDataURL('image/jpeg',.92);
+}
+async function removeBg(file){
+  if(!rbg){const m=await import('https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.5.8/+esm');rbg=m.removeBackground||m.default;}
+  return await rbg(file,{model:'isnet_quint8',output:{format:'image/png'},progress:(k,c,t)=>{if(/fetch/.test(k)&&t){const p=photos.find(p=>p.busy);if(p){p.msg='Préparation du détourage (1re fois) '+Math.round(c/t*100)+' %';draw();}}}});
+}
+async function add(files){
+  for(const f of files){
+    if(photos.length>=8){toast('8 photos maximum');break;}
+    const p={id:++idn,file:f,busy:true,msg:'Chargement…',mode:'orig'};photos.push(p);draw();
+    try{const img=await load(f);p.orig=enhance(img);p.thumb=p.orig;p.msg='';
+      if($('auto').checked){p.msg='Détourage…';draw();
+        try{p.cut=await removeBg(f);p.white=await compose(p.cut);p.mode='white';p.msg='';}
+        catch(e){console.error(e);p.msg='';toast("Détourage impossible : photo gardée telle quelle");}
+      }
+    }catch(e){p.msg='Photo illisible';}
+    p.busy=false;draw();
+  }
+}
+function draw(){
+  $('grid').innerHTML=photos.map(p=>{const src=p.mode==='white'&&p.white?p.white:p.orig;
+    return `<div class="ph">${src?`<img src="${src}" alt="">`:''}
+      ${p.white?`<div class="tg"><button data-m="white" data-i="${p.id}" class="${p.mode==='white'?'on':''}">Fond</button><button data-m="orig" data-i="${p.id}" class="${p.mode==='orig'?'on':''}">Original</button></div>`:''}
+      <button class="x" data-del="${p.id}" aria-label="Retirer">✕</button>
+      ${p.busy||p.msg?`<div class="st">${p.busy?'<span class="spin"></span>':''}${p.msg||''}</div>`:''}</div>`}).join('');
+  $('bSave').hidden=!photos.some(p=>p.orig);$('bGen').disabled=!photos.some(p=>p.orig);
+}
+$('grid').onclick=e=>{const b=e.target.closest('button');if(!b)return;
+  if(b.dataset.del){photos=photos.filter(p=>p.id!=b.dataset.del);draw();return;}
+  const p=photos.find(p=>p.id==b.dataset.i);if(p){p.mode=b.dataset.m;draw();}};
+$('fCam').onchange=e=>{add([...e.target.files]);e.target.value=''};
+$('fLib').onchange=e=>{add([...e.target.files]);e.target.value=''};
+
+const toFile=(u,n)=>fetch(u).then(r=>r.blob()).then(b=>new File([b],n,{type:'image/jpeg'}));
+$('bSave').onclick=async()=>{
+  const fs=await Promise.all(photos.filter(p=>p.orig).map((p,i)=>toFile(p.mode==='white'&&p.white?p.white:p.orig,'annonce-'+(i+1)+'.jpg')));
+  if(navigator.canShare&&navigator.canShare({files:fs})){try{await navigator.share({files:fs})}catch(e){}return;}
+  fs.forEach(f=>{const a=document.createElement('a');a.href=URL.createObjectURL(f);a.download=f.name;document.body.appendChild(a);a.click();a.remove();});
+};
+
+/* ---------- Annonce par l'IA (Gemini, gratuit) ---------- */
+const ETATS=['Neuf avec étiquette','Neuf sans étiquette','Très bon état','Bon état','Satisfaisant'];
+function small(u){return new Promise(ok=>{const i=new Image();i.onload=()=>{const r=Math.min(1,1024/Math.max(i.width,i.height)),c=canvas(i.width*r,i.height*r);c.getContext('2d').drawImage(i,0,0,c.width,c.height);ok(c.toDataURL('image/jpeg',.82).split(',')[1])};i.src=u})}
+$('bGen').onclick=async()=>{
+  const key=store.get('ae-key','');if(!key){$('dSet').showModal();return;}
+  const imgs=await Promise.all(photos.filter(p=>p.orig).slice(0,4).map(p=>small(p.orig)));
+  $('bGen').disabled=true;$('genMsg').innerHTML='<span class="spin"></span>L\'IA regarde tes photos…';
+  const prompt=`Tu aides un particulier à vendre un objet d'occasion sur Vinted en France. Regarde les photos et rédige l'annonce en français.
+Infos du vendeur (prioritaires si elles contredisent les photos) : ${$('note').value.trim()||'aucune'}.
+Réponds UNIQUEMENT en JSON avec ces clés :
+"titre" : 60 caractères max, sous la forme type + marque + détail clé + taille/couleur (ex. "Veste en jean Levi's bleu délavé taille M") ;
+"description" : 4 à 7 lignes simples et honnêtes : ce que c'est, matière, coupe, état réel (signale tout défaut visible), mesures si on peut les deviner, finir par une ligne sympathique (envoi rapide, lot possible) ; pas d'emojis en excès ;
+"marque" : la marque lisible sur les photos, sinon "" ;
+"categorie" : chemin de catégorie Vinted probable (ex. "Femmes > Vêtements > Vestes") ;
+"taille" : si visible ou donnée, sinon "" ;
+"couleur" : couleur principale ;
+"matiere" : si visible ou probable, sinon "" ;
+"etat" : un seul parmi ${ETATS.join(', ')} ;
+"prix_conseille" : prix de vente réaliste en euros sur Vinted (nombre) ;
+"prix_min" et "prix_max" : fourchette réaliste (nombres) ;
+"mots_cles" : 5 à 8 mots-clés courts pour la recherche, séparés par des espaces, sans #.
+N'invente pas une marque que tu ne vois pas.`;
+  const body={contents:[{parts:[{text:prompt},...imgs.map(d=>({inline_data:{mime_type:'image/jpeg',data:d}}))]}],generationConfig:{responseMimeType:'application/json',temperature:.4}};
+  let j=null,err='';
+  for(const m of ['gemini-flash-latest','gemini-2.5-flash']){
+    try{const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+m+':generateContent',{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':key},body:JSON.stringify(body)});
+      const o=await r.json();if(!r.ok){err=(o.error&&o.error.message)||r.status;if(r.status===400||r.status===403)break;continue;}
+      const t=o.candidates&&o.candidates[0]&&o.candidates[0].content.parts.map(x=>x.text||'').join('');j=JSON.parse(t.replace(/^```json|```$/g,''));break;}
+    catch(e){err=e.message}}
+  $('bGen').disabled=false;
+  if(!j){$('genMsg').textContent=/key|API_KEY|permission/i.test(String(err))?'Clé Gemini refusée : vérifie-la dans les réglages ⚙️.':'L\'IA n\'a pas répondu ('+err+'). Réessaie dans un instant.';return;}
+  $('genMsg').textContent='';show(j);
+  const h=store.get('ae-hist',[]);const th=await thumb((photos.find(p=>p.mode==='white'&&p.white)||photos[0]).white||photos[0].orig);
+  h.unshift({t:Date.now(),a:j,th});store.set('ae-hist',h.slice(0,20));drawHist();
+};
+function thumb(u){return new Promise(ok=>{const i=new Image();i.onload=()=>{const c=canvas(120,160);const x=c.getContext('2d'),r=Math.max(120/i.width,160/i.height);x.drawImage(i,(120-i.width*r)/2,(160-i.height*r)/2,i.width*r,i.height*r);ok(c.toDataURL('image/jpeg',.7))};i.src=u})}
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let cur=null;
+function show(a){cur=a;
+  const f=(k,l,v,big)=>v?`<div class="field"><div class="fh"><span class="fl">${l}</span><button class="cp" data-c="${k}">Copier</button></div><div class="fv"${big?' style="font-size:17px;font-weight:700"':''}>${esc(v)}</div></div>`:'';
+  const prix=a.prix_conseille?`<div class="field"><div class="fh"><span class="fl">Prix conseillé</span><button class="cp" data-c="prix_conseille">Copier</button></div><div class="price">${esc(a.prix_conseille)} €</div>${a.prix_min&&a.prix_max?`<div class="mut">Fourchette habituelle : ${esc(a.prix_min)} à ${esc(a.prix_max)} €</div>`:''}</div>`:'';
+  $('fields').innerHTML=f('titre','Titre',a.titre,true)+f('description','Description',a.description)+
+    `<div class="cols">${f('marque','Marque',a.marque)}${f('taille','Taille',a.taille)}${f('etat','État',a.etat)}${f('couleur','Couleur',a.couleur)}${f('matiere','Matière',a.matiere)}</div>`+
+    f('categorie','Catégorie',a.categorie)+prix+f('mots_cles','Mots-clés',a.mots_cles);
+  $('res').hidden=false;$('res').scrollIntoView({behavior:'smooth',block:'start'});
+}
+async function copy(t){try{await navigator.clipboard.writeText(t);toast('Copié ✓')}catch(e){const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();document.execCommand('copy');a.remove();toast('Copié ✓')}}
+$('fields').onclick=e=>{const b=e.target.closest('[data-c]');if(b&&cur)copy(String(cur[b.dataset.c]))};
+$('bAll').onclick=()=>{if(!cur)return;const a=cur;copy([a.titre,'',a.description,'',a.mots_cles?a.mots_cles.split(/\s+/).map(w=>'#'+w.replace(/^#/,'')).join(' '):''].join('\n').trim())};
+function drawHist(){const h=store.get('ae-hist',[]);$('histBox').hidden=!h.length;
+  $('hist').innerHTML=h.map((x,i)=>`<div class="hist" data-h="${i}"><img src="${x.th||''}" alt=""><div><b>${esc(x.a.titre)}</b><span class="mut">${esc(x.a.prix_conseille?x.a.prix_conseille+' € · ':'')}${new Date(x.t).toLocaleDateString('fr-FR',{day:'numeric',month:'short'})}</span></div></div>`).join('');}
+$('hist').onclick=e=>{const r=e.target.closest('[data-h]');if(r)show(store.get('ae-hist',[])[r.dataset.h].a)};
+drawHist();draw();
+if(!store.get('ae-key',''))setTimeout(()=>$('dSet').showModal(),400);
+</script>
+</body>
+</html>
