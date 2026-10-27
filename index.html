@@ -629,6 +629,71 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="stat-item"><div class="stat-num">0€</div><div class="stat-label">Frais cachés</div></div>
   </div>
 
+  <style>
+    .tvp-px{max-width:980px;margin:0 auto;padding:56px 20px 8px}
+    .tvp-px .lbl{font-size:.75rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);font-weight:700}
+    .tvp-px h2{font-family:'Playfair Display',Georgia,serif;font-size:clamp(1.6rem,4.6vw,2.3rem);margin:8px 0 6px;line-height:1.15}
+    .tvp-px .sub{color:var(--gris);margin:0 0 20px}
+    .tvp-off{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 22px}
+    .tvp-off span{border:1px solid rgba(201,168,76,.55);border-radius:999px;padding:7px 12px;font-size:.85rem;font-weight:700}
+    .tvp-tab{width:100%;border-collapse:separate;border-spacing:0;border:1px solid rgba(201,168,76,.35);border-radius:14px;overflow:hidden;font-size:.95rem}
+    .tvp-tab th,.tvp-tab td{padding:13px 12px;text-align:left;border-bottom:1px solid rgba(201,168,76,.18)}
+    .tvp-tab th{background:rgba(201,168,76,.14);font-size:.8rem;text-transform:uppercase;letter-spacing:.06em}
+    .tvp-tab td.p{font-weight:800;color:var(--gold);white-space:nowrap}
+    .tvp-tab tr:last-child td{border-bottom:0}
+    .tvp-note{font-size:.82rem;color:var(--gris);margin:10px 0 0}
+    .tvp-cta{display:inline-block;margin-top:18px;background:linear-gradient(180deg,#EBC660,#C9A84C);color:#1B1813;font-weight:800;border-radius:12px;padding:14px 22px;text-decoration:none;border:0;cursor:pointer;font-size:1rem}
+    .tvp-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:6px}
+    .tvp-steps div{border:1px solid rgba(201,168,76,.3);border-radius:14px;padding:18px}
+    .tvp-steps b{display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:var(--gold);color:#1B1813;margin-bottom:10px}
+    .tvp-steps h3{margin:0 0 6px;font-size:1.05rem}.tvp-steps p{margin:0;color:var(--gris);font-size:.9rem}
+    .tvp-faq details{border-bottom:1px solid rgba(201,168,76,.25);padding:14px 0}
+    .tvp-faq summary{cursor:pointer;font-weight:700;list-style:none}.tvp-faq summary::after{content:"+";float:right;color:var(--gold);font-weight:800}
+    .tvp-faq details[open] summary::after{content:"–"}
+    .tvp-faq p{margin:10px 0 0;color:var(--gris)}
+    @media(max-width:700px){.tvp-steps{grid-template-columns:1fr}.tvp-tab{font-size:.88rem}.tvp-tab th,.tvp-tab td{padding:11px 8px}}
+  </style>
+  <section class="tvp-px" id="tarifs">
+    <div class="lbl">✦ Taxi parisien officiel</div>
+    <h2>Nos prix fixes, <span class="gold">sans surprise</span></h2>
+    <p class="sub">Le prix est annoncé avant la course : bouchons et attente au feu ne changent rien.</p>
+    <div class="tvp-off"><span>🚕 Taxi parisien officiel</span><span>🚌 Voies de bus</span><span>✈️ Suivi du vol</span><span>👶 Siège bébé offert</span><span>💳 Toutes les cartes</span></div>
+    <table class="tvp-tab">
+      <thead><tr><th>Trajet</th><th>Berline<br><small>1 à 4 pers.</small></th><th>Van<br><small>jusqu'à 5-6 pers.</small></th></tr></thead>
+      <tbody>
+        <tr><td>Paris → Roissy CDG</td><td class="p">75 €</td><td class="p">85 €</td></tr>
+        <tr><td>Roissy CDG → Paris</td><td class="p">85 €</td><td class="p">95 €</td></tr>
+        <tr><td>Paris → Orly</td><td class="p">70 €</td><td class="p">80 €</td></tr>
+        <tr><td>Orly → Paris</td><td class="p">80 €</td><td class="p">90 €</td></tr>
+        <tr><td>Roissy CDG ⇄ Orly</td><td class="p">80 €</td><td class="p">109 €</td></tr>
+        <tr><td>Paris → Beauvais</td><td class="p">175 €</td><td class="p">188 €</td></tr>
+        <tr><td>Paris ⇄ gares parisiennes</td><td class="p">dès 50 €</td><td class="p">dès 60 €</td></tr>
+      </tbody>
+    </table>
+    <p class="tvp-note">Grand van 6 à 8 personnes : CDG 95 € · Orly 95 € · Beauvais 205 €. Siège bébé et rehausseur offerts. Autres trajets (Disneyland, Versailles, banlieue) : prix exact en 30 secondes avec le calculateur.</p>
+    <a class="tvp-cta" href="#reserver" onclick="var r=document.querySelector('#reserver,.h2-in');if(r){r.scrollIntoView({behavior:'smooth'});return false;}">Calculer mon prix exact →</a>
+  </section>
+
+  <section class="tvp-px">
+    <div class="lbl">✦ Simple et sans stress</div>
+    <h2>Comment ça marche</h2>
+    <div class="tvp-steps">
+      <div><b>1</b><h3>Réservez en 30 s</h3><p>En ligne, par WhatsApp ou par téléphone. Le prix est fixé dès la réservation.</p></div>
+      <div><b>2</b><h3>On vous attend</h3><p>Nous suivons votre vol ou votre train. Votre chauffeur vous accueille avec une pancarte à votre nom.</p></div>
+      <div><b>3</b><h3>Payez à bord</h3><p>Carte bancaire (Visa, Mastercard, Amex, Apple Pay, Google Pay) ou espèces. Facture sur demande.</p></div>
+    </div>
+  </section>
+
+  <section class="tvp-px tvp-faq">
+    <div class="lbl">✦ Questions fréquentes</div>
+    <h2>Vos questions</h2>
+    <details><summary>Combien coûte un taxi Paris – Roissy CDG ?</summary><p>Prix fixe de 75 € en berline et 85 € en van (jusqu'à 5 personnes), 95 € en grand van jusqu'à 8 personnes. Le prix ne bouge pas, même dans les bouchons.</p></details>
+    <details><summary>Le siège bébé est-il payant ?</summary><p>Non. Siège bébé (0-13 kg) et rehausseur (15-36 kg) sont offerts, il suffit de les demander à la réservation.</p></details>
+    <details><summary>Et si mon vol a du retard ?</summary><p>Nous suivons votre vol en temps réel : votre chauffeur s'adapte à l'heure réelle d'atterrissage et vous attend à la sortie avec une pancarte à votre nom.</p></details>
+    <details><summary>Puis-je payer par carte ?</summary><p>Oui, toutes les cartes bancaires sont acceptées quel que soit le montant, ainsi qu'Apple Pay, Google Pay et les espèces.</p></details>
+    <details><summary>Êtes-vous un vrai taxi ou un VTC ?</summary><p>Un vrai taxi parisien : carte professionnelle, lumineux TAXI PARISIEN et accès aux voies de bus pour un trajet plus rapide aux heures de pointe.</p></details>
+  </section>
+
   <div class="section" style="background:var(--noir-2)">
     <div class="section-label">✦ Notre flotte</div>
     <h2 class="section-title">Berline ou <span class="gold">Van</span>, à vous de choisir</h2>
@@ -698,7 +763,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   <footer class="site-footer">
     <div class="footer-logo" onclick="goPage('home')">Taxis <span>Van</span> Paris</div>
-    <div class="footer-copy">© 2026 Taxis Van Paris by ABTS — Tous droits réservés</div>
+    <div class="footer-copy">© 2026 Taxis Van Paris by ABTS — Tous droits réservés<br>AB Taxis Services · SIREN 912 763 133 · Taxi parisien (carte professionnelle) · Nanterre</div>
     <div class="footer-links">
       <button onclick="goPage('services')">Services</button>
       <button onclick="goPage('contact')">Contact</button>
@@ -2768,7 +2833,7 @@ window.initGooglePlaces = window.initGooglePlaces || function(){};
   var lg=(document.documentElement.lang||"fr").slice(0,2);
   var T={
    fr:{h1:"Taxi Van à Paris avec siège bébé – transferts aéroports CDG, Orly, Beauvais",s:[["Voyagez en famille,","siège bébé offert"],["Transferts aéroports","CDG · Orly · Beauvais"],["Disneyland Paris,","en van jusqu'à 8"],["Voyage d'affaires,","Wi-Fi & facture pro"]],
-       c:["Avis Google","Prix garanti","Siège bébé offert"],p:["CDG dès","Orly dès","Gares dès"],dep:"📍 Départ",arr:"🏁 Arrivée",phd:"Adresse, gare, aéroport…",pha:"Destination…",pax:"👥 Passagers",veh:"🚘 Véhicule",
+       c:["Avis Google","Taxi parisien officiel","Siège bébé offert"],p:["CDG dès","Orly dès","Gares dès"],dep:"📍 Départ",arr:"🏁 Arrivée",phd:"Adresse, gare, aéroport…",pha:"Destination…",pax:"👥 Passagers",veh:"🚘 Véhicule",
        vb:["Berline","jusqu'à 4 pers."],vv:["Van Classe V","jusqu'à 8 pers."],st:"👶 Siège enfant (offert)",sb:["Siège bébé","0–13 kg"],sr:["Rehausseur","15–36 kg"],go:"Voir mon prix en 30 s →",
        err:"Choisissez le départ et l'arrivée dans la liste proposée.",vn:"🚐 Van choisi automatiquement (plus de place).",ann:"✓ Annulation gratuite jusqu'à 24 h avant · Paiement à bord"},
    en:{h1:"Paris van taxi with baby seat – airport transfers CDG, Orly, Beauvais",s:[["Travel as a family,","free baby seat"],["Airport transfers","CDG · Orly · Beauvais"],["Disneyland Paris,","van for up to 8"],["Business travel,","Wi-Fi & invoices"]],
@@ -2789,6 +2854,7 @@ window.initGooglePlaces = window.initGooglePlaces || function(){};
        err:"اختر الانطلاق والوصول من القائمة المقترحة.",vn:"🚐 تم اختيار الفان تلقائياً (مساحة أكبر).",ann:"✓ إلغاء مجاني حتى 24 ساعة قبل · الدفع في السيارة"}
   }[lg]; if(!T) return;
   var IMG=["/img/accueil-1.jpg","/img/accueil-2.jpg","/img/accueil-3.jpg","/img/accueil-4.jpg"];
+  IMG=[IMG[1],IMG[0],IMG[2],IMG[3]]; T.s=[T.s[1],T.s[0],T.s[2],T.s[3]];
   var st={pax:1,veh:"berline",bebe:false,reh:false}, home={}, booking={};
   function $(i){return document.getElementById(i);}
   function construire(){
@@ -3024,11 +3090,11 @@ window.initGooglePlaces = window.initGooglePlaces || function(){};
 <!-- Bannière cookies -->
 <style>
   #tvp-ck{position:fixed;left:12px;right:12px;bottom:12px;z-index:100000;max-width:560px;margin:0 auto;background:#1B1813;color:#F3EDE2;border:1px solid rgba(201,168,76,.5);
-    border-radius:14px;padding:14px 16px;box-shadow:0 10px 30px rgba(0,0,0,.35);font:400 .86rem/1.45 'DM Sans',system-ui,sans-serif;display:none}
-  #tvp-ck.on{display:block}
-  #tvp-ck p{margin:0 0 10px}
-  #tvp-ck .b{display:flex;gap:8px}
-  #tvp-ck button{flex:1;border-radius:10px;padding:11px 8px;font:700 .9rem 'DM Sans',system-ui,sans-serif;cursor:pointer}
+    border-radius:12px;padding:8px 10px;box-shadow:0 6px 20px rgba(0,0,0,.3);font:400 .76rem/1.3 'DM Sans',system-ui,sans-serif;display:none;align-items:center;gap:8px}
+  #tvp-ck.on{display:flex}
+  #tvp-ck p{margin:0;flex:1}
+  #tvp-ck .b{display:flex;gap:6px;flex:none}
+  #tvp-ck button{border-radius:8px;padding:7px 10px;font:700 .78rem 'DM Sans',system-ui,sans-serif;cursor:pointer}
   #tvp-ck .r{background:transparent;color:#F3EDE2;border:1px solid rgba(243,237,226,.5)}
   #tvp-ck .a{background:#C9A84C;color:#1B1813;border:1px solid #C9A84C}
 </style>
@@ -3036,7 +3102,7 @@ window.initGooglePlaces = window.initGooglePlaces || function(){};
 <script>
 (function(){
   var lg=(document.documentElement.lang||"fr").slice(0,2);
-  var T={fr:["🍪 Nous utilisons des cookies de mesure d'audience pour améliorer le site. Vous pouvez les accepter ou les refuser.","Refuser","Accepter"],
+  var T={fr:["🍪 Cookies de mesure d'audience pour améliorer le site.","Refuser","OK"],
          en:["🍪 We use analytics cookies to improve this website. You can accept or decline them.","Decline","Accept"],
          es:["🍪 Utilizamos cookies de medición de audiencia para mejorar el sitio. Puede aceptarlas o rechazarlas.","Rechazar","Aceptar"],
          it:["🍪 Utilizziamo cookie di misurazione del pubblico per migliorare il sito. Potete accettarli o rifiutarli.","Rifiuta","Accetta"],
