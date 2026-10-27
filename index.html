@@ -630,69 +630,120 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </div>
 
   <style>
-    .tvp-px{max-width:980px;margin:0 auto;padding:56px 20px 8px}
-    .tvp-px .lbl{font-size:.75rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);font-weight:700}
-    .tvp-px h2{font-family:'Playfair Display',Georgia,serif;font-size:clamp(1.6rem,4.6vw,2.3rem);margin:8px 0 6px;line-height:1.15}
-    .tvp-px .sub{color:var(--gris);margin:0 0 20px}
-    .tvp-off{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 22px}
-    .tvp-off span{border:1px solid rgba(201,168,76,.55);border-radius:999px;padding:7px 12px;font-size:.85rem;font-weight:700}
-    .tvp-tab{width:100%;border-collapse:separate;border-spacing:0;border:1px solid rgba(201,168,76,.35);border-radius:14px;overflow:hidden;font-size:.95rem}
-    .tvp-tab th,.tvp-tab td{padding:13px 12px;text-align:left;border-bottom:1px solid rgba(201,168,76,.18)}
-    .tvp-tab th{background:rgba(201,168,76,.14);font-size:.8rem;text-transform:uppercase;letter-spacing:.06em}
-    .tvp-tab td.p{font-weight:800;color:var(--gold);white-space:nowrap}
-    .tvp-tab tr:last-child td{border-bottom:0}
-    .tvp-note{font-size:.82rem;color:var(--gris);margin:10px 0 0}
-    .tvp-cta{display:inline-block;margin-top:18px;background:linear-gradient(180deg,#EBC660,#C9A84C);color:#1B1813;font-weight:800;border-radius:12px;padding:14px 22px;text-decoration:none;border:0;cursor:pointer;font-size:1rem}
-    .tvp-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:6px}
-    .tvp-steps div{border:1px solid rgba(201,168,76,.3);border-radius:14px;padding:18px}
-    .tvp-steps b{display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:var(--gold);color:#1B1813;margin-bottom:10px}
-    .tvp-steps h3{margin:0 0 6px;font-size:1.05rem}.tvp-steps p{margin:0;color:var(--gris);font-size:.9rem}
-    .tvp-faq details{border-bottom:1px solid rgba(201,168,76,.25);padding:14px 0}
-    .tvp-faq summary{cursor:pointer;font-weight:700;list-style:none}.tvp-faq summary::after{content:"+";float:right;color:var(--gold);font-weight:800}
-    .tvp-faq details[open] summary::after{content:"–"}
-    .tvp-faq p{margin:10px 0 0;color:var(--gris)}
-    @media(max-width:700px){.tvp-steps{grid-template-columns:1fr}.tvp-tab{font-size:.88rem}.tvp-tab th,.tvp-tab td{padding:11px 8px}}
+    .v2{max-width:1000px;margin:0 auto;padding:54px 18px 6px;font-family:'DM Sans',system-ui,sans-serif}
+    .v2 .lbl{font-size:.74rem;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);font-weight:800}
+    .v2 h2{font-family:'Playfair Display',Georgia,serif;font-size:clamp(1.75rem,5.2vw,2.6rem);margin:8px 0 8px;line-height:1.1}
+    .v2 .sub{color:var(--gris);margin:0 0 22px;font-size:1rem}
+    .v2-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    .v2-card{position:relative;border-radius:18px;overflow:hidden;min-height:190px;color:#fff;display:flex;flex-direction:column;justify-content:flex-end;padding:16px;background:#111 center/cover no-repeat;box-shadow:0 10px 28px rgba(0,0,0,.18);text-decoration:none}
+    .v2-card:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.05) 20%,rgba(0,0,0,.82))}
+    .v2-card>*{position:relative}
+    .v2-card .t{font-weight:800;font-size:1.05rem;line-height:1.2}
+    .v2-card .pr{font-family:'Playfair Display',Georgia,serif;font-size:2.3rem;font-weight:900;color:#F2CF6B;line-height:1;margin:6px 0 2px}
+    .v2-card .pr small{font:600 .8rem 'DM Sans',sans-serif;color:#fff;opacity:.85;margin-right:4px}
+    .v2-card .vv{font-size:.8rem;opacity:.9}
+    .v2-card .bt{margin-top:10px;align-self:flex-start;background:linear-gradient(180deg,#EBC660,#C9A84C);color:#1B1813;font-weight:800;font-size:.85rem;border-radius:999px;padding:8px 14px}
+    .v2-card.big{grid-column:span 2;min-height:230px}
+    .v2-card .tag{position:absolute;top:12px;left:12px;background:#C8102E;color:#fff;font-size:.72rem;font-weight:800;border-radius:999px;padding:5px 10px;letter-spacing:.04em}
+    .v2-note{font-size:.82rem;color:var(--gris);margin:12px 0 0}
+    .v2-vs{width:100%;border-collapse:separate;border-spacing:0;border-radius:16px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.08);font-size:.92rem}
+    .v2-vs th,.v2-vs td{padding:13px 10px;text-align:center;border-bottom:1px solid rgba(0,0,0,.06);background:#fff;color:#1B1813}
+    .v2-vs th{font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;background:#F4EEE2}
+    .v2-vs td:first-child,.v2-vs th:first-child{text-align:left;font-weight:600}
+    .v2-vs .us{background:#1B1813!important;color:#F2CF6B!important;font-weight:800}
+    .v2-vs td.us{color:#fff!important}
+    .v2-vs tr:last-child td{border-bottom:0}
+    .ok{color:#1E9E5A;font-weight:900}.no{color:#C8102E;font-weight:900}
+    .v2-gar{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    .v2-gar div{background:#fff;border-radius:16px;padding:16px;box-shadow:0 6px 18px rgba(0,0,0,.06);border-top:3px solid var(--gold)}
+    .v2-gar b{display:block;font-size:1.6rem;margin-bottom:6px}
+    .v2-gar h3{margin:0 0 4px;font-size:1rem;color:#1B1813}.v2-gar p{margin:0;color:#5b5446;font-size:.86rem}
+    .v2-quote{margin-top:18px;background:#1B1813;color:#F3EDE2;border-radius:18px;padding:22px}
+    .v2-quote .st{color:#F2CF6B;letter-spacing:3px}
+    .v2-quote p{font-family:'Playfair Display',Georgia,serif;font-style:italic;font-size:1.12rem;line-height:1.45;margin:8px 0}
+    .v2-quote small{color:#C9BFA8}
+    .v2-faq details{border-bottom:1px solid rgba(201,168,76,.3);padding:15px 0}
+    .v2-faq summary{cursor:pointer;font-weight:700;list-style:none;font-size:1rem}.v2-faq summary::-webkit-details-marker{display:none}
+    .v2-faq summary::after{content:"+";float:right;color:var(--gold);font-weight:900;font-size:1.2rem}
+    .v2-faq details[open] summary::after{content:"–"}
+    .v2-faq p{margin:10px 0 0;color:var(--gris)}
+    .v2-final{margin:40px 0 0;background:linear-gradient(135deg,#1B1813,#3a2f18);color:#fff;border-radius:22px;padding:30px 22px;text-align:center}
+    .v2-final h2{color:#fff;margin-top:0}.v2-final h2 span{color:#F2CF6B}
+    .v2-final p{color:#D8CFBE;margin:0 0 18px}
+    .v2-btns{display:flex;flex-direction:column;gap:10px;max-width:420px;margin:0 auto}
+    .v2-btns a{display:block;border-radius:14px;padding:15px;font-weight:800;text-decoration:none;font-size:1.02rem}
+    .v2-btns .g{background:linear-gradient(180deg,#EBC660,#C9A84C);color:#1B1813}
+    .v2-btns .w{background:#25D366;color:#fff}
+    .v2-btns .c{border:2px solid rgba(255,255,255,.6);color:#fff}
+    @media(min-width:760px){.v2-cards{grid-template-columns:repeat(4,1fr)}.v2-card.big{grid-column:span 2}.v2-gar{grid-template-columns:repeat(4,1fr)}}
   </style>
-  <section class="tvp-px" id="tarifs">
-    <div class="lbl">✦ Taxi parisien officiel</div>
-    <h2>Nos prix fixes, <span class="gold">sans surprise</span></h2>
-    <p class="sub">Le prix est annoncé avant la course : bouchons et attente au feu ne changent rien.</p>
-    <div class="tvp-off"><span>🚕 Taxi parisien officiel</span><span>🚌 Voies de bus</span><span>✈️ Suivi du vol</span><span>👶 Siège bébé offert</span><span>💳 Toutes les cartes</span></div>
-    <table class="tvp-tab">
-      <thead><tr><th>Trajet</th><th>Berline<br><small>1 à 4 pers.</small></th><th>Van<br><small>jusqu'à 5-6 pers.</small></th></tr></thead>
-      <tbody>
-        <tr><td>Paris → Roissy CDG</td><td class="p">75 €</td><td class="p">85 €</td></tr>
-        <tr><td>Roissy CDG → Paris</td><td class="p">85 €</td><td class="p">95 €</td></tr>
-        <tr><td>Paris → Orly</td><td class="p">70 €</td><td class="p">80 €</td></tr>
-        <tr><td>Orly → Paris</td><td class="p">80 €</td><td class="p">90 €</td></tr>
-        <tr><td>Roissy CDG ⇄ Orly</td><td class="p">80 €</td><td class="p">109 €</td></tr>
-        <tr><td>Paris → Beauvais</td><td class="p">175 €</td><td class="p">188 €</td></tr>
-        <tr><td>Paris ⇄ gares parisiennes</td><td class="p">dès 50 €</td><td class="p">dès 60 €</td></tr>
-      </tbody>
-    </table>
-    <p class="tvp-note">Grand van 6 à 8 personnes : CDG 95 € · Orly 95 € · Beauvais 205 €. Siège bébé et rehausseur offerts. Autres trajets (Disneyland, Versailles, banlieue) : prix exact en 30 secondes avec le calculateur.</p>
-    <a class="tvp-cta" href="#reserver" onclick="var r=document.querySelector('#reserver,.h2-in');if(r){r.scrollIntoView({behavior:'smooth'});return false;}">Calculer mon prix exact →</a>
+
+  <section class="v2" id="tarifs">
+    <div class="lbl">✦ Prix fixes · réservés à l'avance</div>
+    <h2>Votre trajet, <span class="gold">prix connu d'avance</span></h2>
+    <p class="sub">Pas de compteur qui tourne dans les bouchons, pas de prix qui double un soir de pluie.</p>
+    <div class="v2-cards">
+      <a class="v2-card big" href="#reserver" data-go style="background-image:url(/img/accueil-2.jpg)"><span class="tag">LE PLUS DEMANDÉ</span><span class="t">Paris → Roissy CDG</span><span class="pr"><small>dès</small>75 €</span><span class="vv">Van jusqu'à 5 pers. : 85 € · 8 pers. : 95 €</span><span class="bt">Réserver ce trajet →</span></a>
+      <a class="v2-card" href="#reserver" data-go style="background-image:url(/img/escale-paris.jpg)"><span class="t">Paris → Orly</span><span class="pr"><small>dès</small>70 €</span><span class="vv">Van : 80 €</span><span class="bt">Réserver →</span></a>
+      <a class="v2-card" href="#reserver" data-go style="background-image:url(/img/accueil-3.jpg)"><span class="t">Disneyland Paris</span><span class="pr" style="font-size:1.5rem">Van 8 places</span><span class="vv">Siège bébé offert</span><span class="bt">Mon prix →</span></a>
+      <a class="v2-card" href="#reserver" data-go style="background-image:url(/img/van.jpg)"><span class="t">Gares parisiennes</span><span class="pr"><small>dès</small>50 €</span><span class="vv">Nord, Lyon, Montparnasse…</span><span class="bt">Réserver →</span></a>
+      <a class="v2-card" href="#reserver" data-go style="background-image:url(/img/berline.jpg)"><span class="t">Paris → Beauvais</span><span class="pr"><small>dès</small>175 €</span><span class="vv">Van : 188 €</span><span class="bt">Réserver →</span></a>
+    </div>
+    <p class="v2-note">Retour aéroport → Paris : CDG 85 € · Orly 80 € (berline). Autres trajets : prix exact en 30 secondes avec le calculateur.</p>
   </section>
 
-  <section class="tvp-px">
-    <div class="lbl">✦ Simple et sans stress</div>
-    <h2>Comment ça marche</h2>
-    <div class="tvp-steps">
-      <div><b>1</b><h3>Réservez en 30 s</h3><p>En ligne, par WhatsApp ou par téléphone. Le prix est fixé dès la réservation.</p></div>
-      <div><b>2</b><h3>On vous attend</h3><p>Nous suivons votre vol ou votre train. Votre chauffeur vous accueille avec une pancarte à votre nom.</p></div>
-      <div><b>3</b><h3>Payez à bord</h3><p>Carte bancaire (Visa, Mastercard, Amex, Apple Pay, Google Pay) ou espèces. Facture sur demande.</p></div>
+  <section class="v2">
+    <div class="lbl">✦ La différence</div>
+    <h2>Pourquoi nos clients <span class="gold">ne reprennent plus de VTC</span></h2>
+    <table class="v2-vs">
+      <thead><tr><th></th><th class="us">Taxis Van Paris</th><th>VTC / appli</th></tr></thead>
+      <tbody>
+        <tr><td>Prix fixé à la réservation</td><td class="us"><span class="ok">✓</span></td><td>Prix qui change selon la demande</td></tr>
+        <tr><td>Voies de bus (moins de bouchons)</td><td class="us"><span class="ok">✓</span></td><td><span class="no">✗</span></td></tr>
+        <tr><td>Siège bébé et rehausseur</td><td class="us"><span class="ok">Offerts</span></td><td>Rarement disponibles</td></tr>
+        <tr><td>Van 8 places</td><td class="us"><span class="ok">✓</span></td><td>Difficile à trouver</td></tr>
+        <tr><td>Accueil avec pancarte, suivi du vol</td><td class="us"><span class="ok">✓</span></td><td>Variable</td></tr>
+        <tr><td>Chauffeur joignable sur WhatsApp</td><td class="us"><span class="ok">✓</span></td><td>Via l'appli</td></tr>
+      </tbody>
+    </table>
+    <div class="v2-quote"><div class="st">★★★★★</div><p>« Un trajet Roissy CDG extrêmement professionnel. Conduite agréable, voiture très propre. Attente des 20' de retard de notre avion avec grande gentillesse et compréhension. »</p><small>Marie Christine L. · avis Google</small></div>
+  </section>
+
+  <section class="v2">
+    <div class="lbl">✦ Nos garanties</div>
+    <h2>Réservez <span class="gold">l'esprit tranquille</span></h2>
+    <div class="v2-gar">
+      <div><b>✈️</b><h3>Vol en retard ?</h3><p>On suit votre vol et on s'adapte à l'heure réelle d'atterrissage.</p></div>
+      <div><b>🪧</b><h3>Accueil pancarte</h3><p>Votre chauffeur vous attend à la sortie, avec votre nom.</p></div>
+      <div><b>↩️</b><h3>Annulation gratuite</h3><p>Jusqu'à 24 h avant le départ, sans frais.</p></div>
+      <div><b>💳</b><h3>Payez à bord</h3><p>Toutes les cartes, Apple Pay, Google Pay ou espèces. Facture pro.</p></div>
     </div>
   </section>
 
-  <section class="tvp-px tvp-faq">
+  <section class="v2 v2-faq">
     <div class="lbl">✦ Questions fréquentes</div>
     <h2>Vos questions</h2>
-    <details><summary>Combien coûte un taxi Paris – Roissy CDG ?</summary><p>Prix fixe de 75 € en berline et 85 € en van (jusqu'à 5 personnes), 95 € en grand van jusqu'à 8 personnes. Le prix ne bouge pas, même dans les bouchons.</p></details>
-    <details><summary>Le siège bébé est-il payant ?</summary><p>Non. Siège bébé (0-13 kg) et rehausseur (15-36 kg) sont offerts, il suffit de les demander à la réservation.</p></details>
-    <details><summary>Et si mon vol a du retard ?</summary><p>Nous suivons votre vol en temps réel : votre chauffeur s'adapte à l'heure réelle d'atterrissage et vous attend à la sortie avec une pancarte à votre nom.</p></details>
-    <details><summary>Puis-je payer par carte ?</summary><p>Oui, toutes les cartes bancaires sont acceptées quel que soit le montant, ainsi qu'Apple Pay, Google Pay et les espèces.</p></details>
-    <details><summary>Êtes-vous un vrai taxi ou un VTC ?</summary><p>Un vrai taxi parisien : carte professionnelle, lumineux TAXI PARISIEN et accès aux voies de bus pour un trajet plus rapide aux heures de pointe.</p></details>
+    <details><summary>Combien coûte un taxi Paris – Roissy CDG ?</summary><p>75 € en berline, 85 € en van jusqu'à 5 personnes, 95 € jusqu'à 8 personnes. Le prix est fixé à la réservation et ne bouge pas, même dans les bouchons.</p></details>
+    <details><summary>Le siège bébé est-il payant ?</summary><p>Non. Siège bébé (0-13 kg) et rehausseur (15-36 kg) sont offerts : demandez-les simplement à la réservation.</p></details>
+    <details><summary>Et si mon vol a du retard ?</summary><p>Nous suivons votre vol en temps réel. Votre chauffeur s'adapte à l'heure réelle d'atterrissage et vous attend à la sortie avec une pancarte à votre nom.</p></details>
+    <details><summary>Puis-je payer par carte ?</summary><p>Oui, toutes les cartes bancaires quel que soit le montant, Apple Pay, Google Pay, ou espèces.</p></details>
+    <details><summary>Êtes-vous un vrai taxi ou un VTC ?</summary><p>Un vrai taxi parisien : carte professionnelle, lumineux TAXI PARISIEN et accès aux voies de bus pour aller plus vite aux heures de pointe.</p></details>
   </section>
+
+  <section class="v2" style="padding-top:0">
+    <div class="v2-final">
+      <h2>Votre chauffeur est <span>prêt</span></h2>
+      <p>Prix en 30 secondes. Réponse rapide sur WhatsApp, 24h/24.</p>
+      <div class="v2-btns">
+        <a class="g" href="#reserver" data-go>Voir mon prix maintenant →</a>
+        <a class="w" href="https://wa.me/33667402005">💬 Réserver sur WhatsApp</a>
+        <a class="c" href="tel:+33667402005">📞 06 67 40 20 05</a>
+      </div>
+    </div>
+  </section>
+  <script>
+    document.querySelectorAll('.v2 [data-go]').forEach(function(a){a.addEventListener('click',function(e){var r=document.querySelector('.h2-in')||document.querySelector('#page-home .hero');if(r){e.preventDefault();r.scrollIntoView({behavior:'smooth',block:'start'});}});});
+  </script>
 
   <div class="section" style="background:var(--noir-2)">
     <div class="section-label">✦ Notre flotte</div>
