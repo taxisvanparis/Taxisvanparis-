@@ -653,6 +653,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     .v2-vs .us{background:#1B1813!important;color:#F2CF6B!important;font-weight:800}
     .v2-vs td.us{color:#fff!important}
     .v2-vs tr:last-child td{border-bottom:0}
+    .v2-two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .v2-two>div{background:#fff;border-radius:16px;padding:16px;box-shadow:0 6px 18px rgba(0,0,0,.07);color:#1B1813}
+    .v2-two>div.m{background:#1B1813;color:#F3EDE2}
+    .v2-two h3{margin:8px 0 8px;font-size:1.08rem}.v2-two ul{margin:0;padding-left:18px;font-size:.88rem;line-height:1.45}
+    .v2-two .pill{display:inline-block;font-size:.7rem;font-weight:800;letter-spacing:.06em;border-radius:999px;padding:4px 9px;background:#F2CF6B;color:#1B1813}
+    .v2-two .pill.s{background:#E8E1D2}
+    .v2-all{list-style:none;padding:0;margin:14px 0 0;display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;font-weight:700;font-size:.9rem}
+    @media(max-width:520px){.v2-two{grid-template-columns:1fr}}
     .ok{color:#1E9E5A;font-weight:900}.no{color:#C8102E;font-weight:900}
     .v2-gar{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
     .v2-gar div{background:#fff;border-radius:16px;padding:16px;box-shadow:0 6px 18px rgba(0,0,0,.06);border-top:3px solid var(--gold)}
@@ -693,19 +701,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </section>
 
   <section class="v2">
-    <div class="lbl">✦ La différence</div>
-    <h2>Pourquoi nos clients <span class="gold">ne reprennent plus de VTC</span></h2>
-    <table class="v2-vs">
-      <thead><tr><th></th><th class="us">Taxis Van Paris</th><th>VTC / appli</th></tr></thead>
-      <tbody>
-        <tr><td>Prix fixé à la réservation</td><td class="us"><span class="ok">✓</span></td><td>Prix qui change selon la demande</td></tr>
-        <tr><td>Voies de bus (moins de bouchons)</td><td class="us"><span class="ok">✓</span></td><td><span class="no">✗</span></td></tr>
-        <tr><td>Siège bébé et rehausseur</td><td class="us"><span class="ok">Offerts</span></td><td>Rarement disponibles</td></tr>
-        <tr><td>Van 8 places</td><td class="us"><span class="ok">✓</span></td><td>Difficile à trouver</td></tr>
-        <tr><td>Accueil avec pancarte, suivi du vol</td><td class="us"><span class="ok">✓</span></td><td>Variable</td></tr>
-        <tr><td>Chauffeur joignable sur WhatsApp</td><td class="us"><span class="ok">✓</span></td><td>Via l'appli</td></tr>
-      </tbody>
-    </table>
+    <div class="lbl">✦ Taxi en priorité</div>
+    <h2>Un <span class="gold">taxi parisien</span> en priorité,<br>un VTC en renfort</h2>
+    <p class="sub">Nous envoyons d'abord un taxi parisien. Aux heures très demandées, un chauffeur VTC professionnel peut assurer votre course : vous êtes toujours servi, au prix annoncé à la réservation.</p>
+    <div class="v2-two">
+      <div class="m"><span class="pill">EN PRIORITÉ</span><h3>🚕 Taxi parisien</h3><ul><li>Carte professionnelle et lumineux TAXI PARISIEN</li><li>Voies de bus : moins de bouchons</li><li>Berline ou van Mercedes Classe V</li></ul></div>
+      <div><span class="pill s">EN RENFORT</span><h3>🚘 Chauffeur VTC</h3><ul><li>Chauffeur professionnel avec carte VTC</li><li>Berline ou van, selon votre groupe</li><li>Toujours disponible, même les jours chargés</li></ul></div>
+    </div>
+    <ul class="v2-all"><li>✓ Prix fixé à la réservation</li><li>✓ Siège bébé et rehausseur offerts</li><li>✓ Suivi du vol, accueil avec pancarte</li><li>✓ Joignable sur WhatsApp 24h/24</li></ul>
     <div class="v2-quote"><div class="st">★★★★★</div><p>« Un trajet Roissy CDG extrêmement professionnel. Conduite agréable, voiture très propre. Attente des 20' de retard de notre avion avec grande gentillesse et compréhension. »</p><small>Marie Christine L. · avis Google</small></div>
   </section>
 
@@ -727,7 +730,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <details><summary>Le siège bébé est-il payant ?</summary><p>Non. Siège bébé (0-13 kg) et rehausseur (15-36 kg) sont offerts : demandez-les simplement à la réservation.</p></details>
     <details><summary>Et si mon vol a du retard ?</summary><p>Nous suivons votre vol en temps réel. Votre chauffeur s'adapte à l'heure réelle d'atterrissage et vous attend à la sortie avec une pancarte à votre nom.</p></details>
     <details><summary>Puis-je payer par carte ?</summary><p>Oui, toutes les cartes bancaires quel que soit le montant, Apple Pay, Google Pay, ou espèces.</p></details>
-    <details><summary>Êtes-vous un vrai taxi ou un VTC ?</summary><p>Un vrai taxi parisien : carte professionnelle, lumineux TAXI PARISIEN et accès aux voies de bus pour aller plus vite aux heures de pointe.</p></details>
+    <details><summary>Êtes-vous un taxi ou un VTC ?</summary><p>Les deux, avec le taxi en priorité : nous envoyons d'abord un taxi parisien (carte professionnelle, voies de bus). Aux heures très demandées, un chauffeur VTC professionnel peut assurer votre course, au prix annoncé à la réservation.</p></details>
   </section>
 
   <section class="v2" style="padding-top:0">
@@ -2884,7 +2887,7 @@ window.initGooglePlaces = window.initGooglePlaces || function(){};
   var lg=(document.documentElement.lang||"fr").slice(0,2);
   var T={
    fr:{h1:"Taxi Van à Paris avec siège bébé – transferts aéroports CDG, Orly, Beauvais",s:[["Voyagez en famille,","siège bébé offert"],["Transferts aéroports","CDG · Orly · Beauvais"],["Disneyland Paris,","en van jusqu'à 8"],["Voyage d'affaires,","Wi-Fi & facture pro"]],
-       c:["Avis Google","Taxi parisien officiel","Siège bébé offert"],p:["CDG dès","Orly dès","Gares dès"],dep:"📍 Départ",arr:"🏁 Arrivée",phd:"Adresse, gare, aéroport…",pha:"Destination…",pax:"👥 Passagers",veh:"🚘 Véhicule",
+       c:["Avis Google","Taxis officiels en priorité","Siège bébé offert"],p:["CDG dès","Orly dès","Gares dès"],dep:"📍 Départ",arr:"🏁 Arrivée",phd:"Adresse, gare, aéroport…",pha:"Destination…",pax:"👥 Passagers",veh:"🚘 Véhicule",
        vb:["Berline","jusqu'à 4 pers."],vv:["Van Classe V","jusqu'à 8 pers."],st:"👶 Siège enfant (offert)",sb:["Siège bébé","0–13 kg"],sr:["Rehausseur","15–36 kg"],go:"Voir mon prix en 30 s →",
        err:"Choisissez le départ et l'arrivée dans la liste proposée.",vn:"🚐 Van choisi automatiquement (plus de place).",ann:"✓ Annulation gratuite jusqu'à 24 h avant · Paiement à bord"},
    en:{h1:"Paris van taxi with baby seat – airport transfers CDG, Orly, Beauvais",s:[["Travel as a family,","free baby seat"],["Airport transfers","CDG · Orly · Beauvais"],["Disneyland Paris,","van for up to 8"],["Business travel,","Wi-Fi & invoices"]],
