@@ -54,6 +54,11 @@ h1 span{color:var(--gold)}
 .cfg label{display:block;text-align:left;color:var(--mut);margin:10px 0 4px}
 .cfg input{width:min(420px,80vw);font-size:18px;padding:12px;border-radius:12px;border:1px solid var(--line);background:#111;color:#fff}
 .cfg .go{margin-top:16px;background:var(--gold);color:#050505;border:0;border-radius:12px;padding:12px 22px;font-size:18px;font-weight:800}
+.acts{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;width:min(980px,100%)}
+.acts button{background:var(--card);border:1px solid var(--line);border-radius:18px;color:var(--ink);padding:16px 10px;display:flex;flex-direction:column;align-items:center;gap:8px;font:inherit;cursor:pointer}
+.acts button:active{border-color:var(--gold)}
+.acts i{font-style:normal;font-size:clamp(30px,4.4vw,48px)}.acts b{font-size:clamp(14px,1.8vw,18px)}
+@media (orientation:portrait){.acts{grid-template-columns:repeat(2,1fr)}}
 .foot{text-align:center;color:#6f6858;font-size:12px;padding-top:8px}
 </style>
 </head>
@@ -192,7 +197,20 @@ const T={
   waMsg:'مرحباً، أود حجز رحلة.'}
 };
 let lg=store.get('ec-lang','fr');
-const TILES=[['wifi','📶'],['ret','🔁',1],['prix','💶'],['exc','🏰'],['oubli','🧳'],['photo','📸'],['avis','⭐',1],['wa','💬']];
+const AT={
+ fr:{act:['Billets & activités','Tour Eiffel, croisière, Louvre…'],actT:'Billets coupe-file',actP:'Choisissez une activité, puis réservez sur votre téléphone : billets électroniques immédiats.',aff:'Réservation et paiement sécurisés par GetYourGuide.'},
+ en:{act:['Tickets & tours','Eiffel Tower, cruise, Louvre…'],actT:'Skip-the-line tickets',actP:'Choose an activity, then book on your phone: instant e-tickets.',aff:'Secure booking and payment by GetYourGuide.'},
+ es:{act:['Entradas y visitas','Torre Eiffel, crucero, Louvre…'],actT:'Entradas sin colas',actP:'Elija una actividad y reserve en su teléfono: entradas electrónicas al instante.',aff:'Reserva y pago seguros con GetYourGuide.'},
+ it:{act:['Biglietti e tour','Tour Eiffel, crociera, Louvre…'],actT:'Biglietti salta-fila',actP:'Scegliete un\'attività e prenotate sul telefono: biglietti elettronici immediati.',aff:'Prenotazione e pagamento sicuri con GetYourGuide.'},
+ de:{act:['Tickets & Touren','Eiffelturm, Bootsfahrt, Louvre…'],actT:'Tickets ohne Anstehen',actP:'Aktivität wählen und auf dem Handy buchen: sofort E-Tickets.',aff:'Sichere Buchung und Zahlung über GetYourGuide.'},
+ pt:{act:['Bilhetes e visitas','Torre Eiffel, cruzeiro, Louvre…'],actT:'Bilhetes sem fila',actP:'Escolha uma atividade e reserve no telemóvel: bilhetes eletrónicos imediatos.',aff:'Reserva e pagamento seguros com GetYourGuide.'},
+ zh:{act:['门票与游览','埃菲尔铁塔、游船、卢浮宫…'],actT:'免排队门票',actP:'选择活动，在手机上预订，即时电子票。',aff:'由 GetYourGuide 提供安全预订与支付。'},
+ ar:{act:['تذاكر وجولات','برج إيفل، رحلة نهرية، اللوفر…'],actT:'تذاكر بدون طابور',actP:'اختاروا نشاطاً واحجزوا على هاتفكم: تذاكر إلكترونية فورية.',aff:'حجز ودفع آمن عبر GetYourGuide.'}};
+Object.keys(AT).forEach(l=>Object.assign(T[l],AT[l]));
+const ACT=[['🗼','Eiffel Tower','Tour Eiffel','Eiffel Tower'],['🛥️','Seine river cruise','Croisière sur la Seine','Seine River Cruise'],['🖼️','Louvre Museum','Musée du Louvre','Louvre Museum'],['🏰','Palace of Versailles','Château de Versailles','Palace of Versailles'],
+ ['🎢','Disneyland Paris tickets','Billets Disneyland Paris','Disneyland Paris'],['💃','Moulin Rouge','Moulin Rouge','Moulin Rouge'],['🎨','Montmartre walking tour','Visite de Montmartre','Montmartre Tour'],['🏛️','Arc de Triomphe','Arc de Triomphe','Arc de Triomphe']];
+function gyg(q){const id=store.get('ec-gyg','');return 'https://www.getyourguide.com/s/?q='+encodeURIComponent(q+' Paris')+(id?'&partner_id='+encodeURIComponent(id):'')+'&cmp=tablette'}
+const TILES=[['wifi','📶'],['ret','🔁',1],['act','🎟️',1],['exc','🏰'],['oubli','🧳'],['photo','📸'],['avis','⭐',1],['wa','💬']];
 function qr(txt){try{const q=qrcode(0,'M');q.addData(txt);q.make();return q.createSvgTag({cellSize:8,margin:2,scalable:true})}catch(e){return '<div style="color:#000;font-weight:800;word-break:break-all;padding:10px">'+txt+'</div>'}}
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
 function render(){
@@ -208,6 +226,8 @@ function open(k){
   if(k==='wifi')h=page(t.wifiT,t.wifiP,`WIFI:T:WPA;S:${w.s};P:${w.p};;`,`<p style="margin-top:14px">${t.net} : <b style="color:#fff">${esc(w.s)}</b> · ${t.pass} : <b style="color:#fff">${esc(w.p)}</b></p>`);
   if(k==='ret')h=page(t.retT,t.retP,SITE+'?utm_source=tablette&utm_medium=retour#reserver');
   if(k==='prix')h=page(t.prixT,t.prixP,SITE+'?utm_source=tablette&utm_medium=prix#reserver');
+  if(k==='act')h=`<h2>${t.actT}</h2><p>${t.actP}</p><div class="acts">${ACT.map((a,i)=>`<button data-a="${i}"><i>${a[0]}</i><b>${esc(lg==='fr'?a[2]:a[3])}</b></button>`).join('')}</div><p style="font-size:14px;margin-top:14px">${t.aff}</p>`;
+  if(k.startsWith('a:')){const a=ACT[+k.slice(2)];h=page(a[0]+' '+esc(lg==='fr'?a[2]:a[3]),t.actP,gyg(a[1]),`<p style="font-size:14px;margin-top:12px">${t.aff}</p>`)}
   if(k==='avis')h=page(t.avisT,t.avisP,AVIS);
   if(k==='wa')h=page(t.waT,t.waP,'https://wa.me/'+WA);
   if(k==='exc')h=`<h2>${t.excT}</h2><p>${t.excP}</p><div class="row"><div class="list">${t.exList.map(([a,b])=>`<div><b>${esc(a)}</b><span>${esc(b)}</span></div>`).join('')}</div><div class="qr" style="width:min(30vmin,260px);height:min(30vmin,260px)">${qr('https://wa.me/'+WA+'?text='+encodeURIComponent(t.waMsg))}</div></div>`;
@@ -218,12 +238,13 @@ function open(k){
 $('langs').onclick=e=>{const b=e.target.closest('[data-l]');if(!b)return;lg=b.dataset.l;store.set('ec-lang',lg);render()};
 $('grid').onclick=e=>{const b=e.target.closest('[data-k]');if(b)open(b.dataset.k)};
 $('ovClose').onclick=()=>{$('ov').hidden=true};
+$('ovIn').addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(b)open('a:'+b.dataset.a)});
 
 // Réglages chauffeur : appui long 3 s sur le logo (nom et mot de passe du Wi-Fi de la voiture)
 let lp;$('logo').addEventListener('pointerdown',()=>{lp=setTimeout(()=>{const w=store.get('ec-wifi',{s:'',p:''});
   $('ovIn').innerHTML=`<div class="cfg"><h2>Réglages chauffeur</h2><p>Wi-Fi de la voiture (laisser vide pour masquer l'icône).</p>
-  <label>Nom du réseau</label><input id="cS" value="${esc(w.s)}" autocapitalize="off"><label>Mot de passe</label><input id="cP" value="${esc(w.p)}" autocapitalize="off"><br><button class="go" id="cOk">Enregistrer</button></div>`;
-  $('ov').hidden=false;$('cOk').onclick=()=>{const s=$('cS').value.trim();store.set('ec-wifi',s?{s:s,p:$('cP').value.trim()}:null);$('ov').hidden=true;render()};},3000)});
+  <label>Nom du réseau</label><input id="cS" value="${esc(w.s)}" autocapitalize="off"><label>Mot de passe</label><input id="cP" value="${esc(w.p)}" autocapitalize="off"><label>ID partenaire GetYourGuide (commissions)</label><input id="cG" value="${esc(store.get('ec-gyg',''))}" autocapitalize="off"><br><button class="go" id="cOk">Enregistrer</button></div>`;
+  $('ov').hidden=false;$('cOk').onclick=()=>{store.set('ec-gyg',$('cG').value.trim().replace(/[^A-Za-z0-9_-]/g,''));const s=$('cS').value.trim();store.set('ec-wifi',s?{s:s,p:$('cP').value.trim()}:null);$('ov').hidden=true;render()};},3000)});
 ['pointerup','pointerleave','pointercancel'].forEach(ev=>$('logo').addEventListener(ev,()=>clearTimeout(lp)));
 
 // Horloge
