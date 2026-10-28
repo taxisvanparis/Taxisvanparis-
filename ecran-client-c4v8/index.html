@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>Écran client · Taxis Van Paris</title>
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#050505">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Écran client">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{--bg:#050505;--card:#141310;--line:#2a261d;--gold:#C9A84C;--gold2:#EBC660;--ink:#F5F1E8;--mut:#A9A08C}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;overflow:hidden;-webkit-user-select:none;user-select:none}
+.app{height:100%;display:flex;flex-direction:column;padding:calc(14px + env(safe-area-inset-top,0px)) 22px calc(14px + env(safe-area-inset-bottom,0px))}
+header{display:flex;align-items:center;gap:16px;padding-bottom:12px;border-bottom:2px solid var(--gold)}
+.brand{font-family:Georgia,"Times New Roman",serif;font-weight:900;font-size:clamp(22px,3.2vw,34px);letter-spacing:-.01em}
+.brand b{color:var(--gold)}
+.brand small{display:block;font:600 11px/1 -apple-system,Arial,sans-serif;letter-spacing:.32em;color:var(--gold);margin-top:4px}
+.clock{margin-left:auto;text-align:right}
+.clock b{display:block;font-size:clamp(22px,3vw,32px);font-weight:800;font-variant-numeric:tabular-nums}
+.clock span{color:var(--mut);font-size:13px}
+.langs{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;padding:12px 0 6px}
+.langs button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:7px 12px;font-size:15px;cursor:pointer}
+.langs button.on{border-color:var(--gold);background:rgba(201,168,76,.18)}
+h1{text-align:center;font-family:Georgia,serif;font-weight:900;font-size:clamp(26px,4vw,44px);margin:8px 0 2px}
+h1 span{color:var(--gold)}
+.sub{text-align:center;color:var(--mut);margin:0 0 14px;font-size:clamp(14px,1.8vw,18px)}
+.grid{flex:1;display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:1fr;gap:14px;min-height:0}
+.tile{background:linear-gradient(180deg,#1b1914,#100f0c);border:1px solid var(--line);border-radius:22px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:14px;text-align:center;cursor:pointer;color:var(--ink);font:inherit;transition:transform .12s,border-color .12s}
+.tile:active{transform:scale(.97);border-color:var(--gold)}
+.tile i{font-style:normal;font-size:clamp(34px,5vw,58px);line-height:1}
+.tile b{font-size:clamp(15px,2vw,21px)}
+.tile small{color:var(--mut);font-size:clamp(12px,1.4vw,14px);line-height:1.3}
+.tile.hi{border-color:rgba(201,168,76,.6);background:linear-gradient(180deg,#2a2314,#14110a)}
+@media (orientation:portrait){.grid{grid-template-columns:repeat(2,1fr)}}
+.ov{position:fixed;inset:0;z-index:20;background:#050505;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;text-align:center}
+.ov[hidden]{display:none}
+.ov h2{font-family:Georgia,serif;font-size:clamp(28px,4.4vw,48px);margin:0 0 8px}
+.ov p{color:var(--mut);font-size:clamp(16px,2.2vw,22px);margin:0 0 18px;max-width:760px}
+.qr{margin:0 auto;background:#fff;border-radius:22px;padding:16px;width:min(46vmin,400px);height:min(46vmin,400px);display:flex;align-items:center;justify-content:center}
+.qr svg,.qr img{width:100%;height:100%;display:block}
+.big{font-size:clamp(20px,3vw,30px);font-weight:800;margin-top:14px}
+.close{position:fixed;right:22px;bottom:calc(18px + env(safe-area-inset-bottom,0px));border:2px solid var(--gold);color:var(--gold);background:transparent;border-radius:999px;padding:12px 22px;font-size:18px;font-weight:800;cursor:pointer}
+.list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;width:min(900px,100%);text-align:left}
+.list div{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+.list b{display:block;font-size:19px}.list span{color:var(--mut);font-size:15px}
+.check{display:flex;gap:18px;flex-wrap:wrap;justify-content:center;font-size:clamp(40px,7vw,80px);margin:10px 0 20px}
+.check div{display:flex;flex-direction:column;align-items:center;gap:6px}.check small{font-size:clamp(14px,1.8vw,20px);color:var(--ink)}
+.row{display:flex;gap:28px;align-items:center;justify-content:center;flex-wrap:wrap}
+.cfg label{display:block;text-align:left;color:var(--mut);margin:10px 0 4px}
+.cfg input{width:min(420px,80vw);font-size:18px;padding:12px;border-radius:12px;border:1px solid var(--line);background:#111;color:#fff}
+.cfg .go{margin-top:16px;background:var(--gold);color:#050505;border:0;border-radius:12px;padding:12px 22px;font-size:18px;font-weight:800}
+.foot{text-align:center;color:#6f6858;font-size:12px;padding-top:8px}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand" id="logo">Taxis <b>Van</b> Paris<small>BY ABTS</small></div>
+    <div class="clock"><b id="hh">--:--</b><span id="dd"></span></div>
+  </header>
+  <div class="langs" id="langs"></div>
+  <h1 id="t1"></h1>
+  <p class="sub" id="t2"></p>
+  <div class="grid" id="grid"></div>
+  <div class="foot">📞 +33 6 67 40 20 05 · taxisvanparis.fr</div>
+</div>
+
+<div class="ov" id="ov" hidden><div id="ovIn"></div><button class="close" id="ovClose"></button></div>
+
+<script>
+const $=id=>document.getElementById(id);
+const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const SITE='https://taxisvanparis.fr/', WA='33667402005', AVIS='https://g.page/r/CWXImdGQDnt4ECE/review';
+const LANGS=[['fr','🇫🇷 Français'],['en','🇬🇧 English'],['es','🇪🇸 Español'],['it','🇮🇹 Italiano'],['de','🇩🇪 Deutsch'],['pt','🇵🇹 Português'],['zh','🇨🇳 中文'],['ar','🇸🇦 العربية']];
+const T={
+ fr:{t1:'Bienvenue à <span>bord</span>',t2:'Touchez une icône : tout se fait sur votre téléphone.',close:'✕ Fermer',
+  wifi:['Wi-Fi gratuit','Connexion en 1 scan'],ret:['Votre retour','Réservez l\'aéroport, la gare…'],prix:['Prix d\'une course','Disney, Versailles, hôtel…'],
+  exc:['Excursions','Versailles, Giverny, Champagne'],wa:['Nous contacter','WhatsApp 24h/24'],avis:['Votre avis','Merci pour vos ★★★★★'],
+  oubli:['N\'oubliez rien','Avant de descendre'],photo:['Photo souvenir','Demandez au chauffeur 📸'],
+  scan:'Scannez avec l\'appareil photo de votre téléphone.',wifiT:'Wi-Fi gratuit à bord',wifiP:'Scannez pour vous connecter automatiquement.',net:'Réseau',pass:'Mot de passe',
+  retT:'Réservez votre retour',retP:'Aéroport, gare ou autre trajet : prix fixe annoncé tout de suite, siège bébé offert.',
+  prixT:'Le prix d\'une autre course',prixP:'Calculez votre prix en 30 secondes et réservez directement.',
+  excT:'Excursions en van privé',excP:'Journée avec chauffeur au départ de Paris. Prix sur devis : écrivez-nous sur WhatsApp.',
+  waT:'Gardez notre contact',waP:'Scannez pour nous écrire sur WhatsApp, 24h/24.',
+  avisT:'Merci pour votre confiance',avisP:'Votre avis Google nous aide beaucoup. Il suffit de quelques mots.',
+  oubliT:'N\'oubliez rien !',items:['Téléphone','Passeport','Sac','Lunettes','Chargeur'],
+  photoT:'Photo souvenir',photoP:'Votre chauffeur peut vous prendre en photo devant la tour Eiffel ou un monument : demandez-lui !',
+  exList:[['Versailles','Château et jardins'],['Giverny','Maison et jardins de Monet'],['Champagne','Reims et Épernay, caves'],['Mont-Saint-Michel','Journée complète'],['Châteaux de la Loire','Chambord, Chenonceau'],['Disneyland Paris','Aller-retour en van']],
+  waMsg:'Bonjour, je souhaite réserver une excursion.'},
+ en:{t1:'Welcome <span>aboard</span>',t2:'Tap an icon: everything happens on your phone.',close:'✕ Close',
+  wifi:['Free Wi-Fi','Connect in 1 scan'],ret:['Your return trip','Book the airport, station…'],prix:['Price of a ride','Disney, Versailles, hotel…'],
+  exc:['Day trips','Versailles, Giverny, Champagne'],wa:['Contact us','WhatsApp 24/7'],avis:['Your review','Thank you for your ★★★★★'],
+  oubli:['Don\'t forget','Before you get out'],photo:['Souvenir photo','Ask your driver 📸'],
+  scan:'Scan with your phone camera.',wifiT:'Free Wi-Fi on board',wifiP:'Scan to connect automatically.',net:'Network',pass:'Password',
+  retT:'Book your return trip',retP:'Airport, station or any ride: fixed price shown instantly, free baby seat.',
+  prixT:'Price of another ride',prixP:'Get your price in 30 seconds and book directly.',
+  excT:'Private van day trips',excP:'Full day with driver from Paris. Price on request: message us on WhatsApp.',
+  waT:'Keep our contact',waP:'Scan to message us on WhatsApp, 24/7.',
+  avisT:'Thank you for riding with us',avisP:'Your Google review helps us a lot. Just a few words.',
+  oubliT:'Don\'t forget anything!',items:['Phone','Passport','Bag','Glasses','Charger'],
+  photoT:'Souvenir photo',photoP:'Your driver can take your photo in front of the Eiffel Tower or a monument: just ask!',
+  exList:[['Versailles','Palace and gardens'],['Giverny','Monet\'s house and gardens'],['Champagne','Reims & Épernay cellars'],['Mont-Saint-Michel','Full day'],['Loire castles','Chambord, Chenonceau'],['Disneyland Paris','Round trip by van']],
+  waMsg:'Hello, I would like to book a day trip.'},
+ es:{t1:'Bienvenido a <span>bordo</span>',t2:'Toque un icono: todo se hace en su teléfono.',close:'✕ Cerrar',
+  wifi:['Wi-Fi gratis','Conexión en 1 escaneo'],ret:['Su regreso','Aeropuerto, estación…'],prix:['Precio de un trayecto','Disney, Versalles, hotel…'],
+  exc:['Excursiones','Versalles, Giverny, Champaña'],wa:['Contacto','WhatsApp 24h'],avis:['Su opinión','Gracias por sus ★★★★★'],
+  oubli:['No olvide nada','Antes de bajar'],photo:['Foto recuerdo','Pídala al chófer 📸'],
+  scan:'Escanee con la cámara de su teléfono.',wifiT:'Wi-Fi gratis a bordo',wifiP:'Escanee para conectarse automáticamente.',net:'Red',pass:'Contraseña',
+  retT:'Reserve su regreso',retP:'Aeropuerto, estación u otro trayecto: precio fijo al instante, silla de bebé gratis.',
+  prixT:'Precio de otro trayecto',prixP:'Calcule su precio en 30 segundos y reserve directamente.',
+  excT:'Excursiones en van privada',excP:'Día completo con chófer desde París. Precio a consultar por WhatsApp.',
+  waT:'Guarde nuestro contacto',waP:'Escanee para escribirnos por WhatsApp, 24h.',
+  avisT:'Gracias por su confianza',avisP:'Su opinión en Google nos ayuda mucho. Bastan unas palabras.',
+  oubliT:'¡No olvide nada!',items:['Teléfono','Pasaporte','Bolso','Gafas','Cargador'],
+  photoT:'Foto recuerdo',photoP:'Su chófer puede hacerle una foto delante de la torre Eiffel o un monumento: ¡pídaselo!',
+  exList:[['Versalles','Palacio y jardines'],['Giverny','Casa y jardines de Monet'],['Champaña','Reims y Épernay'],['Mont-Saint-Michel','Día completo'],['Castillos del Loira','Chambord, Chenonceau'],['Disneyland París','Ida y vuelta en van']],
+  waMsg:'Hola, quiero reservar una excursión.'},
+ it:{t1:'Benvenuti a <span>bordo</span>',t2:'Toccate un\'icona: tutto si fa sul vostro telefono.',close:'✕ Chiudi',
+  wifi:['Wi-Fi gratuito','Connessione in 1 scansione'],ret:['Il vostro ritorno','Aeroporto, stazione…'],prix:['Prezzo di una corsa','Disney, Versailles, hotel…'],
+  exc:['Escursioni','Versailles, Giverny, Champagne'],wa:['Contattaci','WhatsApp 24h'],avis:['La vostra recensione','Grazie per le ★★★★★'],
+  oubli:['Non dimenticate nulla','Prima di scendere'],photo:['Foto ricordo','Chiedete all\'autista 📸'],
+  scan:'Scansionate con la fotocamera del telefono.',wifiT:'Wi-Fi gratuito a bordo',wifiP:'Scansionate per connettervi automaticamente.',net:'Rete',pass:'Password',
+  retT:'Prenotate il ritorno',retP:'Aeroporto, stazione o altra corsa: prezzo fisso subito, seggiolino gratuito.',
+  prixT:'Prezzo di un\'altra corsa',prixP:'Calcolate il prezzo in 30 secondi e prenotate.',
+  excT:'Escursioni in van privato',excP:'Giornata con autista da Parigi. Prezzo su richiesta via WhatsApp.',
+  waT:'Salvate il nostro contatto',waP:'Scansionate per scriverci su WhatsApp, 24h.',
+  avisT:'Grazie per la fiducia',avisP:'La vostra recensione Google ci aiuta molto. Bastano poche parole.',
+  oubliT:'Non dimenticate nulla!',items:['Telefono','Passaporto','Borsa','Occhiali','Caricatore'],
+  photoT:'Foto ricordo',photoP:'Il vostro autista può scattarvi una foto davanti alla Tour Eiffel: chiedetegli!',
+  exList:[['Versailles','Reggia e giardini'],['Giverny','Casa e giardini di Monet'],['Champagne','Reims ed Épernay'],['Mont-Saint-Michel','Giornata intera'],['Castelli della Loira','Chambord, Chenonceau'],['Disneyland Paris','Andata e ritorno in van']],
+  waMsg:'Buongiorno, vorrei prenotare un\'escursione.'},
+ de:{t1:'Willkommen an <span>Bord</span>',t2:'Tippen Sie auf ein Symbol: alles läuft über Ihr Handy.',close:'✕ Schließen',
+  wifi:['Gratis WLAN','Verbinden mit 1 Scan'],ret:['Ihre Rückfahrt','Flughafen, Bahnhof…'],prix:['Preis einer Fahrt','Disney, Versailles, Hotel…'],
+  exc:['Ausflüge','Versailles, Giverny, Champagne'],wa:['Kontakt','WhatsApp 24/7'],avis:['Ihre Bewertung','Danke für Ihre ★★★★★'],
+  oubli:['Nichts vergessen','Vor dem Aussteigen'],photo:['Erinnerungsfoto','Fragen Sie den Fahrer 📸'],
+  scan:'Mit der Handykamera scannen.',wifiT:'Gratis WLAN an Bord',wifiP:'Scannen, um sich automatisch zu verbinden.',net:'Netzwerk',pass:'Passwort',
+  retT:'Rückfahrt buchen',retP:'Flughafen, Bahnhof oder andere Fahrt: Festpreis sofort, Babysitz gratis.',
+  prixT:'Preis einer anderen Fahrt',prixP:'Preis in 30 Sekunden berechnen und direkt buchen.',
+  excT:'Ausflüge im Privatvan',excP:'Ganzer Tag mit Fahrer ab Paris. Preis auf Anfrage per WhatsApp.',
+  waT:'Unseren Kontakt speichern',waP:'Scannen, um uns per WhatsApp zu schreiben, 24/7.',
+  avisT:'Danke für Ihr Vertrauen',avisP:'Ihre Google-Bewertung hilft uns sehr. Ein paar Worte genügen.',
+  oubliT:'Nichts vergessen!',items:['Handy','Reisepass','Tasche','Brille','Ladekabel'],
+  photoT:'Erinnerungsfoto',photoP:'Ihr Fahrer macht gern ein Foto vor dem Eiffelturm: einfach fragen!',
+  exList:[['Versailles','Schloss und Gärten'],['Giverny','Monets Haus und Gärten'],['Champagne','Reims & Épernay'],['Mont-Saint-Michel','Ganzer Tag'],['Loire-Schlösser','Chambord, Chenonceau'],['Disneyland Paris','Hin und zurück im Van']],
+  waMsg:'Hallo, ich möchte einen Ausflug buchen.'},
+ pt:{t1:'Bem-vindo a <span>bordo</span>',t2:'Toque num ícone: tudo acontece no seu telemóvel.',close:'✕ Fechar',
+  wifi:['Wi-Fi grátis','Ligação com 1 leitura'],ret:['O seu regresso','Aeroporto, estação…'],prix:['Preço de uma viagem','Disney, Versalhes, hotel…'],
+  exc:['Excursões','Versalhes, Giverny, Champagne'],wa:['Contacto','WhatsApp 24h'],avis:['A sua opinião','Obrigado pelas ★★★★★'],
+  oubli:['Não se esqueça de nada','Antes de sair'],photo:['Foto recordação','Peça ao motorista 📸'],
+  scan:'Leia com a câmara do telemóvel.',wifiT:'Wi-Fi grátis a bordo',wifiP:'Leia para se ligar automaticamente.',net:'Rede',pass:'Palavra-passe',
+  retT:'Reserve o seu regresso',retP:'Aeroporto, estação ou outra viagem: preço fixo imediato, cadeira de bebé grátis.',
+  prixT:'Preço de outra viagem',prixP:'Calcule o preço em 30 segundos e reserve diretamente.',
+  excT:'Excursões em van privada',excP:'Dia completo com motorista a partir de Paris. Preço sob consulta no WhatsApp.',
+  waT:'Guarde o nosso contacto',waP:'Leia para nos escrever no WhatsApp, 24h.',
+  avisT:'Obrigado pela confiança',avisP:'A sua opinião no Google ajuda-nos muito. Bastam umas palavras.',
+  oubliT:'Não se esqueça de nada!',items:['Telemóvel','Passaporte','Mala','Óculos','Carregador'],
+  photoT:'Foto recordação',photoP:'O seu motorista pode tirar-lhe uma foto em frente à Torre Eiffel: peça!',
+  exList:[['Versalhes','Palácio e jardins'],['Giverny','Casa e jardins de Monet'],['Champagne','Reims e Épernay'],['Mont-Saint-Michel','Dia completo'],['Castelos do Loire','Chambord, Chenonceau'],['Disneyland Paris','Ida e volta em van']],
+  waMsg:'Olá, gostaria de reservar uma excursão.'},
+ zh:{t1:'欢迎<span>乘车</span>',t2:'点击图标：一切都在您的手机上完成。',close:'✕ 关闭',
+  wifi:['免费 Wi-Fi','扫码即连'],ret:['预订返程','机场、火车站…'],prix:['查询车费','迪士尼、凡尔赛、酒店…'],
+  exc:['一日游','凡尔赛、吉维尼、香槟区'],wa:['联系我们','WhatsApp 24小时'],avis:['您的评价','感谢您的 ★★★★★'],
+  oubli:['别忘了物品','下车前请检查'],photo:['纪念照','请告诉司机 📸'],
+  scan:'请用手机相机扫描。',wifiT:'车上免费 Wi-Fi',wifiP:'扫码自动连接。',net:'网络',pass:'密码',
+  retT:'预订您的返程',retP:'机场、火车站或其他行程：即时固定价格，免费婴儿座椅。',
+  prixT:'查询其他行程价格',prixP:'30秒算出价格并直接预订。',
+  excT:'私人商务车一日游',excP:'巴黎出发，司机全天陪同。价格请通过 WhatsApp 咨询。',
+  waT:'保存我们的联系方式',waP:'扫码在 WhatsApp 上联系我们，24小时。',
+  avisT:'感谢您的信任',avisP:'您的谷歌评价对我们帮助很大，几句话就好。',
+  oubliT:'请勿遗忘物品！',items:['手机','护照','包','眼镜','充电器'],
+  photoT:'纪念照',photoP:'司机可以在埃菲尔铁塔前为您拍照，请告诉他！',
+  exList:[['凡尔赛','宫殿与花园'],['吉维尼','莫奈故居与花园'],['香槟区','兰斯与埃佩尔奈酒窖'],['圣米歇尔山','全天'],['卢瓦尔河城堡','香波堡、舍农索堡'],['巴黎迪士尼','商务车往返']],
+  waMsg:'您好，我想预订一日游。'},
+ ar:{t1:'مرحباً بكم <span>على متن السيارة</span>',t2:'اضغطوا على أيقونة: كل شيء يتم على هاتفكم.',close:'✕ إغلاق',
+  wifi:['واي فاي مجاني','اتصال بمسح واحد'],ret:['رحلة العودة','المطار، المحطة…'],prix:['سعر رحلة','ديزني، فرساي، الفندق…'],
+  exc:['رحلات','فرساي، جيفرني، الشمبانيا'],wa:['اتصلوا بنا','واتساب 24/24'],avis:['رأيكم','شكراً على ★★★★★'],
+  oubli:['لا تنسوا شيئاً','قبل النزول'],photo:['صورة تذكارية','اطلبوها من السائق 📸'],
+  scan:'امسحوا الرمز بكاميرا هاتفكم.',wifiT:'واي فاي مجاني في السيارة',wifiP:'امسحوا للاتصال تلقائياً.',net:'الشبكة',pass:'كلمة المرور',
+  retT:'احجزوا رحلة العودة',retP:'المطار أو المحطة أو أي رحلة: سعر ثابت فوراً، مقعد رضيع مجاني.',
+  prixT:'سعر رحلة أخرى',prixP:'احسبوا السعر في 30 ثانية واحجزوا مباشرة.',
+  excT:'رحلات بفان خاص',excP:'يوم كامل مع سائق من باريس. السعر عند الطلب عبر واتساب.',
+  waT:'احفظوا رقمنا',waP:'امسحوا للكتابة لنا على واتساب، 24/24.',
+  avisT:'شكراً لثقتكم',avisP:'تقييمكم على Google يساعدنا كثيراً. بضع كلمات تكفي.',
+  oubliT:'لا تنسوا شيئاً!',items:['الهاتف','جواز السفر','الحقيبة','النظارات','الشاحن'],
+  photoT:'صورة تذكارية',photoP:'يمكن للسائق التقاط صورة لكم أمام برج إيفل: اطلبوا منه!',
+  exList:[['فرساي','القصر والحدائق'],['جيفرني','بيت وحدائق مونيه'],['الشمبانيا','ريمس وإيبيرناي'],['مون سان ميشيل','يوم كامل'],['قصور اللوار','شامبور وشينونسو'],['ديزني لاند باريس','ذهاب وعودة بالفان']],
+  waMsg:'مرحباً، أود حجز رحلة.'}
+};
+let lg=store.get('ec-lang','fr');
+const TILES=[['wifi','📶'],['ret','🔁',1],['prix','💶'],['exc','🏰'],['oubli','🧳'],['photo','📸'],['avis','⭐',1],['wa','💬']];
+function qr(txt){try{const q=qrcode(0,'M');q.addData(txt);q.make();return q.createSvgTag({cellSize:8,margin:2,scalable:true})}catch(e){return '<div style="color:#000;font-weight:800;word-break:break-all;padding:10px">'+txt+'</div>'}}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function render(){
+  const t=T[lg];document.documentElement.lang=lg;document.documentElement.dir=lg==='ar'?'rtl':'ltr';
+  $('langs').innerHTML=LANGS.map(([k,n])=>`<button data-l="${k}" class="${k===lg?'on':''}">${n}</button>`).join('');
+  $('t1').innerHTML=t.t1;$('t2').textContent=t.t2;$('ovClose').textContent=t.close;
+  const wifi=store.get('ec-wifi',null);
+  $('grid').innerHTML=TILES.filter(([k])=>k!=='wifi'||wifi).map(([k,ic,hi])=>`<button class="tile${hi?' hi':''}" data-k="${k}"><i>${ic}</i><b>${esc(t[k][0])}</b><small>${esc(t[k][1])}</small></button>`).join('');
+}
+function open(k){
+  const t=T[lg],w=store.get('ec-wifi',{s:'',p:''});let h='';
+  const page=(title,p,url,extra)=>`<h2>${title}</h2><p>${p}</p><div class="qr">${qr(url)}</div><div class="big">${t.scan}</div>${extra||''}`;
+  if(k==='wifi')h=page(t.wifiT,t.wifiP,`WIFI:T:WPA;S:${w.s};P:${w.p};;`,`<p style="margin-top:14px">${t.net} : <b style="color:#fff">${esc(w.s)}</b> · ${t.pass} : <b style="color:#fff">${esc(w.p)}</b></p>`);
+  if(k==='ret')h=page(t.retT,t.retP,SITE+'?utm_source=tablette&utm_medium=retour#reserver');
+  if(k==='prix')h=page(t.prixT,t.prixP,SITE+'?utm_source=tablette&utm_medium=prix#reserver');
+  if(k==='avis')h=page(t.avisT,t.avisP,AVIS);
+  if(k==='wa')h=page(t.waT,t.waP,'https://wa.me/'+WA);
+  if(k==='exc')h=`<h2>${t.excT}</h2><p>${t.excP}</p><div class="row"><div class="list">${t.exList.map(([a,b])=>`<div><b>${esc(a)}</b><span>${esc(b)}</span></div>`).join('')}</div><div class="qr" style="width:min(30vmin,260px);height:min(30vmin,260px)">${qr('https://wa.me/'+WA+'?text='+encodeURIComponent(t.waMsg))}</div></div>`;
+  if(k==='oubli')h=`<h2>${t.oubliT}</h2><div class="check">${['📱','🛂','👜','🕶️','🔌'].map((e,i)=>`<div>${e}<small>${esc(t.items[i])}</small></div>`).join('')}</div><p>✓ ${esc(t.items.join(' · '))}</p>`;
+  if(k==='photo')h=`<h2>${t.photoT}</h2><div style="font-size:min(30vmin,220px);line-height:1;margin:6px 0 14px">📸</div><p>${t.photoP}</p>`;
+  $('ovIn').innerHTML=h;$('ov').hidden=false;clearTimeout(window._ovT);window._ovT=setTimeout(()=>{$('ov').hidden=true},120000);
+}
+$('langs').onclick=e=>{const b=e.target.closest('[data-l]');if(!b)return;lg=b.dataset.l;store.set('ec-lang',lg);render()};
+$('grid').onclick=e=>{const b=e.target.closest('[data-k]');if(b)open(b.dataset.k)};
+$('ovClose').onclick=()=>{$('ov').hidden=true};
+
+// Réglages chauffeur : appui long 3 s sur le logo (nom et mot de passe du Wi-Fi de la voiture)
+let lp;$('logo').addEventListener('pointerdown',()=>{lp=setTimeout(()=>{const w=store.get('ec-wifi',{s:'',p:''});
+  $('ovIn').innerHTML=`<div class="cfg"><h2>Réglages chauffeur</h2><p>Wi-Fi de la voiture (laisser vide pour masquer l'icône).</p>
+  <label>Nom du réseau</label><input id="cS" value="${esc(w.s)}" autocapitalize="off"><label>Mot de passe</label><input id="cP" value="${esc(w.p)}" autocapitalize="off"><br><button class="go" id="cOk">Enregistrer</button></div>`;
+  $('ov').hidden=false;$('cOk').onclick=()=>{const s=$('cS').value.trim();store.set('ec-wifi',s?{s:s,p:$('cP').value.trim()}:null);$('ov').hidden=true;render()};},3000)});
+['pointerup','pointerleave','pointercancel'].forEach(ev=>$('logo').addEventListener(ev,()=>clearTimeout(lp)));
+
+// Horloge
+function tick(){const d=new Date();$('hh').textContent=d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+  $('dd').textContent=d.toLocaleDateString(lg==='zh'?'zh-CN':lg==='ar'?'ar':lg,{weekday:'long',day:'numeric',month:'long'})}
+tick();setInterval(tick,15000);
+
+// Écran toujours allumé
+let wl=null;async function awake(){try{if('wakeLock' in navigator&&(!wl||wl.released))wl=await navigator.wakeLock.request('screen')}catch(e){}}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')awake()});document.addEventListener('pointerdown',awake);awake();
+render();
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+</body>
+</html>
