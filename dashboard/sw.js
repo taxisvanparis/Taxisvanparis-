@@ -7,6 +7,16 @@ async function pastille(n) { try { if (n > 0 && self.navigator.setAppBadge) awai
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
 
+// Course dans moins d'une heure (ou « Maintenant ») d'après la ligne « 📅 jj/mm/aaaa … à HH:MM »
+function estImmediate(t) {
+  if (/maintenant/i.test(t)) return true;
+  const m = String(t).match(/(\d{2})\/(\d{2})\/(\d{4})[^\n]*?(\d{1,2})[:h](\d{2})/) || String(t).match(/(\d{4})-(\d{2})-(\d{2})[^\n]*?(\d{1,2})[:h](\d{2})/);
+  if (!m) return false;
+  const d = m[1].length === 4 ? new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5]) : new Date(+m[3], +m[2] - 1, +m[1], +m[4], +m[5]);
+  const mn = (d - Date.now()) / 60000;
+  return mn <= 60 && mn >= -30;
+}
+
 self.addEventListener('push', e => {
   let p = {};
   try { p = e.data ? e.data.json() : {}; } catch (x) { p = { body: e.data ? e.data.text() : '' }; }
@@ -15,9 +25,12 @@ self.addEventListener('push', e => {
     const n = (await lireN()) + 1;
     await ecrireN(n);
     await pastille(n);
-    await self.registration.showNotification(d.title || '🚖 Nouvelle réservation', {
+    const imm = estImmediate(d.body || '');
+    await self.registration.showNotification((imm ? '⚡ IMMÉDIAT · ' : '') + (d.title || '🚖 Nouvelle réservation'), {
       body: d.body || '', icon: 'icon-192.png', badge: 'badge-96.png', tag: d.tag || ('resa-' + Date.now()),
-      data: { url: d.url || './' }
+      data: { url: d.url || './' }, renotify: true,
+      requireInteraction: imm,                                   // reste affichée jusqu'au toucher (Android, ordinateur)
+      vibrate: imm ? [600, 200, 600, 200, 600, 200, 1200] : [300, 120, 300]
     });
   })());
 });

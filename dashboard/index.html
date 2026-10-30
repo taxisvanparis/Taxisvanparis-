@@ -383,6 +383,11 @@
   .rc .acts .del{color:var(--red);border-color:transparent}
   .rc .acts .edit{border-color:var(--gold);color:var(--gold-soft)}
   .rc.nouv{box-shadow:0 0 0 2px var(--gold),0 0 18px rgba(201,162,75,.35);}
+  .rc .src{display:inline-block;font-size:11px;font-weight:800;border-radius:999px;padding:3px 9px;margin:4px 6px 0 0;border:1px solid rgba(255,255,255,.18);color:#e9e2d0;background:rgba(255,255,255,.06)}
+  .rc .src.site{border-color:#4f8ef7;color:#9cc0ff}.rc .src.hotel{border-color:#c9a84c;color:#f0d68a}.rc .src.tel{border-color:#a77bf3;color:#cdb2ff}
+  .rc .imm{display:inline-block;font-size:11px;font-weight:900;border-radius:999px;padding:3px 9px;margin:4px 6px 0 0;background:#d93025;color:#fff;animation:immb 1s infinite alternate}
+  @keyframes immb{from{opacity:1}to{opacity:.55}}
+  .rc.imm-card{box-shadow:0 0 0 2px #d93025 inset}
   .rc .nv{display:inline-block;background:var(--gold);color:#141008;font-size:10.5px;font-weight:800;border-radius:999px;padding:3px 8px;letter-spacing:.5px;margin-right:6px;vertical-align:2px}
   .rc .acts .vu-btn{border-color:var(--gold);background:var(--gold);color:#141008;font-weight:700}
   .nb{display:none;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:#E5484D;color:#fff;font:700 12px/20px var(--body);text-align:center;margin-left:auto}
@@ -1327,6 +1332,27 @@ function anonymise(title,location){
   document.getElementById("btn-push-plustard").addEventListener("click", () => { lsSet("tvp_push_plustard", String(Date.now() + 3 * 86400000)); majPushBar(); });
   majPushBar();
 
+  const DRAP={fr:"🇫🇷",en:"🇬🇧",es:"🇪🇸",it:"🇮🇹",ar:"🇸🇦",de:"🇩🇪",pt:"🇵🇹",zh:"🇨🇳",nl:"🇳🇱",ru:"🇷🇺",ja:"🇯🇵",ko:"🇰🇷",tr:"🇹🇷"};
+  function provenance(r){
+    const s=String(r.source||"").toLowerCase();
+    if(s==="hotel"||r.hotel) return "";
+    if(s==="site") return '<span class="src site">🌐 Site</span>';
+    if(s.indexOf("telephone")===0) return '<span class="src tel">📞 Téléphone IA</span>';
+    if(s) return '<span class="src">'+esc(r.source)+'</span>';
+    return '<span class="src">✍️ Manuel</span>';
+  }
+  function minutesAvant(r){
+    const d=String(r.date||""); const m=String(r.heure||"").match(/(\d{1,2})[:h](\d{2})/);
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(d)||!m) return null;
+    const t=new Date(d+"T"+m[1].padStart(2,"0")+":"+m[2]+":00");
+    return (t-Date.now())/60000;
+  }
+  function estImmediat(r){
+    if(r.statut==="terminée"||r.statut==="annulée") return false;
+    if(/maintenant/i.test(String(r.heure||""))&&groupOf(r)===0) return true;
+    const mn=minutesAvant(r); return mn!==null&&mn<=60&&mn>=-30;
+  }
+  setInterval(()=>{try{if(typeof reservationsCache!=='undefined'&&reservationsCache.length)renderReservations()}catch(e){}},60000);
   function renderReservations() {
     const aVenir = reservationsCache.filter(r => groupOf(r) === 0 && r.statut !== "annulée");
     document.getElementById("resa-cal-all").innerHTML = aVenir.length ? calLink(aVenir, "📅 Tout ajouter au calendrier", "cal-btn cal-all") : "";
@@ -1357,10 +1383,14 @@ function anonymise(title,location){
           (groupOf(r) === 0 ? calLink([r], "📅", "cal-btn") : "") +
           (r.statut === "terminée" ? `<button class="edit" data-facture="${esc(r.id)}">🧾 ${r.factureNumero ? "Facture n° " + esc(r.factureNumero) : "Facture"}</button>` : "") +
           `<button class="edit" data-edit="${esc(r.id)}">✏️ Modifier</button><button class="del" data-del="${esc(r.id)}" aria-label="Supprimer">🗑️</button>`;
-        return `<div class="rc s-${cls}${nouv ? " nouv" : ""}" data-rid="${esc(r.id)}">
+        const imm = estImmediat(r);
+        const lg = String(r.langue||"").slice(0,2).toLowerCase();
+        const badges = (imm ? '<span class="imm">⚡ IMMÉDIAT</span>' : "") + provenance(r) + (lg && DRAP[lg] ? '<span class="src">'+DRAP[lg]+' '+lg.toUpperCase()+'</span>' : "");
+        return `<div class="rc s-${cls}${nouv ? " nouv" : ""}${imm ? " imm-card" : ""}" data-rid="${esc(r.id)}">
           <div class="t">${esc(r.heure || "—")}${r.ref ? `<small>${esc(r.ref)}</small>` : ""}</div>
           <div class="m">
             <div class="l1"><span class="nm">${nouv ? '<span class="nv">NOUVEAU</span>' : ""}${nom}</span><span class="pill">${lib}</span></div>
+            ${badges ? `<div>${badges}</div>` : ""}
             ${hotel ? `<div><span class="tag-hotel">🏨 ${esc(r.hotel || "Hôtel partenaire")}</span></div>` : ""}
             <div class="rt">${esc(r.dep || "?")} → <b>${esc(r.arr || "?")}</b></div>
             ${meta ? `<div class="mt">${meta}</div>` : ""}
