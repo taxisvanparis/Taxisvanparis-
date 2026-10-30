@@ -155,7 +155,7 @@ textarea{min-height:64px;resize:vertical}
   var COM = 10; // commission de secours, remplacée par celle du Google Sheets
   // Adresse (et commission de secours) des partenaires, proposée en priorité au départ et à l'arrivée
   var PARTENAIRES = {
-    richelieu38: {adresse:"38 Rue de Richelieu, 75001 Paris", c:0}
+    richelieu38: {adresse:"38 Rue de Richelieu, 75001 Paris", c:0, site:true} // site:true → ouvre le calculateur du site
   };
   /* ================================== */
 
@@ -238,6 +238,13 @@ textarea{min-height:64px;resize:vertical}
   var $=function(id){return document.getElementById(id);};
   var params=new URLSearchParams(location.search);
   var code=(params.get("h")||(location.hash||"").replace("#","")||"exemple").toLowerCase();
+  // Partenaire sans commission « site:true » : on ouvre le calculateur du site principal, dans la langue du client
+  if(PARTENAIRES[code]&&PARTENAIRES[code].site){
+    var PAGES={fr:"/",en:"/en.html",es:"/es.html",it:"/it.html",ar:"/ar.html"};
+    var lg=(params.get("lang")||(navigator.language||"fr")).slice(0,2).toLowerCase();
+    location.replace((PAGES[lg]||PAGES.en)+"?h="+encodeURIComponent(code)+"#reserver");
+    return;
+  }
   var hotel={nom:"…",adresse:""}, hotelPt=null;
   if(PARTENAIRES[code]){ hotel.adresse=PARTENAIRES[code].adresse||""; if(PARTENAIRES[code].c!=null) COM=PARTENAIRES[code].c; }
   var lang=(params.get("lang")||(navigator.language||"fr")).slice(0,2).toLowerCase(); if(!T[lang]) lang="en";

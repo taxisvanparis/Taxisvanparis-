@@ -23,7 +23,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   var saved=null; try{saved=localStorage.getItem('tvp_lang');}catch(e){}
   var nav=((navigator.languages&&navigator.languages[0])||navigator.language||'').slice(0,2).toLowerCase();
   var t=saved||nav;
-  if(t && t!=='fr' && P[t]) location.replace(P[t]+location.hash);
+  if(t && t!=='fr' && P[t]) location.replace(P[t]+location.search+location.hash);
 })();
 </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -3056,5 +3056,6 @@ window.initGooglePlaces = window.initGooglePlaces || function(){};
   if(!lire()) setTimeout(function(){ b.classList.add("on"); },600);
 })();
 </script>
+<script src="/partenaire.js" defer></script>
 </body>
 </html>
