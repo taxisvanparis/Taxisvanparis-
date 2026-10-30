@@ -64,7 +64,8 @@ h2{font-size:clamp(30px,4.4vw,52px)}
 /* Gains */
 .gain{display:grid;grid-template-columns:.9fr 1.1fr;gap:clamp(20px,4vw,48px);align-items:center}
 .big{background:radial-gradient(400px 260px at 50% 0%,rgba(201,162,75,.25),transparent 70%),var(--panel);border:1px solid var(--gold);border-radius:24px;padding:28px;text-align:center}
-.big .v{font:700 clamp(70px,10vw,120px)/1 var(--display);color:var(--gold-2)}
+.big .v{font-size:clamp(64px,9vw,100px);line-height:1}
+.big .u{font:700 clamp(24px,3vw,32px)/1.2 var(--display)!important;color:var(--gold-2);margin-top:14px!important}
 .big .u{font-size:18px;margin-top:6px}
 .big .s{color:var(--muted);font-size:14px;margin-top:10px}
 .sim{margin-top:22px;background:var(--panel2);border-radius:16px;padding:16px;text-align:left}
@@ -164,7 +165,7 @@ input{width:100%;background:var(--bg);color:var(--fg);border:1px solid var(--lin
           <p class="lead" data-t="s1p"></p>
           <div class="pills"><span data-t="p1"></span><span data-t="p2"></span><span data-t="p3"></span><span data-t="p4"></span></div>
         </div>
-        <div class="ph"><img src="../img/van.jpg" alt=""><div class="tag"><b>10 €</b><span data-t="tag"></span></div></div>
+        <div class="ph"><img src="../img/van.jpg" alt=""><div class="tag"><b data-t="tagb"></b><span data-t="tag"></span></div></div>
       </div></section>
 
       <!-- 2 -->
@@ -181,12 +182,7 @@ input{width:100%;background:var(--bg);color:var(--fg);border:1px solid var(--lin
       <!-- 3 -->
       <section class="slide"><div class="gain">
         <div class="big">
-          <div class="v">10 €</div><div class="u" data-t="g1"></div><div class="s" data-t="g2"></div>
-          <div class="sim">
-            <label><span data-t="simL"></span><b id="nb">30</b></label>
-            <input type="range" id="rng" min="5" max="150" step="5" value="30" aria-label="Courses par mois">
-            <div class="r"><span data-t="simR"></span> <b id="tot">300 €</b></div>
-          </div>
+          <div class="v">💶</div><div class="u" data-t="g1"></div><div class="s" data-t="g2"></div>
         </div>
         <div>
           <p class="eyebrow" data-t="s3e"></p>
@@ -211,11 +207,11 @@ input{width:100%;background:var(--bg);color:var(--fg);border:1px solid var(--lin
         <p class="eyebrow" data-t="s5e"></p>
         <h2><span data-t="s5h"></span><span class="demo" data-t="ex"></span></h2>
         <div class="esp">
-          <div class="hd"><b>Hôtel Exemple ★★★★</b><div class="m"><span id="mc">40 €</span><small data-t="mcl"></small></div></div>
-          <div class="row"><span class="d" data-t="r1d"></span><span class="tr">Hôtel → CDG T2E<small>M. Martin · 3 pers.</small></span><span class="st ok" data-t="done"></span><span class="c">+10 €</span></div>
-          <div class="row"><span class="d" data-t="r2d"></span><span class="tr">Orly → Hôtel<small>Mme Dupont · 2 pers.</small></span><span class="st ok" data-t="done"></span><span class="c">+10 €</span></div>
-          <div class="row"><span class="d" data-t="r3d"></span><span class="tr">Hôtel → Disneyland Paris<small>Famille Bernard · 6 pers. · 👶</small></span><span class="st ok" data-t="done"></span><span class="c">+10 €</span></div>
-          <div class="row"><span class="d" data-t="r4d"></span><span class="tr">Hôtel → Gare de Lyon<small>M. Petit · 1 pers.</small></span><span class="st ok" data-t="done"></span><span class="c">+10 €</span></div>
+          <div class="hd"><b>Hôtel Exemple ★★★★</b><div class="m"><span data-t="mcv"></span><small data-t="mcl"></small></div></div>
+          <div class="row"><span class="d" data-t="r1d"></span><span class="tr">Hôtel → CDG T2E<small>M. Martin · 3 pers.</small></span><span class="st ok" data-t="done"></span><span class="c">✓</span></div>
+          <div class="row"><span class="d" data-t="r2d"></span><span class="tr">Orly → Hôtel<small>Mme Dupont · 2 pers.</small></span><span class="st ok" data-t="done"></span><span class="c">✓</span></div>
+          <div class="row"><span class="d" data-t="r3d"></span><span class="tr">Hôtel → Disneyland Paris<small>Famille Bernard · 6 pers. · 👶</small></span><span class="st ok" data-t="done"></span><span class="c">✓</span></div>
+          <div class="row"><span class="d" data-t="r4d"></span><span class="tr">Hôtel → Gare de Lyon<small>M. Petit · 1 pers.</small></span><span class="st ok" data-t="done"></span><span class="c">✓</span></div>
           <div class="row"><span class="d" data-t="r5d"></span><span class="tr">Hôtel → CDG T1<small>Mme Moreau · 4 pers.</small></span><span class="st wait" data-t="wait"></span><span class="c" style="color:var(--muted)">—</span></div>
         </div>
       </section>
@@ -265,20 +261,20 @@ input{width:100%;background:var(--bg);color:var(--fg);border:1px solid var(--lin
 <script>
 const T={
 fr:{dots:["Accueil","Fonctionnement","Vos gains","QR code","Votre espace","Véhicules","Démarrer"],
-s1e:"Partenariat hôtels",s1h:"Un taxi fiable pour vos clients. <span class='gold'>10 € pour vous</span> à chaque course.",
+s1e:"Partenariat hôtels",s1h:"Un taxi fiable pour vos clients. <span class='gold'>Une commission pour vous</span> à chaque course.",
 s1p:"Vos clients réservent leur taxi en un scan, dans leur langue. Vous n'avez rien à gérer, et l'hôtel touche une commission sur chaque course effectuée.",
-p1:"✈️ CDG · Orly · Beauvais",p2:"🚆 Gares",p3:"🏰 Disneyland",p4:"🕐 24h/24 · 7j/7",tag:"pour l'hôtel, par course",
+p1:"✈️ CDG · Orly · Beauvais",p2:"🚆 Gares",p3:"🏰 Disneyland",p4:"🕐 24h/24 · 7j/7",tagb:"Commission",tag:"pour l'hôtel, à chaque course",
 s2e:"Comment ça marche",s2h:"Trois étapes, zéro gestion pour la réception",
 a1:"Le client scanne",a1p:"Un QR code posé à la réception ou en chambre. Pas d'appli à installer.",
 a2:"Il réserve en 1 minute",a2p:"Il voit le prix fixe tout de suite, en français, anglais, espagnol, italien ou arabe.",
 a3:"Le chauffeur est là",a3p:"À l'heure, devant l'hôtel. Vous voyez chaque réservation dans votre espace.",
 s3e:"Vos gains",s3h:"Une commission simple, versée chaque mois",
-g1:"par course effectuée",g2:"Aucun frais pour l'hôtel · sans engagement",simL:"Courses par mois",simR:"Commission :",
-l1:"10 € versés à l'hôtel pour chaque course effectuée, chaque mois",l2:"Aucun abonnement, aucun frais, sans engagement",l3:"Prix fixe annoncé au client avant de réserver, sans surprise",l4:"Moins d'appels à passer pour la réception : le client réserve seul",
+g1:"Une commission pour vous à chaque course",g2:"Aucun frais pour l'hôtel · sans engagement",
+l1:"Une commission pour l'hôtel à chaque course effectuée, versée chaque mois",l2:"Aucun abonnement, aucun frais, sans engagement",l3:"Prix fixe annoncé au client avant de réserver, sans surprise",l4:"Moins d'appels à passer pour la réception : le client réserve seul",
 s4e:"Votre QR code",s4h:"Prêt à poser à la réception",s4p:"Chaque hôtel a son propre QR code. Les réservations faites avec lui sont comptées pour vous automatiquement.",
 q1:"Chevalet pour la réception et cartes pour les chambres, fournis",q2:"Essayez maintenant : scannez avec votre téléphone",q3:"Le client paie par carte (Visa, Mastercard, Amex, Apple Pay) ou en espèces",
 qt:"Besoin d'un taxi ?",qs:"Scannez pour réserver · Prix fixe",
-s5e:"Votre espace hôtel",s5h:"Toutes vos réservations, en direct",ex:"Exemple",mcl:"commission du mois",
+s5e:"Votre espace hôtel",s5h:"Toutes vos réservations, en direct",ex:"Exemple",mcv:"4 courses",mcl:"commissionnées ce mois",
 r1d:"Lun. 08:30",r2d:"Mar. 14:10",r3d:"Mer. 09:00",r4d:"Jeu. 17:45",r5d:"Sam. 06:15",done:"Effectuée",wait:"À venir",
 s6e:"Nos véhicules",s6h:"Confort, ponctualité et chauffeurs professionnels",
 v1:"Jusqu'à 8 passagers, idéal pour les familles et les groupes avec bagages",v2t:"Berline",v2:"Pour 1 à 4 passagers, élégante et discrète",
@@ -286,20 +282,20 @@ f1:"👶 Siège bébé et rehausseur gratuits",f2:"✈️ Suivi des vols",f3:"�
 s7e:"On démarre ?",s7h:"Votre QR code prêt en 24 h",s7p:"Laissez-nous vos coordonnées : nous préparons votre QR code et votre espace hôtel, puis nous vous les apportons.",
 fh:"Nom de l'hôtel",fc:"Personne à contacter",fp:"Téléphone",fe:"E-mail",fs:"Devenir partenaire",fn:"Vos coordonnées nous sont envoyées par WhatsApp. Rien n'est enregistré sur cet iPad."},
 en:{dots:["Welcome","How it works","Earnings","QR code","Your space","Vehicles","Get started"],
-s1e:"Hotel partnership",s1h:"A reliable taxi for your guests. <span class='gold'>€10 for you</span> on every ride.",
+s1e:"Hotel partnership",s1h:"A reliable taxi for your guests. <span class='gold'>A commission for you</span> on every ride.",
 s1p:"Your guests book their taxi with one scan, in their own language. Nothing to manage, and the hotel earns a commission on every completed ride.",
-p1:"✈️ CDG · Orly · Beauvais",p2:"🚆 Train stations",p3:"🏰 Disneyland",p4:"🕐 24/7",tag:"for the hotel, per ride",
+p1:"✈️ CDG · Orly · Beauvais",p2:"🚆 Train stations",p3:"🏰 Disneyland",p4:"🕐 24/7",tagb:"Commission",tag:"for the hotel, on every ride",
 s2e:"How it works",s2h:"Three steps, zero work for the front desk",
 a1:"The guest scans",a1p:"A QR code at the front desk or in the room. No app to install.",
 a2:"Books in 1 minute",a2p:"A fixed price shown right away, in French, English, Spanish, Italian or Arabic.",
 a3:"The driver is there",a3p:"On time, at the hotel door. You see every booking in your space.",
 s3e:"Your earnings",s3h:"A simple commission, paid every month",
-g1:"per completed ride",g2:"No cost for the hotel · no commitment",simL:"Rides per month",simR:"Commission:",
-l1:"€10 paid to the hotel for every completed ride, every month",l2:"No subscription, no fees, no commitment",l3:"Fixed price shown to the guest before booking, no surprises",l4:"Fewer calls for the front desk: guests book by themselves",
+g1:"A commission for you on every ride",g2:"No cost for the hotel · no commitment",
+l1:"A commission for the hotel on every completed ride, paid monthly",l2:"No subscription, no fees, no commitment",l3:"Fixed price shown to the guest before booking, no surprises",l4:"Fewer calls for the front desk: guests book by themselves",
 s4e:"Your QR code",s4h:"Ready for your front desk",s4p:"Each hotel has its own QR code. Bookings made with it are counted for you automatically.",
 q1:"Front-desk stand and room cards provided",q2:"Try it now: scan with your phone",q3:"Guests pay by card (Visa, Mastercard, Amex, Apple Pay) or cash",
 qt:"Need a taxi?",qs:"Scan to book · Fixed price",
-s5e:"Your hotel space",s5h:"All your bookings, live",ex:"Example",mcl:"commission this month",
+s5e:"Your hotel space",s5h:"All your bookings, live",ex:"Example",mcv:"4 rides",mcl:"with commission this month",
 r1d:"Mon 08:30",r2d:"Tue 14:10",r3d:"Wed 09:00",r4d:"Thu 17:45",r5d:"Sat 06:15",done:"Completed",wait:"Upcoming",
 s6e:"Our vehicles",s6h:"Comfort, punctuality and professional drivers",
 v1:"Up to 8 passengers, ideal for families and groups with luggage",v2t:"Sedan",v2:"For 1 to 4 passengers, elegant and discreet",
@@ -316,7 +312,7 @@ function render(){
   document.querySelectorAll(".lang button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.l===L));
   $("dots").innerHTML=T[L].dots.map((d,k)=>`<button type="button" data-k="${k}"><span>${k+1}</span><span class="lbl"> · ${d}</span></button>`).join("");
   $("dots").querySelectorAll("button").forEach(b=>b.onclick=()=>go(+b.dataset.k));
-  sim();go(i,true);
+  go(i,true);
 }
 function go(k,quiet){
   i=Math.max(0,Math.min(N-1,k));
@@ -325,8 +321,6 @@ function go(k,quiet){
   $("dots").querySelectorAll("button").forEach((b,n)=>b.setAttribute("aria-current",n===i));
   document.querySelectorAll(".slide").forEach((s,n)=>{s.setAttribute("aria-hidden",n!==i);s.inert=n!==i;if(n===i&&!quiet)s.scrollTop=0});
 }
-function sim(){const n=+$("rng").value;$("nb").textContent=n;$("tot").textContent=(L==="fr"?(n*10)+" € / mois":"€"+(n*10)+" / month")}
-$("rng").oninput=sim;
 $("prev").onclick=()=>go(i-1);$("next").onclick=()=>go(i+1);
 document.querySelectorAll(".lang button").forEach(b=>b.onclick=()=>{L=b.dataset.l;try{localStorage.setItem("dh-lang",L)}catch(e){}render()});
 document.addEventListener("keydown",e=>{if(e.target.tagName==="INPUT")return;if(e.key==="ArrowRight")go(i+1);if(e.key==="ArrowLeft")go(i-1)});
