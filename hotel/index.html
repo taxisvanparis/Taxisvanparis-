@@ -15,8 +15,8 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);font-
 .wrap{max-width:560px;margin:0 auto;padding-block:max(20px,env(safe-area-inset-top)) 60px}
 .top{display:flex;justify-content:space-between;align-items:center;gap:12px}
 .brand{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin:0}
-.lang{display:flex;gap:4px}
-.lang button{background:none;border:1px solid var(--line);color:var(--muted);border-radius:999px;padding:5px 10px;font:600 12px var(--body);cursor:pointer}
+.lang{display:flex;gap:3px;flex:none}
+.lang button{background:none;border:1px solid var(--line);color:var(--muted);border-radius:999px;padding:5px 8px;font:600 12px var(--body);cursor:pointer}
 .lang button[aria-pressed="true"]{border-color:var(--gold);color:var(--gold-2)}
 h1{font:600 clamp(26px,7vw,34px)/1.15 var(--display);margin:14px 0 6px;text-wrap:balance}
 .lead{color:var(--muted);margin:0 0 14px;line-height:1.5}
@@ -72,6 +72,7 @@ textarea{min-height:64px;resize:vertical}
 .rows div{display:flex;justify-content:space-between;gap:12px;border-bottom:1px dashed var(--line);padding:4px 0}
 .rows span:first-child{color:var(--muted)}
 .rows span:last-child{text-align:right;overflow-wrap:anywhere;min-width:0}
+[dir="rtl"] #phone,[dir="rtl"] #email{text-align:right}
 </style>
 <style>/* iPhone : pas de zoom auto sur les champs */@media (max-width:900px){input,select,textarea{font-size:16px!important}}</style>
 <style>/* iPhone : pas de zoom au double appui sur les boutons */button,a,select,label,input,.vc,.seg button,.stp button,.pax-steps button,[onclick]{touch-action:manipulation}</style></head>
@@ -79,7 +80,7 @@ textarea{min-height:64px;resize:vertical}
 <div class="wrap">
   <div class="top">
     <p class="brand">Taxis Van Paris By ABTS</p>
-    <div class="lang"><button type="button" data-l="fr" aria-pressed="true">FR</button><button type="button" data-l="en" aria-pressed="false">EN</button></div>
+    <div class="lang"><button type="button" data-l="fr" aria-pressed="true">FR</button><button type="button" data-l="en" aria-pressed="false">EN</button><button type="button" data-l="es" aria-pressed="false">ES</button><button type="button" data-l="it" aria-pressed="false">IT</button><button type="button" data-l="ar" aria-pressed="false" lang="ar">ع</button></div>
   </div>
   <h1 data-t="h1">Réservez votre taxi</h1>
   <p class="lead" data-t="lead">Prix calculé à l'avance. Votre chauffeur vient vous chercher à l'hôtel.</p>
@@ -95,8 +96,8 @@ textarea{min-height:64px;resize:vertical}
       <div class="field"><label class="t" for="room" data-t="room">Chambre (facultatif)</label><input id="room"></div>
     </div>
     <div class="g2">
-      <div class="field"><label class="t" for="phone" data-t="phone">Téléphone / WhatsApp</label><input id="phone" inputmode="tel" autocomplete="tel" placeholder="+33 6 12 34 56 78" required></div>
-      <div class="field"><label class="t" for="email" data-t="email">Email (facultatif)</label><input id="email" type="email" autocomplete="email"></div>
+      <div class="field"><label class="t" for="phone" data-t="phone">Téléphone / WhatsApp</label><input id="phone" dir="ltr" inputmode="tel" autocomplete="tel" placeholder="+33 6 12 34 56 78" required></div>
+      <div class="field"><label class="t" for="email" data-t="email">Email (facultatif)</label><input id="email" dir="ltr" type="email" autocomplete="email"></div>
     </div>
 
     <fieldset>
@@ -177,7 +178,43 @@ textarea{min-height:64px;resize:vertical}
       netErr:"The booking could not be sent. Tap the green button to book directly on WhatsApp.",
       unknownHotel:"This QR code is not active yet. Tap the green button to book directly on WhatsApp.",
       v:{berline:"Sedan (1–4)",van:"Van (up to 8)"},
-      r:{dep:"From",arr:"To",when:"Date",pax:"Passengers",veh:"Vehicle",price:"Price"}}
+      r:{dep:"From",arr:"To",when:"Date",pax:"Passengers",veh:"Vehicle",price:"Price"}},
+    es:{h1:"Reserve su taxi",lead:"Precio calculado de antemano. Su conductor le recoge en el hotel.",p1:"✓ Precio fijo",p2:"✓ Silla de bebé gratis",p3:"✓ Van hasta 8 plazas",p4:"✓ 24/7",
+      partner:"Reserva a través de",name:"Su nombre",room:"Habitación (opcional)",phone:"Teléfono / WhatsApp",email:"Email (opcional)",trip:"Trayecto",depL:"Salida",arrL:"Llegada",
+      depPh:"Dirección del hotel",arrPh:"¿Adónde va? Dirección, estación, aeropuerto…",swap:"⇅ Invertir",
+      date:"Fecha",time:"Hora de recogida",pax:"Pasajeros",bags:"Maletas",veh:"Vehículo",baby:"Silla infantil (gratis)",b0:"Ninguna",b1:"1 silla de bebé",b2:"1 elevador",b3:"2 o más (indique las edades)",
+      notes:"Observaciones (n.º de vuelo, tren…)",price:"Precio total",book:"Reservar",sending:"Enviando…",payinfo:"Pago al conductor. Recibirá una confirmación por WhatsApp o SMS.",
+      okTitle:"Reserva enviada",refLbl:"Su referencia",okNote:"El conductor le confirmará el viaje en breve. ¿Alguna pregunta? Escríbanos:",waBtn:"Escribir al conductor por WhatsApp",
+      pick:"Elija la dirección en la lista",quote:"Bajo presupuesto",need:"Indique: ",f_name:"su nombre",f_phone:"su teléfono",f_dt:"la fecha y la hora",f_dep:"la dirección de salida",f_arr:"la dirección de llegada",
+      noRes:"Sin resultados",dist:"Distancia estimada",
+      netErr:"No se pudo enviar la reserva. Pulse el botón verde para reservar directamente por WhatsApp.",
+      unknownHotel:"Este código QR aún no está activado. Pulse el botón verde para reservar directamente por WhatsApp.",
+      v:{berline:"Sedán (1–4)",van:"Van (hasta 8)"},
+      r:{dep:"Salida",arr:"Llegada",when:"Fecha",pax:"Pasajeros",veh:"Vehículo",price:"Precio"}},
+    it:{h1:"Prenota il tuo taxi",lead:"Prezzo calcolato in anticipo. L'autista viene a prenderti in hotel.",p1:"✓ Prezzo fisso",p2:"✓ Seggiolino gratis",p3:"✓ Van fino a 8 posti",p4:"✓ 24/7",
+      partner:"Prenotazione tramite",name:"Il tuo nome",room:"Camera (facoltativo)",phone:"Telefono / WhatsApp",email:"Email (facoltativa)",trip:"Tragitto",depL:"Partenza",arrL:"Arrivo",
+      depPh:"Indirizzo dell'hotel",arrPh:"Dove vai? Indirizzo, stazione, aeroporto…",swap:"⇅ Inverti",
+      date:"Data",time:"Ora di partenza",pax:"Passeggeri",bags:"Valigie",veh:"Veicolo",baby:"Seggiolino (gratis)",b0:"Nessuno",b1:"1 seggiolino neonato",b2:"1 alzatina",b3:"2 o più (indica l'età)",
+      notes:"Note (n° di volo, treno…)",price:"Prezzo totale",book:"Prenota",sending:"Invio…",payinfo:"Pagamento all'autista. Riceverai una conferma via WhatsApp o SMS.",
+      okTitle:"Prenotazione inviata",refLbl:"Il tuo riferimento",okNote:"L'autista ti confermerà la corsa a breve. Domande? Scrivici:",waBtn:"Scrivi all'autista su WhatsApp",
+      pick:"Scegli l'indirizzo dall'elenco",quote:"Su preventivo",need:"Indica: ",f_name:"il tuo nome",f_phone:"il tuo telefono",f_dt:"data e ora",f_dep:"l'indirizzo di partenza",f_arr:"l'indirizzo di arrivo",
+      noRes:"Nessun risultato",dist:"Distanza stimata",
+      netErr:"Invio non riuscito. Tocca il pulsante verde per prenotare direttamente su WhatsApp.",
+      unknownHotel:"Questo codice QR non è ancora attivo. Tocca il pulsante verde per prenotare direttamente su WhatsApp.",
+      v:{berline:"Berlina (1–4)",van:"Van (fino a 8)"},
+      r:{dep:"Partenza",arr:"Arrivo",when:"Data",pax:"Passeggeri",veh:"Veicolo",price:"Prezzo"}},
+    ar:{h1:"احجز سيارة الأجرة",lead:"السعر محدد مسبقًا. يأتي السائق لاصطحابك من الفندق.",p1:"✓ سعر ثابت",p2:"✓ مقعد أطفال مجاني",p3:"✓ فان حتى 8 ركاب",p4:"✓ على مدار الساعة",
+      partner:"الحجز عبر",name:"اسمك",room:"رقم الغرفة (اختياري)",phone:"الهاتف / واتساب",email:"البريد الإلكتروني (اختياري)",trip:"الرحلة",depL:"الانطلاق",arrL:"الوصول",
+      depPh:"عنوان الفندق",arrPh:"إلى أين؟ عنوان، محطة، مطار…",swap:"⇅ عكس الاتجاه",
+      date:"التاريخ",time:"وقت الانطلاق",pax:"عدد الركاب",bags:"الحقائب",veh:"السيارة",baby:"مقعد طفل (مجاني)",b0:"لا شيء",b1:"مقعد رضيع واحد",b2:"مقعد رافع واحد",b3:"اثنان أو أكثر (اذكر الأعمار)",
+      notes:"ملاحظات (رقم الرحلة، القطار…)",price:"السعر الإجمالي",book:"احجز الآن",sending:"جارٍ الإرسال…",payinfo:"الدفع للسائق. ستصلك رسالة تأكيد عبر واتساب أو رسالة نصية.",
+      okTitle:"تم إرسال الحجز",refLbl:"رقم الحجز",okNote:"سيؤكد لك السائق الرحلة قريبًا. لأي سؤال راسلنا:",waBtn:"راسل السائق عبر واتساب",
+      pick:"اختر العنوان من القائمة",quote:"حسب الطلب",need:"يرجى إدخال: ",f_name:"اسمك",f_phone:"رقم هاتفك",f_dt:"التاريخ والوقت",f_dep:"عنوان الانطلاق",f_arr:"عنوان الوصول",
+      noRes:"لا توجد نتائج",dist:"المسافة التقديرية",
+      netErr:"تعذّر إرسال الحجز. اضغط على الزر الأخضر للحجز مباشرة عبر واتساب.",
+      unknownHotel:"رمز QR هذا غير مفعّل بعد. اضغط على الزر الأخضر للحجز مباشرة عبر واتساب.",
+      v:{berline:"سيدان (1–4)",van:"فان (حتى 8)"},
+      r:{dep:"الانطلاق",arr:"الوصول",when:"التاريخ",pax:"الركاب",veh:"السيارة",price:"السعر"}}
   };
 
   // Raccourcis de destination (mêmes points que le site)
@@ -197,7 +234,7 @@ textarea{min-height:64px;resize:vertical}
   var params=new URLSearchParams(location.search);
   var code=(params.get("h")||(location.hash||"").replace("#","")||"exemple").toLowerCase();
   var hotel={nom:"…",adresse:""};
-  var lang=(params.get("lang")||(navigator.language||"fr")).slice(0,2)==="fr"?"fr":"en";
+  var lang=(params.get("lang")||(navigator.language||"fr")).slice(0,2).toLowerCase(); if(!T[lang]) lang="en";
   var P={dep:null,arr:null}; // {lat,lon,address,dept}
   var maps=null, timers={};
 
@@ -213,13 +250,13 @@ textarea{min-height:64px;resize:vertical}
   var d=new Date(); d.setDate(d.getDate()+1); $("date").value=d.toISOString().slice(0,10); $("time").value="08:00";
 
   function applyLang(){
-    var t=T[lang]; document.documentElement.lang=lang;
+    var t=T[lang]; document.documentElement.lang=lang; document.documentElement.dir=lang==="ar"?"rtl":"ltr";
     document.querySelectorAll("[data-t]").forEach(function(el){ var k=el.getAttribute("data-t"); if(t[k]) el.textContent=t[k]; });
     document.querySelectorAll("[data-ph]").forEach(function(el){ el.placeholder=t[el.getAttribute("data-ph")]; });
     document.querySelectorAll("#veh label").forEach(function(l){ l.textContent=t.v[l.dataset.k]; });
     document.querySelectorAll(".lang button").forEach(function(b){ b.setAttribute("aria-pressed", b.dataset.l===lang); });
     $("chips").innerHTML="";
-    LIEUX.forEach(function(L){ var b=document.createElement("button"); b.type="button"; b.className="chip"; b.textContent=L[lang];
+    LIEUX.forEach(function(L){ var b=document.createElement("button"); b.type="button"; b.className="chip"; b.textContent=L[lang]||L.en;
       b.onclick=function(){ setPoint("arr",{lat:L.lat,lon:L.lon,address:L.name,dept:L.dept,zone:L['fr'].replace(/^\S+\s/,"").replace(/^(CDG|Orly|Beauvais)$/,"Aéroport $1")},L.name); }; $("chips").appendChild(b); });
     update();
   }
@@ -404,7 +441,7 @@ textarea{min-height:64px;resize:vertical}
       data.ref=ref||"";
       $("ref").textContent=ref||"—";
       var r=T[lang].r, dt=new Date(data.date+"T"+data.time);
-      var when=dt.toLocaleDateString(lang==="fr"?"fr-FR":"en-GB",{weekday:"long",day:"numeric",month:"long"})+" · "+data.time;
+      var when=dt.toLocaleDateString({fr:"fr-FR",en:"en-GB",es:"es-ES",it:"it-IT",ar:"ar-u-nu-latn"}[lang]||"en-GB",{weekday:"long",day:"numeric",month:"long"})+" · "+data.time;
       $("recap").innerHTML="";
       [[r.dep,depLabel],[r.arr,destLabel],[r.when,when],[r.pax,data.pax],[r.veh,T[lang].v[s.v]],[r.price,s.r?fmt(s.r.prix):T[lang].quote]]
         .forEach(function(x){ var row=document.createElement("div"); var a=document.createElement("span"); a.textContent=x[0]; var b=document.createElement("span"); b.textContent=x[1]; row.appendChild(a); row.appendChild(b); $("recap").appendChild(row); });
