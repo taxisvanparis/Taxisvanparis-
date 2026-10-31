@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0B0B0D">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Partenaires">
+<title>Espace partenaires | Taxis Van Paris</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@700;800;900&display=swap">
+<style>
+:root{--bg:#0B0B0D;--panel:#151518;--panel2:#1B1A1D;--line:#2B2823;--fg:#F3EFE6;--muted:#A39C8E;--gold:#C9A24B;--gold-2:#E4C57A;--ink:#141008;--ok:#7FC79A;--err:#F08A7A;
+  --display:"Playfair Display",Georgia,serif;--body:"DM Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color-scheme:dark}
+*{box-sizing:border-box}[hidden]{display:none!important}
+html,body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px}
+body{padding:max(14px,env(safe-area-inset-top)) 16px max(24px,env(safe-area-inset-bottom))}
+.wrap{max-width:640px;margin:0 auto}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--gold-2);outline-offset:2px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}
+.brand{font:900 22px/1 var(--display);letter-spacing:-.01em}.brand span{color:var(--gold)}
+.brand small{display:block;font:600 11px var(--body);letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-top:5px}
+.ghost{background:none;border:1px solid var(--line);color:var(--muted);border-radius:999px;padding:7px 12px;font-size:13px;cursor:pointer}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px}
+h2{font:700 20px/1.2 var(--display);margin:0 0 4px}
+.muted{color:var(--muted)}.small{font-size:13px}
+label{display:grid;gap:6px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+input,select,textarea{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px;font-size:16px;text-transform:none;letter-spacing:0}
+textarea{min-height:60px;resize:vertical}
+.g{display:grid;gap:12px}.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:460px){.g2{grid-template-columns:1fr}}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:0;border-radius:12px;padding:14px;font-weight:700;font-size:15.5px;background:var(--gold);color:var(--ink);cursor:pointer;text-decoration:none}
+.btn.sec{background:var(--panel2);color:var(--fg);border:1px solid var(--line)}
+.btn.wa{background:#25D366;color:#0B2414}
+.btn[disabled]{opacity:.55}
+.err{color:var(--err);font-size:14px;margin:0}.ok{color:var(--ok)}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.seg button{border:1px solid var(--line);background:var(--bg);border-radius:12px;padding:12px;text-align:left;cursor:pointer}
+.seg button b{display:block;font-size:14.5px}.seg button small{display:block;color:var(--muted);font-size:12px;margin-top:3px}
+.seg button[aria-pressed="true"]{border-color:var(--gold);background:rgba(201,162,75,.12)}
+.list{display:grid;gap:10px}
+.p{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px;cursor:pointer;text-align:left;width:100%}
+.p .ic{width:42px;height:42px;border-radius:10px;display:grid;place-items:center;background:rgba(201,162,75,.15);font-size:20px;flex:none}
+.p .t{flex:1;min-width:0}.p b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.p small{display:block;color:var(--muted);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tag{font-size:11.5px;font-weight:700;border-radius:999px;padding:4px 9px;border:1px solid var(--line);white-space:nowrap}
+.tag.site{color:#9cc0ff;border-color:#3b5d99}.tag.com{color:var(--gold-2);border-color:#6b5726}.tag.off{color:var(--muted)}
+.qr{background:#fff;border-radius:14px;padding:12px;width:190px;margin:0 auto}
+.qr img{display:block;width:100%;height:auto;image-rendering:pixelated}
+.link{word-break:break-all;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px;font-size:13.5px}
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.kpi{display:flex;gap:10px}.kpi div{flex:1;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}
+.kpi b{display:block;font:700 22px var(--display);color:var(--gold-2)}.kpi small{color:var(--muted);font-size:12px}
+.sheet{background:rgba(201,162,75,.08);border:1px dashed var(--gold);border-radius:12px;padding:12px;font-size:14px}
+.sheet table{width:100%;border-collapse:collapse;margin-top:8px;font-size:13px}
+.sheet td{border:1px solid var(--line);padding:6px;word-break:break-all}
+.ac{position:relative}.ac-list{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:20;background:#1B1A1D;border:1px solid var(--gold);border-radius:12px;overflow:hidden}
+.ac-list button{display:block;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:10px 12px;cursor:pointer;font-size:14px}
+.ac-list button:last-child{border-bottom:0}
+.toast{position:fixed;left:50%;bottom:max(20px,env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--gold);color:var(--ink);font-weight:700;padding:10px 16px;border-radius:999px;z-index:50}
+.back{background:none;border:0;color:var(--gold-2);padding:0;margin-bottom:12px;cursor:pointer;font-size:15px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="brand">Taxis <span>Van</span> Paris<small>Espace partenaires</small></div>
+    <button class="ghost" id="out" hidden>Déconnexion</button>
+  </div>
+
+  <!-- Connexion -->
+  <section id="vLogin" class="card g" hidden>
+    <h2>Connexion</h2>
+    <p class="muted small" style="margin:0">Même e-mail et mot de passe que ton tableau de bord.</p>
+    <label>E-mail<input id="lEmail" type="email" autocomplete="email" inputmode="email"></label>
+    <label>Mot de passe<input id="lPass" type="password" autocomplete="current-password"></label>
+    <p class="err" id="lErr"></p>
+    <button class="btn" id="lGo">Se connecter</button>
+  </section>
+
+  <!-- Liste -->
+  <section id="vList" hidden>
+    <button class="btn" id="add" style="margin-bottom:14px">＋ Nouveau partenaire</button>
+    <div class="list" id="plist"></div>
+    <p class="muted small" id="pEmpty" hidden>Aucun partenaire pour l'instant.</p>
+    <p class="err" id="pErr"></p>
+  </section>
+
+  <!-- Formulaire -->
+  <section id="vForm" hidden>
+    <button class="back" data-back>← Partenaires</button>
+    <div class="card g">
+      <h2 id="fTitle">Nouveau partenaire</h2>
+      <label>Nom affiché<input id="fNom" placeholder="Ex. : Hôtel du Parc, Appartement 12 rue X"></label>
+      <div class="g">
+        <span class="muted small" style="text-transform:uppercase;letter-spacing:.08em;font-size:12px">Type</span>
+        <div class="seg" id="fType">
+          <button type="button" data-v="site" aria-pressed="true"><b>🏠 Airbnb / logement</b><small>Sans commission · calculateur du site</small></button>
+          <button type="button" data-v="hotel" aria-pressed="false"><b>🏨 Hôtel avec commission</b><small>Page hôtel · commission par course</small></button>
+        </div>
+      </div>
+      <div class="ac"><label>Adresse (point de départ proposé)<input id="fAdr" autocomplete="off" placeholder="Ex. : 38 Rue de Richelieu, 75001 Paris"></label><div class="ac-list" id="fAdrList" hidden></div></div>
+      <label id="fComL" hidden>Commission par course (€)<input id="fCom" type="number" inputmode="decimal" min="0" step="1" value="10"></label>
+      <div class="g2">
+        <label>Contact<input id="fCtc" placeholder="Nom de la personne"></label>
+        <label>Téléphone<input id="fTel" type="tel" inputmode="tel" placeholder="+33 6 …"></label>
+      </div>
+      <label>E-mail du partenaire<input id="fMail" type="email" inputmode="email"></label>
+      <label>Note<textarea id="fNote" placeholder="Ex. : 2 appartements, clients surtout américains"></textarea></label>
+      <label>Code (dans le lien et le QR)<input id="fCode" autocapitalize="none" autocomplete="off" spellcheck="false"></label>
+      <p class="muted small" style="margin:-4px 0 0" id="fCodeHelp">Rempli tout seul à partir du nom. Lettres minuscules et chiffres seulement.</p>
+      <label style="display:flex;align-items:center;gap:10px;text-transform:none;letter-spacing:0;font-size:15px;color:var(--fg)"><input id="fActif" type="checkbox" checked style="width:22px;height:22px"> Actif (le QR code fonctionne)</label>
+      <p class="err" id="fErr"></p>
+      <button class="btn" id="fSave">Enregistrer</button>
+      <button class="btn sec" id="fDel" hidden>Supprimer ce partenaire</button>
+    </div>
+  </section>
+
+  <!-- Fiche -->
+  <section id="vCard" hidden>
+    <button class="back" data-back>← Partenaires</button>
+    <div class="card g">
+      <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start">
+        <div><h2 id="cNom"></h2><div class="muted small" id="cAdr"></div></div>
+        <span class="tag" id="cTag"></span>
+      </div>
+      <div class="kpi"><div><b id="kN">–</b><small>réservations</small></div><div><b id="kM">–</b><small>ce mois-ci</small></div><div><b id="kC">–</b><small>commission due</small></div></div>
+      <div class="qr" id="cQr"></div>
+      <div class="link" id="cLink"></div>
+      <div class="acts">
+        <button class="btn sec" id="cCopy">📋 Copier le lien</button>
+        <button class="btn sec" id="cPrint">🖨️ Autocollants</button>
+        <a class="btn wa" id="cWa" target="_blank" rel="noopener">💬 Envoyer au partenaire</a>
+        <button class="btn sec" id="cGuest">✉️ Message voyageurs</button>
+      </div>
+      <div class="sheet" id="cSheet" hidden>
+        <b>À faire une fois pour un hôtel avec commission :</b> dans ton Google Sheets, onglet <b>Hôtels</b>, ajoute cette ligne. C'est elle qui calcule la commission et remplit l'espace de l'hôtel.
+        <table><tr><td>A · Code</td><td id="sA"></td></tr><tr><td>B · Nom</td><td id="sB"></td></tr><tr><td>C · Clé</td><td id="sC"></td></tr><tr><td>D · Commission</td><td id="sD"></td></tr><tr><td>E · E-mail</td><td id="sE"></td></tr></table>
+        <button class="btn sec" id="sCopy" style="margin-top:10px">📋 Copier la ligne</button>
+      </div>
+      <div class="muted small" id="cCtc"></div>
+      <button class="btn sec" id="cEdit">✏️ Modifier</button>
+    </div>
+  </section>
+</div>
+
+<!-- Planche d'autocollants (impression) -->
+<div id="print" hidden></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { getFirestore, collection, doc, getDoc, setDoc, deleteDoc, onSnapshot, getDocs, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+const app = initializeApp({apiKey:"AIzaSyBN8uBFONIt1tDTH9C-NIQKeulFdJ2m26Q",authDomain:"taxis-van-paris-by-abts.firebaseapp.com",projectId:"taxis-van-paris-by-abts",storageBucket:"taxis-van-paris-by-abts.firebasestorage.app",messagingSenderId:"53887245170",appId:"1:53887245170:web:942537659f6de1041f9beb"});
+const auth = getAuth(app), db = getFirestore(app);
+const MAPS_KEY = "AIzaSyCotWtH67rWpOKRwxTGXtxj-oVcc0vwOVg";
+const SITE = "https://taxisvanparis.fr";
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let partners = [], cur = null, unsub = null, type = "site";
+
+// Partenaires déjà en place avant l'appli : ajoutés une fois dans la base
+const DEJA = { richelieu38: { nom: "38 rue de Richelieu", adresse: "38 Rue de Richelieu, 75001 Paris", site: true, c: 0, actif: true } };
+
+function show(v){ ["vLogin","vList","vForm","vCard"].forEach(x => $(x).hidden = x !== v); window.scrollTo(0,0); }
+function toast(t){ const d=document.createElement("div"); d.className="toast"; d.textContent=t; document.body.appendChild(d); setTimeout(()=>d.remove(),1800); }
+const lien = p => p.site ? `${SITE}/?h=${p.code}` : `${SITE}/hotel/?h=${p.code}`;
+function qrImg(txt, lvl){ try{ const q=qrcode(0,lvl||"M"); q.addData(txt); q.make(); return q.createDataURL(10,0); }catch(e){ return ""; } }
+
+// ---------- Connexion ----------
+$("lGo").onclick = async () => {
+  $("lErr").textContent = "";
+  try { await signInWithEmailAndPassword(auth, $("lEmail").value.trim(), $("lPass").value); $("lPass").value=""; }
+  catch(e){ $("lErr").textContent = "E-mail ou mot de passe incorrect."; }
+};
+$("out").onclick = () => signOut(auth);
+document.querySelectorAll("[data-back]").forEach(b => b.onclick = () => show("vList"));
+
+onAuthStateChanged(auth, async u => {
+  if (unsub) { unsub(); unsub = null; }
+  $("out").hidden = !u;
+  if (!u) { show("vLogin"); return; }
+  show("vList");
+  unsub = onSnapshot(collection(db, "partenaires"), s => {
+    partners = s.docs.map(d => ({ code: d.id, ...d.data() })).sort((a,b) => String(a.nom).localeCompare(String(b.nom)));
+    drawList();
+    // première ouverture : on range les partenaires déjà en place
+    Object.entries(DEJA).forEach(([code, p]) => { if (!partners.some(x => x.code === code)) setDoc(doc(db,"partenaires",code), {...p, cree: serverTimestamp()}).catch(()=>{}); });
+  }, e => { $("pErr").textContent = "Accès refusé à la base « partenaires ». Il faut ajouter la règle Firestore (voir le message de Claude)."; });
+});
+
+// ---------- Liste ----------
+function drawList(){
+  $("pEmpty").hidden = partners.length > 0;
+  $("plist").innerHTML = partners.map(p => `<button class="p" data-code="${esc(p.code)}"><span class="ic">${p.site ? "🏠" : "🏨"}</span>
+    <span class="t"><b>${esc(p.nom)}</b><small>${esc(p.adresse || "Adresse non renseignée")}</small></span>
+    <span class="tag ${p.actif === false ? "off" : p.site ? "site" : "com"}">${p.actif === false ? "Inactif" : p.site ? "Sans commission" : (Number(p.c)||0) + " € / course"}</span></button>`).join("");
+  $("plist").querySelectorAll("[data-code]").forEach(b => b.onclick = () => openCard(b.dataset.code));
+}
+$("add").onclick = () => openForm(null);
+
+// ---------- Formulaire ----------
+function setType(v){ type = v; $("fType").querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", b.dataset.v === v)); $("fComL").hidden = v !== "hotel"; }
+$("fType").querySelectorAll("button").forEach(b => b.onclick = () => setType(b.dataset.v));
+const slug = s => String(s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/\b(hotel|appartement|appart|airbnb|rue|avenue|bd|boulevard|de|du|des|la|le|les|l|d)\b/g," ").replace(/[^a-z0-9]+/g,"").slice(0,14);
+let codeTouche = false;
+$("fNom").addEventListener("input", () => { if (!codeTouche && !cur) $("fCode").value = slug($("fNom").value + " " + ($("fAdr").value.match(/^\d+/)||[""])[0]); });
+$("fAdr").addEventListener("input", () => { if (!codeTouche && !cur) $("fCode").value = slug($("fNom").value + " " + ($("fAdr").value.match(/^\d+/)||[""])[0]); adrSearch(); });
+$("fCode").addEventListener("input", () => { codeTouche = true; $("fCode").value = $("fCode").value.toLowerCase().replace(/[^a-z0-9]/g,""); });
+
+function openForm(p){
+  cur = p; codeTouche = !!p;
+  $("fTitle").textContent = p ? "Modifier" : "Nouveau partenaire";
+  $("fNom").value = p ? p.nom || "" : ""; $("fAdr").value = p ? p.adresse || "" : "";
+  $("fCom").value = p && p.c != null ? p.c : 10; $("fCtc").value = p ? p.contact || "" : ""; $("fTel").value = p ? p.tel || "" : "";
+  $("fMail").value = p ? p.email || "" : ""; $("fNote").value = p ? p.note || "" : ""; $("fCode").value = p ? p.code : "";
+  $("fCode").disabled = !!p; $("fCodeHelp").textContent = p ? "Le code ne change plus : il est déjà dans le QR code." : "Rempli tout seul à partir du nom. Lettres minuscules et chiffres seulement.";
+  $("fActif").checked = !p || p.actif !== false; $("fDel").hidden = !p; $("fErr").textContent = "";
+  setType(p ? (p.site ? "site" : "hotel") : "site");
+  show("vForm");
+}
+$("fSave").onclick = async () => {
+  const code = $("fCode").value.trim(), nom = $("fNom").value.trim(), adr = $("fAdr").value.trim();
+  if (!nom) return $("fErr").textContent = "Indique le nom affiché.";
+  if (!/^[a-z0-9]{3,20}$/.test(code)) return $("fErr").textContent = "Le code doit faire 3 à 20 lettres minuscules ou chiffres.";
+  if (!cur && partners.some(x => x.code === code)) return $("fErr").textContent = "Ce code existe déjà, change-le un peu (ex. ajoute un chiffre).";
+  if (type === "site" && !adr) return $("fErr").textContent = "Indique l'adresse du logement.";
+  const data = { nom, adresse: adr, site: type === "site", c: type === "site" ? 0 : Math.max(0, Number($("fCom").value) || 0),
+    contact: $("fCtc").value.trim(), tel: $("fTel").value.trim(), email: $("fMail").value.trim(), note: $("fNote").value.trim(),
+    actif: $("fActif").checked, maj: serverTimestamp() };
+  if (!cur) { data.cree = serverTimestamp(); data.cle = Math.random().toString(36).slice(2, 12); }
+  $("fSave").disabled = true;
+  try { await setDoc(doc(db, "partenaires", code), data, { merge: true }); toast("Enregistré ✓"); openCard(code); }
+  catch(e){ $("fErr").textContent = "Enregistrement impossible : " + (e.code || e.message); }
+  finally { $("fSave").disabled = false; }
+};
+$("fDel").onclick = async () => {
+  if (!cur || !confirm("Supprimer « " + cur.nom + " » ? Son QR code ne marchera plus.")) return;
+  await deleteDoc(doc(db, "partenaires", cur.code)); toast("Supprimé"); show("vList");
+};
+
+// Adresse : suggestions Google (même clé que le site)
+let maps = null, adrT = null;
+window.initMapsPart = () => { maps = new google.maps.places.AutocompleteService(); };
+const sc = document.createElement("script"); sc.async = true;
+sc.src = "https://maps.googleapis.com/maps/api/js?key=" + MAPS_KEY + "&libraries=places&callback=initMapsPart&language=fr";
+document.head.appendChild(sc);
+function adrSearch(){
+  const q = $("fAdr").value.trim(), L = $("fAdrList");
+  if (!maps || q.length < 4) { L.hidden = true; return; }
+  clearTimeout(adrT);
+  adrT = setTimeout(() => maps.getPlacePredictions({ input: q, language: "fr", componentRestrictions: { country: "fr" } }, (pr, st) => {
+    if (st !== "OK" || !pr) { L.hidden = true; return; }
+    L.innerHTML = ""; pr.slice(0,5).forEach(p => { const b = document.createElement("button"); b.type = "button"; b.textContent = p.description.replace(/, France$/, "");
+      b.onmousedown = e => e.preventDefault(); b.onclick = () => { $("fAdr").value = b.textContent; L.hidden = true; $("fAdr").dispatchEvent(new Event("input")); L.hidden = true; }; L.appendChild(b); });
+    L.hidden = false;
+  }), 300);
+}
+$("fAdr").addEventListener("blur", () => setTimeout(() => $("fAdrList").hidden = true, 200));
+
+// ---------- Fiche partenaire ----------
+async function openCard(code){
+  const p = partners.find(x => x.code === code) || { code, ...(await getDoc(doc(db,"partenaires",code))).data() };
+  cur = p;
+  $("cNom").textContent = p.nom; $("cAdr").textContent = p.adresse || "";
+  $("cTag").className = "tag " + (p.actif === false ? "off" : p.site ? "site" : "com");
+  $("cTag").textContent = p.actif === false ? "Inactif" : p.site ? "Sans commission" : (Number(p.c)||0) + " € / course";
+  const url = lien(p);
+  $("cLink").textContent = url;
+  $("cQr").innerHTML = `<img alt="QR code" src="${qrImg(url)}">`;
+  const msg = `Bonjour${p.contact ? " " + p.contact : ""},\n\nVoici votre lien de réservation Taxis Van Paris pour vos clients :\n${url}\n\nIls réservent en 1 minute dans leur langue, avec un prix fixe affiché avant de réserver${p.adresse ? " et le départ déjà rempli avec votre adresse" : ""}. Vous pouvez le mettre dans votre livret d'accueil et vos messages automatiques.\n\nJe vous apporte aussi les autocollants avec le QR code.\n\nBadr — Taxis Van Paris`;
+  const tel = String(p.tel || "").replace(/[^\d+]/g, "").replace(/^0(\d{9})$/, "33$1").replace(/^\+/, "");
+  $("cWa").href = "https://wa.me/" + (tel || "") + "?text=" + encodeURIComponent(msg);
+  $("cSheet").hidden = !!p.site;
+  if (!p.site) { $("sA").textContent = p.code; $("sB").textContent = p.nom; $("sC").textContent = p.cle || p.code + "k"; $("sD").textContent = Number(p.c) || 0; $("sE").textContent = p.email || ""; }
+  $("cCtc").innerHTML = [p.contact && "👤 " + esc(p.contact), p.tel && "📞 " + esc(p.tel), p.email && "✉️ " + esc(p.email), p.note && "📝 " + esc(p.note)].filter(Boolean).join("<br>");
+  show("vCard");
+  stats(p);
+}
+$("cEdit").onclick = () => openForm(cur);
+$("cCopy").onclick = async () => { try { await navigator.clipboard.writeText(lien(cur)); toast("Lien copié ✓"); } catch(e){ prompt("Copie le lien :", lien(cur)); } };
+$("sCopy").onclick = async () => { const t = [cur.code, cur.nom, cur.cle || cur.code + "k", Number(cur.c)||0, cur.email || ""].join("\t"); try { await navigator.clipboard.writeText(t); toast("Ligne copiée ✓ — colle-la en colonne A"); } catch(e){ prompt("Copie :", t); } };
+$("cGuest").onclick = async () => {
+  const url = lien(cur);
+  const t = `🚕 Taxi / Airport transfer\nNeed a ride to/from the airport, a train station or Disneyland? Book our partner taxi in 1 minute, fixed price shown before booking${cur.adresse ? ", pick-up at the door" : ""}:\n👉 ${url}\nFree baby seat · Vans up to 8 passengers · Card or cash · 24/7\n\n🇫🇷 Besoin d'un taxi ? Réservez en 1 minute avec le lien ci-dessus, prix fixe affiché avant de réserver.`;
+  try { await navigator.clipboard.writeText(t); toast("Message copié ✓"); } catch(e){ prompt("Copie le message :", t); }
+};
+
+// Statistiques : réservations venues de ce partenaire
+async function stats(p){
+  ["kN","kM","kC"].forEach(k => $(k).textContent = "…");
+  try {
+    const qs = [query(collection(db,"reservations"), where("partenaire_code","==",p.code)), query(collection(db,"reservations"), where("hotel_code","==",p.code))];
+    const seen = new Map();
+    for (const q of qs) (await getDocs(q)).docs.forEach(d => seen.set(d.id, d.data()));
+    const all = [...seen.values()].filter(r => r.statut !== "annulée");
+    const m = new Date().toISOString().slice(0,7);
+    const mois = all.filter(r => String(r.date || "").slice(0,7) === m);
+    $("kN").textContent = all.length; $("kM").textContent = mois.length;
+    $("kC").textContent = p.site ? "0 €" : (mois.filter(r => r.statut === "terminée").length * (Number(p.c)||0)) + " €";
+  } catch(e){ ["kN","kM","kC"].forEach(k => $(k).textContent = "–"); }
+}
+
+// ---------- Autocollants : planche A4 de 4 (impression AirPrint) ----------
+$("cPrint").onclick = () => {
+  const p = cur, url = lien(p), q = qrImg(url, "H");
+  const one = `<div class="st"><div class="ph"><div class="lg">Taxis <span>Van</span> Paris</div><div class="pl">24/7</div></div>
+    <div class="bd"><div class="ey">Airport · Train station · Disneyland</div><h1>Your taxi<br><span>in 1 scan</span></h1>
+    <div class="sub">No app · No account · Fixed price</div><div class="fr">Votre taxi réservé en 30 secondes, sans appli</div>
+    <div class="qz"><div class="sm">SCAN ME</div><div class="in"><img src="${q}" alt=""><i>🚕</i></div></div>
+    <div class="cam">📷 Open your camera · 🇬🇧 🇫🇷 🇪🇸 🇮🇹 🇸🇦</div>
+    <div class="ft"><div><b>💶 Fixed price</b><small>Prix fixe</small></div><div><b>🚪 Door pick-up</b><small>À la porte</small></div><div><b>👶 Free baby seat</b><small>Siège bébé offert</small></div></div></div>
+    <div class="band">AB Taxis Services · Vans up to 8 seats · Cards accepted</div></div>`;
+  const w = window.open("", "_blank");
+  if (!w) { toast("Autorise les fenêtres pour imprimer"); return; }
+  w.document.write(`<!doctype html><html><head><base href="${location.href}"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Autocollants ${esc(p.nom)}</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;700;800&family=Playfair+Display:ital,wght@0,800;0,900;1,400&display=swap">
+  <style>@page{size:A4;margin:0}*{box-sizing:border-box}body{margin:0;background:#888;font-family:"DM Sans",sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .bar{position:sticky;top:0;background:#0B0B0D;color:#fff;padding:12px;display:flex;gap:10px;align-items:center;justify-content:space-between;font-size:14px;z-index:2}
+  .bar button{background:#C9A24B;border:0;border-radius:10px;padding:10px 16px;font-weight:800;font-size:15px}
+  .a4{width:210mm;height:297mm;margin:10px auto;background:#fff;display:grid;grid-template-columns:105mm 105mm;grid-template-rows:148.5mm 148.5mm}
+  @media print{.bar{display:none}body{background:#fff}.a4{margin:0}}
+  .st{position:relative;overflow:hidden;background:#0A0A0C;color:#F3EFE6;display:flex;flex-direction:column;outline:.15mm dashed #999}
+  .ph{position:relative;height:52mm;flex:none;background:url(van-paris.jpg) center 40%/105mm auto no-repeat}
+  .ph::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,10,12,.25),rgba(10,10,12,0) 22%,rgba(10,10,12,0) 55%,#0A0A0C)}
+  .lg{position:absolute;z-index:2;left:4mm;top:4.6mm;font:900 6mm/1 "Playfair Display",serif;color:#fff;padding:2.2mm 3.2mm 2.5mm;border-radius:2.4mm;background:rgba(5,5,5,.72);border:.3mm solid rgba(201,168,76,.45)}.lg span{color:#C9A84C}
+  .pl{position:absolute;z-index:2;right:3.8mm;top:5mm;background:linear-gradient(#F0D58C,#C9A24B);color:#141008;font:800 3.5mm/1 "DM Sans";padding:2.1mm 3.4mm;border-radius:99mm}
+  .bd{flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;padding:0 6mm 3mm;margin-top:-8.5mm;position:relative;z-index:1}
+  .ey{font:700 2.5mm "DM Sans";letter-spacing:.2em;color:#E4C57A;text-transform:uppercase}
+  h1{margin:1.6mm 0 0;font:800 9.4mm/.98 "Playfair Display",serif;font-variant-numeric:lining-nums}h1 span{color:#E4C57A}
+  .sub{margin-top:1.8mm;font:700 2.9mm "DM Sans"}.fr{margin-top:.9mm;font:italic 400 2.85mm "Playfair Display",serif;color:#BDB4A0}
+  .qz{position:relative;margin-top:4mm;width:35mm;height:35mm;padding:2.2mm;border:.75mm solid #E4C57A;border-radius:3mm}
+  .in{position:relative;width:100%;height:100%;background:#fff;border-radius:2mm;padding:1.4mm}.in img{width:100%;height:100%;display:block;image-rendering:pixelated}
+  .in i{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-style:normal;font-size:3.6mm;background:#C9A24B;border:.6mm solid #fff;border-radius:1.2mm;width:6.2mm;height:6.2mm;display:grid;place-items:center}
+  .sm{position:absolute;left:50%;top:-2.8mm;transform:translateX(-50%);z-index:3;background:linear-gradient(#F0D58C,#C9A24B);color:#141008;font:800 2.6mm/1 "DM Sans";letter-spacing:.22em;padding:1.3mm 3.2mm;border-radius:99mm;white-space:nowrap}
+  .cam{margin-top:1.4mm;font:500 2.45mm "DM Sans";color:#A39C8E}
+  .ft{display:grid;grid-template-columns:repeat(3,1fr);gap:2mm;width:100%;margin-top:2.6mm}.ft div{border:.25mm solid #2E2A22;background:#141316;border-radius:2.4mm;padding:1.7mm .8mm}
+  .ft b{display:block;font:700 2.5mm "DM Sans"}.ft small{display:block;font:500 2.1mm "DM Sans";color:#A39C8E;margin-top:.3mm}
+  .band{flex:none;background:linear-gradient(90deg,#B98F3C,#EBCB7E 50%,#B98F3C);color:#141008;text-align:center;font:700 2.55mm "DM Sans";padding:2.3mm 2mm}
+  </style></head><body><div class="bar"><span>${esc(p.nom)} · 4 autocollants A6</span><button onclick="print()">🖨️ Imprimer</button></div>
+  <div class="a4">${one.repeat(4)}</div></body></html>`);
+  w.document.close();
+};
+
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{});
+</script>
+</body>
+</html>
