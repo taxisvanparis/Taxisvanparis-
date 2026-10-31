@@ -66,6 +66,14 @@ textarea{min-height:60px;resize:vertical}
 .toast{position:fixed;left:50%;bottom:max(20px,env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--gold);color:var(--ink);font-weight:700;padding:10px 16px;border-radius:999px;z-index:50}
 .back{background:none;border:0;color:var(--gold-2);padding:0;margin-bottom:12px;cursor:pointer;font-size:15px}
 </style>
+<style>
+@page{size:A4;margin:0}
+#print{background:#888;margin:-14px -16px;font-family:"DM Sans",sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+@media screen and (max-width:820px){#print .a4{zoom:.47}}
+@media print{body{padding:0;background:#fff}#print{margin:0;background:#fff}#print .bar{display:none}#print .a4{margin:0}}
+#print .bar{position:sticky;top:0;background:#0B0B0D;color:#fff;padding:12px;display:flex;gap:10px;align-items:center;justify-content:space-between;font-size:14px;z-index:2}#print .bar button{background:#C9A24B;border:0;border-radius:10px;padding:10px 16px;font-weight:800;font-size:15px}#print .a4{width:210mm;height:297mm;margin:10px auto;background:#fff;display:grid;grid-template-columns:105mm 105mm;grid-template-rows:148.5mm 148.5mm}#print .st{position:relative;overflow:hidden;background:#0A0A0C;color:#F3EFE6;display:flex;flex-direction:column;outline:.15mm dashed #999}#print .ph{position:relative;height:52mm;flex:none;background:url(van-paris.jpg) center 40%/105mm auto no-repeat}#print .ph::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,10,12,.25),rgba(10,10,12,0) 22%,rgba(10,10,12,0) 55%,#0A0A0C)}#print .lg{position:absolute;z-index:2;left:4mm;top:4.6mm;font:900 6mm/1 "Playfair Display",serif;color:#fff;padding:2.2mm 3.2mm 2.5mm;border-radius:2.4mm;background:rgba(5,5,5,.72);border:.3mm solid rgba(201,168,76,.45)}#print .lg span{color:#C9A84C}#print .pl{position:absolute;z-index:2;right:3.9mm;top:4.2mm;min-width:16.5mm;text-align:center;background:linear-gradient(#F0D58C,#C9A24B);color:#141008;font:800 3.5mm/1 "DM Sans";padding:2.6mm 3.4mm;border-radius:99mm;box-shadow:0 0 0 .6mm #0A0A0C}#print .bd{flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;padding:0 6mm 3mm;margin-top:-8.5mm;position:relative;z-index:1}#print .ey{font:700 2.5mm "DM Sans";letter-spacing:.2em;color:#E4C57A;text-transform:uppercase}#print h1{margin:1.6mm 0 0;font:800 9.4mm/.98 "Playfair Display",serif;font-variant-numeric:lining-nums}#print h1 span{color:#E4C57A}#print .sub{margin-top:1.8mm;font:700 2.9mm "DM Sans"}#print .fr{margin-top:.9mm;font:italic 400 2.85mm "Playfair Display",serif;color:#BDB4A0}#print .qz{position:relative;margin-top:4mm;width:35mm;height:35mm;padding:2.2mm;border:.75mm solid #E4C57A;border-radius:3mm}#print .in{position:relative;width:100%;height:100%;background:#fff;border-radius:2mm;padding:1.4mm}#print .in img{width:100%;height:100%;display:block;image-rendering:pixelated}#print .in i{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-style:normal;font-size:3.6mm;background:#C9A24B;border:.6mm solid #fff;border-radius:1.2mm;width:6.2mm;height:6.2mm;display:grid;place-items:center}#print .sm{position:absolute;left:50%;top:-2.8mm;transform:translateX(-50%);z-index:3;background:linear-gradient(#F0D58C,#C9A24B);color:#141008;font:800 2.6mm/1 "DM Sans";letter-spacing:.22em;padding:1.3mm 3.2mm;border-radius:99mm;white-space:nowrap}#print .cam{margin-top:1.4mm;font:500 2.45mm "DM Sans";color:#A39C8E}#print .ft{display:grid;grid-template-columns:repeat(3,1fr);gap:2mm;width:100%;margin-top:2.6mm}#print .ft div{border:.25mm solid #2E2A22;background:#141316;border-radius:2.4mm;padding:1.7mm .8mm}#print .ft b{display:block;font:700 2.5mm "DM Sans"}#print .ft small{display:block;font:500 2.1mm "DM Sans";color:#A39C8E;margin-top:.3mm}#print .band{flex:none;background:linear-gradient(90deg,#B98F3C,#EBCB7E 50%,#B98F3C);color:#141008;text-align:center;font:700 2.55mm "DM Sans";padding:2.3mm 2mm}
+  
+</style>
 </head>
 <body>
 <div class="wrap">
@@ -201,8 +209,8 @@ onAuthStateChanged(auth, async u => {
 function drawList(){
   $("pEmpty").hidden = partners.length > 0;
   $("plist").innerHTML = partners.map(p => `<button class="p" data-code="${esc(p.code)}"><span class="ic">${p.site ? "🏠" : "🏨"}</span>
-    <span class="t"><b>${esc(p.nom)}</b><small>${esc(p.adresse || "Adresse non renseignée")}</small></span>
-    <span class="tag ${p.actif === false ? "off" : p.site ? "site" : "com"}">${p.actif === false ? "Inactif" : p.site ? "Sans commission" : (Number(p.c)||0) + " € / course"}</span></button>`).join("");
+    <span class="t"><b>${esc(p.nom)}</b><small>${esc(p.adresse || "Adresse non renseignée")}</small>
+    <span class="tag ${p.actif === false ? "off" : p.site ? "site" : "com"}" style="display:inline-block;margin-top:6px">${p.actif === false ? "Inactif" : p.site ? "Sans commission" : (Number(p.c)||0) + " € / course"}</span></span></button>`).join("");
   $("plist").querySelectorAll("[data-code]").forEach(b => b.onclick = () => openCard(b.dataset.code));
 }
 $("add").onclick = () => openForm(null);
@@ -319,35 +327,8 @@ $("cPrint").onclick = () => {
     <div class="cam">📷 Open your camera · 🇬🇧 🇫🇷 🇪🇸 🇮🇹 🇸🇦</div>
     <div class="ft"><div><b>💶 Fixed price</b><small>Prix fixe</small></div><div><b>🚪 Door pick-up</b><small>À la porte</small></div><div><b>👶 Free baby seat</b><small>Siège bébé offert</small></div></div></div>
     <div class="band">AB Taxis Services · Vans up to 8 seats · Cards accepted</div></div>`;
-  const w = window.open("", "_blank");
-  if (!w) { toast("Autorise les fenêtres pour imprimer"); return; }
-  w.document.write(`<!doctype html><html><head><base href="${location.href}"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Autocollants ${esc(p.nom)}</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;700;800&family=Playfair+Display:ital,wght@0,800;0,900;1,400&display=swap">
-  <style>@page{size:A4;margin:0}*{box-sizing:border-box}body{margin:0;background:#888;font-family:"DM Sans",sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  .bar{position:sticky;top:0;background:#0B0B0D;color:#fff;padding:12px;display:flex;gap:10px;align-items:center;justify-content:space-between;font-size:14px;z-index:2}
-  .bar button{background:#C9A24B;border:0;border-radius:10px;padding:10px 16px;font-weight:800;font-size:15px}
-  .a4{width:210mm;height:297mm;margin:10px auto;background:#fff;display:grid;grid-template-columns:105mm 105mm;grid-template-rows:148.5mm 148.5mm}
-  @media print{.bar{display:none}body{background:#fff}.a4{margin:0}}
-  .st{position:relative;overflow:hidden;background:#0A0A0C;color:#F3EFE6;display:flex;flex-direction:column;outline:.15mm dashed #999}
-  .ph{position:relative;height:52mm;flex:none;background:url(van-paris.jpg) center 40%/105mm auto no-repeat}
-  .ph::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,10,12,.25),rgba(10,10,12,0) 22%,rgba(10,10,12,0) 55%,#0A0A0C)}
-  .lg{position:absolute;z-index:2;left:4mm;top:4.6mm;font:900 6mm/1 "Playfair Display",serif;color:#fff;padding:2.2mm 3.2mm 2.5mm;border-radius:2.4mm;background:rgba(5,5,5,.72);border:.3mm solid rgba(201,168,76,.45)}.lg span{color:#C9A84C}
-  .pl{position:absolute;z-index:2;right:3.8mm;top:5mm;background:linear-gradient(#F0D58C,#C9A24B);color:#141008;font:800 3.5mm/1 "DM Sans";padding:2.1mm 3.4mm;border-radius:99mm}
-  .bd{flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;padding:0 6mm 3mm;margin-top:-8.5mm;position:relative;z-index:1}
-  .ey{font:700 2.5mm "DM Sans";letter-spacing:.2em;color:#E4C57A;text-transform:uppercase}
-  h1{margin:1.6mm 0 0;font:800 9.4mm/.98 "Playfair Display",serif;font-variant-numeric:lining-nums}h1 span{color:#E4C57A}
-  .sub{margin-top:1.8mm;font:700 2.9mm "DM Sans"}.fr{margin-top:.9mm;font:italic 400 2.85mm "Playfair Display",serif;color:#BDB4A0}
-  .qz{position:relative;margin-top:4mm;width:35mm;height:35mm;padding:2.2mm;border:.75mm solid #E4C57A;border-radius:3mm}
-  .in{position:relative;width:100%;height:100%;background:#fff;border-radius:2mm;padding:1.4mm}.in img{width:100%;height:100%;display:block;image-rendering:pixelated}
-  .in i{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-style:normal;font-size:3.6mm;background:#C9A24B;border:.6mm solid #fff;border-radius:1.2mm;width:6.2mm;height:6.2mm;display:grid;place-items:center}
-  .sm{position:absolute;left:50%;top:-2.8mm;transform:translateX(-50%);z-index:3;background:linear-gradient(#F0D58C,#C9A24B);color:#141008;font:800 2.6mm/1 "DM Sans";letter-spacing:.22em;padding:1.3mm 3.2mm;border-radius:99mm;white-space:nowrap}
-  .cam{margin-top:1.4mm;font:500 2.45mm "DM Sans";color:#A39C8E}
-  .ft{display:grid;grid-template-columns:repeat(3,1fr);gap:2mm;width:100%;margin-top:2.6mm}.ft div{border:.25mm solid #2E2A22;background:#141316;border-radius:2.4mm;padding:1.7mm .8mm}
-  .ft b{display:block;font:700 2.5mm "DM Sans"}.ft small{display:block;font:500 2.1mm "DM Sans";color:#A39C8E;margin-top:.3mm}
-  .band{flex:none;background:linear-gradient(90deg,#B98F3C,#EBCB7E 50%,#B98F3C);color:#141008;text-align:center;font:700 2.55mm "DM Sans";padding:2.3mm 2mm}
-  </style></head><body><div class="bar"><span>${esc(p.nom)} · 4 autocollants A6</span><button onclick="print()">🖨️ Imprimer</button></div>
-  <div class="a4">${one.repeat(4)}</div></body></html>`);
-  w.document.close();
+  $("print").innerHTML = `<div class="bar"><button onclick="document.getElementById('print').hidden=true;document.querySelector('.wrap').hidden=false">← Retour</button><span>${esc(p.nom)} · 4 autocollants</span><button onclick="print()">🖨️ Imprimer</button></div><div class="a4">${one.repeat(4)}</div>`;
+  document.querySelector(".wrap").hidden = true; $("print").hidden = false; window.scrollTo(0,0);
 };
 
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{});

@@ -24,8 +24,20 @@
     if (code) sessionStorage.setItem("tvp_partenaire", code);
     else code = sessionStorage.getItem("tvp_partenaire") || "";
   } catch (e) {}
-  var P = PARTENAIRES[code];
-  if (!P) return;
+  if (!code) return;
+  // Partenaires gérés dans l'appli « Espace partenaires » (Firestore, lecture publique) ; repli sur la liste ci-dessus
+  var FS = "https://firestore.googleapis.com/v1/projects/taxis-van-paris-by-abts/databases/(default)/documents/partenaires/";
+  function val(f) { if (!f) return null; return f.stringValue !== undefined ? f.stringValue : f.booleanValue !== undefined ? f.booleanValue : f.integerValue !== undefined ? Number(f.integerValue) : f.doubleValue !== undefined ? f.doubleValue : null; }
+  fetch(FS + encodeURIComponent(code)).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }).then(function (d) {
+    var P = null;
+    if (d && d.fields) {
+      var f = d.fields;
+      if (val(f.actif) !== false && val(f.site) !== false) P = { nom: val(f.nom) || code, adresse: val(f.adresse) || "" };
+    } else P = PARTENAIRES[code] || null;
+    if (P) lancer(P);
+  });
+
+  function lancer(P) {
   var lang = (document.documentElement.lang || "fr").slice(0, 2);
   var t = TXT[lang] || TXT.en;
   window.TVP_PARTENAIRE = { code: code, nom: P.nom, adresse: P.adresse };
@@ -124,4 +136,5 @@
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function () { setTimeout(demarrer, 0); });
   else setTimeout(demarrer, 0);
+  }
 })();

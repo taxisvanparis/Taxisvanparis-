@@ -239,12 +239,12 @@ textarea{min-height:64px;resize:vertical}
   var params=new URLSearchParams(location.search);
   var code=(params.get("h")||(location.hash||"").replace("#","")||"exemple").toLowerCase();
   // Partenaire sans commission « site:true » : on ouvre le calculateur du site principal, dans la langue du client
-  if(PARTENAIRES[code]&&PARTENAIRES[code].site){
+  function versSite(){
     var PAGES={fr:"/",en:"/en.html",es:"/es.html",it:"/it.html",ar:"/ar.html"};
     var lg=(params.get("lang")||(navigator.language||"fr")).slice(0,2).toLowerCase();
     location.replace((PAGES[lg]||PAGES.en)+"?h="+encodeURIComponent(code)+"#reserver");
-    return;
   }
+  if(PARTENAIRES[code]&&PARTENAIRES[code].site){ versSite(); return; }
   var hotel={nom:"…",adresse:""}, hotelPt=null;
   if(PARTENAIRES[code]){ hotel.adresse=PARTENAIRES[code].adresse||""; if(PARTENAIRES[code].c!=null) COM=PARTENAIRES[code].c; }
   var lang=(params.get("lang")||(navigator.language||"fr")).slice(0,2).toLowerCase(); if(!T[lang]) lang="en";
@@ -493,6 +493,18 @@ textarea{min-height:64px;resize:vertical}
   });
 
   applyLang();
+
+  // Partenaire géré dans l'appli « Espace partenaires » (Firestore) : redirection site, ou adresse et nom de secours
+  fetch("https://firestore.googleapis.com/v1/projects/taxis-van-paris-by-abts/databases/(default)/documents/partenaires/"+encodeURIComponent(code))
+    .then(function(r){return r.ok?r.json():null;}).catch(function(){return null;})
+    .then(function(d){
+      if(!d||!d.fields) return;
+      var f=d.fields, v=function(x){return x?(x.stringValue!==undefined?x.stringValue:x.booleanValue!==undefined?x.booleanValue:x.integerValue!==undefined?Number(x.integerValue):x.doubleValue):undefined;};
+      if(v(f.actif)===false) return;
+      if(v(f.site)===true){ versSite(); return; }
+      if(v(f.adresse)&&!hotel.adresse){ hotel.adresse=v(f.adresse); hotelDepart(); }
+      if(hotel.nom==="…"&&v(f.nom)) setHotel(v(f.nom));
+    });
 
   // Nom, adresse et commission de l'hôtel depuis le Google Sheets
   fetch(API_URL+"?action=config&h="+encodeURIComponent(code))
