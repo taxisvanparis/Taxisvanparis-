@@ -199,6 +199,7 @@ footer .logo{color:#F8F5EE}
 footer .logo span{color:#E8C97A}
 .float{background:linear-gradient(135deg,#E8C97A,#C9A84C);color:#1B1813;border-radius:40px}
 </style>
+<style>.bk-price b{white-space:nowrap;flex-shrink:0}.bk-price span{min-width:0}@media(max-width:420px){.bk-price b{font-size:1.65rem!important}}</style>
 </head>
 <body>
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KDBPZR9P" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
@@ -410,7 +411,7 @@ var TVP = (function(){
   function price(){
     var a=amount();
     $('bk-price').textContent = a ? fmt(a) : 'Sur devis';
-    if(a&&last) $('bk-price-l').textContent = last.fixed ? 'Prix garanti pour tout le véhicule' : 'Prix estimé ('+last.km+' km), confirmé par le chauffeur';
+    if(a&&last) $('bk-price-l').textContent = last.fixed ? 'Prix garanti pour tout le véhicule' : 'Tarif estimé ('+last.km+' km)';
     else if(a) $('bk-price-l').textContent = 'Prix garanti depuis toute adresse dans Paris : indiquez votre adresse pour le prix exact';
     else if(typed.from||typed.to) $('bk-price-l').textContent = 'Choisissez votre adresse dans les suggestions pour voir le prix';
     else $('bk-price-l').textContent = 'Nous vous confirmons un prix garanti en quelques minutes';
