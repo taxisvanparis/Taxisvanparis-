@@ -411,7 +411,7 @@ var TVP = (function(){
   function price(){
     var a=amount();
     $('bk-price').textContent = a ? fmt(a) : 'Sur devis';
-    if(a&&last) $('bk-price-l').textContent = last.fixed ? 'Prix garanti pour tout le véhicule' : 'Tarif estimé ('+last.km+' km)';
+    if(a&&last) $('bk-price-l').textContent = last.fixed ? 'Prix garanti pour tout le véhicule' : 'Tarif estimé';
     else if(a) $('bk-price-l').textContent = 'Prix garanti depuis toute adresse dans Paris : indiquez votre adresse pour le prix exact';
     else if(typed.from||typed.to) $('bk-price-l').textContent = 'Choisissez votre adresse dans les suggestions pour voir le prix';
     else $('bk-price-l').textContent = 'Nous vous confirmons un prix garanti en quelques minutes';
