@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0B0B0D">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Répondre">
+<title>Répondre | Taxis Van Paris</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&family=Playfair+Display:wght@800;900&display=swap">
+<style>
+:root{--bg:#0B0B0D;--panel:#151518;--panel2:#1D1C20;--line:#2B2823;--fg:#F3EFE6;--muted:#A39C8E;--gold:#C9A24B;--gold2:#E4C57A;--ink:#141008;--wa:#25D366;--wa-bg:#DCF8C6;--wa-ink:#111B21;--err:#F08A7A;
+  --display:"Playfair Display",Georgia,serif;--body:"DM Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color-scheme:dark}
+*{box-sizing:border-box}[hidden]{display:none!important}
+html,body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px}
+body{padding:max(12px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(24px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}
+.wrap{max-width:520px;margin:0 auto;display:grid;gap:14px}
+button,input,textarea,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--gold2);outline-offset:2px}
+.top{display:flex;justify-content:space-between;align-items:center}
+.brand{font:900 21px/1 var(--display)}.brand span{color:var(--gold)}
+.ghost{background:none;border:1px solid var(--line);color:var(--muted);border-radius:999px;padding:7px 12px;font-size:13px;cursor:pointer}
+/* Accueil */
+.hero{display:grid;gap:14px;padding-top:6vh;text-align:center}
+.hero h1{font:800 30px/1.1 var(--display);margin:0}
+.hero p{color:var(--muted);margin:0;line-height:1.5}
+.big{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;border:0;border-radius:18px;padding:22px 16px;font-weight:800;font-size:20px;cursor:pointer;text-decoration:none}
+.big.gold{background:linear-gradient(180deg,#E4C57A,#C9A24B);color:var(--ink)}
+.big.wa{background:var(--wa);color:#06260F}
+.zone{width:100%;min-height:110px;background:var(--panel);border:1px dashed var(--line);border-radius:14px;padding:12px;font-size:15px;resize:vertical}
+.small{font-size:13px;color:var(--muted)}
+/* Résultat */
+.langs{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.langs button{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:7px 13px;font-weight:700;font-size:14px;cursor:pointer}
+.langs button[aria-pressed="true"]{background:var(--gold);border-color:var(--gold);color:var(--ink)}
+.price{background:radial-gradient(300px 140px at 50% 0%,rgba(201,162,75,.22),transparent 70%),var(--panel);border:1px solid var(--gold);border-radius:20px;padding:16px;display:grid;gap:10px;text-align:center}
+.prow{display:flex;align-items:center;justify-content:center;gap:16px}
+.step{width:48px;height:48px;border-radius:50%;border:1px solid var(--line);background:var(--panel2);font-size:24px;font-weight:700;cursor:pointer}
+.val{font:900 46px/1 var(--display);color:var(--gold2);min-width:130px;background:none;border:0;text-align:center;width:150px}
+.why{font-size:13px;color:var(--muted)}
+.veh{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.veh button{border:1px solid var(--line);background:var(--panel2);border-radius:12px;padding:10px;font-weight:700;cursor:pointer}
+.veh button[aria-pressed="true"]{border-color:var(--gold);background:rgba(201,162,75,.15);color:var(--gold2)}
+.trip{background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.trip label{display:grid;grid-template-columns:30px 1fr;align-items:center;gap:6px;padding:8px 12px;border-bottom:1px solid var(--line)}
+.trip label:last-child{border-bottom:0}
+.trip input{width:100%;background:transparent;border:0;padding:6px 0;font-size:15.5px;min-width:0}
+.trip input::placeholder{color:var(--err)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.bubble{background:var(--wa-bg);color:var(--wa-ink);border-radius:14px 14px 4px 14px;padding:12px 14px;white-space:pre-wrap;font-size:15px;line-height:1.45;box-shadow:0 2px 0 rgba(0,0,0,.25);border:0;width:100%;min-height:200px;resize:vertical}
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sec{border:1px solid var(--line);background:var(--panel);border-radius:14px;padding:13px;font-weight:700;cursor:pointer;text-align:center}
+.load{display:grid;place-items:center;gap:10px;padding:12vh 0;color:var(--muted)}
+.spin{width:38px;height:38px;border:3px solid var(--line);border-top-color:var(--gold);border-radius:50%;animation:s 1s linear infinite}
+@keyframes s{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spin{animation:none}}
+.err{color:var(--err);font-size:14px;text-align:center;margin:0}
+.toast{position:fixed;left:50%;bottom:max(20px,env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--gold);color:var(--ink);font-weight:700;padding:10px 16px;border-radius:999px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><div class="brand">Taxis <span>Van</span> Paris</div><button class="ghost" id="new" hidden>↺ Nouveau</button></div>
+
+  <!-- 1. Accueil -->
+  <section id="vHome" class="hero">
+    <h1>Répondre à un client</h1>
+    <p>Copie le message du client dans WhatsApp, puis appuie ici.</p>
+    <button class="big gold" id="paste">📋 Coller le message du client</button>
+    <textarea class="zone" id="zone" placeholder="… ou colle-le ici"></textarea>
+    <button class="sec" id="go" hidden>Lire ce message →</button>
+    <p class="err" id="hErr"></p>
+    <p class="small" id="keyInfo"></p>
+  </section>
+
+  <!-- 2. Chargement -->
+  <section id="vLoad" class="load" hidden><div class="spin"></div><div id="loadTxt">Je lis le message…</div></section>
+
+  <!-- 3. Résultat -->
+  <section id="vRes" class="wrap" hidden>
+    <div class="langs" id="langs"></div>
+    <div class="price">
+      <div class="prow"><button class="step" id="minus" aria-label="Moins 5 euros">−</button><span style="display:flex;align-items:baseline;justify-content:center"><input class="val" id="prix" inputmode="decimal" aria-label="Prix en euros" style="width:110px;text-align:right"><span class="val" style="width:auto;min-width:0">€</span></span><button class="step" id="plus" aria-label="Plus 5 euros">+</button></div>
+      <div class="why" id="why"></div>
+      <div class="veh" id="veh"><button data-v="Berline">🚗 Berline</button><button data-v="Van">🚐 Van</button></div>
+    </div>
+    <div class="trip">
+      <label>📍<input id="dep" placeholder="Départ manquant"></label>
+      <label>🏁<input id="arr" placeholder="Arrivée manquante"></label>
+      <label>📅<div class="row2"><input id="date" type="date"><input id="heure" type="time"></div></label>
+      <label>👥<div class="row2"><input id="pax" type="number" min="1" max="8" placeholder="Passagers" aria-label="Passagers"><input id="bag" type="number" min="0" placeholder="Valises" aria-label="Valises"></div></label>
+      <label>✈️<input id="vol" placeholder="N° de vol / train (facultatif)"></label>
+    </div>
+    <textarea class="bubble" id="msg" aria-label="Réponse au client"></textarea>
+    <a class="big wa" id="wa" target="_blank" rel="noopener">📲 Envoyer sur WhatsApp</a>
+    <div class="acts"><button class="sec" id="copy">📋 Copier</button><button class="sec" id="again">↺ Nouveau message</button></div>
+  </section>
+</div>
+
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const IA_URL="https://script.google.com/macros/s/AKfycbynqJeRA8W1AoYiHWQhS-ZPGHrEHyQBW8xp4xFGAYgP68lAugMsNZqWYkleYV1P4Va6/exec";
+const MAPS_KEY="AIzaSyCotWtH67rWpOKRwxTGXtxj-oVcc0vwOVg";
+function cle(){try{return localStorage.getItem("tvp_cle_ia")||""}catch(e){return ""}}
+function toast(t){const d=document.createElement("div");d.className="toast";d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),1600)}
+function vue(v){["vHome","vLoad","vRes"].forEach(x=>$(x).hidden=x!==v);$("new").hidden=v!=="vRes";scrollTo(0,0)}
+$("keyInfo").innerHTML=cle()?"✨ Lecture IA active sur ce téléphone.":"Première fois : l'appli te demandera ta clé admin (la même que la lecture IA du tableau de bord).";
+
+/* Google Maps (même clé que le site) */
+const gm=document.createElement("script");gm.async=true;gm.src="https://maps.googleapis.com/maps/api/js?key="+MAPS_KEY+"&libraries=places&language=fr&callback=__gm";window.__gm=()=>{};document.head.appendChild(gm);
+const attendreMaps=()=>new Promise(ok=>{let n=0;(function w(){if(window.google&&google.maps&&google.maps.places&&google.maps.DirectionsService)return ok(true);if(n++>40)return ok(false);setTimeout(w,150)})()});
+
+  function detecter(t) {
+    t = " " + String(t || "").toLowerCase() + " ";
+    if (/[؀-ۿ]/.test(t)) return "ar";
+    const sc = {
+      fr: (t.match(/\b(bonjour|bonsoir|merci|je|nous|vous|une?|pour|aéroport|gare|valises?|demain|svp|s'il)\b/g) || []).length,
+      en: (t.match(/\b(hello|hi|the|i|we|to|from|please|need|would|like|airport|suitcases?|tomorrow|thanks?|how much)\b/g) || []).length,
+      es: (t.match(/\b(hola|gracias|quiero|necesito|para|somos|maletas?|aeropuerto|mañana|cuánto|por favor|buenas)\b|[¿¡]/g) || []).length,
+      it: (t.match(/\b(ciao|buongiorno|buonasera|grazie|vorrei|siamo|valigie|aeroporto|domani|quanto|per favore|della)\b/g) || []).length
+    };
+    let best = "en", n = 0;
+    Object.keys(sc).forEach(k => { if (sc[k] > n) { n = sc[k]; best = k; } });
+    return best;
+  }
+  /* ---------- Grille de prix (mêmes règles que le site) ---------- */
+  const gps = (a, b, c, d) => { const r = Math.PI / 180, x = (c - a) * r, y = (d - b) * r, h = Math.sin(x / 2) ** 2 + Math.cos(a * r) * Math.cos(c * r) * Math.sin(y / 2) ** 2; return 6371 * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h)); };
+  const creuse = hs => { if (!hs) return false; const p = hs.split(":").map(Number), m = p[0] * 60 + p[1]; return m >= 1200 || m < 360 || (m >= 600 && m < 900); };
+  const montantKm = (km, cr) => km <= 20 ? km * 2.9 : km <= 50 ? 58 + (km - 20) * (cr ? 2.2 : 2.4) : 58 + 30 * (cr ? 2.2 : 2.4) + (km - 50) * (cr ? 2.3 : 2.5);
+  const VILLES = ["paris", "boulogne-billancourt", "issy-les-moulineaux", "neuilly-sur-seine", "levallois-perret", "clichy", "saint-ouen", "aubervilliers", "pantin", "pré-saint-gervais",
+    "les lilas", "bagnolet", "montreuil", "vincennes", "charenton-le-pont", "saint-mandé", "malakoff", "montrouge", "ivry-sur-seine", "vitry-sur-seine"];
+  const low = p => (p.address || "").toLowerCase();
+  const villeForfait = p => p.dept === "75" || VILLES.some(v => low(p).indexOf(v) >= 0);
+  const roissy = p => /cdg|charles de gaulle|roissy|9570[012]|mesnil.amelot/.test(low(p)) || gps(p.lat, p.lon, 49.0097, 2.5479) < 8;
+  const orly = p => /orly|94390|94547/.test(low(p)) || gps(p.lat, p.lon, 48.7262, 2.3652) < 5;
+  const beauvais = p => /beauvais|till[ée]|60000/.test(low(p)) || gps(p.lat, p.lon, 49.4544, 2.1128) < 6;
+  const GARES = [[48.8809, 2.3553], [48.8449, 2.3735], [48.8408, 2.3205], [48.8760, 2.3245], [48.8765, 2.3590], [48.8426, 2.3655], [48.8402, 2.3793]];
+  const gareParis = p => GARES.some(g => gps(p.lat, p.lon, g[0], g[1]) < 0.7) || /\bgare\b/.test(low(p));
+  const zone = p => ["75", "92", "93", "94"].indexOf(p.dept) >= 0;
+
+  function tarif(dep, arr, km, van, pax, heure, siege) {
+    const cr = creuse(heure), supp = pax > 3 ? (pax - 3) * 5.5 : 0;
+    let total = 15 + montantKm(km, cr) + supp, forfait = "", fGare = false;
+    const dP = villeForfait(dep), aP = villeForfait(arr);
+    if ((roissy(dep) && orly(arr)) || (orly(dep) && roissy(arr))) { total = van ? 109 : 80; forfait = "Roissy ⇄ Orly"; }
+    else if (dP && roissy(arr)) { total = !van ? 75 : pax <= 5 ? 85 : 95; forfait = "Paris → CDG"; }
+    else if (aP && roissy(dep)) { total = !van ? 85 : pax <= 5 ? 95 : 105; forfait = "CDG → Paris"; }
+    else if (dP && orly(arr)) { total = !van ? 70 : pax <= 6 ? 80 : 95; forfait = "Paris → Orly"; }
+    else if (aP && orly(dep)) { total = !van ? 80 : pax <= 6 ? 90 : 105; forfait = "Orly → Paris"; }
+    else if (dP && beauvais(arr)) { total = !van ? 175 : pax <= 6 ? 188 : 205; forfait = "Paris → Beauvais"; }
+    else if (aP && beauvais(dep)) { total = !van ? 185 : pax <= 6 ? 198 : 215; forfait = "Beauvais → Paris"; }
+    else if ((dP && gareParis(arr)) || (aP && gareParis(dep)) || (gareParis(dep) && gareParis(arr))) { total = 50 + supp; forfait = "gare"; fGare = true; }
+    if (!forfait && zone(dep) && zone(arr)) { const gv = van && pax >= 6, plafond = km < 29 ? (gv ? 95 : 85) : (gv ? 110 : 100); total = Math.min(total, plafond); }
+    if (dep.dept === "75" && arr.dept === "75") total = Math.max(total, siege ? 60 : 50);
+    if ((/cr[ée]teil|94000/.test(low(dep)) && orly(arr)) || (orly(dep) && /cr[ée]teil|94000/.test(low(arr)))) total = Math.max(total, 60);
+    if (van && pax <= 4 && (!forfait || fGare)) total += 10;
+    if (van) { const enParis = p => gareParis(p) || p.dept === "75"; if ((gareParis(dep) && !enParis(arr)) || (gareParis(arr) && !enParis(dep))) total = Math.max(total, 70); }
+    return { prix: Math.round(total), forfait, km };
+  }
+
+  /* ---------- Google Maps : adresse → point, puis distance par la route ---------- */
+  // Même méthode que le site (Places) : prédiction Google puis détails du lieu
+  function pointDe(adr) {
+    return new Promise((ok, ko) => {
+      if (!window.google || !google.maps || !google.maps.places) return ko("maps");
+      const ac = new google.maps.places.AutocompleteService(), pl = new google.maps.places.PlacesService(document.createElement("div"));
+      ac.getPlacePredictions({ input: adr, language: "fr" }, (preds, st) => {
+        if (st !== "OK" || !preds || !preds[0]) return ko("adresse");
+        pl.getDetails({ placeId: preds[0].place_id, fields: ["geometry", "address_components"] }, (r, st2) => {
+          if (st2 !== "OK" || !r || !r.geometry) return ko("adresse");
+          const cp = (r.address_components || []).find(c => c.types.indexOf("postal_code") >= 0);
+          const loc = (r.address_components || []).find(c => c.types.indexOf("locality") >= 0);
+          const dept = cp ? cp.long_name.slice(0, 2) : (loc && loc.long_name.toLowerCase() === "paris" ? "75" : "");
+          ok({ lat: r.geometry.location.lat(), lon: r.geometry.location.lng(), address: adr + ", " + preds[0].description, dept });
+        });
+      });
+    });
+  }
+  function kmRoute(a, b) {
+    return new Promise(ok => {
+      try {
+        new google.maps.DirectionsService().route({ origin: { lat: a.lat, lng: a.lon }, destination: { lat: b.lat, lng: b.lon }, travelMode: "DRIVING", region: "fr" },
+          (res, st) => ok(st === "OK" && res.routes && res.routes[0] ? Math.max(1, Math.round(res.routes[0].legs[0].distance.value / 1000)) : Math.round(gps(a.lat, a.lon, b.lat, b.lon) * 1.35)));
+      } catch (e) { ok(Math.round(gps(a.lat, a.lon, b.lat, b.lon) * 1.35)); }
+    });
+  }
+
+  /* ---------- Textes de la réponse ---------- */
+  const T = {
+    fr: { hi: "Bonjour et merci pour votre message 😊", ok: "Oui, c'est disponible ✅", veh: { Van: "Van Mercedes Classe V", Berline: "Berline" }, pax: n => n + " passager" + (n > 1 ? "s" : ""), bag: n => n + " valise" + (n > 1 ? "s" : ""),
+      at: "à", price: (p, f) => `💶 Prix : *${p} € tout compris*${f ? " (forfait, prix fixe)" : ""}, sans surprise avec les bouchons.`, seat: "👶 Siège bébé / rehausseur offert et installé.",
+      flight: v => `✈️ Vol ${v} : on suit votre vol et on vous attend aux arrivées avec une pancarte à votre nom.`, pay: "Paiement à bord par carte (Visa, Mastercard, Amex, Apple Pay, Google Pay) ou en espèces.",
+      ask: "Je vous confirme la réservation ?", miss: "Pour vous donner le prix exact, pouvez-vous m'indiquer :", need: { dep: "📍 l'adresse de départ", arr: "🏁 la destination", date: "📅 la date et l'heure" }, loc: "fr-FR" },
+    en: { hi: "Hello and thank you for your message 😊", ok: "Yes, this is available ✅", veh: { Van: "Mercedes V-Class van", Berline: "Sedan" }, pax: n => n + " passenger" + (n > 1 ? "s" : ""), bag: n => n + " suitcase" + (n > 1 ? "s" : ""),
+      at: "at", price: (p, f) => `💶 Price: *${p} € all included*${f ? " (fixed fare)" : ""}, no surprise with traffic.`, seat: "👶 Baby seat / booster free of charge and installed.",
+      flight: v => `✈️ Flight ${v}: we track your flight and wait for you at arrivals with a name sign.`, pay: "Payment on board by card (Visa, Mastercard, Amex, Apple Pay, Google Pay) or cash.",
+      ask: "Shall I confirm the booking for you?", miss: "To give you the exact price, could you tell me:", need: { dep: "📍 the pick-up address", arr: "🏁 the destination", date: "📅 the date and time" }, loc: "en-GB" },
+    es: { hi: "¡Hola y gracias por su mensaje! 😊", ok: "Sí, está disponible ✅", veh: { Van: "Van Mercedes Clase V", Berline: "Berlina" }, pax: n => n + " pasajero" + (n > 1 ? "s" : ""), bag: n => n + " maleta" + (n > 1 ? "s" : ""),
+      at: "a las", price: (p, f) => `💶 Precio: *${p} € todo incluido*${f ? " (tarifa fija)" : ""}, sin sorpresas con el tráfico.`, seat: "👶 Silla de bebé / elevador gratis e instalado.",
+      flight: v => `✈️ Vuelo ${v}: seguimos su vuelo y le esperamos en llegadas con un cartel con su nombre.`, pay: "Pago a bordo con tarjeta (Visa, Mastercard, Amex, Apple Pay, Google Pay) o en efectivo.",
+      ask: "¿Le confirmo la reserva?", miss: "Para darle el precio exacto, ¿podría indicarme:", need: { dep: "📍 la dirección de recogida", arr: "🏁 el destino", date: "📅 la fecha y la hora" }, loc: "es-ES" },
+    it: { hi: "Buongiorno e grazie per il messaggio 😊", ok: "Sì, è disponibile ✅", veh: { Van: "Van Mercedes Classe V", Berline: "Berlina" }, pax: n => n + (n > 1 ? " passeggeri" : " passeggero"), bag: n => n + (n > 1 ? " valigie" : " valigia"),
+      at: "alle", price: (p, f) => `💶 Prezzo: *${p} € tutto incluso*${f ? " (tariffa fissa)" : ""}, nessuna sorpresa con il traffico.`, seat: "👶 Seggiolino / rialzo gratis e montato.",
+      flight: v => `✈️ Volo ${v}: seguiamo il suo volo e la aspettiamo agli arrivi con un cartello con il suo nome.`, pay: "Pagamento a bordo con carta (Visa, Mastercard, Amex, Apple Pay, Google Pay) o contanti.",
+      ask: "Le confermo la prenotazione?", miss: "Per darle il prezzo esatto, può indicarmi:", need: { dep: "📍 l'indirizzo di partenza", arr: "🏁 la destinazione", date: "📅 data e ora" }, loc: "it-IT" },
+    ar: { hi: "مرحباً وشكراً على رسالتك 😊", ok: "نعم، متاح ✅", veh: { Van: "فان مرسيدس V-Class", Berline: "سيارة سيدان" }, pax: n => n + " ركاب", bag: n => n + " حقائب",
+      at: "الساعة", price: (p, f) => `💶 السعر: *${p} يورو شامل كل شيء*${f ? " (سعر ثابت)" : ""}، بدون مفاجآت بسبب الزحام.`, seat: "👶 مقعد رضيع / مقعد معزز مجاناً ومركّب.",
+      flight: v => `✈️ الرحلة ${v}: نتابع رحلتك وننتظرك في صالة الوصول مع لافتة باسمك.`, pay: "الدفع في السيارة بالبطاقة (Visa، Mastercard، Amex، Apple Pay، Google Pay) أو نقداً.",
+      ask: "هل أؤكد لك الحجز؟", miss: "لإعطائك السعر الدقيق، هل يمكنك إخباري بـ:", need: { dep: "📍 عنوان الانطلاق", arr: "🏁 الوجهة", date: "📅 التاريخ والوقت" }, loc: "ar-u-nu-latn" }
+  };
+
+
+const court=s=>String(s||"").replace(/,\s*(France|Francia)$/i,"").trim();
+let lang="en",langAuto=true,res=null,texte="";
+const LANGS=[["fr","FR"],["en","EN"],["es","ES"],["it","IT"],["ar","ع"]];
+function dessinerLangs(){$("langs").innerHTML=LANGS.map(([c,l])=>`<button type="button" data-l="${c}" aria-pressed="${c===lang}">${l}</button>`).join("");
+  $("langs").querySelectorAll("button").forEach(b=>b.onclick=()=>{lang=b.dataset.l;langAuto=false;dessinerLangs();ecrire()})}
+function dessinerVeh(){$("veh").querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===veh))}
+let veh="Berline";
+$("veh").querySelectorAll("button").forEach(b=>b.onclick=()=>{veh=b.dataset.v;dessinerVeh();recalcul()});
+
+function siege(){return /b[ée]b[ée]|baby|infant|toddler|siège|siege|rehausseur|booster|car ?seat|silla|seggiolino|rialzo|كرسي|مقعد/i.test(texte)}
+function ecrire(){
+  const t=T[lang]||T.en,L=[t.hi,""],dep=$("dep").value.trim(),arr=$("arr").value.trim(),date=$("date").value,heure=$("heure").value;
+  const manque=[!dep&&"dep",!arr&&"arr",!(date&&heure)&&"date"].filter(Boolean);
+  if(manque.length||!$("prix").value){L.push(t.miss);(manque.length?manque:["dep"]).forEach(m=>L.push(t.need[m]))}
+  else{
+    L.push(t.ok,"","📍 "+court(dep),"🏁 "+court(arr));
+    const dt=new Date(date+"T"+heure);L.push("📅 "+dt.toLocaleDateString(t.loc,{weekday:"long",day:"numeric",month:"long"})+" "+t.at+" "+heure);
+    const pax=+$("pax").value||1,bag=+$("bag").value||0;L.push("👨‍👩‍👧 "+t.pax(pax)+(bag?" · 🧳 "+t.bag(bag):""));
+    L.push("🚐 "+t.veh[veh]);
+    if(siege())L.push(t.seat);
+    const vol=$("vol").value.trim();if(vol)L.push(t.flight(vol.toUpperCase()));
+    L.push("",t.price($("prix").value,!!(res&&res.forfait)),t.pay,"",t.ask);
+  }
+  L.push("","Badr – Taxis Van Paris");
+  $("msg").value=L.join("\n");majWa();
+}
+function majWa(){$("wa").href="https://wa.me/?text="+encodeURIComponent($("msg").value)}
+$("msg").addEventListener("input",majWa);
+
+let calcN=0;
+async function recalcul(){
+  const dep=$("dep").value.trim(),arr=$("arr").value.trim(),n=++calcN;
+  const pax=+$("pax").value||1;if(pax>4&&veh!=="Van"){veh="Van";dessinerVeh()}
+  if(!dep||!arr){res=null;$("why").textContent="Il manque le départ ou l'arrivée : la réponse le demande au client.";ecrire();return}
+  $("why").textContent="Calcul du prix…";
+  if(!(await attendreMaps())){$("why").textContent="Google Maps ne répond pas : mets le prix à la main.";ecrire();return}
+  try{
+    const[a,b]=await Promise.all([pointDe(dep),pointDe(arr)]);const km=await kmRoute(a,b);
+    if(n!==calcN)return;
+    res=tarif(a,b,km,veh==="Van",pax,$("heure").value,siege());
+    $("prix").value=res.prix;
+    $("why").textContent=(res.forfait?"Forfait "+res.forfait:res.km+" km · "+($("heure").value?(creuse($("heure").value)?"heure creuse":"heure pleine"):"heure à préciser"))+" · grille du site";
+  }catch(e){$("why").textContent="Adresse introuvable : corrige le départ ou l'arrivée ci-dessous.";}
+  ecrire();
+}
+["dep","arr","heure","pax"].forEach(id=>$(id).addEventListener("change",recalcul));
+["date","bag","vol"].forEach(id=>$(id).addEventListener("change",ecrire));
+$("prix").addEventListener("input",ecrire);
+$("minus").onclick=()=>{$("prix").value=Math.max(0,(+$("prix").value||0)-5);ecrire()};
+$("plus").onclick=()=>{$("prix").value=(+$("prix").value||0)+5;ecrire()};
+
+function anonymiser(txt){return txt.replace(/[\w.+-]+@[\w-]+\.[\w.]+/g,"[EMAIL]").replace(/(?:\+|00)\s?\d[\d\s.-]{7,}\d|\b0\s?[1-9](?:[\s.-]?\d{2}){4}\b/g,"[TEL]")
+  .replace(/\b(je m'appelle|my name is|i am|i'm|me llamo|mi chiamo)\s+([A-ZÀ-Ö][\wà-öø-ÿ'-]+(?:\s+[A-ZÀ-Ö][\wà-öø-ÿ'-]+)?)/gi,"$1 [NOM]")}
+async function lire(txt){
+  texte=String(txt||"").trim();if(!texte){$("hErr").textContent="Le message est vide : copie d'abord le message du client.";return}
+  let k=cle();
+  if(!k){k=(prompt("Ta clé admin (la même que pour la lecture IA du tableau de bord) :")||"").trim();if(!k)return;try{localStorage.setItem("tvp_cle_ia",k)}catch(e){}}
+  $("hErr").textContent="";vue("vLoad");$("loadTxt").textContent="Je lis le message…";
+  if(langAuto)lang=detecter(texte);
+  let ch={};
+  try{
+    const r=await fetch(IA_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:"ia",k,texte:anonymiser(texte).slice(0,4000)})});
+    const j=await r.json();
+    if(!j.ok){if(j.error==="acces_refuse"){try{localStorage.removeItem("tvp_cle_ia")}catch(e){}vue("vHome");$("hErr").textContent="Clé admin incorrecte, réessaie.";return}}
+    else ch=j.champs||{};
+  }catch(e){}
+  $("dep").value=ch.dep||"";$("arr").value=ch.arr||"";$("date").value=ch.date||"";$("heure").value=ch.heure||"";
+  $("pax").value=ch.pax||"";$("bag").value=ch.bagages!=null?ch.bagages:"";
+  const mv=texte.match(/\b(?:vol|flight|vuelo|volo|train|tren|treno|eurostar)\b\s*(?:n[°o.]?\s*|:\s*|#\s*)?([A-Z]{0,3}\s?\d{2,5}[A-Z]?)\b/i);$("vol").value=mv?mv[1].replace(/\s/g,"").toUpperCase():"";
+  veh=ch.vehicule||((+ch.pax||1)>4||(+ch.bagages||0)>=4||/poussette|pram|stroller|carrito|passeggino/i.test(texte)?"Van":"Berline");$("prix").value=ch.prix||"";
+  dessinerLangs();dessinerVeh();vue("vRes");
+  $("loadTxt").textContent="Je calcule le prix…";
+  await recalcul();
+}
+$("paste").onclick=async()=>{try{const t=await navigator.clipboard.readText();if(t&&t.trim())return lire(t)}catch(e){}$("zone").focus();$("hErr").textContent="Colle le message dans la case ci-dessous."};
+$("zone").addEventListener("input",()=>{$("go").hidden=!$("zone").value.trim()});
+$("zone").addEventListener("paste",()=>setTimeout(()=>lire($("zone").value),60));
+$("go").onclick=()=>lire($("zone").value);
+$("copy").onclick=()=>{(navigator.clipboard?navigator.clipboard.writeText($("msg").value):Promise.reject()).then(()=>toast("Copié ✓"),()=>{$("msg").select()})};
+const reset=()=>{$("zone").value="";$("go").hidden=true;langAuto=true;res=null;vue("vHome")};
+$("again").onclick=reset;$("new").onclick=reset;
+
+// Ouvert depuis le raccourci « Partager » de l'iPhone : …/?m=texte
+const m=new URLSearchParams(location.search).get("m");if(m){history.replaceState(null,"",location.pathname);lire(m)}
+if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
+})();
+</script>
+</body>
+</html>
