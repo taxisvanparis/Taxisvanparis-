@@ -271,7 +271,7 @@ async function traduire(textes,de,vers){
   textes.forEach((t,i)=>{const k=de+'>'+vers+':'+t;if(memo[k])out[i]=memo[k];else manque.push(i)});
   if(manque.length){
     const idToken=await auth.currentUser.getIdToken();
-    const r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'traduire',idToken,de,vers,textes:manque.map(i=>textes[i])})}).then(x=>x.json());
+    const r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(mode==='invite'?{action:'course',source:'trad',code,push:false,idToken,de,vers,textes:manque.map(i=>textes[i])}:{action:'traduire',idToken,de,vers,textes:manque.map(i=>textes[i])})}).then(x=>x.json());
     if(!r.ok)throw new Error(r.error||'erreur');
     manque.forEach((i,j)=>{out[i]=r.traductions[j]||'';if(textes[i].length<200&&out[i])memo[de+'>'+vers+':'+textes[i]]=out[i]});
     const ks=Object.keys(memo);if(ks.length>600)ks.slice(0,ks.length-600).forEach(k=>delete memo[k]);
@@ -374,7 +374,13 @@ async function envoyer(de,texte){
   texte=texte.trim();if(!texte)return;
   if(!langue){toast(mode==='chauffeur'?'Le client n\'a pas encore choisi sa langue':'Choose your language');if(mode==='chauffeur')choisirLangue();return}
   const L=LG(langue);const src=de==='chauffeur'?'fr':TC(L), dst=de==='chauffeur'?TC(L):'fr';
-  if(mode==='invite'){try{await addDoc(refMsgs(),{de:'client',texte:texte.slice(0,600),langue:TC(L),traduction:null,langueT:'fr',t:serverTimestamp()})}catch(e){toast('⚠️ '+(e.code||'erreur'))}return}
+  if(mode==='invite'){
+    // traduit par le serveur + notification au chauffeur (même si son appli est fermée) ; sinon son téléphone traduira
+    texte=texte.slice(0,600);let tr=null,lg=TC(L);
+    try{const ctl=new AbortController(),to=setTimeout(()=>ctl.abort(),7000);
+      const r=await fetch(API,{method:'POST',signal:ctl.signal,headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'course',source:'trad',idToken:await auth.currentUser.getIdToken(),code,textes:[texte],de:'',vers:'fr',push:true})}).then(x=>x.json());
+      clearTimeout(to);if(r.ok){tr=r.traductions[0]||null;if(r.langues&&/^[a-zA-Z-]{2,8}$/.test(r.langues[0]||''))lg=r.langues[0]}}catch(e){}
+    try{await addDoc(refMsgs(),{de:'client',texte,langue:lg,traduction:tr,langueT:'fr',t:serverTimestamp()})}catch(e){toast('⚠️ '+(e.code||'erreur'))}return}
   // 1) la phrase part tout de suite (l'autre écran la voit et attend la traduction)
   let ref=null;
   try{ref=await addDoc(refMsgs(),{de,texte,langue:src,traduction:null,langueT:dst,t:serverTimestamp()})}catch(e){toast('Envoi impossible (internet ?)');return}
@@ -516,7 +522,7 @@ $('chTel').onclick=async()=>{
   if(!code){
     $('shBody').innerHTML=`<div style="padding:16px;display:grid;gap:12px"><p class="mut" style="margin:0">Le client scanne un QR code avec l'appareil photo de son téléphone : une page s'ouvre (sans appli), il choisit sa langue et vous discutez chacun sur votre téléphone. Ton téléphone fait les traductions : garde l'appli ouverte.</p><button class="btn" id="tGo">Créer le QR code</button></div>`;
     $('sheet').hidden=false;
-    $('tGo').onclick=async()=>{$('tGo').disabled=true;try{await creerTel();setTimeout(()=>$('chTel').onclick(),300)}catch(e){toast('Impossible, étape '+(e.etape||'?')+' ('+(e.code||'erreur')+') – v10');$('tGo').disabled=false}};
+    $('tGo').onclick=async()=>{$('tGo').disabled=true;try{await creerTel();setTimeout(()=>$('chTel').onclick(),300)}catch(e){toast('Impossible, étape '+(e.etape||'?')+' ('+(e.code||'erreur')+') – v11');$('tGo').disabled=false}};
     return;
   }
   const url=lienInvite(code);
