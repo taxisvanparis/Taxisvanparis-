@@ -71,6 +71,20 @@ h1{font-size:26px;line-height:1.15;margin:4px 0 4px;font-weight:800;letter-spaci
 .center .lg{width:64px;height:64px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-weight:900;color:#1a1408;background:linear-gradient(145deg,#ecd08a,var(--gold) 50%,var(--gold2))}
 .toast{position:fixed;left:50%;bottom:calc(84px + var(--bot));transform:translateX(-50%);background:#2a241b;border:1px solid rgba(212,178,94,.4);color:var(--ink);padding:10px 16px;border-radius:999px;font-size:14px;z-index:60;max-width:90vw}
 [dir=rtl] .route,[dir=rtl] .drv{direction:rtl}
+.callb{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:50px;margin:0 0 12px;border-radius:14px;border:0;font-weight:800;font-size:16px;background:linear-gradient(180deg,#5fd391,var(--green));color:#062312}
+.quick{display:flex;gap:6px;overflow-x:auto;max-width:520px;margin:0 auto 8px;scrollbar-width:none}
+.dock .quick button{flex:none;width:auto;height:auto;border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--ink);border-radius:999px;padding:8px 12px;font-size:13.5px;font-weight:650;white-space:nowrap}
+.vu{color:var(--green)}
+.callov{position:fixed;inset:0;z-index:80;background:radial-gradient(120% 60% at 50% 0%,rgba(212,178,94,.22),transparent 60%),#070605;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:24px;text-align:center}
+.callov .big{width:110px;height:110px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:46px;background:linear-gradient(145deg,#ecd08a,var(--gold) 50%,var(--gold2));color:#1a1408;animation:pul 1.6s ease-in-out infinite}
+@keyframes pul{50%{box-shadow:0 0 0 18px rgba(212,178,94,.15)}}
+@media (prefers-reduced-motion:reduce){.callov .big{animation:none}}
+.callov h2{margin:8px 0 0;font-size:24px}.callov p{margin:0;color:var(--mut)}
+.callov .row{display:flex;gap:26px;margin-top:22px}
+.callov .row button{width:70px;height:70px;border-radius:50%;border:0;font-size:28px;color:#fff}
+.callov .ok{background:var(--green)}.callov .no{background:var(--red)}.callov .opt{background:rgba(255,255,255,.12)}
+.callov .opt.on{background:var(--gold);color:#1a1408}
+.callov small{display:block;font-size:12px;color:var(--mut);margin-top:6px}
 </style>
 </head>
 <body>
@@ -92,7 +106,7 @@ h1{font-size:26px;line-height:1.15;margin:4px 0 4px;font-weight:800;letter-spaci
   <section class="card" id="cDrv"><h2 id="tDrv"></h2>
     <div class="drv"><div class="av" id="av"></div><div><b id="drvN"></b><span id="drvV"></span></div></div>
     <div class="plate" id="plate" hidden><span id="plateT"></span></div>
-    <div class="acts"><a class="b" id="bCall">📞 <span id="tCall"></span></a><a class="b w" id="bWa" target="_blank" rel="noopener">💬 WhatsApp</a></div>
+    <div class="acts" hidden><a class="b" id="bCall">📞 <span id="tCall"></span></a><a class="b w" id="bWa" target="_blank" rel="noopener">💬 WhatsApp</a></div>
   </section>
 
   <section class="card" id="cMeet"><h2 id="tMeet"></h2>
@@ -102,19 +116,26 @@ h1{font-size:26px;line-height:1.15;margin:4px 0 4px;font-weight:800;letter-spaci
   </section>
 
   <section class="card chat"><h2 id="tChat"></h2>
+    <button type="button" class="callb" id="bAppel">📞 <span id="tAppel"></span></button>
     <p class="hint" id="chatHint"></p>
     <div class="msgs" id="msgs"></div>
   </section>
 </main>
 
-<div class="dock" id="dock" hidden><form id="fSend"><input id="txt" autocomplete="off" enterkeyhint="send" maxlength="600"><button aria-label="Send">➤</button></form></div>
+<div class="dock" id="dock" hidden><div class="quick" id="quick" hidden></div><form id="fSend"><input id="txt" autocomplete="off" enterkeyhint="send" maxlength="600"><button aria-label="Send">➤</button></form></div>
 
+<audio id="rAudio" autoplay playsinline></audio>
+<div class="callov" id="callov" hidden>
+  <div class="big" id="cIc">📞</div><h2 id="cT"></h2><p id="cS"></p>
+  <div class="row" id="cRing"><button class="no" id="cRefuse" aria-label="Refuser">✕</button><button class="ok" id="cAccept" aria-label="Décrocher">📞</button></div>
+  <div class="row" id="cLive" hidden><div><button class="opt" id="cMute" aria-label="Micro">🎙️</button><small id="cMuteL"></small></div><div><button class="no" id="cHang" aria-label="Raccrocher">✕</button><small id="cHangL"></small></div></div>
+</div>
 <div class="sheet" id="sheet" hidden><div class="in"><h3 id="tLang">🌍</h3><div class="grid" id="grid"></div></div></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-import { getFirestore, doc, setDoc, addDoc, collection, query, orderBy, limit, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, addDoc, updateDoc, collection, query, orderBy, limit, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
 const API="https://script.google.com/macros/s/AKfycbynqJeRA8W1AoYiHWQhS-ZPGHrEHyQBW8xp4xFGAYgP68lAugMsNZqWYkleYV1P4Va6/exec";
 const app=initializeApp({apiKey:"AIzaSyBN8uBFONIt1tDTH9C-NIQKeulFdJ2m26Q",authDomain:"taxis-van-paris-by-abts.firebaseapp.com",projectId:"taxis-van-paris-by-abts",storageBucket:"taxis-van-paris-by-abts.firebasestorage.app",messagingSenderId:"53887245170",appId:"1:53887245170:web:2a3b785d734c54e01f9beb"});
@@ -139,6 +160,12 @@ const T={
  es:{load:'Cargando su trayecto…',hello:'Hola {n} 👋',hello0:'Hola 👋',helloS:'Toda la información de su trayecto está aquí. Puede escribir a su conductor en su idioma.',ride:'Su trayecto',drv:'Su conductor',meet:'Punto de encuentro',chat:'Escribir al conductor',hint:'Escriba en su idioma: el conductor recibe la traducción y sus respuestas aparecen aquí en su idioma.',ph:'Su mensaje…',call:'Llamar',map:'Abrir el mapa',orig:'Ver texto original (francés)',pax:'pasajeros',bags:'maletas',flight:'Vuelo',from:'Recogida',to:'Destino',empty:'Aún no hay mensajes.',err:'No se pudo enviar. Inténtelo de nuevo.',fin:'Este enlace ya no está activo',finS:'Gracias por viajar con Taxis Van Paris. ¿Necesita otro trayecto? Escríbanos por WhatsApp.',lang:'Elija su idioma',drv0:'Su conductor se confirmará pronto'},
  de:{load:'Ihre Fahrt wird geladen…',hello:'Hallo {n} 👋',hello0:'Hallo 👋',helloS:'Alle Infos zu Ihrer Fahrt finden Sie hier. Sie können Ihrem Fahrer in Ihrer Sprache schreiben.',ride:'Ihre Fahrt',drv:'Ihr Fahrer',meet:'Treffpunkt',chat:'Dem Fahrer schreiben',hint:'Schreiben Sie in Ihrer Sprache: Ihr Fahrer erhält die Übersetzung, seine Antworten erscheinen hier in Ihrer Sprache.',ph:'Ihre Nachricht…',call:'Anrufen',map:'Karte öffnen',orig:'Originaltext anzeigen (Französisch)',pax:'Fahrgäste',bags:'Gepäckstücke',flight:'Flug',from:'Abholung',to:'Ziel',empty:'Noch keine Nachrichten.',err:'Senden fehlgeschlagen. Bitte erneut versuchen.',fin:'Dieser Link ist nicht mehr aktiv',finS:'Danke, dass Sie mit Taxis Van Paris gefahren sind. Noch eine Fahrt? Schreiben Sie uns auf WhatsApp.',lang:'Sprache wählen',drv0:'Ihr Fahrer wird bald bestätigt'}
 };
+const CT={fr:{call:'Appeler le chauffeur',callC:'Appeler le client',out:'Appel en cours…',outS:'Appel internet · numéro masqué',inc:'Appel entrant',incC:'Votre chauffeur vous appelle',incD:'Le client vous appelle',live:'En communication',mute:'Micro',hang:'Raccrocher',miss:'📞 Appel manqué',done:'📞 Appel',busy:'Pas de réponse',mic:'Autorisez le micro pour appeler.',seen:'Vu'},
+ en:{call:'Call your driver',callC:'Call the client',out:'Calling…',outS:'Internet call · number hidden',inc:'Incoming call',incC:'Your driver is calling',incD:'The client is calling',live:'On call',mute:'Mute',hang:'Hang up',miss:'📞 Missed call',done:'📞 Call',busy:'No answer',mic:'Please allow the microphone to call.',seen:'Seen'},
+ es:{call:'Llamar al conductor',out:'Llamando…',outS:'Llamada por internet · número oculto',inc:'Llamada entrante',incC:'Su conductor le llama',live:'En llamada',mute:'Silencio',hang:'Colgar',miss:'📞 Llamada perdida',done:'📞 Llamada',busy:'Sin respuesta',mic:'Permita el micrófono para llamar.',seen:'Visto'},
+ it:{call:"Chiama l'autista",out:'Chiamata in corso…',outS:'Chiamata internet · numero nascosto',inc:'Chiamata in arrivo',incC:"Il suo autista la sta chiamando",live:'In chiamata',mute:'Muto',hang:'Riaggancia',miss:'📞 Chiamata persa',done:'📞 Chiamata',busy:'Nessuna risposta',mic:'Consenta il microfono per chiamare.',seen:'Visto'},
+ ar:{call:'اتصل بالسائق',out:'جارٍ الاتصال…',outS:'مكالمة عبر الإنترنت · الرقم مخفي',inc:'مكالمة واردة',incC:'السائق يتصل بك',live:'في مكالمة',mute:'كتم',hang:'إنهاء',miss:'📞 مكالمة فائتة',done:'📞 مكالمة',busy:'لا رد',mic:'اسمح باستخدام الميكروفون للاتصال.',seen:'شوهدت'}};
+const ct=k=>{const c=CT[String(TK(L)).split('-')[0]]||CT.en;return c[k]||CT.en[k]||CT.fr[k]};
 const LG=c=>LANGS.find(l=>l[0]===c)||null;
 const TK=c=>({'en-GB':'en','en-US':'en'})[c]||c;          // clé du dictionnaire
 const TR=c=>(LG(c)||LANGS[0])[2];                          // code de traduction
@@ -160,6 +187,7 @@ function appliquerLangue(){
   ['ride','drv','meet','chat'].forEach(k=>{$('t'+k[0].toUpperCase()+k.slice(1)).textContent=t(k)});
   $('chatHint').textContent=t('hint')+(TR(L)==='fr'?' Les messages peuvent être lus par Taxis Van Paris pour le suivi de votre course.':' Messages may be read by Taxis Van Paris to follow up your ride.');$('tCall').textContent=t('call');$('tMap').textContent=t('map');$('tLang').textContent='🌍 '+t('lang');
   $('finT').textContent=t('fin');$('finS').textContent=t('finS');
+  $('tAppel').textContent=CHAUF?CT.fr.callC:ct('call');
   if(info)rendre();
 }
 $('bLang').onclick=()=>{
@@ -214,15 +242,20 @@ function rendre(){
 $('bOrig').onclick=()=>{$('origT').hidden=!$('origT').hidden};
 
 const hm=ms=>ms?new Date(ms).toLocaleTimeString(TR(L),{hour:'2-digit',minute:'2-digit'}):'';
+const MOI=()=>CHAUF?'chauffeur':'client', AUTRE=()=>CHAUF?'client':'chauffeur';
+function vuPar(){const v=info&&info['vu_'+AUTRE()];return tsMs(v)}
 function dessiner(){
   const liste=msgs.concat(pend);
+  const vu=vuPar(),dernierMien=[...msgs].reverse().find(m=>(CHAUF?m.de!=='client':m.de==='client')&&!m.type);
   if(!liste.length){$('msgs').innerHTML=`<div class="empty">${esc(t('empty'))}</div>`;return}
   $('msgs').innerHTML=liste.map(m=>{
     if(CHAUF){const moi=m.de!=='client';const qui=m.de==='client'?'👤 Client':(m.par==='chauffeur'?'Moi':'🏢 Taxis Van Paris');
       const txt=moi?m.texte:(m.traduction||m.texte);const orig=!moi&&m.langue&&m.langue!=='fr'&&m.texte!==txt?`<div class="tm" style="text-align:left">🌍 ${esc(m.texte)}</div>`:'';
-      return `<div class="bub ${moi?'me':''} ${m.pend?'pend':''}"><div class="tm" style="text-align:left;margin:0 0 3px">${qui}</div>${esc(txt)}${orig}<div class="tm">${m.pend?'…':hm(tsMs(m.t))}</div></div>`;}
+      const lu=moi&&m===dernierMien&&vu&&vu>=tsMs(m.t);
+      return `<div class="bub ${moi?'me':''} ${m.pend?'pend':''}"><div class="tm" style="text-align:left;margin:0 0 3px">${qui}</div>${esc(txt)}${orig}<div class="tm">${m.pend?'…':hm(tsMs(m.t))}${lu?' <span class="vu">✓✓ Vu</span>':''}</div></div>`;}
     const moi=m.de==='client';const txt=moi?m.texte:(m.traduction||m.texte);
-    return `<div class="bub ${moi?'me':''} ${m.pend?'pend':''}">${esc(txt)}<div class="tm">${m.pend?'…':hm(tsMs(m.t))}${moi&&!m.pend?' ✓':''}</div></div>`;
+    const lu=moi&&m===dernierMien&&vu&&vu>=tsMs(m.t);
+    return `<div class="bub ${moi?'me':''} ${m.pend?'pend':''}">${esc(txt)}<div class="tm">${m.pend?'…':hm(tsMs(m.t))}${moi&&!m.pend?(lu?` <span class="vu">✓✓ ${esc(ct('seen'))}</span>`:' ✓'):''}</div></div>`;
   }).join('');
 }
 function finir(){$('app').hidden=true;$('dock').hidden=true;$('load').hidden=true;$('fin').hidden=false}
@@ -247,16 +280,91 @@ $('fSend').onsubmit=async e=>{
   catch(e){toast(t('err'));$('txt').value=texte}
   pend=pend.filter(x=>x!==p);dessiner();
 };
+let dernierVu=0;
+function marquerLu(){if(document.hidden||!msgs.length)return;const der=msgs.filter(m=>CHAUF?m.de==='client':m.de!=='client').pop();if(!der)return;const t0=tsMs(der.t);if(!t0||t0<=dernierVu)return;dernierVu=t0;
+  setDoc(doc(db,'trad_g',code),{['vu_'+MOI()]:serverTimestamp()},{merge:true}).catch(()=>{})}
+document.addEventListener('visibilitychange',marquerLu);
 const scrollBas=()=>setTimeout(()=>window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'}),60);
+
+/* ===== Appel internet masqué : WebRTC pair-à-pair, signalisation dans trad_g/{code}/appels ===== */
+const ICE={iceServers:[{urls:['stun:stun.l.google.com:19302','stun:stun1.l.google.com:19302']},
+  {urls:['turn:openrelay.metered.ca:80','turn:openrelay.metered.ca:443','turn:openrelay.metered.ca:443?transport=tcp'],username:'openrelayproject',credential:'openrelayproject'}]};
+let pc=null,flux=null,appel=null,unsC=[],debut=0,tSonne=null,muet=false;
+const ctxT=k=>CHAUF?CT.fr[k]:ct(k);
+function ov(mode,titre,sous){$('callov').hidden=false;$('cT').textContent=titre;$('cS').textContent=sous;$('cRing').hidden=mode!=='ring';$('cLive').hidden=mode==='ring';$('cMuteL').textContent=ctxT('mute');$('cHangL').textContent=ctxT('hang')}
+function nettoyer(){unsC.forEach(f=>{try{f()}catch(e){}});unsC=[];if(pc){try{pc.close()}catch(e){}pc=null}if(flux){flux.getTracks().forEach(t=>t.stop());flux=null}clearTimeout(tSonne);$('callov').hidden=true;$('rAudio').srcObject=null;muet=false;$('cMute').classList.remove('on')}
+async function micro(){try{return await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}})}catch(e){toast(ctxT('mic'));throw e}}
+function brancher(id,cote){
+  pc=new RTCPeerConnection(ICE);flux.getTracks().forEach(t=>pc.addTrack(t,flux));
+  pc.ontrack=e=>{$('rAudio').srcObject=e.streams[0];$('rAudio').play().catch(()=>{})};
+  pc.onicecandidate=e=>{if(e.candidate)addDoc(collection(db,'trad_g',code,'appels',id,'ice_'+cote),e.candidate.toJSON()).catch(()=>{})};
+  pc.onconnectionstatechange=()=>{if(pc&&pc.connectionState==='connected'){debut=Date.now();ov('live',ctxT('live'),ctxT('outS'))}if(pc&&['failed','closed'].includes(pc.connectionState))raccrocher(false)};
+  const autre=cote==='a'?'b':'a';
+  unsC.push(onSnapshot(collection(db,'trad_g',code,'appels',id,'ice_'+autre),s=>s.docChanges().forEach(c=>{if(c.type==='added'&&pc)pc.addIceCandidate(new RTCIceCandidate(c.doc.data())).catch(()=>{})})));
+}
+async function appeler(){
+  if(appel)return;
+  try{flux=await micro()}catch(e){return}
+  const ref=await addDoc(collection(db,'trad_g',code,'appels'),{de:MOI(),etat:'sonne',t:serverTimestamp()});
+  appel={id:ref.id,moi:'a'};brancher(ref.id,'a');
+  const off=await pc.createOffer();await pc.setLocalDescription(off);
+  await updateDoc(ref,{offer:{type:off.type,sdp:off.sdp}});
+  ov('live',ctxT('out'),ctxT('outS'));
+  unsC.push(onSnapshot(ref,async s=>{const d=s.data()||{};
+    if(d.answer&&pc&&!pc.currentRemoteDescription)await pc.setRemoteDescription(d.answer);
+    if(d.etat==='fini'||d.etat==='refuse'){if(d.etat==='refuse')toast(ctxT('busy'));raccrocher(false)}}));
+  tSonne=setTimeout(async()=>{if(!debut&&appel){await updateDoc(ref,{etat:'manque'}).catch(()=>{});journal('miss');toast(ctxT('busy'));nettoyer();appel=null}},35000);
+}
+async function decrocher(){
+  if(!appel||appel.moi!=='b')return;
+  try{flux=await micro()}catch(e){return}
+  const ref=doc(db,'trad_g',code,'appels',appel.id);brancher(appel.id,'b');
+  await pc.setRemoteDescription(appel.offer);const ans=await pc.createAnswer();await pc.setLocalDescription(ans);
+  await updateDoc(ref,{answer:{type:ans.type,sdp:ans.sdp},etat:'en_cours'});
+  ov('live',ctxT('live'),ctxT('outS'));
+  unsC.push(onSnapshot(ref,s=>{const d=s.data()||{};if(d.etat==='fini')raccrocher(false)}));
+}
+async function raccrocher(signaler=true){
+  if(!appel)return nettoyer();
+  const id=appel.id,duree=debut?Math.round((Date.now()-debut)/1000):0,lanceur=appel.moi==='a';
+  if(signaler)await updateDoc(doc(db,'trad_g',code,'appels',id),{etat:appel.moi==='b'&&!debut?'refuse':'fini',duree}).catch(()=>{});
+  if(lanceur&&duree)journal('done',duree);
+  appel=null;debut=0;nettoyer();
+}
+function journal(type,duree){
+  const d=type==='miss'?'':' · '+Math.floor(duree/60)+' min '+String(duree%60).padStart(2,'0');
+  const fr=(type==='miss'?CT.fr.miss:CT.fr.done)+d, loc=(type==='miss'?ct('miss'):ct('done'))+d;
+  // texte = langue de celui qui écrit ; traduction = langue de l'autre (le français pour le chauffeur et Badr)
+  addDoc(collection(db,'trad_g',code,'msgs'),CHAUF?{de:'chauffeur',par:'chauffeur',type:'appel',texte:fr,traduction:loc,langue:'fr',t:serverTimestamp()}
+    :{de:'client',type:'appel',texte:loc,traduction:fr,langue:TR(L),t:serverTimestamp()}).catch(()=>{});
+}
+function ecouterAppels(){
+  onSnapshot(query(collection(db,'trad_g',code,'appels'),orderBy('t','desc'),limit(1)),s=>{
+    const d0=s.docs[0];if(!d0)return;const d={id:d0.id,...d0.data()};
+    const recent=Date.now()-tsMs(d.t)<40000;
+    if(d.etat==='sonne'&&d.de!==MOI()&&d.offer&&recent&&!appel){
+      appel={id:d.id,moi:'b',offer:d.offer};
+      ov('ring',ctxT('inc'),CHAUF?CT.fr.incD:ct('incC'));
+      try{navigator.vibrate&&navigator.vibrate([400,200,400,200,400])}catch(e){}
+    }
+    if(appel&&appel.moi==='b'&&d.id===appel.id&&['manque','fini'].includes(d.etat)&&!debut){appel=null;nettoyer()}
+  },()=>{});
+}
+$('bAppel').onclick=appeler;$('cAccept').onclick=decrocher;$('cRefuse').onclick=()=>raccrocher(true);$('cHang').onclick=()=>raccrocher(true);
+$('cMute').onclick=()=>{if(!flux)return;muet=!muet;flux.getAudioTracks().forEach(t=>t.enabled=!muet);$('cMute').classList.toggle('on',muet)};
+window.addEventListener('pagehide',()=>{if(appel)raccrocher(true)});
 
 appliquerLangue();
 if(CHAUF){
   document.title='Taxis Van Paris – Chat client';
   $('bLang').hidden=true;$('cDrv').hidden=true;
-  const st=document.createElement('style');st.textContent='#hello{font-size:22px}';document.head.appendChild(st);
+  const st=document.createElement('style');st.textContent='#hello{font-size:22px}.wrap{padding-bottom:calc(170px + var(--bot))}';document.head.appendChild(st);
   const fixe=()=>{$('hello').textContent='💬 Conversation avec le client';$('helloS').textContent='🔒 Le numéro du client est masqué. Écris en français : ton message part traduit dans sa langue.';
     $('tChat').textContent='Messages';$('chatHint').textContent='Les messages du client arrivent traduits en français (original en dessous).';$('txt').placeholder='Écrire au client…'};
   const r0=rendre;rendre=function(){r0();fixe()};fixe();
+  const Q=['Je suis arrivé, je vous attends 👋','Je suis à la sortie… ','J\'arrive dans 5 minutes','Votre vol a atterri, prenez votre temps','Je ne vous trouve pas, où êtes-vous ?','Je suis devant, voiture noire'];
+  $('quick').innerHTML=Q.map(q=>`<button type="button">${esc(q)}</button>`).join('');$('quick').hidden=false;
+  $('quick').querySelectorAll('button').forEach(b=>b.onclick=()=>{const v=b.textContent;if(/…\s*$/.test(v)){$('txt').value=v.replace(/…\s*$/,'');$('txt').focus()}else{$('txt').value=v;$('fSend').requestSubmit()}});
 }
 if(!code){finir()}
 else{
@@ -265,12 +373,17 @@ else{
     onSnapshot(doc(db,'trad_codes',code),s=>{const d=s.exists()?s.data():null;if(!d||!d.actif||tsMs(d.exp)<Date.now())finir()},()=>finir());
     onSnapshot(doc(db,'trad_g',code),s=>{
       if(!s.exists()){finir();return}
-      info=s.data();$('load').hidden=true;$('app').hidden=false;$('dock').hidden=false;rendre();envoyerLangue();
+      info=s.data();
+      {const c=info.course||{},m=String(c.date||'').match(/^(\d{4})-(\d{2})-(\d{2})$/),h=String(c.heure||'').match(/^(\d{1,2}):(\d{2})/);
+       if(m&&h&&Date.now()>new Date(+m[1],+m[2]-1,+m[3],+h[1],+h[2]).getTime()+3*3600e3&&!CHAUF){finir();return}}
+      $('load').hidden=true;$('app').hidden=false;$('dock').hidden=false;rendre();envoyerLangue();
     },()=>finir());
+    ecouterAppels();
     let premier=true;
     onSnapshot(query(collection(db,'trad_g',code,'msgs'),orderBy('t','desc'),limit(80)),s=>{
       const n=msgs.length;msgs=s.docs.map(d=>({id:d.id,...d.data()})).reverse();dessiner();
-      if(!premier&&msgs.length>n&&msgs[msgs.length-1].de!=='client'){scrollBas();try{navigator.vibrate&&navigator.vibrate(120)}catch(e){}}
+      if(!premier&&msgs.length>n&&(CHAUF?msgs[msgs.length-1].de==='client':msgs[msgs.length-1].de!=='client')){scrollBas();try{navigator.vibrate&&navigator.vibrate(120)}catch(e){}}
+      marquerLu();
       premier=false;
     },()=>{});
   });
