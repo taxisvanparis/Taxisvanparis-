@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0B0B0D">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Mes outils">
+<link rel="apple-touch-icon" href="/pancarte-tvp-k7x2/icon-192.png">
+<title>Mes outils | Taxis Van Paris</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@800;900&display=swap">
+<style>
+:root{--bg:#0B0B0D;--panel:#151518;--line:#2B2823;--fg:#F3EFE6;--muted:#A39C8E;--gold:#C9A24B;--gold2:#E4C57A;--ok:#7FC79A;--wait:#E8A33C;
+  --display:"Playfair Display",Georgia,serif;--body:"DM Sans",system-ui,-apple-system,"Segoe UI",sans-serif;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.45}
+.wrap{max-width:760px;margin:0 auto;padding:max(18px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 48px max(16px,env(safe-area-inset-left))}
+.brand{font:900 24px/1 var(--display);margin:0}.brand span{color:var(--gold)}
+h1{font:800 clamp(26px,6vw,34px)/1.1 var(--display);margin:14px 0 6px;text-wrap:balance}
+.lead{color:var(--muted);margin:0 0 6px}
+nav{position:sticky;top:0;z-index:5;background:var(--bg);display:flex;gap:6px;overflow-x:auto;padding:12px 0;border-bottom:1px solid var(--line);margin-top:12px;scrollbar-width:none}
+nav a{flex:none;border:1px solid var(--line);border-radius:999px;padding:7px 12px;color:var(--fg);text-decoration:none;font-size:13.5px;font-weight:600}
+h2{font:800 21px/1.2 var(--display);margin:28px 0 10px;color:var(--gold2)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.card{display:flex;gap:12px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:13px;color:var(--fg);text-decoration:none;min-width:0}
+a.card:hover,a.card:focus-visible{border-color:var(--gold)}
+.ic{font-size:24px;line-height:1;flex:none}
+.card b{display:block;font-size:15px}
+.card small{display:block;color:var(--muted);font-size:12.5px;margin-top:3px}
+.tag{display:inline-block;font-size:11px;font-weight:700;border-radius:999px;padding:2px 8px;margin-top:6px;border:1px solid var(--line)}
+.tag.ok{color:var(--ok);border-color:rgba(127,199,154,.4)}.tag.wait{color:var(--wait);border-color:rgba(232,163,60,.5)}.tag.off{color:var(--muted)}
+.tl{list-style:none;margin:0;padding:0;border-left:2px solid var(--line);margin-left:6px}
+.tl li{position:relative;padding:0 0 14px 18px}
+.tl li::before{content:"";position:absolute;left:-7px;top:5px;width:12px;height:12px;border-radius:50%;background:var(--gold)}
+.tl .d{font-size:12px;color:var(--gold2);font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.tl p{margin:2px 0 0;color:var(--fg)}
+.note{color:var(--muted);font-size:13px;margin-top:24px}
+:focus-visible{outline:2px solid var(--gold2);outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="brand">Taxis <span>Van</span> Paris</p>
+  <h1>Mes outils</h1>
+  <p class="lead">Tout ce qu'on a construit ensemble, au même endroit. Page privée : elle n'apparaît ni dans le menu ni sur Google.</p>
+  <nav><a href="#jour">Au quotidien</a><a href="#site">Le site</a><a href="#partenaires">Partenaires</a><a href="#scripts">Automatismes</a><a href="#attente">En attente</a><a href="#historique">Historique</a></nav>
+
+  <h2 id="jour">Au quotidien</h2>
+  <div class="grid">
+    <a class="card" href="/dashboard/"><span class="ic">📋</span><span><b>Tableau de bord</b><small>Réservations, badges Site/Hôtel/⚡ Immédiat, notifications 🔔, factures, chauffeurs, calendrier 📅, 📢 Dispatcher, saisie IA</small><span class="tag ok">En ligne</span></span></a>
+    <a class="card" href="/repondre-r4m8/"><span class="ic">💬</span><span><b>Répondre</b><small>Colle le message du client : prix de la grille du site + réponse dans sa langue → WhatsApp</small><span class="tag ok">En ligne</span></span></a>
+    <a class="card" href="/pancarte-tvp-k7x2/"><span class="ic">🪧</span><span><b>Pancarte</b><small>Nom du client en grand, envoi depuis le tableau de bord, Arrivées du jour, QR avis Google</small><span class="tag ok">En ligne</span></span></a>
+    <a class="card" href="/traduction-p4v9/"><span class="ic">🗣️</span><span><b>TVP Traduction</b><small>Chauffeur ↔ client en 9 langues, client sur son téléphone par QR code</small><span class="tag ok">En ligne</span></span></a>
+    <a class="card" href="/depenses-k9m4/"><span class="ic">💶</span><span><b>Mes dépenses</b><small>Dépenses, recettes, chiffre d'affaires du jour/mois, À recevoir, frais communs avec Ahmed (A/B)</small><span class="tag ok">En ligne</span></span></a>
+    <a class="card" href="/raccourcis-q7p3/"><span class="ic">⚡</span><span><b>Mes raccourcis</b><small>Arrivées gares et aéroports, outils, QR avis</small><span class="tag ok">En ligne</span></span></a>
+  </div>
+
+  <h2 id="site">Le site taxisvanparis.fr</h2>
+  <div class="grid">
+    <a class="card" href="/"><span class="ic">🇫🇷</span><span><b>Accueil + calculateur</b><small>Prix instantané, forfaits aéroports et gares, siège bébé offert, van 8 places</small></span></a>
+    <a class="card" href="/en.html"><span class="ic">🌍</span><span><b>EN · ES · IT · AR</b><small>Le site complet en 5 langues, langue choisie automatiquement</small></span></a>
+    <a class="card" href="/taxi-aeroport-cdg-roissy.html"><span class="ic">✈️</span><span><b>Taxi CDG Roissy</b><small>Page dédiée, prix fixe, réservation</small></span></a>
+    <a class="card" href="/taxi-aeroport-orly.html"><span class="ic">✈️</span><span><b>Taxi Orly</b><small>Page dédiée, prix fixe, réservation</small></span></a>
+    <a class="card" href="/taxi-disneyland-paris.html"><span class="ic">🏰</span><span><b>Taxi Disneyland</b><small>Page dédiée familles</small></span></a>
+    <a class="card" href="/beauvais-paris-navette-train-taxi.html"><span class="ic">🛫</span><span><b>Beauvais – Paris</b><small>Article navette, train ou taxi + forfait</small></span></a>
+    <a class="card" href="/paris-taxi-baby-seat.html"><span class="ic">👶</span><span><b>Siège bébé (EN)</b><small>Page familles avec enfants</small></span></a>
+    <a class="card" href="/paris-layover-tour.html"><span class="ic">🗼</span><span><b>Escale à Paris</b><small>Tour de Paris pendant une longue escale</small></span></a>
+    <a class="card" href="/chauffeur-mise-a-disposition.html"><span class="ic">🕴️</span><span><b>Chauffeur à disposition</b><small>Sur devis</small></span></a>
+  </div>
+
+  <h2 id="partenaires">Hôtels et Airbnb partenaires</h2>
+  <div class="grid">
+    <a class="card" href="/hotel/?h=exemple"><span class="ic">🏨</span><span><b>Page de réservation hôtel</b><small>QR code par partenaire, 5 langues, adresse pré-remplie, commission</small><span class="tag ok">En ligne</span></span></a>
+    <a class="card" href="/hotel/espace.html"><span class="ic">🔑</span><span><b>Espace hôtel</b><small>Chaque hôtel voit ses réservations et sa commission</small><span class="tag ok">En ligne</span></span></a>
+    <a class="card" href="/hotel/admin.html"><span class="ic">📊</span><span><b>Commissions à verser</b><small>Courses effectuées et commissions par hôtel</small><span class="tag ok">En ligne</span></span></a>
+    <a class="card" href="/demo-hotel-r8n3/"><span class="ic">📱</span><span><b>Démo hôtels (iPad)</b><small>Présentation du partenariat à montrer à la réception</small><span class="tag ok">En ligne</span></span></a>
+    <a class="card" href="/hotel/?h=richelieu38"><span class="ic">🏠</span><span><b>38 rue de Richelieu</b><small>Airbnb sans commission, autocollants QR imprimés</small><span class="tag ok">En ligne</span></span></a>
+  </div>
+
+  <h2 id="scripts">Automatismes (Google Apps Script)</h2>
+  <div class="grid">
+    <div class="card"><span class="ic">📨</span><span><b>Réservations + alertes</b><small>Chaque réservation : e-mail, WhatsApp, notification sur les téléphones</small><span class="tag ok">Actif</span></span></div>
+    <div class="card"><span class="ic">✨</span><span><b>Lecture IA (Gemini)</b><small>Lit un message client et remplit la réservation</small><span class="tag ok">Actif</span></span></div>
+    <div class="card"><span class="ic">🏨</span><span><b>Hôtels (Google Sheets)</b><small>Onglets Hôtels, Tarifs, Reservations</small><span class="tag ok">Actif</span></span></div>
+    <div class="card"><span class="ic">🤖</span><span><b>Agents de la semaine</b><small>Contenu, prospection, marchés publics, suivi hôtels, article du mois, agences étrangères</small><span class="tag ok">Programmés</span></span></div>
+  </div>
+
+  <h2 id="attente">Prêt, en attente de ton OK</h2>
+  <div class="grid">
+    <div class="card"><span class="ic">🤝</span><span><b>Espace partenaires</b><small>Ajouter un hôtel/Airbnb toi-même, QR et autocollants auto</small><span class="tag wait">Aperçu</span></span></div>
+    <div class="card"><span class="ic">🧭</span><span><b>Airbnb → calculateur du site</b><small>Le QR du 38 Richelieu ouvre ton calculateur</small><span class="tag wait">Aperçu</span></span></div>
+    <div class="card"><span class="ic">⏰</span><span><b>Rappel 1 h avant + badge</b><small>Notification « course dans 60 min », ⏰ Dans X min</small><span class="tag wait">Aperçu</span></span></div>
+    <div class="card"><span class="ic">🚖</span><span><b>Dispatch auto Telegram</b><small>Course proposée aux chauffeurs, 1er qui accepte, commission 10 €</small><span class="tag wait">Aperçu</span></span></div>
+    <div class="card"><span class="ic">🖼️</span><span><b>Icône écran d'accueil</b><small>Logo « Taxis Van Paris » pour le site</small><span class="tag off">De côté</span></span></div>
+    <div class="card"><span class="ic">🚕</span><span><b>Lumineux taxi, nouvel accueil</b><small>Photos avec lumineux, accueil « taxis prioritaires »</small><span class="tag off">De côté</span></span></div>
+  </div>
+
+  <h2 id="historique">Historique</h2>
+  <ul class="tl">
+    <li><span class="d">Septembre 2026</span><p>Création du site, calculateur de prix, QR codes hôtels avec commission et Google Sheets, outil de demande d'avis Google.</p></li>
+    <li><span class="d">12 octobre</span><p>Van 8 places sur tout le site, page Chauffeur à disposition, vraies factures (n° auto, TVA 10 %, PDF).</p></li>
+    <li><span class="d">15 – 17 octobre</span><p>Voies de bus, appli Pancarte, appli Dépenses, Raccourcis, notifications et pastille du tableau de bord.</p></li>
+    <li><span class="d">18 – 21 octobre</span><p>« Course dans Paris dès 50 € », Confirmation SMS, frais communs avec Ahmed.</p></li>
+    <li><span class="d">22 – 23 octobre</span><p>TVP Traduction (9 langues, QR client), formulaire de contact avec alerte, nouveaux avis clients.</p></li>
+    <li><span class="d">24 – 26 octobre</span><p>Pancarte fond noir + Arrivées du jour, chiffre d'affaires dans Mes dépenses.</p></li>
+    <li><span class="d">30 octobre</span><p>Badges de provenance et ⚡ Immédiat, Démo hôtels iPad, page hôtel en 5 langues, Airbnb 38 Richelieu.</p></li>
+    <li><span class="d">31 octobre</span><p>Bouton 📅 : calendrier iPhone ou Google Agenda.</p></li>
+    <li><span class="d">1er novembre</span><p>Pages CDG, Orly, Disneyland et Beauvais, anciennes pages redirigées.</p></li>
+    <li><span class="d">2 novembre</span><p>Appli Répondre, réponses rapides WhatsApp en 4 langues.</p></li>
+  </ul>
+
+  <p class="note">Page privée, non indexée. Ajoute-la à ton écran d'accueil : Safari → Partager → Sur l'écran d'accueil.</p>
+</div>
+</body>
+</html>
