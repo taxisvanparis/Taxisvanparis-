@@ -350,7 +350,7 @@ function ecouterAppels(){
     if(appel&&appel.moi==='b'&&d.id===appel.id&&['manque','fini'].includes(d.etat)&&!debut){appel=null;nettoyer()}
   },()=>{});
 }
-$('bAppel').onclick=appeler;$('cAccept').onclick=decrocher;$('cRefuse').onclick=()=>raccrocher(true);$('cHang').onclick=()=>raccrocher(true);
+$('bAppel').onclick=()=>appeler().catch(e=>{nettoyer();appel=null;toast(e&&e.code==='permission-denied'?(CHAUF?'Appel bloqué : règle Firebase à ajouter':'Call not available yet, please write a message'):(CHAUF?'Appel impossible, réessaie':'Call failed, please try again'))});$('cAccept').onclick=decrocher;$('cRefuse').onclick=()=>raccrocher(true);$('cHang').onclick=()=>raccrocher(true);
 $('cMute').onclick=()=>{if(!flux)return;muet=!muet;flux.getAudioTracks().forEach(t=>t.enabled=!muet);$('cMute').classList.toggle('on',muet)};
 window.addEventListener('pagehide',()=>{if(appel)raccrocher(true)});
 
