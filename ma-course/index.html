@@ -46,6 +46,9 @@ h1{font-size:26px;line-height:1.15;margin:4px 0 4px;font-weight:800;letter-spaci
 .b.g{background:linear-gradient(180deg,#e2c477,var(--gold) 45%,var(--gold2));color:#1a1408;border:0}
 .b.w{border-color:rgba(70,195,123,.6);color:var(--green)}
 .meet{font-size:17px;line-height:1.5;white-space:pre-line}
+.meetph{display:block;width:100%;max-height:340px;object-fit:cover;border-radius:14px;border:1px solid var(--line);margin:0 0 12px;cursor:zoom-in}
+.zoom{position:fixed;inset:0;z-index:99;background:rgba(0,0,0,.94);display:grid;place-items:center;padding:calc(10px + var(--top)) 10px calc(10px + var(--bot))}
+.zoom img{max-width:100%;max-height:100%;object-fit:contain;border-radius:10px}
 .orig{margin-top:10px;font-size:13px;color:var(--mut);background:none;border:0;padding:0;text-decoration:underline}
 .origt{margin-top:6px;font-size:14px;color:var(--mut);white-space:pre-line}
 .chat .hint{color:var(--mut);font-size:14.5px;line-height:1.45;margin:-4px 0 12px}
@@ -110,6 +113,7 @@ h1{font-size:26px;line-height:1.15;margin:4px 0 4px;font-weight:800;letter-spaci
   </section>
 
   <section class="card" id="cMeet"><h2 id="tMeet"></h2>
+    <img class="meetph" id="meetPh" alt="" hidden>
     <div class="meet" id="meet"></div>
     <button class="orig" id="bOrig" hidden></button><div class="origt" id="origT" hidden></div>
     <div class="acts" id="mapActs" style="grid-template-columns:1fr"><a class="b" id="bMap" target="_blank" rel="noopener">🗺️ <span id="tMap"></span></a></div>
@@ -234,12 +238,14 @@ function rendre(){
   $('bCall').href='tel:'+tel;$('bWa').href='https://wa.me/'+wa;$('finWa').href='https://wa.me/'+wa;
   // rendez-vous
   $('cMeet').hidden=!rdv.texte;
+  const ph=/^[\w-]+\.(jpe?g|png|webp)$/i.test(rdv.photo||'')?rdv.photo:'';$('meetPh').hidden=!ph;if(ph&&!$('meetPh').src.endsWith('/rdv/'+ph)){$('meetPh').src='../rdv/'+ph}$('meetPh').alt=t('meet');
   $('meet').textContent=ti?(ti[0]||rdv.texte||''):(rdv.texte||'');
   $('bOrig').hidden=tr==='fr'||!rdv.texte;$('bOrig').textContent=t('orig');$('origT').textContent=rdv.texte||'';
   const lieu=rdv.lieu||c.dep;$('mapActs').hidden=!lieu;$('bMap').href='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(lieu||'');
   dessiner();
 }
 $('bOrig').onclick=()=>{$('origT').hidden=!$('origT').hidden};
+$('meetPh').onclick=()=>{const z=document.createElement('div');z.className='zoom';const i=new Image();i.src=$('meetPh').src;i.alt=$('meetPh').alt;z.appendChild(i);z.onclick=()=>z.remove();document.body.appendChild(z)};
 
 const hm=ms=>ms?new Date(ms).toLocaleTimeString(TR(L),{hour:'2-digit',minute:'2-digit'}):'';
 const MOI=()=>CHAUF?'chauffeur':'client', AUTRE=()=>CHAUF?'client':'chauffeur';

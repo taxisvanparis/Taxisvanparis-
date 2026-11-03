@@ -607,6 +607,8 @@
         <div class="field" hidden><label>Téléphone du chauffeur</label><input id="mc-tel" type="tel"></div>
         <div class="field"><label>Véhicule (modèle + couleur)</label><input id="mc-modele" type="text" placeholder="Mercedes Classe V noire"></div>
         <div class="field"><label>Plaque</label><input id="mc-plaque" type="text" autocapitalize="characters" placeholder="AB-123-CD"></div>
+        <div class="field" style="grid-column:1/-1"><label>Lieu du rendez-vous (photo montrée au client)</label><select id="mc-point" class="mc-ta"></select>
+          <img id="mc-photo" alt="Photo du point de rendez-vous" hidden style="margin-top:8px;width:100%;max-height:260px;object-fit:cover;border-radius:10px;border:1px solid var(--border)"></div>
         <div class="field" style="grid-column:1/-1"><label>Point de rendez-vous (en français, traduit automatiquement)</label><textarea id="mc-rdv" rows="3" class="mc-ta"></textarea></div>
       </div>
       <button class="btn-gold" id="mc-save" style="width:100%">Créer le lien</button>
@@ -783,6 +785,7 @@ function anonymise(title,location){
 
 </script>
 <script src="facture.js"></script>
+<script src="../rdv/points.js"></script>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
   import {
@@ -1241,7 +1244,26 @@ function anonymise(title,location){
     return `<button type="button" class="cal-btn lien-btn${r.lienCourse ? " actif" : ""}" style="font-family:inherit;cursor:pointer" data-lien="${esc(r.id)}">${r.lienCourse ? "💬 Lien client ✓" : "🔗 Lien client"}</button> `;
   }
   function mcProfil() { try { return JSON.parse(localStorage.getItem("tvp_mc_prof") || "{}"); } catch (e) { return {}; } }
+  // Points de RDV avec photo (rdv/points.js)
+  function mcPointRemplir(r) {
+    const sel = document.getElementById("mc-point"), R = window.TVP_RDV;
+    if (!R) { sel.closest(".field").hidden = true; return; }
+    if (!sel.options.length) {
+      let h = '<option value="">— Autre / adresse (pas de photo) —</option>', g = "";
+      R.points.forEach(p => { if (p.groupe !== g) { h += (g ? "</optgroup>" : "") + '<optgroup label="' + p.groupe + '">'; g = p.groupe; } h += '<option value="' + p.id + '">' + (p.photo ? "📷 " : "") + p.nom + "</option>"; });
+      sel.innerHTML = h + "</optgroup>";
+      sel.onchange = () => { const p = R.parId(sel.value); if (p) document.getElementById("mc-rdv").value = p.texte; mcPhoto(); };
+    }
+    const p = (r.lien && r.lien.point !== undefined) ? R.parId(r.lien.point) : R.trouver(r.dep);
+    sel.value = p ? p.id : ""; mcPhoto();
+  }
+  function mcPhoto() {
+    const R = window.TVP_RDV, p = R && R.parId(document.getElementById("mc-point").value), im = document.getElementById("mc-photo");
+    if (p && p.photo) { im.src = "../rdv/" + p.photo; im.hidden = false; } else { im.hidden = true; im.removeAttribute("src"); }
+  }
   function rdvDefaut(r) {
+    const pt = window.TVP_RDV && window.TVP_RDV.trouver(r.dep);
+    if (pt) return pt.texte.replace("Arrivées :", "Arrivées" + (r.vol ? " (vol " + r.vol + ")" : "") + " :");
     const d = String(r.dep || "") + " " + String(r.depZone || "");
     const vol = r.vol ? " (vol " + r.vol + ")" : "";
     if (/\b(cdg|roissy|charles[ -]?de[ -]?gaulle)\b/i.test(d)) return `Aéroport Charles-de-Gaulle${vol} : je vous attends dans le hall des arrivées, à la sortie de la zone bagages, avec une pancarte à votre nom.\nÉcrivez-moi ici dès que vous avez récupéré vos bagages.`;
@@ -1271,6 +1293,7 @@ function anonymise(title,location){
     document.getElementById("mc-tel").value = (r.lien && r.lien.tel) || (ch && ch.tel) || pr.tel || "06 67 40 20 05";
     document.getElementById("mc-modele").value = (r.lien && r.lien.modele) || pr["modele_" + (vehLabel(r.vehicule) || "x")] || pr.modele || (vehLabel(r.vehicule) === "Van" ? "Mercedes Classe V noire" : "");
     document.getElementById("mc-plaque").value = (r.lien && r.lien.plaque) || pr["plaque_" + (vehLabel(r.vehicule) || "x")] || pr.plaque || "";
+    mcPointRemplir(r);
     document.getElementById("mc-rdv").value = (r.lien && r.lien.rdv) || rdvDefaut(r);
     document.getElementById("mc-save").textContent = mcCode ? "Mettre à jour la page client" : "Créer le lien";
     document.getElementById("mc-infos").open = !mcCode;
@@ -1333,7 +1356,7 @@ function anonymise(title,location){
   document.getElementById("mc-save").addEventListener("click", async () => {
     const r = mcR; if (!r) return;
     const v = id => document.getElementById(id).value.trim();
-    const lien = { prenom: v("mc-prenom"), tel: v("mc-tel"), modele: v("mc-modele"), plaque: v("mc-plaque").toUpperCase(), rdv: v("mc-rdv") };
+    const lien = { prenom: v("mc-prenom"), tel: v("mc-tel"), modele: v("mc-modele"), plaque: v("mc-plaque").toUpperCase(), rdv: v("mc-rdv"), point: v("mc-point") };
     const pr = mcProfil(), vk = vehLabel(r.vehicule) || "x";
     Object.assign(pr, { prenom: lien.prenom, tel: lien.tel, modele: lien.modele, plaque: lien.plaque, ["modele_" + vk]: lien.modele, ["plaque_" + vk]: lien.plaque });
     try { localStorage.setItem("tvp_mc_prof", JSON.stringify(pr)); } catch (e) {}
@@ -1346,7 +1369,7 @@ function anonymise(title,location){
       course: { nom: nom.length > 1 ? nom.charAt(0).toUpperCase() + nom.slice(1) : "", date: r.date || "", heure: r.heure || "", dep: r.dep || "", arr: r.arr || "", pax: r.pax || "", bagages: r.bagages || "", vol: volCode(r) || r.vol || "" },
       chauffeur: { prenom: lien.prenom, tel: lien.tel.replace(/[^\d+]/g, "").replace(/^0/, "+33") },
       vehicule: { modele: lien.modele, plaque: lien.plaque },
-      rdv: { texte: lien.rdv, lieu: r.dep || "" }, t: serverTimestamp()
+      rdv: { texte: lien.rdv, lieu: r.dep || "", point: lien.point, photo: (window.TVP_RDV && (window.TVP_RDV.parId(lien.point) || {}).photo) || "" }, t: serverTimestamp()
     };
     const btn = document.getElementById("mc-save"); btn.disabled = true;
     try {
