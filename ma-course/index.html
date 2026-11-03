@@ -96,6 +96,10 @@ h1{font-size:26px;line-height:1.15;margin:4px 0 4px;font-weight:800;letter-spaci
   <div class="top"><div class="lg">TVP</div><div class="nm">Taxis Van Paris<small>Paris · CDG · Orly</small></div><button class="lang" id="bLang"></button></div>
   <h1 id="hello"></h1>
   <p class="sub" id="helloS"></p>
+  <section class="card" id="cPush" hidden><h2>🔔 Notifications</h2>
+    <p class="sub" id="pushTxt" style="margin:0"></p>
+    <div class="acts" style="grid-template-columns:1fr"><button class="b" id="bPush" type="button">🔔 Activer les notifications</button></div>
+  </section>
 
   <section class="card"><h2 id="tRide"></h2>
     <div class="when" id="when"></div>
@@ -354,6 +358,36 @@ $('bAppel').onclick=()=>appeler().catch(e=>{nettoyer();appel=null;toast(e&&e.cod
 $('cMute').onclick=()=>{if(!flux)return;muet=!muet;flux.getAudioTracks().forEach(t=>t.enabled=!muet);$('cMute').classList.toggle('on',muet)};
 window.addEventListener('pagehide',()=>{if(appel)raccrocher(true)});
 
+/* ===== Notifications du chauffeur : un message du client arrive même si la page est fermée ===== */
+const VAPID="BOXaMxALtm_gQKauJU91dkR-7d2-vyr90g8ZLpeXlEZH_v8KoQ5L5CDoKg4oC8VtnM7KQq8uEkEUsPeUiGPqwnU";
+function pushChauffeur(){
+  const ios=/iPhone|iPad|iPod/.test(navigator.userAgent), appli=navigator.standalone===true||(window.matchMedia&&matchMedia('(display-mode: standalone)').matches);
+  const possible='serviceWorker' in navigator&&'PushManager' in window&&'Notification' in window;
+  if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js',{scope:'./'}).catch(()=>{});
+  const maj=()=>{
+    let t='',btn=false;
+    if(ios&&!appli)t="📲 Pour être prévenu quand le client écrit (une seule fois) : bouton Partager ⬆️ → « Sur l'écran d'accueil », puis ouvre la page depuis la nouvelle icône et active les notifications.";
+    else if(!possible)t='';
+    else if(Notification.permission==='denied')t='🔕 Notifications bloquées : autorise-les dans les réglages du téléphone.';
+    else if(Notification.permission!=='granted'||ls.get('tvp_ch_push')!==((info&&info.chauffeur&&info.chauffeur.prenom)||'-')){t='Reçois une notification sur ce téléphone dès que le client t\'écrit, même page fermée.';btn=true}
+    $('cPush').hidden=!t;$('pushTxt').textContent=t;$('bPush').hidden=!btn;
+  };
+  $('bPush').onclick=async()=>{
+    const b=$('bPush');b.disabled=true;b.textContent='Activation…';
+    try{
+      if(await Notification.requestPermission()!=='granted')throw new Error('refusé');
+      const reg=await navigator.serviceWorker.ready;
+      const {getMessaging,getToken}=await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-messaging.js');
+      const token=await getToken(getMessaging(app),{vapidKey:VAPID,serviceWorkerRegistration:reg});
+      if(!token)throw new Error('jeton vide');
+      const prenom=(info&&info.chauffeur&&info.chauffeur.prenom)||'';
+      await api({op:'tok',token,prenom,appareil:/iPhone|iPad/.test(navigator.userAgent)?'iPhone':/Android/.test(navigator.userAgent)?'Android':'Ordinateur'});
+      ls.set('tvp_ch_push',prenom||'-');toast('✅ Notifications activées');
+    }catch(e){toast('Impossible d\'activer ('+(e.message||e)+')')}
+    finally{b.disabled=false;b.textContent='🔔 Activer les notifications';maj()}
+  };
+  const r1=rendre;rendre=function(){r1();maj()};maj();
+}
 appliquerLangue();
 if(CHAUF){
   document.title='Taxis Van Paris – Chat client';
@@ -362,6 +396,7 @@ if(CHAUF){
   const fixe=()=>{$('hello').textContent='💬 Conversation avec le client';$('helloS').textContent='🔒 Le numéro du client est masqué. Écris en français : ton message part traduit dans sa langue.';
     $('tChat').textContent='Messages';$('chatHint').textContent='Les messages du client arrivent traduits en français (original en dessous).';$('txt').placeholder='Écrire au client…'};
   const r0=rendre;rendre=function(){r0();fixe()};fixe();
+  pushChauffeur();
   const Q=['Je suis arrivé, je vous attends 👋','Je suis à la sortie… ','J\'arrive dans 5 minutes','Votre vol a atterri, prenez votre temps','Je ne vous trouve pas, où êtes-vous ?','Je suis devant, voiture noire'];
   $('quick').innerHTML=Q.map(q=>`<button type="button">${esc(q)}</button>`).join('');$('quick').hidden=false;
   $('quick').querySelectorAll('button').forEach(b=>b.onclick=()=>{const v=b.textContent;if(/…\s*$/.test(v)){$('txt').value=v.replace(/…\s*$/,'');$('txt').focus()}else{$('txt').value=v;$('fSend').requestSubmit()}});
