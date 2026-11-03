@@ -148,7 +148,8 @@ function langueAuto(){
   return 'en-GB';
 }
 const code=(new URLSearchParams(location.search).get('c')||'').replace(/[^a-z0-9]/g,'').slice(0,30);
-let L=LG(ls.get('tvp_mc_lang'))?ls.get('tvp_mc_lang'):langueAuto();
+const CHAUF=new URLSearchParams(location.search).get('d')==='1'; // lien du chauffeur : chat en français, numéro du client jamais affiché
+let L=CHAUF?'fr':(LG(ls.get('tvp_mc_lang'))?ls.get('tvp_mc_lang'):langueAuto());
 let info=null,msgs=[],pend=[],tradInfo={},tradEnCours='';
 const t=k=>(T[TK(L)]||T.en)[k]||T.en[k];
 
@@ -157,7 +158,7 @@ function appliquerLangue(){
   $('bLang').textContent='🌍 '+LG(L)[1];$('loadT').textContent=t('load');
   $('txt').placeholder=t('ph');
   ['ride','drv','meet','chat'].forEach(k=>{$('t'+k[0].toUpperCase()+k.slice(1)).textContent=t(k)});
-  $('chatHint').textContent=t('hint');$('tCall').textContent=t('call');$('tMap').textContent=t('map');$('tLang').textContent='🌍 '+t('lang');
+  $('chatHint').textContent=t('hint')+(TR(L)==='fr'?' Les messages peuvent être lus par Taxis Van Paris pour le suivi de votre course.':' Messages may be read by Taxis Van Paris to follow up your ride.');$('tCall').textContent=t('call');$('tMap').textContent=t('map');$('tLang').textContent='🌍 '+t('lang');
   $('finT').textContent=t('fin');$('finS').textContent=t('finS');
   if(info)rendre();
 }
@@ -175,7 +176,7 @@ async function api(body){
   finally{clearTimeout(to)}
 }
 let langEnvoyee='';
-async function envoyerLangue(){if(!info||langEnvoyee===L)return;langEnvoyee=L;try{await setDoc(doc(db,'trad_g',code),{langue:L,t:serverTimestamp()},{merge:true})}catch(e){}}
+async function envoyerLangue(){if(CHAUF||!info||langEnvoyee===L)return;langEnvoyee=L;try{await setDoc(doc(db,'trad_g',code),{langue:L,t:serverTimestamp()},{merge:true})}catch(e){}}
 
 const fmtDate=(d,h)=>{const m=String(d||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);if(!m)return h||'';
   const dt=new Date(+m[1],+m[2]-1,+m[3]);let s=dt.toLocaleDateString(TR(L),{weekday:'long',day:'numeric',month:'long'});s=s.charAt(0).toUpperCase()+s.slice(1);
@@ -201,7 +202,7 @@ function rendre(){
   $('av').textContent=pn?pn[0].toUpperCase():'🚖';$('drvN').textContent=pn||t('drv0');
   $('drvV').textContent=(ti?ti[1]:v.modele)||v.modele||'';
   $('plate').hidden=!v.plaque;$('plateT').textContent=String(v.plaque||'').toUpperCase();
-  const tel=String(ch.tel||'+33667402005').replace(/[^\d+]/g,''),wa=tel.replace(/^\+/,'').replace(/^0/,'33');
+  const tel='+33667402005',wa='33667402005'; // numéro de Taxis Van Paris : le numéro du chauffeur n'est jamais montré
   $('bCall').href='tel:'+tel;$('bWa').href='https://wa.me/'+wa;$('finWa').href='https://wa.me/'+wa;
   // rendez-vous
   $('cMeet').hidden=!rdv.texte;
@@ -217,14 +218,26 @@ function dessiner(){
   const liste=msgs.concat(pend);
   if(!liste.length){$('msgs').innerHTML=`<div class="empty">${esc(t('empty'))}</div>`;return}
   $('msgs').innerHTML=liste.map(m=>{
+    if(CHAUF){const moi=m.de!=='client';const qui=m.de==='client'?'👤 Client':(m.par==='chauffeur'?'Moi':'🏢 Taxis Van Paris');
+      const txt=moi?m.texte:(m.traduction||m.texte);const orig=!moi&&m.langue&&m.langue!=='fr'&&m.texte!==txt?`<div class="tm" style="text-align:left">🌍 ${esc(m.texte)}</div>`:'';
+      return `<div class="bub ${moi?'me':''} ${m.pend?'pend':''}"><div class="tm" style="text-align:left;margin:0 0 3px">${qui}</div>${esc(txt)}${orig}<div class="tm">${m.pend?'…':hm(tsMs(m.t))}</div></div>`;}
     const moi=m.de==='client';const txt=moi?m.texte:(m.traduction||m.texte);
     return `<div class="bub ${moi?'me':''} ${m.pend?'pend':''}">${esc(txt)}<div class="tm">${m.pend?'…':hm(tsMs(m.t))}${moi&&!m.pend?' ✓':''}</div></div>`;
   }).join('');
 }
 function finir(){$('app').hidden=true;$('dock').hidden=true;$('load').hidden=true;$('fin').hidden=false}
 
+function langueClient(){const d=msgs.filter(m=>m.de==='client'&&m.langue).pop();if(d)return d.langue;if(info&&info.langue)return TR(info.langue);return 'en'}
 $('fSend').onsubmit=async e=>{
   e.preventDefault();const texte=$('txt').value.trim().slice(0,600);if(!texte)return;$('txt').value='';
+  if(CHAUF){
+    const p={de:'chauffeur',par:'chauffeur',texte,pend:true,t:null};pend.push(p);dessiner();scrollBas();
+    const vers=langueClient();let trad=texte;
+    if(vers!=='fr'){try{const r=await api({textes:[texte],de:'fr',vers,push:false});trad=r.traductions[0]||texte}catch(x){trad=null}}
+    try{await addDoc(collection(db,'trad_g',code,'msgs'),{de:'chauffeur',par:'chauffeur',texte,langue:'fr',traduction:trad||texte,langueT:vers,t:serverTimestamp()})}
+    catch(x){toast('Envoi impossible, réessaie');$('txt').value=texte}
+    pend=pend.filter(x=>x!==p);dessiner();return;
+  }
   const p={de:'client',texte,pend:true,t:null};pend.push(p);dessiner();scrollBas();
   let trad=null;const src=TR(L);
   // langue détectée automatiquement : un client réglé en anglais qui écrit en français arrive bien en français
@@ -237,6 +250,14 @@ $('fSend').onsubmit=async e=>{
 const scrollBas=()=>setTimeout(()=>window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'}),60);
 
 appliquerLangue();
+if(CHAUF){
+  document.title='Taxis Van Paris – Chat client';
+  $('bLang').hidden=true;$('cDrv').hidden=true;
+  const st=document.createElement('style');st.textContent='#hello{font-size:22px}';document.head.appendChild(st);
+  const fixe=()=>{$('hello').textContent='💬 Conversation avec le client';$('helloS').textContent='🔒 Le numéro du client est masqué. Écris en français : ton message part traduit dans sa langue.';
+    $('tChat').textContent='Messages';$('chatHint').textContent='Les messages du client arrivent traduits en français (original en dessous).';$('txt').placeholder='Écrire au client…'};
+  const r0=rendre;rendre=function(){r0();fixe()};fixe();
+}
 if(!code){finir()}
 else{
   onAuthStateChanged(auth,u=>{

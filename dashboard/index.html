@@ -604,7 +604,7 @@
     <details id="mc-infos" open><summary>🚖 Infos affichées au client</summary>
       <div class="grid2">
         <div class="field"><label>Prénom du chauffeur</label><input id="mc-prenom" type="text"></div>
-        <div class="field"><label>Téléphone du chauffeur</label><input id="mc-tel" type="tel"></div>
+        <div class="field" hidden><label>Téléphone du chauffeur</label><input id="mc-tel" type="tel"></div>
         <div class="field"><label>Véhicule (modèle + couleur)</label><input id="mc-modele" type="text" placeholder="Mercedes Classe V noire"></div>
         <div class="field"><label>Plaque</label><input id="mc-plaque" type="text" autocapitalize="characters" placeholder="AB-123-CD"></div>
         <div class="field" style="grid-column:1/-1"><label>Point de rendez-vous (en français, traduit automatiquement)</label><textarea id="mc-rdv" rows="3" class="mc-ta"></textarea></div>
@@ -617,6 +617,7 @@
         <a class="cal-btn sms-btn" id="mc-sms">✉️ Par SMS</a>
         <button type="button" class="cal-btn" id="mc-copy">📋 Copier le lien</button>
         <a class="cal-btn" id="mc-voir" target="_blank" rel="noopener">👁 Voir la page client</a>
+        <button type="button" class="cal-btn" id="mc-copy-ch">🚖 Copier le lien chauffeur</button>
       </div>
     </div>
     <div id="mc-chat" hidden>
@@ -1214,6 +1215,7 @@ function anonymise(title,location){
     if (enCompte) L.push("💳 En compte");
     const note = sansPrixNiTel(enCompte ? String(r.note || "").replace(/\ben\s+compte\b/gi, "") : r.note).replace(/^[\s,;.:-]+|[\s,;:-]+$/g, "").replace(/\s+([,;.])/g, "$1").replace(/([,;])\s*(?=[,;]|$)/g, "");
     if (note) L.push(`📝 ${note}`);
+    if (r.lienCourse) L.push("", "💬 Écrire au client (numéro masqué, traduit) :", new URL("../ma-course/?c=" + r.lienCourse + "&d=1", location.href).href);
     return L.join("\n");
   }
   function waChauffeur(r) {
@@ -1324,7 +1326,7 @@ function anonymise(title,location){
     const hm = v => { const ms = v && v.toMillis ? v.toMillis() : 0; return ms ? new Date(ms).toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }) : "…"; };
     box.innerHTML = mcMsgs.map(m => m.de === "client"
       ? `<div class="mc-b"><b>${esc(m.traduction || "…")}</b>${m.langue && m.langue !== "fr" ? `<small>🌍 ${esc(m.texte)}</small>` : ""}<small>${hm(m.t)}</small></div>`
-      : `<div class="mc-b moi">${esc(m.texte)}${m.traduction && m.traduction !== m.texte ? `<small>→ ${esc(m.traduction)}</small>` : ""}<small>${hm(m.t)}</small></div>`).join("");
+      : `<div class="mc-b moi">${m.par === "chauffeur" ? "<small style='margin:0 0 3px'>🚖 Chauffeur</small>" : ""}${esc(m.texte)}${m.traduction && m.traduction !== m.texte ? `<small>→ ${esc(m.traduction)}</small>` : ""}<small>${hm(m.t)}</small></div>`).join("");
     box.scrollTop = box.scrollHeight;
   }
   document.getElementById("mc-close").addEventListener("click", () => { mcStop(); document.getElementById("modal-lien").classList.remove("shown"); });
@@ -1365,6 +1367,7 @@ function anonymise(title,location){
     btn.disabled = false;
   });
   document.getElementById("mc-copy").addEventListener("click", () => { copyText(mcUrl(mcCode)); toast("Lien copié"); });
+  document.getElementById("mc-copy-ch").addEventListener("click", () => { copyText(mcUrl(mcCode) + "&d=1"); toast("Lien chauffeur copié (chat sans numéro)"); });
   document.getElementById("mc-form").addEventListener("submit", async e => {
     e.preventDefault(); const inp = document.getElementById("mc-txt"), texte = inp.value.trim().slice(0, 600); if (!texte || !mcCode) return; inp.value = "";
     const vers = mcCible().code;
@@ -2135,7 +2138,7 @@ function anonymise(title,location){
         ${volInfo(c) || volCode(c) ? `<div class="course-meta" style="color:var(--amber);font-weight:600;margin-bottom:6px">✈️ ${volInfo(c) || "Vol " + volCode(c)}${volBtn(c)}</div>` : ""}
         <div class="course-meta">${c.nom || ""} · ${c.pax || 1} passager(s)${c.bagages ? " · " + c.bagages + " bagage(s)" : ""} · ${c.vehicule || ""}</div>
         <div class="course-actions">
-          <a class="action-call" href="tel:${c.tel || ""}">Appeler</a>
+          ${c.lienCourse ? `<a class="action-call" target="_blank" rel="noopener" href="../ma-course/?c=${encodeURIComponent(c.lienCourse)}&d=1">💬 Écrire au client</a>` : `<span class="course-meta" style="margin:0">💬 Chat client : demande le lien à Badr</span>`}
           <a class="action-waze" target="_blank" rel="noopener" href="https://waze.com/ul?q=${encodeURIComponent(c.dep||"")}&navigate=yes">Waze départ</a>
           <a class="action-waze" target="_blank" rel="noopener" href="https://waze.com/ul?q=${encodeURIComponent(c.arr||"")}&navigate=yes">Waze arrivée</a>
           <a class="action-map" target="_blank" rel="noopener" href="https://maps.apple.com/?saddr=${encodeURIComponent(c.dep||"")}&daddr=${encodeURIComponent(c.arr||"")}&dirflg=d">Plans</a>
