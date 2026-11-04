@@ -35,6 +35,7 @@ h1{font-size:26px;line-height:1.15;margin:4px 0 4px;font-weight:800;letter-spaci
 .route small{display:block;color:var(--mut);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 .chip{background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:999px;padding:6px 11px;font-size:14px;font-weight:650}
+.chipL{color:inherit;text-decoration:none;border-color:var(--gold,#d4b25e)}
 .drv{display:flex;gap:14px;align-items:center}
 .av{flex:none;width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:#1a1408;background:linear-gradient(145deg,#ecd08a,var(--gold) 50%,var(--gold2));box-shadow:0 8px 22px rgba(212,178,94,.25)}
 .drv b{font-size:20px;display:block}.drv span{color:var(--mut);font-size:15px}
@@ -224,7 +225,9 @@ function rendre(){
   $('hello').textContent=prenom?t('hello').replace('{n}',prenom):t('hello0');$('helloS').textContent=t('helloS');
   $('when').textContent=fmtDate(c.date,c.heure);
   $('route').innerHTML=`<i><span class="dot"></span></i><div><small>${esc(t('from'))}</small>${esc(c.dep||'—')}</div><i><span class="ln"></span></i><div></div><i><span class="dot f"></span></i><div><small>${esc(t('to'))}</small>${esc(c.arr||'—')}</div>`;
-  $('chips').innerHTML=[c.pax&&`👥 ${esc(c.pax)} ${esc(t('pax'))}`,+c.bagages>0&&`🧳 ${esc(c.bagages)} ${esc(t('bags'))}`,c.vol&&`✈️ ${esc(t('flight'))} ${esc(c.vol)}`].filter(Boolean).map(x=>`<span class="chip">${x}</span>`).join('');
+  $('chips').innerHTML=[c.pax&&`👥 ${esc(c.pax)} ${esc(t('pax'))}`,+c.bagages>0&&`🧳 ${esc(c.bagages)} ${esc(t('bags'))}`,c.vol&&`✈️ ${esc(t('flight'))} ${esc(c.vol)}`].filter(Boolean).map(x=>x.startsWith('✈️')?volLien(c.vol,x):`<span class="chip">${x}</span>`).join('');
+  // Vol cliquable : fiche Google du vol (heure réelle, terminal, porte) dans la langue du client
+  function volLien(v,txt){const code=String(v||'').toUpperCase().replace(/[^A-Z0-9]/g,'');if(!code)return `<span class="chip">${txt}</span>`;const hl=(document.documentElement.lang||'fr').split('-')[0];return `<a class="chip chipL" href="https://www.google.com/search?q=${encodeURIComponent(code)}&hl=${encodeURIComponent(hl)}" target="_blank" rel="noopener">${txt} <span aria-hidden="true">↗</span></a>`;}
   // chauffeur
   const pn=String(ch.prenom||'').trim();
   $('av').textContent=pn?pn[0].toUpperCase():'🚖';$('drvN').textContent=pn||t('drv0');
