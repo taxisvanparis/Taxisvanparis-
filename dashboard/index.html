@@ -400,6 +400,22 @@
   .rc .acts .del{color:var(--red);border-color:transparent}
   .rc .acts .edit{border-color:var(--gold);color:var(--gold-soft)}
   .rc.nouv{box-shadow:0 0 0 2px var(--gold),0 0 18px rgba(201,162,75,.35);}
+  .rc .l3 .acts{flex-direction:column;align-items:stretch;width:100%;gap:7px}
+  .rc .acts .ag{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+  .rc .acts .agl{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);min-width:56px}
+  .rc .acts .ag2{padding-top:6px;border-top:1px dashed var(--border);justify-content:flex-end}
+  .rc .acts .ag2 button{font-size:11.5px;border-color:transparent;color:var(--muted)}
+  .rc .acts .ag2 .del{color:var(--red)}
+  .rc .eta{display:inline-block;white-space:nowrap;font-size:11.5px;font-weight:800;border-radius:999px;padding:3px 9px;margin:4px 6px 0 0;border:1px solid}
+  .suivi-tg{font:inherit;font-weight:800;font-size:13px;min-width:58px;padding:6px 12px;border-radius:999px;cursor:pointer;border:1.5px solid var(--border);background:transparent;color:var(--muted)}
+  .suivi-tg.on{border-color:#46c37b;color:#46c37b;background:#46c37b1f}
+  .ec{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px}
+  .ec .h{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+  .ec .h b{font-size:18px;color:var(--gold-soft)} .ec .h span{font-weight:700;font-size:16px}
+  .ec .big{display:inline-block;font-weight:800;font-size:14px;border-radius:999px;padding:5px 12px;border:1.5px solid;margin:4px 6px 4px 0;white-space:nowrap}
+  .ec .tl{color:var(--muted);font-size:13px;margin:4px 0}
+  .ec .rt{font-size:14.5px;margin:4px 0}
+  .ec a{display:inline-block;margin-top:8px;color:var(--gold);font-weight:700;text-decoration:none;border:1px solid var(--gold);border-radius:10px;padding:7px 12px}
   .rc .src{display:inline-block;font-size:11px;font-weight:800;border-radius:999px;padding:3px 9px;margin:4px 6px 0 0;border:1px solid rgba(255,255,255,.18);color:#e9e2d0;background:rgba(255,255,255,.06)}
   .rc .src.site{border-color:#4f8ef7;color:#9cc0ff}.rc .src.hotel{border-color:#c9a84c;color:#f0d68a}.rc .src.tel{border-color:#a77bf3;color:#cdb2ff}
   .rc .imm{display:inline-block;font-size:11px;font-weight:900;border-radius:999px;padding:3px 9px;margin:4px 6px 0 0;background:#d93025;color:#fff;animation:immb 1s infinite alternate}
@@ -446,9 +462,10 @@
   <div id="sidebar">
     <h2 class="brand">Taxis Van Paris</h2>
     <span class="brand-sub" style="color:#8B93A7;font-size:12px;margin-bottom:28px;display:block;">Tableau de bord</span>
+    <button class="nav-item" data-tab="encours"><span class="dot"></span>Courses en cours<span class="nb" id="nb-encours"></span></button>
     <button class="nav-item active" data-tab="reservations"><span class="dot"></span>Réservations<span class="nb" id="nb-nav"></span></button>
-    <button class="nav-item" data-tab="facturation"><span class="dot"></span>Facturation</button>
     <button class="nav-item" data-tab="chauffeurs"><span class="dot"></span>Chauffeurs</button>
+    <button class="nav-item" data-tab="facturation"><span class="dot"></span>Facturation</button>
     <button class="nav-item" data-tab="partage"><span class="dot"></span>Partage WhatsApp</button>
     <div id="sidebar-footer">
       <div class="who"><strong id="admin-name">—</strong><span id="admin-email">—</span></div>
@@ -529,10 +546,13 @@
           <div></div>
         </div>
         <table>
-          <thead><tr><th>Nom</th><th>Téléphone</th><th>Véhicule</th><th>Statut</th><th>Compte app chauffeur</th><th></th></tr></thead>
-          <tbody id="chauffeur-tbody"><tr class="empty-row"><td colspan="6">Chargement…</td></tr></tbody>
+          <thead><tr><th>Nom</th><th>Téléphone</th><th>Véhicule</th><th>Statut</th><th>Compte app chauffeur</th><th>Lien de suivi</th><th></th></tr></thead>
+          <tbody id="chauffeur-tbody"><tr class="empty-row"><td colspan="7">Chargement…</td></tr></tbody>
         </table>
       </div>
+
+      <!-- COURSES EN COURS -->
+      <div class="tab-panel" id="tab-encours"><div id="encours-list"></div></div>
 
       <!-- PARTAGE WHATSAPP -->
       <div class="tab-panel" id="tab-partage">
@@ -709,6 +729,7 @@
         <label>UID compte app chauffeur (optionnel)</label>
         <input id="fc-uid" type="text" placeholder="Voir instructions plus bas pour créer son accès">
       </div>
+      <div class="field" style="grid-column:1/-1;"><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input id="fc-suivi" type="checkbox" checked style="width:auto"> Envoyer le lien de suivi « Ma course » à ce chauffeur (étapes, position, chat client)</label></div>
     </div>
     <div class="modal-actions">
       <button class="btn-ghost" id="btn-cancel-chauffeur">Annuler</button>
@@ -947,7 +968,8 @@ function anonymise(title,location){
     reservations: ["Réservations", "Toutes les courses en cours et à venir"],
     facturation: ["Facturation", "Suivi des paiements clients"],
     chauffeurs: ["Chauffeurs", "Équipe et disponibilités"],
-    partage: ["Partage WhatsApp", "Courses anonymisées, prêtes à poster"]
+    partage: ["Partage WhatsApp", "Courses anonymisées, prêtes à poster"],
+    encours: ["Courses en cours", "En direct : en route, sur place, client à bord"]
   };
   document.querySelectorAll(".nav-item").forEach(btn => {
     btn.addEventListener("click", () => {
@@ -962,7 +984,8 @@ function anonymise(title,location){
         tab === "reservations" ? "+ Nouvelle réservation" :
         tab === "facturation" ? "+ Nouvelle facture" : "+ Nouveau chauffeur";
       document.getElementById("btn-new-primary").dataset.target = tab;
-      document.getElementById("btn-new-primary").style.visibility = tab === "partage" ? "hidden" : "";
+      document.getElementById("btn-new-primary").style.visibility = tab === "partage" || tab === "encours" ? "hidden" : "";
+      if (tab === "encours") renderEnCours();
       if (tab === "partage") renderShare();
     });
   });
@@ -993,6 +1016,7 @@ function anonymise(title,location){
     currentUnsubs.push(onSnapshot(collection(db, "reservations"), snap => {
       reservationsCache = sortReservations(snap.docs.map(d => normResa({ id: d.id, ...d.data() })));
       suivreNouvelles();
+      suivreEtapes();
       renderReservations();
       renderStatsResa();
       renderShare();
@@ -1215,7 +1239,8 @@ function anonymise(title,location){
     if (enCompte) L.push("💳 En compte");
     const note = sansPrixNiTel(enCompte ? String(r.note || "").replace(/\ben\s+compte\b/gi, "") : r.note).replace(/^[\s,;.:-]+|[\s,;:-]+$/g, "").replace(/\s+([,;.])/g, "$1").replace(/([,;])\s*(?=[,;]|$)/g, "");
     if (note) L.push(`📝 ${note}`);
-    if (r.lienCourse) L.push("", "💬 Écrire au client (numéro masqué, traduit) :", new URL("../ma-course/?c=" + r.lienCourse + "&d=1", location.href).href);
+    const chS = chauffeurDe(r);
+    if (r.lienCourse && (!chS || chS.suivi !== false)) L.push("", "💬 Écrire au client (numéro masqué, traduit) :", new URL("../ma-course/?c=" + r.lienCourse + "&d=1", location.href).href);
     return L.join("\n");
   }
   function waChauffeur(r) {
@@ -1562,7 +1587,53 @@ function anonymise(title,location){
     const mn=minutesAvant(r); return mn!==null&&mn<=60&&mn>=-30;
   }
   setInterval(()=>{try{if(typeof reservationsCache!=='undefined'&&reservationsCache.length)renderReservations()}catch(e){}},60000);
+  // Étapes de la course (touchées par le chauffeur sur sa page « Ma course ») : pastille sur chaque réservation
+  const ETAPES = { route: ["🚗", "En route", "#5b9cf0"], place: ["📍", "Chauffeur sur place", "#f0a030"], bord: ["🧳", "Client à bord", "#46c37b"], fin: ["🏁", "Course terminée", "#9b9384"] };
+  const etapesCache = {}, etapesSubs = {};
+  const etTs = v => v && typeof v.toMillis === "function" ? v.toMillis() : (v && v.seconds ? v.seconds * 1000 : 0);
+  const etHm = v => { const ms = etTs(v); return ms ? new Date(ms).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }) : ""; };
+  function suivreEtapes() {
+    const voulus = new Set(reservationsCache.filter(r => r.lienCourse && groupOf(r) === 0 && r.statut !== "annulée").map(r => r.lienCourse));
+    Object.keys(etapesSubs).forEach(c => { if (!voulus.has(c)) { try { etapesSubs[c](); } catch (e) {} delete etapesSubs[c]; delete etapesCache[c]; } });
+    voulus.forEach(c => {
+      if (etapesSubs[c]) return;
+      etapesSubs[c] = onSnapshot(doc(db, "trad_g", c), s => {
+        const d = s.data() || {}, v = JSON.stringify([d.etape || "", Object.keys(d.etapes || {}).sort(), etTs((d.etapes || {})[d.etape])]);
+        const avant = etapesCache[c] && etapesCache[c].v;
+        etapesCache[c] = { v, etape: d.etape || "", etapes: d.etapes || {} };
+        if (avant !== v) renderReservations();
+      }, () => {});
+    });
+  }
+  function etapeBadge(r) {
+    const e = r.lienCourse && etapesCache[r.lienCourse];
+    if (!e) return "";
+    let h = "";
+    const x = ETAPES[e.etape];
+    if (x) h += `<span class="eta" style="color:${x[2]};border-color:${x[2]};background:${x[2]}1f">${x[0]} ${x[1]}${etHm(e.etapes[e.etape]) ? " · " + etHm(e.etapes[e.etape]) : ""}</span>`;
+    if ("client_ici" in e.etapes && e.etape !== "bord" && e.etape !== "fin") h += `<span class="eta" style="color:#46c37b;border-color:#46c37b;background:#46c37b1f">👤 Client au RDV${etHm(e.etapes.client_ici) ? " · " + etHm(e.etapes.client_ici) : ""}</span>`;
+    return h;
+  }
+  function renderEnCours() {
+    const box = document.getElementById("encours-list");
+    const rows = reservationsCache.filter(r => { const e = r.lienCourse && etapesCache[r.lienCourse]; return e && ("route place bord".includes(e.etape || "-") || (!e.etape && "client_ici" in e.etapes)); })
+      .sort((a, b) => ((a.date || "") + (a.heure || "")).localeCompare((b.date || "") + (b.heure || "")));
+    ["nb-encours"].forEach(id => { const el = document.getElementById(id); if (el) { el.textContent = rows.length; el.classList.toggle("on", rows.length > 0); } });
+    if (!box) return;
+    if (!rows.length) { box.innerHTML = `<div class="rempty">Aucune course en cours.<br><small>Une course apparaît ici dès que le chauffeur touche « En route » sur sa page « Ma course ».</small></div>`; return; }
+    box.innerHTML = rows.map(r => {
+      const e = etapesCache[r.lienCourse], x = ETAPES[e.etape];
+      const tl = [...Object.keys(ETAPES).filter(k => k in e.etapes).map(k => ETAPES[k][0] + " " + etHm(e.etapes[k])), "client_ici" in e.etapes ? "👤 " + etHm(e.etapes.client_ici) : ""].filter(Boolean).join(" · ");
+      return `<div class="ec"><div class="h"><b>${esc(r.heure || "—")}</b><span>${esc(r.nom || "Client")}</span></div>`
+        + (x ? `<span class="big" style="color:${x[2]};border-color:${x[2]};background:${x[2]}1f">${x[0]} ${x[1]} · ${etHm(e.etapes[e.etape])}</span>` : "")
+        + ("client_ici" in e.etapes && e.etape !== "bord" ? `<span class="big" style="color:#46c37b;border-color:#46c37b;background:#46c37b1f">👤 Client au RDV · ${etHm(e.etapes.client_ici)}</span>` : "")
+        + `<div class="rt">${esc(r.dep || "?")} → <b>${esc(r.arr || "?")}</b></div>`
+        + `<div class="tl">${r.chauffeurNom ? "Chauffeur : " + esc(r.chauffeurNom) + " · " : ""}${volCode(r) ? "✈️ " + esc(volCode(r)) + " · " : ""}${tl}</div>`
+        + `<a target="_blank" rel="noopener" href="../ma-course/?c=${encodeURIComponent(r.lienCourse)}&d=1">💬 Conversation</a></div>`;
+    }).join("");
+  }
   function renderReservations() {
+    renderEnCours();
     const aVenir = reservationsCache.filter(r => groupOf(r) === 0 && r.statut !== "annulée");
     document.getElementById("resa-cal-all").innerHTML = aVenir.length ? calLink(aVenir, "📅 Tout ajouter au calendrier", "cal-btn cal-all") : "";
     const key = r => (r.date || "9999-12-31") + " " + (r.heure || "00:00");
@@ -1585,16 +1656,22 @@ function anonymise(title,location){
         const vol = volInfo(r) || volCode(r) ? `<div class="mt" style="color:var(--gold-soft)">✈️ ${volInfo(r) || "Vol " + volCode(r)}${volBtn(r)}</div>` : "";
         const note = r.note ? `<div class="nt">${esc(r.note)}</div>` : "";
         const ferme = r.statut === "terminée" || r.statut === "annulée";
-        const boutons = (nouv ? `<button class="vu-btn" data-vu="${esc(r.id)}">👁 Vu</button>` : "") + (ferme ? `<button class="no" data-st="en attente" data-id="${esc(r.id)}">Rétablir</button>` :
-            (r.statut !== "confirmée" ? `<button class="ok" data-st="confirmée" data-id="${esc(r.id)}">Confirmer</button>` : "") +
-            `<button class="done" data-st="terminée" data-id="${esc(r.id)}">Effectuée</button><button class="no" data-st="annulée" data-id="${esc(r.id)}">Annuler</button>`) +
-          waClient(r) + smsClient(r) + waAvis(r) + (groupOf(r) === 0 && r.statut !== "annulée" ? waChauffeur(r) : "") + (groupOf(r) === 0 && r.statut !== "annulée" ? pancarteBtn(r) : "") + (groupOf(r) === 0 && r.statut !== "annulée" ? lienBtn(r) : "") + (groupOf(r) === 0 && r.statut !== "annulée" ? `<a class="grp-btn" target="_blank" rel="noopener" href="${waLink(shareMessage(shareItem(r)))}">📢 Dispatcher</a>` : "") +
-          (groupOf(r) === 0 ? calLink([r], "📅", "cal-btn") : "") +
-          (r.statut === "terminée" ? `<button class="edit" data-facture="${esc(r.id)}">🧾 ${r.factureNumero ? "Facture n° " + esc(r.factureNumero) : "Facture"}</button>` : "") +
-          `<button class="edit" data-edit="${esc(r.id)}">✏️ Modifier</button><button class="del" data-del="${esc(r.id)}" aria-label="Supprimer">🗑️</button>`;
+        // Boutons rangés dans l'ordre de la vie d'une course : avant → jour J → après, puis le reste à part
+        const actif = groupOf(r) === 0 && r.statut !== "annulée";
+        const avant = ferme ? "" : (r.statut !== "confirmée" ? `<button class="ok" data-st="confirmée" data-id="${esc(r.id)}">✅ Confirmer</button>` : "") +
+          waClient(r) + smsClient(r) +
+          (actif ? `<a class="grp-btn" target="_blank" rel="noopener" href="${waLink(shareMessage(shareItem(r)))}">📢 Dispatcher</a>` + waChauffeur(r) + lienBtn(r) + calLink([r], "📅 Calendrier", "cal-btn") : "");
+        const jourJ = actif && (AERO_RX.test(String(r.dep || "") + " " + String(r.depZone || "")) || /\bgare\b|\bstation\b/i.test(String(r.dep || ""))) ? pancarteBtn(r) : "";
+        const apres = (!ferme ? `<button class="done" data-st="terminée" data-id="${esc(r.id)}">✔️ Effectuée</button>` : "") +
+          (r.statut === "terminée" ? `<button class="edit" data-facture="${esc(r.id)}">🧾 ${r.factureNumero ? "Facture n° " + esc(r.factureNumero) : "Facture"}</button>` : "") + waAvis(r);
+        const autres = (ferme ? `<button class="no" data-st="en attente" data-id="${esc(r.id)}">↩️ Rétablir</button>` : `<button class="no" data-st="annulée" data-id="${esc(r.id)}">❌ Annuler</button>`) +
+          `<button class="no" data-edit="${esc(r.id)}">✏️ Modifier</button><button class="del" data-del="${esc(r.id)}" aria-label="Supprimer">🗑️ Supprimer</button>`;
+        const grp = (lib, h) => h ? `<div class="ag"><span class="agl">${lib}</span>${h}</div>` : "";
+        const boutons = (nouv ? `<div class="ag"><button class="vu-btn" data-vu="${esc(r.id)}">👁 Vu</button></div>` : "") +
+          grp("Avant", avant) + grp("Jour J", jourJ) + grp("Après", apres) + `<div class="ag ag2">${autres}</div>`;
         const imm = estImmediat(r);
         const lg = String(r.langue||"").slice(0,2).toLowerCase();
-        const badges = (imm ? '<span class="imm">⚡ IMMÉDIAT</span>' : "") + provenance(r) + (lg && DRAP[lg] ? '<span class="src">'+DRAP[lg]+' '+lg.toUpperCase()+'</span>' : "");
+        const badges = etapeBadge(r) + (imm ? '<span class="imm">⚡ IMMÉDIAT</span>' : "") + provenance(r) + (lg && DRAP[lg] ? '<span class="src">'+DRAP[lg]+' '+lg.toUpperCase()+'</span>' : "");
         return `<div class="rc s-${cls}${nouv ? " nouv" : ""}${imm ? " imm-card" : ""}" data-rid="${esc(r.id)}">
           <div class="t">${esc(r.heure || "—")}${r.ref ? `<small>${esc(r.ref)}</small>` : ""}</div>
           <div class="m">
@@ -1703,7 +1780,7 @@ function anonymise(title,location){
   function renderChauffeurs() {
     const tbody = document.getElementById("chauffeur-tbody");
     if (chauffeursCache.length === 0) {
-      tbody.innerHTML = `<tr class="empty-row"><td colspan="6">Aucun chauffeur enregistré.</td></tr>`;
+      tbody.innerHTML = `<tr class="empty-row"><td colspan="7">Aucun chauffeur enregistré.</td></tr>`;
       return;
     }
     tbody.innerHTML = chauffeursCache.map(c => `
@@ -1713,9 +1790,16 @@ function anonymise(title,location){
         <td>${c.vehicule || ""}</td>
         <td>${badgeChauffeur(c.statut || "disponible")}</td>
         <td>${c.uid ? "Actif" : "Non créé"}</td>
+        <td><button class="suivi-tg${c.suivi === false ? "" : " on"}" data-id="${c.id}" data-kind="suivi" title="Envoyer ou non le lien « Ma course » (étapes, position, chat client) à ce chauffeur">${c.suivi === false ? "Non" : "Oui"}</button></td>
         <td><button class="icon-btn danger" data-id="${c.id}" data-kind="del-chauffeur">Suppr.</button></td>
       </tr>
     `).join("");
+    tbody.querySelectorAll('[data-kind="suivi"]').forEach(btn => {
+      btn.addEventListener("click", () => {
+        const c = chauffeursCache.find(x => x.id === btn.dataset.id); if (!c) return;
+        updateDoc(doc(db, "chauffeurs", c.id), { suivi: c.suivi === false }).then(() => toast(c.suivi === false ? "Lien de suivi : oui pour " + c.nom : "Lien de suivi : non pour " + c.nom)).catch(() => toast("Erreur, réessaie"));
+      });
+    });
     tbody.querySelectorAll('[data-kind="del-chauffeur"]').forEach(btn => {
       btn.addEventListener("click", () => {
         if (confirm("Supprimer ce chauffeur ?")) deleteDoc(doc(db, "chauffeurs", btn.dataset.id));
@@ -1909,6 +1993,7 @@ function anonymise(title,location){
   // ---------------- MODALS: CHAUFFEUR ----------------
   function openChauffeurModal() {
     ["fc-nom","fc-tel","fc-vh","fc-uid"].forEach(id => document.getElementById(id).value = "");
+    document.getElementById("fc-suivi").checked = true;
     document.getElementById("modal-chauffeur").classList.add("shown");
   }
   document.getElementById("btn-cancel-chauffeur").addEventListener("click", () => document.getElementById("modal-chauffeur").classList.remove("shown"));
@@ -1918,7 +2003,8 @@ function anonymise(title,location){
       tel: document.getElementById("fc-tel").value.trim(),
       vehicule: document.getElementById("fc-vh").value.trim(),
       statut: document.getElementById("fc-statut").value,
-      uid: document.getElementById("fc-uid").value.trim() || null
+      uid: document.getElementById("fc-uid").value.trim() || null,
+      suivi: document.getElementById("fc-suivi").checked
     };
     if (!data.nom) { alert("Merci de renseigner au moins le nom du chauffeur."); return; }
     await addDoc(collection(db, "chauffeurs"), data);

@@ -76,6 +76,22 @@ h1{font-size:26px;line-height:1.15;margin:4px 0 4px;font-weight:800;letter-spaci
 .quick{display:flex;gap:6px;overflow-x:auto;max-width:520px;margin:0 auto 8px;scrollbar-width:none}
 .dock .quick button{flex:none;width:auto;height:auto;border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--ink);border-radius:999px;padding:8px 12px;font-size:13.5px;font-weight:650;white-space:nowrap}
 .vu{color:var(--green)}
+/* Suivi des étapes */
+.steps{display:flex;flex-direction:column;gap:2px}
+.st{display:flex;align-items:center;gap:12px;padding:7px 0;color:var(--mut);font-weight:700;font-size:16px}
+.st i{flex:none;width:14px;height:14px;border-radius:50%;border:2px solid var(--line);font-style:normal}
+.st.ok{color:var(--ink)}.st.ok i{background:var(--gold);border-color:var(--gold)}
+.st.now{color:var(--gold)}.st.now i{background:var(--gold);border-color:var(--gold);box-shadow:0 0 0 5px rgba(212,178,94,.2)}
+.st small{margin-left:auto;color:var(--mut);font-weight:600;font-size:13px}
+.ici{margin-top:12px;width:100%}
+.iciok{margin-top:12px;color:var(--green);font-weight:750;font-size:15px}
+.eg{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.eg button{min-height:64px;border-radius:14px;border:1.5px solid var(--line);background:rgba(255,255,255,.04);font-weight:800;font-size:15.5px;line-height:1.2;padding:8px}
+.eg button small{display:block;font-weight:650;font-size:12.5px;color:var(--mut);margin-top:3px}
+.eg button.ok{border-color:rgba(212,178,94,.55);color:var(--gold)}
+.eg button.next{border:0;background:linear-gradient(180deg,#e2c477,var(--gold) 45%,var(--gold2));color:#1a1408}
+.eg button.next small{color:#3a2d10}
+.cli{margin:0 0 12px;padding:10px 12px;border-radius:12px;background:rgba(70,195,123,.12);border:1px solid rgba(70,195,123,.45);color:var(--green);font-weight:750;font-size:15px}
 .callov{position:fixed;inset:0;z-index:80;background:radial-gradient(120% 60% at 50% 0%,rgba(212,178,94,.22),transparent 60%),#070605;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:24px;text-align:center}
 .callov .big{width:110px;height:110px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:46px;background:linear-gradient(145deg,#ecd08a,var(--gold) 50%,var(--gold2));color:#1a1408;animation:pul 1.6s ease-in-out infinite}
 @keyframes pul{50%{box-shadow:0 0 0 18px rgba(212,178,94,.15)}}
@@ -102,6 +118,12 @@ h1{font-size:26px;line-height:1.15;margin:4px 0 4px;font-weight:800;letter-spaci
     <div class="when" id="when"></div>
     <div class="route" id="route"></div>
     <div class="chips" id="chips"></div>
+  </section>
+
+  <section class="card" id="cEtape"><h2 id="tEtape"></h2>
+    <div class="cli" id="cliIci" hidden></div>
+    <div id="etapes"></div>
+    <button type="button" class="b g ici" id="bIci" hidden></button><div class="iciok" id="iciOk" hidden></div>
   </section>
 
   <section class="card" id="cDrv"><h2 id="tDrv"></h2>
@@ -168,6 +190,20 @@ const CT={fr:{call:'Appeler le chauffeur',callC:'Appeler le client',out:'Appel e
  ar:{call:'اتصل بالسائق',out:'جارٍ الاتصال…',outS:'مكالمة عبر الإنترنت · الرقم مخفي',inc:'مكالمة واردة',incC:'السائق يتصل بك',live:'في مكالمة',mute:'كتم',hang:'إنهاء',miss:'📞 مكالمة فائتة',done:'📞 مكالمة',busy:'لا رد',mic:'اسمح باستخدام الميكروفون للاتصال.',seen:'شوهدت'}};
 const ct=k=>{const c=CT[String(TK(L)).split('-')[0]]||CT.en;return c[k]||CT.en[k]||CT.fr[k]};
 const LG=c=>LANGS.find(l=>l[0]===c)||null;
+/* Étapes de la course : le chauffeur les touche, le client les voit, Badr les voit dans le tableau de bord */
+const ETK=['route','place','bord','fin'];
+const ET={en:{suivi:'Ride status',route:'Driver on the way',place:'Driver has arrived',bord:'On board',fin:'Ride completed',ici:"📍 I'm at the meeting point",iciOk:'✓ Your driver has been notified'},
+ fr:{suivi:'Suivi de la course',route:'Chauffeur en route',place:'Chauffeur sur place',bord:'À bord',fin:'Course terminée',ici:'📍 Je suis au point de rendez-vous',iciOk:'✓ Votre chauffeur est prévenu'},
+ ar:{suivi:'حالة الرحلة',route:'السائق في الطريق',place:'وصل السائق',bord:'على متن السيارة',fin:'انتهت الرحلة',ici:'📍 أنا عند نقطة اللقاء',iciOk:'✓ تم إبلاغ السائق'},
+ 'zh-CN':{suivi:'行程状态',route:'司机正在路上',place:'司机已到达',bord:'已上车',fin:'行程已结束',ici:'📍 我已到达集合地点',iciOk:'✓ 已通知司机'},
+ ja:{suivi:'配車状況',route:'ドライバーが向かっています',place:'ドライバーが到着しました',bord:'乗車済み',fin:'ご乗車終了',ici:'📍 待ち合わせ場所に着きました',iciOk:'✓ ドライバーに通知しました'},
+ pt:{suivi:'Estado da viagem',route:'Motorista a caminho',place:'Motorista chegou',bord:'A bordo',fin:'Viagem concluída',ici:'📍 Estou no ponto de encontro',iciOk:'✓ O seu motorista foi avisado'},
+ it:{suivi:'Stato della corsa',route:'Autista in arrivo',place:"L'autista è arrivato",bord:'A bordo',fin:'Corsa terminata',ici:"📍 Sono al punto d'incontro",iciOk:'✓ Il suo autista è stato avvisato'},
+ ru:{suivi:'Статус поездки',route:'Водитель в пути',place:'Водитель на месте',bord:'В машине',fin:'Поездка завершена',ici:'📍 Я на месте встречи',iciOk:'✓ Водитель предупреждён'},
+ es:{suivi:'Estado del trayecto',route:'Conductor en camino',place:'El conductor ha llegado',bord:'A bordo',fin:'Trayecto finalizado',ici:'📍 Estoy en el punto de encuentro',iciOk:'✓ Su conductor ha sido avisado'},
+ de:{suivi:'Fahrtstatus',route:'Fahrer ist unterwegs',place:'Fahrer ist da',bord:'An Bord',fin:'Fahrt beendet',ici:'📍 Ich bin am Treffpunkt',iciOk:'✓ Ihr Fahrer wurde benachrichtigt'}};
+const ETC={route:'🚗 En route',place:'📍 Sur place',bord:'🧳 Client à bord',fin:'🏁 Course terminée'};
+const et=k=>(ET[TK(L)]||ET.en)[k]||ET.en[k];
 const TK=c=>({'en-GB':'en','en-US':'en'})[c]||c;          // clé du dictionnaire
 const TR=c=>(LG(c)||LANGS[0])[2];                          // code de traduction
 function langueAuto(){
@@ -240,9 +276,38 @@ function rendre(){
   $('meet').textContent=ti?(ti[0]||rdv.texte||''):(rdv.texte||'');
   $('bOrig').hidden=tr==='fr'||!rdv.texte;$('bOrig').textContent=t('orig');$('origT').textContent=rdv.texte||'';
   const lieu=rdv.lieu||c.dep;$('mapActs').hidden=!lieu;$('bMap').href='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(lieu||'');
+  rendreEtapes();
   dessiner();
 }
 $('bOrig').onclick=()=>{$('origT').hidden=!$('origT').hidden};
+let etapeLocale=null;
+function rendreEtapes(){
+  const es=(info&&info.etapes)||{},cur=etapeLocale||(info&&info.etape)||'',ci=ETK.indexOf(cur);
+  const h=k=>k in es?(tsMs(es[k])?hm(tsMs(es[k])):hm(Date.now())):'';
+  if(CHAUF){
+    $('tEtape').textContent='Étape de la course';
+    $('cliIci').hidden=!('client_ici' in es)||ci>=2;$('cliIci').textContent='👤 Le client est au point de rendez-vous depuis '+h('client_ici');
+    $('etapes').innerHTML='<div class="eg">'+ETK.map((k,i)=>`<button type="button" data-e="${k}" class="${i<=ci?'ok':''}${i===ci+1?' next':''}">${i<=ci?'✓ ':''}${esc(ETC[k])}${k in es?`<small>${h(k)}</small>`:''}</button>`).join('')+'</div>';
+    $('etapes').querySelectorAll('[data-e]').forEach(b=>b.onclick=()=>marquerEtape(b.dataset.e));
+    $('bIci').hidden=true;$('iciOk').hidden=true;return;
+  }
+  $('tEtape').textContent=et('suivi');$('cliIci').hidden=true;
+  $('etapes').innerHTML='<div class="steps">'+ETK.map((k,i)=>`<div class="st ${i<ci?'ok':''}${i===ci?' now':''}"><i></i>${esc(et(k))}${k in es&&i<=ci?`<small>${h(k)}</small>`:''}</div>`).join('')+'</div>';
+  const ici='client_ici' in es;
+  $('bIci').hidden=ici||ci>=2;$('bIci').textContent=et('ici');
+  $('iciOk').hidden=!ici||ci>=2;$('iciOk').textContent=et('iciOk')+(ici?' · '+h('client_ici'):'');
+}
+async function marquerEtape(k){
+  if(k==='fin'&&!confirm('Terminer la course ?'))return;
+  const avant=etapeLocale;etapeLocale=k;rendreEtapes();try{navigator.vibrate&&navigator.vibrate(60)}catch(e){}
+  try{await setDoc(doc(db,'trad_g',code),{etape:k,etapes:{[k]:serverTimestamp()},t:serverTimestamp()},{merge:true});etapeLocale=null}
+  catch(e){etapeLocale=avant;rendreEtapes();toast(e&&e.code==='permission-denied'?'Étape bloquée : règle Firebase à ajouter':'Pas de connexion, réessaie')}
+}
+$('bIci').onclick=async()=>{
+  $('bIci').disabled=true;
+  try{await setDoc(doc(db,'trad_g',code),{etapes:{client_ici:serverTimestamp()},t:serverTimestamp()},{merge:true})}
+  catch(e){toast(t('err'))}finally{$('bIci').disabled=false}
+};
 
 const hm=ms=>ms?new Date(ms).toLocaleTimeString(TR(L),{hour:'2-digit',minute:'2-digit'}):'';
 const MOI=()=>CHAUF?'chauffeur':'client', AUTRE=()=>CHAUF?'client':'chauffeur';
