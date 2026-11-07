@@ -1629,9 +1629,31 @@ function anonymise(title,location){
         + ("client_ici" in e.etapes && e.etape !== "bord" ? `<span class="big" style="color:#46c37b;border-color:#46c37b;background:#46c37b1f">👤 Client au RDV · ${etHm(e.etapes.client_ici)}</span>` : "")
         + `<div class="rt">${esc(r.dep || "?")} → <b>${esc(r.arr || "?")}</b></div>`
         + `<div class="tl">${r.chauffeurNom ? "Chauffeur : " + esc(r.chauffeurNom) + " · " : ""}${volCode(r) ? "✈️ " + esc(volCode(r)) + " · " : ""}${tl}</div>`
-        + `<a target="_blank" rel="noopener" href="../ma-course/?c=${encodeURIComponent(r.lienCourse)}&d=1">💬 Conversation</a></div>`;
+        + `<a target="_blank" rel="noopener" href="../ma-course/?c=${encodeURIComponent(r.lienCourse)}&d=1">💬 Conversation</a>`
+        + ` <a href="#" data-pos="${esc(r.lienCourse)}">📍 Position du chauffeur</a> <a href="#" data-preuve="${esc(r.lienCourse)}">📷 Preuve d'arrivée</a></div>`;
     }).join("");
   }
+  // Courses en cours : position en direct et preuve d'arrivée (photo datée + GPS) envoyées par la page chauffeur
+  document.getElementById("encours-list")?.addEventListener("click", async ev => {
+    const a = ev.target.closest("[data-pos],[data-preuve]"); if (!a) return; ev.preventDefault();
+    const w = window.open("about:blank", "_blank");
+    try {
+      if (a.dataset.pos) {
+        const s = await getDoc(doc(db, "trad_g", a.dataset.pos, "suivi", "pos")), d = s.exists() ? s.data() : null;
+        if (!d || typeof d.lat !== "number") { w && w.close(); toast("Pas encore de position : le chauffeur doit toucher « En route »", 4000); return; }
+        const age = d.t && d.t.toMillis ? Math.round((Date.now() - d.t.toMillis()) / 60000) : null;
+        if (age !== null && age >= 3) toast("Dernière position il y a " + age + " min", 4000);
+        w.location.href = "https://www.google.com/maps/search/?api=1&query=" + d.lat + "," + d.lng;
+      } else {
+        const s = await getDoc(doc(db, "trad_g", a.dataset.preuve, "preuves", "arrivee")), d = s.exists() ? s.data() : null;
+        if (!d) { w && w.close(); toast("Pas encore de preuve : elle est prise quand le chauffeur touche « Sur place »", 4000); return; }
+        const h = x => x && x.toDate ? x.toDate().toLocaleString("fr-FR") : "—";
+        const gps = typeof d.lat === "number" ? `<a href="https://www.google.com/maps/search/?api=1&query=${d.lat},${d.lng}">${d.lat}, ${d.lng}</a> (±${d.acc || "?"} m)` : "indisponible";
+        w.document.write(`<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Preuve d'arrivée</title><body style="margin:0;background:#0b0a08;color:#f7f3ea;font:16px system-ui;padding:16px"><h2 style="color:#d4b25e;margin:0 0 10px">📍 Preuve d'arrivée</h2><p>Arrivée : <b>${h(d.t)}</b><br>Photo : <b>${d.img ? h(d.tPhoto) : "pas de photo"}</b><br>GPS : ${gps}</p>${d.img ? `<img src="${d.img}" style="width:100%;max-width:700px;border-radius:12px">` : ""}</body>`);
+        w.document.close();
+      }
+    } catch (e) { w && w.close(); toast("Impossible : " + ((e && e.code) || "erreur") + (e && e.code === "permission-denied" ? " (règle Firebase)" : ""), 5000); }
+  });
   function renderReservations() {
     renderEnCours();
     const aVenir = reservationsCache.filter(r => groupOf(r) === 0 && r.statut !== "annulée");

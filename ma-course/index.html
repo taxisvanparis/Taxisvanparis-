@@ -62,6 +62,11 @@ h1{font-size:26px;line-height:1.15;margin:4px 0 4px;font-weight:800;letter-spaci
 .dock input{flex:1;min-width:0;font:inherit;font-size:17px;color:var(--ink);background:rgba(255,255,255,.05);border:1.5px solid var(--line);border-radius:999px;padding:12px 16px}
 .dock input:focus{outline:none;border-color:var(--gold)}
 .dock button{flex:none;width:50px;height:50px;border-radius:50%;border:0;font-size:20px;background:linear-gradient(180deg,#e2c477,var(--gold) 45%,var(--gold2));color:#1a1408;font-weight:900}
+.navg{display:grid;gap:10px}.navi{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;font-size:15px;font-weight:650}.navi small{display:block;color:var(--mut);font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:800}.navi .b{min-height:42px;padding:0 12px;font-size:14px}
+.acts2{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px}.acts2 .b{min-height:46px;font-size:14px;padding:0 6px;background:transparent}.acts2 .b.r{border-color:rgba(239,75,79,.6);color:#ff8a8d}
+.gps{margin:10px 0 0;font-size:13px;color:var(--mut)}.att{margin-top:10px;font-weight:800;color:var(--gold)}
+#carte{height:240px;border-radius:14px;overflow:hidden;background:#0d0c0a;border:1px solid var(--line)}.eta2{margin:0 0 10px;font-size:18px;font-weight:800}
+.sheet .fl{display:grid;gap:8px}.sheet .fl button{min-height:50px;border-radius:14px;border:1.5px solid var(--line);background:rgba(255,255,255,.04);font-weight:750;font-size:16px}
 .sheet{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center}
 .sheet .in{width:100%;max-width:520px;background:var(--card);border-radius:22px 22px 0 0;padding:18px 16px calc(18px + var(--bot));border-top:1px solid var(--line)}
 .sheet h3{margin:0 0 12px;font-size:16px;text-align:center}
@@ -126,6 +131,16 @@ h1{font-size:26px;line-height:1.15;margin:4px 0 4px;font-weight:800;letter-spaci
     <button type="button" class="b g ici" id="bIci" hidden></button><div class="iciok" id="iciOk" hidden></div>
   </section>
 
+  <section class="card" id="cNav" hidden><h2>🧭 Mission</h2>
+    <div class="navg" id="navL"></div>
+    <div class="acts2"><a class="b" id="bPanneau" target="_blank" rel="noopener">🪧 Panneau</a><button type="button" class="b" id="bPhoto">📷 Photo</button><button type="button" class="b r" id="bProb">⚠️ Problème</button></div>
+    <p class="gps" id="gpsS"></p>
+  </section>
+  <section class="card" id="cSuivi" hidden><h2 id="tSuivi"></h2>
+    <p class="eta2" id="etaT"></p><div id="carte"></div><p class="gps" id="majT"></p>
+    <a class="b" id="bVoirPos" target="_blank" rel="noopener" style="margin-top:10px"></a>
+  </section>
+  <input type="file" id="fPhoto" accept="image/*" capture="environment" hidden>
   <section class="card" id="cDrv"><h2 id="tDrv"></h2>
     <div class="drv"><div class="av" id="av"></div><div><b id="drvN"></b><span id="drvV"></span></div></div>
     <div class="plate" id="plate" hidden><span id="plateT"></span></div>
@@ -421,6 +436,130 @@ function ecouterAppels(){
 $('bAppel').onclick=()=>appeler().catch(e=>{nettoyer();appel=null;toast(e&&e.code==='permission-denied'?(CHAUF?'Appel bloqué : règle Firebase à ajouter':'Call not available yet, please write a message'):(CHAUF?'Appel impossible, réessaie':'Call failed, please try again'))});$('cAccept').onclick=decrocher;$('cRefuse').onclick=()=>raccrocher(true);$('cHang').onclick=()=>raccrocher(true);
 $('cMute').onclick=()=>{if(!flux)return;muet=!muet;flux.getAudioTracks().forEach(t=>t.enabled=!muet);$('cMute').classList.toggle('on',muet)};
 window.addEventListener('pagehide',()=>{if(appel)raccrocher(true)});
+
+/* ===== Mission : navigation Waze/Maps, preuve d'arrivée photo + GPS, position en direct, carte + heure d'arrivée pour le client ===== */
+const MAPS_KEY='AIzaSyCotWtH67rWpOKRwxTGXtxj-oVcc0vwOVg',TVP_WA='33667402005';
+const posRef=()=>doc(db,'trad_g',code,'suivi','pos'),preuveRef=()=>doc(db,'trad_g',code,'preuves','arrivee');
+const distM=(a,b)=>{const R=6371e3,r=x=>x*Math.PI/180,dl=r(b.lat-a.lat),dn=r(b.lng-a.lng),h=Math.sin(dl/2)**2+Math.cos(r(a.lat))*Math.cos(r(b.lat))*Math.sin(dn/2)**2;return 2*R*Math.asin(Math.sqrt(h))};
+const etapeCour=()=>etapeLocale||(info&&info.etape)||'';
+const pointRdv=()=>{const c=(info&&info.course)||{};return (info&&info.rdv&&info.rdv.lieu)||c.dep||''};
+function mission(){
+  if(!info)return;
+  if(CHAUF){
+    const c=info.course||{},dep=pointRdv(),arr=c.arr||'';
+    $('cNav').hidden=false;
+    const lig=(lbl,a)=>a?`<div class="navi"><div><small>${lbl}</small>${esc(a)}</div><a class="b" target="_blank" rel="noopener" href="https://waze.com/ul?q=${encodeURIComponent(a)}&navigate=yes">Waze</a><a class="b" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(a)}&travelmode=driving">Maps</a></div>`:'';
+    $('navL').innerHTML=lig('Prise en charge',dep)+lig('Dépose',arr)+(dep&&arr?`<a class="b" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(dep)}&destination=${encodeURIComponent(arr)}&travelmode=driving">🗺️ Itinéraire complet</a>`:'');
+    $('bPanneau').href='../pancarte-tvp-k7x2/?nom='+encodeURIComponent(c.nom||'');
+    gpsSuivi();attente();
+  } else clientSuivi();
+}
+/* --- Chauffeur : position partagée de « En route » jusqu'à « Client à bord » --- */
+let watchId=null,dernierEnvoi=0,dernierPt=null;
+function gpsSuivi(){
+  const e=etapeCour(),actif=e==='route'||e==='place';
+  if(actif&&watchId===null&&'geolocation' in navigator){
+    watchId=navigator.geolocation.watchPosition(envoyerPos,err=>{$('gpsS').textContent=err.code===1?'📡 Localisation refusée : autorise-la pour que le client te suive sur la carte.':'📡 GPS indisponible pour l\'instant…'},{enableHighAccuracy:true,maximumAge:5000,timeout:20000});
+    $('gpsS').textContent='📡 Recherche de ta position…';
+  }else if(!actif&&watchId!==null){navigator.geolocation.clearWatch(watchId);watchId=null}
+  if(!actif)$('gpsS').textContent=(e==='bord'||e==='fin')?'📡 Partage de position terminé.':'📡 Touche « En route » : le client te verra arriver sur la carte, avec l\'heure d\'arrivée.';
+}
+async function envoyerPos(p,force){
+  const pt={lat:+p.coords.latitude.toFixed(6),lng:+p.coords.longitude.toFixed(6),acc:Math.round(p.coords.accuracy||0),cap:p.coords.heading==null||isNaN(p.coords.heading)?null:Math.round(p.coords.heading),v:p.coords.speed==null?null:Math.round(p.coords.speed*3.6)};
+  const now=Date.now();
+  if(!force&&now-dernierEnvoi<10000&&dernierPt&&distM(dernierPt,pt)<40)return;
+  dernierEnvoi=now;dernierPt=pt;
+  try{await setDoc(posRef(),{...pt,t:serverTimestamp()});$('gpsS').textContent='📡 Position partagée avec le client · '+hm(now)+' (±'+pt.acc+' m)'}
+  catch(e){$('gpsS').textContent=e&&e.code==='permission-denied'?'📡 Partage bloqué : règle Firebase à ajouter':'📡 Pas de connexion, nouvel essai…'}
+}
+setInterval(()=>{if(CHAUF&&watchId!==null&&Date.now()-dernierEnvoi>45000)navigator.geolocation.getCurrentPosition(p=>envoyerPos(p,true),()=>{},{enableHighAccuracy:true,maximumAge:10000,timeout:15000})},15000);
+/* --- Chauffeur : temps d'attente sur place --- */
+function attente(){
+  let el=$('attente');if(!el){el=document.createElement('div');el.id='attente';el.className='att';$('etapes').after(el)}
+  const t0=tsMs((info.etapes||{}).place);
+  if(etapeCour()==='place'&&t0){el.hidden=false;el.textContent='⏱ Attente : '+Math.max(0,Math.floor((Date.now()-t0)/60000))+' min (sur place depuis '+hm(t0)+')'}else el.hidden=true;
+}
+setInterval(()=>{if(CHAUF&&info)attente()},30000);
+/* --- Chauffeur : preuve d'arrivée (photo datée + GPS) --- */
+function positionUnique(){return new Promise(ok=>{if(!('geolocation' in navigator))return ok(dernierPt);navigator.geolocation.getCurrentPosition(p=>ok({lat:+p.coords.latitude.toFixed(6),lng:+p.coords.longitude.toFixed(6),acc:Math.round(p.coords.accuracy||0)}),()=>ok(dernierPt),{enableHighAccuracy:true,maximumAge:15000,timeout:9000})})}
+function photoTamponnee(f,pt){return new Promise((ok,ko)=>{const u=URL.createObjectURL(f),im=new Image();im.onload=()=>{const s=Math.min(1,1000/Math.max(im.width,im.height)),cv=document.createElement('canvas');cv.width=Math.round(im.width*s);cv.height=Math.round(im.height*s);const g=cv.getContext('2d');g.drawImage(im,0,0,cv.width,cv.height);
+  const h=Math.round(cv.width*.075),txt=['Taxis Van Paris · '+new Date().toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}),pt?('GPS '+pt.lat.toFixed(5)+', '+pt.lng.toFixed(5)+' (±'+pt.acc+' m)'):'GPS indisponible'];
+  g.fillStyle='rgba(0,0,0,.62)';g.fillRect(0,cv.height-h*1.9,cv.width,h*1.9);g.fillStyle='#e8c76e';g.font='700 '+Math.round(h*.55)+'px system-ui,sans-serif';g.fillText(txt[0],h*.4,cv.height-h*1.1);g.fillStyle='#fff';g.font='600 '+Math.round(h*.45)+'px system-ui,sans-serif';g.fillText(txt[1],h*.4,cv.height-h*.35);
+  URL.revokeObjectURL(u);ok(cv.toDataURL('image/jpeg',.62))};im.onerror=ko;im.src=u})}
+async function preuveArrivee(){
+  const pt=await positionUnique();
+  try{await setDoc(preuveRef(),{lat:pt?pt.lat:null,lng:pt?pt.lng:null,acc:pt?pt.acc:null,t:serverTimestamp()},{merge:true})}catch(e){}
+  feuille('📍 Arrivée enregistrée','Prends une photo de l\'endroit : elle sert de preuve (heure + GPS) si le client ne se présente pas.',[['📷 Prendre la photo',()=>$('fPhoto').click()],['Plus tard',()=>{}]]);
+}
+$('fPhoto').onchange=async e=>{
+  const f=e.target.files&&e.target.files[0];e.target.value='';if(!f)return;
+  toast('Enregistrement de la photo…');
+  try{const pt=await positionUnique(),img=await photoTamponnee(f,pt);await setDoc(preuveRef(),{img,lat:pt?pt.lat:null,lng:pt?pt.lng:null,acc:pt?pt.acc:null,tPhoto:serverTimestamp()},{merge:true});toast('✅ Photo d\'arrivée enregistrée (heure + GPS)')}
+  catch(err){toast(err&&err.code==='permission-denied'?'Photo bloquée : règle Firebase à ajouter':'Photo non enregistrée, réessaie')}
+};
+if(CHAUF){const mo=marquerEtape;marquerEtape=async function(k){const deja=info&&info.etapes&&info.etapes[k];await mo(k);gpsSuivi();if(k==='place'&&!deja)preuveArrivee()}}
+$('bPhoto').onclick=()=>$('fPhoto').click();
+/* --- Chauffeur : problème → message WhatsApp à Taxis Van Paris avec la course et la position --- */
+function feuille(titre,txt,btns){
+  const s=document.createElement('div');s.className='sheet';s.innerHTML=`<div class="in"><h3>${esc(titre)}</h3>${txt?`<p class="sub" style="text-align:center;margin:0 0 12px">${esc(txt)}</p>`:''}<div class="fl"></div></div>`;
+  btns.forEach(([l,f])=>{const b=document.createElement('button');b.type='button';b.textContent=l;b.onclick=()=>{s.remove();f()};s.querySelector('.fl').appendChild(b)});
+  s.onclick=e=>{if(e.target===s)s.remove()};document.body.appendChild(s);
+}
+$('bProb').onclick=()=>{
+  const c=info.course||{},es=info.etapes||{},t0=tsMs(es.place);
+  const envoyer=async quoi=>{const pt=dernierPt||await positionUnique();
+    const l=['⚠️ '+quoi,'Course : '+[c.date,c.heure,c.nom||'Client'].filter(Boolean).join(' · '),'📍 '+(pointRdv()||'?')+' → '+(c.arr||'?'),'Étape : '+(ETC[etapeCour()]||'pas commencée')+(etapeCour()==='place'&&t0?' · attente '+Math.floor((Date.now()-t0)/60000)+' min':''),pt?'Ma position : https://maps.google.com/?q='+pt.lat+','+pt.lng:'','Conversation : '+location.origin+location.pathname+'?c='+code+'&d=1'].filter(Boolean).join('\n');
+    location.href='https://wa.me/'+TVP_WA+'?text='+encodeURIComponent(l)};
+  feuille('⚠️ Un problème ?','Taxis Van Paris reçoit ton message avec la course et ta position.',[['👤 Client absent / introuvable',()=>envoyer('Client absent / introuvable')],['⏰ Je vais être en retard',()=>envoyer('Je vais être en retard')],['📍 Adresse introuvable',()=>envoyer('Adresse introuvable')],['🚗 Problème de véhicule',()=>envoyer('Problème de véhicule')],['💬 Autre problème',()=>envoyer('Problème')],['📞 Appeler Taxis Van Paris',()=>{location.href='tel:+33667402005'}]]);
+};
+/* --- Chauffeur : écran toujours allumé pendant la mission --- */
+if(CHAUF){let wl=null;const garder=async()=>{try{if('wakeLock' in navigator&&document.visibilityState==='visible'&&(!wl||wl.released))wl=await navigator.wakeLock.request('screen')}catch(e){}};
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){garder();if(watchId!==null)navigator.geolocation.getCurrentPosition(p=>envoyerPos(p,true),()=>{},{enableHighAccuracy:true,timeout:15000})}});
+  ['pointerdown','touchstart'].forEach(ev=>document.addEventListener(ev,garder,{passive:true}));garder()}
+/* --- Client : carte en direct + heure d'arrivée --- */
+const LV={en:{titre:'Your driver, live',eta:'Arriving in about {n} min',eta0:'Your driver is almost there',ici:'Your driver is at the meeting point',maj:'Position updated {n} min ago',voir:'Open in Google Maps'},
+ fr:{titre:'Votre chauffeur en direct',eta:'Arrivée dans environ {n} min',eta0:'Votre chauffeur arrive',ici:'Votre chauffeur est au point de rendez-vous',maj:'Position mise à jour il y a {n} min',voir:'Ouvrir dans Google Maps'},
+ es:{titre:'Su conductor en directo',eta:'Llega en unos {n} min',eta0:'Su conductor está llegando',ici:'Su conductor está en el punto de encuentro',maj:'Posición actualizada hace {n} min',voir:'Abrir en Google Maps'},
+ it:{titre:'Il suo autista in diretta',eta:'Arrivo tra circa {n} min',eta0:'Il suo autista sta arrivando',ici:"Il suo autista è al punto d'incontro",maj:'Posizione aggiornata {n} min fa',voir:'Apri in Google Maps'},
+ de:{titre:'Ihr Fahrer live',eta:'Ankunft in ca. {n} Min.',eta0:'Ihr Fahrer ist gleich da',ici:'Ihr Fahrer ist am Treffpunkt',maj:'Position vor {n} Min. aktualisiert',voir:'In Google Maps öffnen'},
+ pt:{titre:'O seu motorista em direto',eta:'Chega em cerca de {n} min',eta0:'O seu motorista está a chegar',ici:'O seu motorista está no ponto de encontro',maj:'Posição atualizada há {n} min',voir:'Abrir no Google Maps'},
+ ar:{titre:'سائقك مباشرة',eta:'يصل خلال {n} دقيقة تقريبًا',eta0:'سائقك على وشك الوصول',ici:'سائقك عند نقطة اللقاء',maj:'تم تحديث الموقع منذ {n} دقيقة',voir:'افتح في خرائط Google'},
+ 'zh-CN':{titre:'司机实时位置',eta:'约 {n} 分钟后到达',eta0:'司机即将到达',ici:'司机已在集合地点',maj:'位置 {n} 分钟前更新',voir:'在 Google 地图中打开'},
+ ja:{titre:'ドライバーの現在地',eta:'約{n}分で到着',eta0:'まもなく到着します',ici:'ドライバーは待ち合わせ場所にいます',maj:'{n}分前に位置を更新',voir:'Google マップで開く'},
+ ru:{titre:'Ваш водитель онлайн',eta:'Прибудет примерно через {n} мин',eta0:'Водитель почти на месте',ici:'Водитель на месте встречи',maj:'Позиция обновлена {n} мин назад',voir:'Открыть в Google Картах'}};
+const lv=k=>(LV[TK(L)]||LV.en)[k]||LV.en[k];
+let posUnsub=null,posClient=null,mapsP=null,carte=null,mkV=null,mkR=null,rdvLL=null,rdvAdr='',etaMin=null,etaT=0;
+function clientSuivi(){
+  const e=etapeCour(),voir=e==='route'||e==='place';
+  if(voir&&!posUnsub)posUnsub=onSnapshot(posRef(),s=>{posClient=s.exists()?s.data():null;majCarte()},()=>{});
+  if(!voir&&posUnsub){posUnsub();posUnsub=null;posClient=null}
+  majCarte();
+}
+function chargerMaps(){if(window.google&&google.maps)return Promise.resolve();if(mapsP)return mapsP;
+  mapsP=new Promise((ok,ko)=>{window.__tvpMaps=ok;const s=document.createElement('script');s.src='https://maps.googleapis.com/maps/api/js?key='+MAPS_KEY+'&callback=__tvpMaps&language='+encodeURIComponent(TR(L).split('-')[0]);s.async=true;s.onerror=ko;document.head.appendChild(s);setTimeout(()=>ko(new Error('maps')),12000)});return mapsP}
+function majCarte(){
+  const e=etapeCour(),p=posClient,ok=(e==='route'||e==='place')&&p&&typeof p.lat==='number';
+  $('cSuivi').hidden=!ok;if(!ok)return;
+  $('tSuivi').textContent=lv('titre');
+  const age=tsMs(p.t)?Math.floor((Date.now()-tsMs(p.t))/60000):0;
+  $('bVoirPos').href='https://www.google.com/maps/search/?api=1&query='+p.lat+','+p.lng;$('bVoirPos').textContent='🗺️ '+lv('voir');
+  const ligne=()=>{$('etaT').textContent=e==='place'?'📍 '+lv('ici'):(etaMin!=null?'🚖 '+(etaMin<=1?lv('eta0'):lv('eta').replace('{n}',etaMin)):'🚖 '+lv('eta0'));$('majT').textContent=age>=3?lv('maj').replace('{n}',age):''};
+  ligne();
+  chargerMaps().then(()=>{
+    const g=google.maps,pos={lat:p.lat,lng:p.lng};
+    if(!carte){carte=new g.Map($('carte'),{center:pos,zoom:14,disableDefaultUI:true,zoomControl:true,gestureHandling:'cooperative',clickableIcons:false});
+      mkV=new g.Marker({map:carte,position:pos,zIndex:2,icon:{path:g.SymbolPath.CIRCLE,scale:11,fillColor:'#d4b25e',fillOpacity:1,strokeColor:'#1a1408',strokeWeight:3},label:{text:'🚖',fontSize:'13px'}})}
+    else mkV.setPosition(pos);
+    const adr=pointRdv();
+    const cadrer=()=>{if(rdvLL&&e==='route'){const b=new g.LatLngBounds();b.extend(pos);b.extend(rdvLL);carte.fitBounds(b,48)}else carte.panTo(pos)};
+    if(adr&&adr!==rdvAdr){rdvAdr=adr;new g.Geocoder().geocode({address:adr},(r,st)=>{if(st==='OK'&&r[0]){rdvLL=r[0].geometry.location;mkR=new g.Marker({map:carte,position:rdvLL,zIndex:1});cadrer()}})}
+    cadrer();
+    if(e==='route'&&adr&&Date.now()-etaT>60000){etaT=Date.now();
+      new g.DistanceMatrixService().getDistanceMatrix({origins:[pos],destinations:[adr],travelMode:'DRIVING',drivingOptions:{departureTime:new Date()}},(r,st)=>{try{const el=r.rows[0].elements[0];if(st==='OK'&&el.status==='OK'){etaMin=Math.max(1,Math.round(((el.duration_in_traffic||el.duration).value)/60));ligne()}}catch(x){}})}
+  }).catch(()=>{$('carte').hidden=true});
+}
+setInterval(()=>{if(!CHAUF&&posClient)majCarte()},60000);
+{const r3=rendre;rendre=function(){r3();try{mission()}catch(e){console.warn(e)}}}
 
 appliquerLangue();
 if(CHAUF){
