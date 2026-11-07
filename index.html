@@ -566,7 +566,96 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 @media(max-width:700px){.esc-band{grid-template-columns:1fr}.esc-band .ph{min-height:190px;background-position:45% 30%}.esc-band .tx{padding:18px}.esc-band .b{align-self:stretch;text-align:center}}
 </style>
 <style>/* iPhone : pas de zoom auto sur les champs */@media (max-width:900px){input,select,textarea{font-size:16px!important}}</style>
-<style>/* iPhone : pas de zoom au double appui sur les boutons */button,a,select,label,input,.vc,.seg button,.stp button,.pax-steps button,[onclick]{touch-action:manipulation}</style></head>
+<style>/* iPhone : pas de zoom au double appui sur les boutons */button,a,select,label,input,.vc,.seg button,.stp button,.pax-steps button,[onclick]{touch-action:manipulation}</style><style id="tvp-v2">
+/* ===== Nouvel accueil (v2) ===== */
+#page-home .v2{--g:#C9A84C;--g2:#E8C97A;--ink:#1B1813;--mut:#6B6357;--cream:#FBF8F2;--cream2:#F3EDE2;--line:#E6DCC8;background:var(--cream)!important;color:var(--ink);font-family:'DM Sans',sans-serif}
+.v2 *{box-sizing:border-box}
+.v2 h1,.v2 h2{font-family:'Playfair Display',serif;letter-spacing:-.01em;text-wrap:balance}
+.v2 h2{font-size:clamp(1.7rem,4vw,2.5rem);line-height:1.15;margin:0 0 12px;color:var(--ink)}
+.v2 h2 span{color:#A8842C}
+.v2-lab{font-size:.75rem;letter-spacing:.18em;text-transform:uppercase;font-weight:800;color:#A8842C;margin:0 0 10px}
+.v2-sub{color:var(--mut);max-width:62ch;margin:0 0 26px;line-height:1.6}
+.v2-sec{padding:72px max(20px,calc((100vw - 1140px)/2))}
+.v2-alt{background:var(--cream2)}
+.v2-dark{background:#0B0A08!important;color:#F8F5EE}
+.v2-dark h2{color:#F8F5EE}.v2-dark h2 span{color:var(--g2)}.v2-dark .v2-lab{color:var(--g)}.v2-dark .v2-sub{color:#A39C8E}
+.v2-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:0 26px;border-radius:12px;border:0;cursor:pointer;font:800 1rem 'DM Sans',sans-serif;text-decoration:none;color:#1a1408;background:linear-gradient(180deg,var(--g2),var(--g) 55%,#A8842C);box-shadow:0 10px 26px rgba(168,132,44,.28)}
+.v2-btn-o{background:transparent;color:inherit;border:1.5px solid rgba(201,168,76,.6);box-shadow:none}
+.v2-btn-c{margin-top:26px}
+/* hero */
+.v2-hero{position:relative;min-height:100svh;display:flex;align-items:center;padding:110px max(20px,calc((100vw - 1140px)/2)) 60px;background:#050505;color:#F8F5EE;overflow:hidden}
+.v2-hero-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 60%;opacity:.42}
+.v2-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(5,5,5,.92) 0%,rgba(5,5,5,.6) 55%,rgba(5,5,5,.25)),linear-gradient(0deg,rgba(5,5,5,.8),transparent 40%)}
+.v2-hero-in{position:relative;z-index:1;display:grid;grid-template-columns:1.2fr .9fr;gap:48px;align-items:center;width:100%}
+.v2-kick{color:var(--g);font-weight:800;letter-spacing:.14em;text-transform:uppercase;font-size:.75rem;margin:0 0 14px;grid-column:1}
+.v2-hero h1{grid-column:1;font-size:clamp(2.1rem,5.4vw,3.6rem);line-height:1.08;margin:0 0 20px}
+.v2-hero h1 span{color:var(--g2);font-style:italic;font-weight:600;font-size:.72em;display:inline-block;margin-top:6px}
+.v2-bul{grid-column:1;list-style:none;margin:0;padding:0;display:grid;gap:10px;font-size:1.05rem;color:#E9E3D6}
+.v2-bul b{color:#fff}
+.v2-quote{grid-column:2;grid-row:1/span 4;background:rgba(20,18,15,.88);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid rgba(201,168,76,.35);border-radius:20px;padding:26px;box-shadow:0 30px 60px rgba(0,0,0,.45)}
+.v2-quote-t{font-family:'Playfair Display',serif;font-size:1.45rem;margin:0 0 16px;color:#fff}
+.v2-quote-g{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.v2-quote-g button{display:flex;flex-direction:column;align-items:center;gap:6px;padding:16px 6px;border-radius:14px;border:1.5px solid rgba(201,168,76,.3);background:rgba(255,255,255,.04);color:#F8F5EE;font:700 .95rem 'DM Sans',sans-serif;cursor:pointer;font-size:1.5rem}
+.v2-quote-g button span{font-size:.9rem}
+.v2-quote-g button:hover{border-color:var(--g);background:rgba(201,168,76,.1)}
+.v2-quote .v2-btn{width:100%}
+.v2-quote-or{display:flex;gap:10px;margin-top:12px}
+.v2-quote-or a{flex:1;text-align:center;padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,.14);color:#F8F5EE;text-decoration:none;font-weight:700;font-size:.92rem}
+/* bande confiance */
+.v2-trust{display:grid;grid-template-columns:repeat(4,1fr);background:#0B0A08!important;border-top:1px solid rgba(201,168,76,.2)}
+.v2-trust div{padding:22px 18px;text-align:center;border-right:1px solid rgba(201,168,76,.12)}
+.v2-trust b{display:block;color:var(--g2);font-family:'Playfair Display',serif;font-size:1.35rem}
+.v2-trust span{color:#A39C8E;font-size:.85rem}
+/* forfaits */
+.v2-prices{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.v2-pc{display:grid;gap:6px;text-align:left;padding:22px;border-radius:18px;background:#fff;border:1px solid var(--line);color:var(--ink);text-decoration:none;font:inherit;cursor:pointer;box-shadow:0 10px 26px rgba(60,45,15,.06);transition:transform .15s,box-shadow .15s}
+.v2-pc:hover{transform:translateY(-3px);box-shadow:0 18px 36px rgba(60,45,15,.12)}
+.v2-pi{font-size:1.5rem}.v2-pc b{font-size:1.15rem;margin-bottom:4px}
+.v2-pp{display:flex;justify-content:space-between;gap:8px;color:var(--mut);font-size:.95rem}.v2-pp em{font-style:normal;font-weight:800;color:var(--ink);font-size:1.05rem}
+.v2-pc small{color:#A8842C;font-weight:700;margin-top:4px}
+/* étapes */
+.v2-steps{list-style:none;margin:10px 0 0;padding:0;display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.v2-steps li{padding:22px;border-radius:18px;border:1px solid rgba(201,168,76,.22);background:rgba(255,255,255,.03);display:grid;gap:8px}
+.v2-steps i{font-style:normal;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-weight:900;color:#1a1408;background:linear-gradient(145deg,var(--g2),var(--g))}
+.v2-steps b{font-size:1.08rem;color:#fff}.v2-steps span{color:#A39C8E;line-height:1.55;font-size:.95rem}
+/* flotte */
+.v2-fleet{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.v2-car{border-radius:18px;overflow:hidden;background:#fff;border:1px solid var(--line)}
+.v2-car img{width:100%;height:260px;object-fit:cover;display:block}
+.v2-car div{padding:18px;display:grid;gap:6px}.v2-car b{font-size:1.15rem}.v2-car span{color:var(--mut)}
+/* services */
+.v2-srv{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.v2-srv a,.v2-srv button{display:grid;gap:4px;text-align:left;padding:20px;border-radius:16px;background:#fff;border:1px solid var(--line);text-decoration:none;color:var(--ink);font:inherit;font-size:1.4rem;cursor:pointer}
+.v2-srv b{font-size:1.05rem}.v2-srv span{font-size:.9rem;color:var(--mut)}
+/* avis / fin */
+.v2-rev,.v2-end{text-align:center}.v2-rev .v2-sub{margin:0 auto 26px}
+.v2-end-b{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:22px}
+/* FAQ */
+.v2-faq{display:grid;gap:10px;max-width:820px}
+.v2-faq details{background:#fff;border:1px solid var(--line);border-radius:14px;padding:4px 18px}
+.v2-faq summary{cursor:pointer;font-weight:750;padding:14px 0;list-style:none}
+.v2-faq summary::after{content:"+";float:right;color:#A8842C;font-weight:900}.v2-faq details[open] summary::after{content:"–"}
+.v2-faq p{margin:0 0 14px;color:var(--mut);line-height:1.6}
+/* barre mobile */
+.v2-bar{display:none}
+@media (max-width:900px){
+  .v2-hero{min-height:auto;padding:96px 16px 30px}.v2-hero h1{font-size:2rem;margin-bottom:14px}.v2-kick{font-size:.68rem;margin-bottom:10px}.v2-bul{font-size:.95rem;gap:7px}.v2-quote{padding:18px}.v2-quote-t{font-size:1.2rem;margin-bottom:12px}.v2-quote-g button{padding:12px 4px}
+  .v2-hero-in{grid-template-columns:1fr;gap:22px}
+  .v2-quote{grid-column:1;grid-row:auto}
+  .v2-trust{grid-template-columns:1fr 1fr}.v2-trust div:nth-child(2){border-right:0}.v2-trust div{border-bottom:1px solid rgba(201,168,76,.12)}
+  .v2-sec{padding:52px 16px}
+  .v2-prices,.v2-srv{grid-template-columns:1fr 1fr}
+  .v2-steps{grid-template-columns:1fr 1fr}
+  .v2-fleet{grid-template-columns:1fr}
+  .v2-bar{display:grid;grid-template-columns:auto auto 1fr;gap:8px;position:fixed;left:0;right:0;bottom:0;z-index:999;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:rgba(11,10,8,.94);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-top:1px solid rgba(201,168,76,.25)}
+  .v2-bar a,.v2-bar button{display:flex;align-items:center;justify-content:center;gap:6px;min-height:48px;padding:0 14px;border-radius:12px;font:800 .92rem 'DM Sans',sans-serif;text-decoration:none;color:#F8F5EE;border:1px solid rgba(255,255,255,.16);background:transparent}
+  .v2-bar button{color:#1a1408;border:0;background:linear-gradient(180deg,#E8C97A,#C9A84C)}
+  body.v2-hasbar{padding-bottom:72px}
+}
+@media (max-width:520px){.v2-prices,.v2-srv,.v2-steps{grid-template-columns:1fr}.v2-bar a span{display:none}}
+@media (max-width:900px){body.v2-hasbar #btn-float{display:none!important}}
+</style>
+</head>
 <body>
   <!-- Google Tag Manager (noscript) -->
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KDBPZR9P"
@@ -592,109 +681,123 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <!-- PAGE ACCUEIL -->
 <div class="page active" id="page-home">
-  <div class="hero">
-    <img class="hero-img" data-photo="van" src="" alt="Mercedes Classe V Paris Tour Eiffel"/>
-    <div class="hero-overlay"></div>
-    <div class="hero-grid-overlay"></div>
-    <div class="hero-content">
-      <div class="hero-badge">✦ Siège bébé & rehausseur gratuits — Paris & Île-de-France</div>
-      <h1 class="hero-title">
-        Taxi Van à Paris<br>
-        <span class="gold">avec siège bébé</span>
-        <em>Van 8 places & Berline — disponibles 24h/24</em>
-      </h1>
-      <p class="hero-sub">Siège bébé et rehausseur gratuits. Van 8 places et berline 24h/24 — CDG, Orly, Beauvais, Disneyland.</p>
-      <div class="hero-cta-btns">
-        <button class="btn-primary" onclick="goPage('booking')">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          Réserver maintenant
-        </button>
-        <button class="btn-outline" onclick="goPage('fleet')">Découvrir la flotte →</button>
-      </div>
-    </div>
-    <div class="hero-scroll-hint" onclick="document.querySelector('#page-home .stats-band').scrollIntoView({behavior:'smooth'})">
-      <span>Découvrir</span>
-      <svg width="14" height="18" viewBox="0 0 14 18" fill="none">
-        <path d="M7 1v13M1 9l6 7 6-7" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </div>
-  </div>
-
-  <div class="esc-wrap"><a class="esc-band" href="/paris-layover-tour.html"><div class="ph" role="img" aria-label="Visitez Paris entre deux vols"></div><div class="tx"><span class="k">✈️ Longue escale à Roissy ou Orly ?</span><span class="t">Visitez Paris entre deux vols</span><p class="d">On vient vous chercher à l'aéroport, tour de Paris sur mesure, et retour à temps pour votre vol. Envoyez vos numéros de vol, on s'occupe du reste.</p><span class="b">Découvrir l'offre →</span></div></a></div>
-  <div class="stats-band">
-    <div class="stat-item"><div class="stat-num">dès 50€</div><div class="stat-label">Course dans Paris</div></div>
-    <div class="stat-item"><div class="stat-num">24h</div><div class="stat-label">Disponibilité</div></div>
-    <div class="stat-item"><div class="stat-num">8</div><div class="stat-label">Passagers max</div></div>
-    
-    <div class="stat-item"><div class="stat-num">0€</div><div class="stat-label">Frais cachés</div></div>
-  </div>
-
-  <div class="section" style="background:var(--noir-2)">
-    <div class="section-label">✦ Notre flotte</div>
-    <h2 class="section-title">Berline ou <span class="gold">Van</span>, à vous de choisir</h2>
-    <div class="vehicles-row">
-      <div class="vehicle-showcase" onclick="goPage('fleet')">
-        <img class="vs-img" data-photo="berline" src="" alt="Taxi Berline"/>
-        <div class="vs-body">
-          <div class="vs-tag">✦ Véhicule de prestige</div>
-          <div class="vs-name">Berline Premium</div>
-          <div class="vs-desc">Élégance et confort pour vos déplacements quotidiens. Idéale pour 1 à 4 passagers avec bagages.</div>
-          <div class="vs-specs">
-            <span class="vs-spec"><span class="dot"></span>Jusqu'à 4 passagers</span>
-            <span class="vs-spec"><span class="dot"></span>Climatisation</span>
-            <span class="vs-spec"><span class="dot"></span>Siège bébé disponible</span>
-          </div>
-          <button class="vs-btn">Voir les détails <span>→</span></button>
+  <div class="v2">
+  <!-- HERO -->
+  <header class="v2-hero">
+    <img class="v2-hero-img" data-photo="van" src="" alt="Van Mercedes Classe V Taxis Van Paris" fetchpriority="high"/>
+    <div class="v2-hero-in">
+      <p class="v2-kick">Taxi officiel · Paris & Île-de-France · 24h/24</p>
+      <h1>Taxi & Van 8 places à Paris,<br><span>prix fixe annoncé avant le départ</span></h1>
+      <ul class="v2-bul">
+        <li>👶 Sièges bébé et rehausseurs <b>offerts</b></li>
+        <li>✈️ Suivi de votre vol ou train, attente sans supplément</li>
+        <li>💬 Chat avec votre chauffeur <b>traduit dans votre langue</b></li>
+      </ul>
+      <div class="v2-quote">
+        <p class="v2-quote-t">Prix immédiat en 30 secondes</p>
+        <div class="v2-quote-g">
+          <button type="button" onclick="v2Go('aero')">✈️<span>Aéroport</span></button>
+          <button type="button" onclick="v2Go('gare')">🚆<span>Gare</span></button>
+          <button type="button" onclick="v2Go('adr')">📍<span>Adresse</span></button>
         </div>
-      </div>
-      <div class="vehicle-showcase" onclick="goPage('fleet')">
-        <img class="vs-img" data-photo="van" src="" alt="Mercedes Classe V Van Paris" style="object-position:center 60%"/>
-        <div class="vs-body">
-          <div class="vs-tag">✦ Van</div>
-          <div class="vs-name">Van Premium — Mercedes Classe V</div>
-          <div class="vs-desc">Spacieux et confortable pour les familles et groupes. Plusieurs vans disponibles simultanément sur demande.</div>
-          <div class="vs-specs">
-            <span class="vs-spec"><span class="dot"></span>Jusqu'à 8 passagers</span>
-            <span class="vs-spec"><span class="dot"></span>Grand coffre</span>
-            <span class="vs-spec"><span class="dot"></span>Sièges modulables</span>
-          </div>
-          <button class="vs-btn">Voir les détails <span>→</span></button>
-        </div>
+        <button type="button" class="v2-btn" onclick="v2Go('adr')">Calculer mon prix →</button>
+        <div class="v2-quote-or"><a href="tel:+33667402005">📞 Appeler</a><a href="https://wa.me/33667402005" target="_blank" rel="noopener">💬 WhatsApp</a></div>
       </div>
     </div>
+  </header>
+
+  <!-- PREUVES -->
+  <div class="v2-trust">
+    <div><b>Prix fixe</b><span>tout compris, sans surprise avec les bouchons</span></div>
+    <div><b>8 places</b><span>Mercedes Classe V et berlines</span></div>
+    <div><b>24h/24</b><span>7j/7, jours fériés compris</span></div>
+    <div><b>Carte, Apple Pay</b><span>ou espèces, payé à bord</span></div>
   </div>
 
-  <div class="section" style="background:var(--noir)">
-    <div class="section-label">✦ Nos engagements</div>
-    <h2 class="section-title">Pourquoi nous choisir</h2>
-    <div class="services-grid" style="max-width:1100px;margin:0 auto">
-      <div class="srv-card" style="border-color:rgba(201,168,76,.4)">
-        <span class="srv-icon">🚍</span>
-        <h3>Accès aux voies de bus</h3>
-        <p>Carte professionnelle certifiée et accès aux voies de bus réservées : un trajet plus fluide aux heures de pointe, en toute sérénité.</p>
-      </div>
-      <div class="srv-card"><span class="srv-icon">🛡️</span><h3>Sécurité maximale</h3><p>Chauffeurs certifiés, véhicules contrôlés régulièrement, sièges enfants homologués NF.</p></div>
-      <div class="srv-card"><span class="srv-icon">⏱️</span><h3>Ponctualité</h3><p>Suivi du trafic en temps réel. Votre chauffeur arrive toujours à l'heure convenue.</p></div>
-      <div class="srv-card"><span class="srv-icon">💳</span><h3>Prix garanti</h3><p>Prix calculé avant la course, aucune surprise. Le tarif affiché est garanti.</p></div>
-      <div class="srv-card"><span class="srv-icon">👶</span><h3>Familles bienvenues</h3><p>Sièges bébé, rehausseurs et Van disponibles pour voyager en toute sérénité.</p></div>
-      <div class="srv-card"><span class="srv-icon">✈️</span><h3>Transferts aéroport</h3><p>Prise en charge et dépose à tous les aéroports parisiens et régionaux.</p></div>
-      <div class="srv-card"><span class="srv-icon">🌙</span><h3>24h / 7j</h3><p>Un chauffeur disponible à toute heure, même la nuit et les jours fériés.</p></div>
+  <!-- FORFAITS -->
+  <section class="v2-sec">
+    <p class="v2-lab">Nos prix</p>
+    <h2>Les forfaits, <span>affichés clairement</span></h2>
+    <p class="v2-sub">Depuis ou vers Paris. Prix tout compris pour la berline ; le van 8 places est indiqué à côté.</p>
+    <div class="v2-prices">
+      <a class="v2-pc" href="/taxi-aeroport-cdg-roissy.html"><span class="v2-pi">✈️</span><b>Roissy CDG</b><span class="v2-pp">Paris → CDG <em>75 €</em></span><span class="v2-pp">CDG → Paris <em>85 €</em></span><small>Van : 85 € / 95 €</small></a>
+      <a class="v2-pc" href="/taxi-aeroport-orly.html"><span class="v2-pi">✈️</span><b>Orly</b><span class="v2-pp">Paris → Orly <em>70 €</em></span><span class="v2-pp">Orly → Paris <em>80 €</em></span><small>Van : 80 € / 90 €</small></a>
+      <a class="v2-pc" href="/beauvais-paris-navette-train-taxi.html"><span class="v2-pi">✈️</span><b>Beauvais</b><span class="v2-pp">Paris → Beauvais <em>175 €</em></span><span class="v2-pp">Beauvais → Paris <em>185 €</em></span><small>Van : 188 € / 198 €</small></a>
+      <button class="v2-pc" type="button" onclick="v2Go('gare')"><span class="v2-pi">🚆</span><b>Gares parisiennes</b><span class="v2-pp">Gare ⇄ Paris <em>50 €</em></span><span class="v2-pp">Gare ⇄ gare <em>50 €</em></span><small>Nord, Lyon, Est, Montparnasse, Saint-Lazare…</small></button>
+      <a class="v2-pc" href="/taxi-disneyland-paris.html"><span class="v2-pi">🏰</span><b>Disneyland Paris</b><span class="v2-pp">Paris, CDG, Orly <em>prix fixe</em></span><span class="v2-pp">Van famille <em>8 places</em></span><small>Prix exact en 30 s avec le calculateur</small></a>
+      <button class="v2-pc" type="button" onclick="v2Go('adr')"><span class="v2-pi">📍</span><b>Dans Paris</b><span class="v2-pp">Course <em>dès 50 €</em></span><span class="v2-pp">Banlieue, province <em>au km</em></span><small>Prix fixe calculé avant de réserver</small></button>
     </div>
+  </section>
+
+  <!-- PARCOURS -->
+  <section class="v2-sec v2-dark">
+    <p class="v2-lab">Comment ça se passe</p>
+    <h2>Simple, du début <span>à la fin</span></h2>
+    <ol class="v2-steps">
+      <li><i>1</i><b>Vous réservez</b><span>Prix fixe immédiat, confirmation sur WhatsApp. Aucun paiement à l'avance.</span></li>
+      <li><i>2</i><b>Votre page « Ma course »</b><span>Photo du point de rendez-vous, voiture et plaque, chat avec le chauffeur traduit dans votre langue.</span></li>
+      <li><i>3</i><b>Suivi en direct</b><span>Vous voyez la voiture arriver sur la carte, avec l'heure d'arrivée. Vol et train suivis.</span></li>
+      <li><i>4</i><b>Accueil avec pancarte</b><span>Votre chauffeur vous attend avec votre nom, aide aux bagages, sièges enfants installés.</span></li>
+    </ol>
+  </section>
+
+  <!-- FLOTTE -->
+  <section class="v2-sec">
+    <p class="v2-lab">Notre flotte</p>
+    <h2>Berline ou <span>Van 8 places</span></h2>
+    <div class="v2-fleet">
+      <div class="v2-car"><img data-photo="van" src="" alt="Mercedes Classe V" loading="lazy"/><div><b>Van Mercedes Classe V</b><span>Jusqu'à 8 passagers · grand coffre · poussette · 2 sièges bébé + 2 rehausseurs</span></div></div>
+      <div class="v2-car"><img data-photo="berline" src="" alt="Berline taxi" loading="lazy"/><div><b>Berline</b><span>Jusqu'à 4 passagers · confort · idéale pour 2 valises</span></div></div>
+    </div>
+    <button type="button" class="v2-btn v2-btn-c" onclick="goPage('fleet')">Voir la flotte →</button>
+  </section>
+
+  <!-- SERVICES -->
+  <section class="v2-sec v2-alt">
+    <p class="v2-lab">Services</p>
+    <h2>Pour chaque <span>trajet</span></h2>
+    <div class="v2-srv">
+      <a href="/taxi-aeroport-cdg-roissy.html">✈️<b>Transferts aéroports</b><span>CDG, Orly, Beauvais, suivi du vol</span></a>
+      <a href="/paris-taxi-baby-seat.html">👶<b>Familles</b><span>Sièges bébé et rehausseurs offerts</span></a>
+      <a href="/taxi-disneyland-paris.html">🏰<b>Disneyland Paris</b><span>Van 8 places, toute la famille ensemble</span></a>
+      <a href="/paris-layover-tour.html">🗼<b>Escale à Paris</b><span>Longue escale : visite de Paris et retour à l'avion</span></a>
+      <a href="/chauffeur-mise-a-disposition.html">⏱️<b>Mise à disposition</b><span>Chauffeur à l'heure, événements, affaires</span></a>
+      <button type="button" onclick="goPage('services')">🧾<b>Professionnels</b><span>Facture et note de frais, Wi-Fi à bord</span></button>
+    </div>
+  </section>
+
+  <!-- AVIS -->
+  <section class="v2-sec v2-dark v2-rev">
+    <p class="v2-lab">Ils nous font confiance</p>
+    <h2>Lisez les avis <span>de nos clients</span></h2>
+    <p class="v2-sub">Familles, voyageurs d'affaires, touristes du monde entier : leurs avis sont publics, sur Google.</p>
+    <a class="v2-btn" href="https://www.google.com/maps/search/?api=1&query=Taxis%20Van%20Paris%20Nanterre" target="_blank" rel="noopener">⭐ Voir nos avis Google</a>
+  </section>
+
+  <!-- FAQ -->
+  <section class="v2-sec">
+    <p class="v2-lab">Questions fréquentes</p>
+    <h2>Vous vous <span>demandez…</span></h2>
+    <div class="v2-faq">
+      <details><summary>Le prix peut-il changer pendant la course ?</summary><p>Non. Le prix annoncé à la réservation est fixe et tout compris, même avec des bouchons ou un retard de vol.</p></details>
+      <details><summary>Les sièges enfants sont-ils payants ?</summary><p>Non, ils sont offerts. Nous fournissons jusqu'à 2 sièges bébé et 2 rehausseurs par véhicule, installés à l'avance.</p></details>
+      <details><summary>Que se passe-t-il si mon vol a du retard ?</summary><p>Nous suivons votre vol ou votre train. Le chauffeur s'adapte à l'heure réelle d'arrivée, sans supplément.</p></details>
+      <details><summary>Comment je paie ?</summary><p>À bord, par carte (Visa, Mastercard, American Express), Apple Pay, Google Pay ou en espèces. Un lien de paiement à l'avance est possible sur demande.</p></details>
+      <details><summary>Je ne parle pas français, est-ce un problème ?</summary><p>Non. Sur votre page « Ma course », vous écrivez à votre chauffeur dans votre langue : il reçoit le message traduit, et vous recevez ses réponses traduites.</p></details>
+      <details><summary>Où le chauffeur m'attend-il à l'aéroport ?</summary><p>Aux arrivées, avec une pancarte à votre nom. Le point exact (avec photo pour certains terminaux) est indiqué sur votre page « Ma course ».</p></details>
+    </div>
+    <button type="button" class="v2-btn v2-btn-c" onclick="goPage('faq')">Toutes les questions →</button>
+  </section>
+
+  <!-- APPEL FINAL -->
+  <section class="v2-sec v2-dark v2-end">
+    <h2>Votre prix fixe <span>en 30 secondes</span></h2>
+    <div class="v2-end-b"><button type="button" class="v2-btn" onclick="v2Go('adr')">Calculer mon prix →</button><a class="v2-btn v2-btn-o" href="tel:+33667402005">📞 +33 6 67 40 20 05</a></div>
+  </section>
   </div>
 
-  <div style="background:var(--noir-2);padding:70px 60px;text-align:center;position:relative">
-    <div style="position:absolute;top:0;left:60px;right:60px;height:1px;background:linear-gradient(90deg,transparent,rgba(201,168,76,.25),transparent)"></div>
-    <div class="section-label" style="text-align:center">✦ Prêt à partir ?</div>
-    <h2 style="font-family:'Playfair Display',serif;font-size:clamp(1.8rem,4vw,2.6rem);font-weight:700;margin-bottom:16px">Réservez votre taxi en <span style="color:var(--gold)">30 secondes</span></h2>
-    <p style="color:var(--gris);margin-bottom:32px;font-size:.95rem">Calculez votre tarif, choisissez votre véhicule et confirmez en ligne en 30 secondes</p>
-    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
-      <button class="btn-primary" onclick="goPage('booking')">Calculer mon tarif →</button>
-      <a class="btn-outline" href="tel:+33667402005" style="display:inline-flex;align-items:center;gap:9px">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 10.8 19.79 19.79 0 01.01 2.22 2 2 0 012 .04h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92z"/></svg>
-        Appeler directement
-      </a>
-    </div>
-  </div>
+  <!-- Barre d'action mobile -->
+  <div class="v2-bar" id="v2bar"><a href="tel:+33667402005">📞<span>Appeler</span></a><a href="https://wa.me/33667402005" target="_blank" rel="noopener">💬<span>WhatsApp</span></a><button type="button" onclick="v2Go('adr')">Prix & réservation</button></div>
 
   <footer class="site-footer">
     <div class="footer-logo" onclick="goPage('home')">Taxis <span>Van</span> Paris</div>
@@ -3055,6 +3158,11 @@ window.initGooglePlaces = window.initGooglePlaces || function(){};
   window.tvpCookies=function(){ b.classList.add("on"); };   // pour rouvrir la bannière
   if(!lire()) setTimeout(function(){ b.classList.add("on"); },600);
 })();
+</script>
+<script>
+/* Nouvel accueil : raccourcis vers le calculateur + barre d'action mobile */
+function v2Go(t){goPage('booking');setTimeout(function(){try{if(t==='aero')openAeroportModal('dep');else if(t==='gare')openGareModal('dep');else{var d=document.getElementById('dep');d&&d.focus({preventScroll:true});}}catch(e){}},350);}
+(function(){document.body.classList.add('v2-hasbar');var bar=document.getElementById('v2bar');var g=window.goPage;window.goPage=function(p){g(p);if(bar)bar.style.display=(p==='booking')?'none':'';};})();
 </script>
 </body>
 </html>
