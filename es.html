@@ -2336,7 +2336,7 @@ window.initGooglePlaces = window.initGooglePlaces || function(){};
         .catch(function(){ return note ? Promise.resolve(window.enregistrerReservation(resa)).catch(function(){}) : null; });
     }
     var alerte = fetch(APPS, {method: "POST", headers: {"Content-Type": "text/plain;charset=utf-8"},
-      body: JSON.stringify(Object.assign({action: "site", email: mail, note: note}, resa))}).catch(function(){});
+      body: JSON.stringify(Object.assign({action: "site", email: mail, note: note, langue_tel: ((navigator.languages && navigator.languages[0]) || navigator.language || "").slice(0,2).toLowerCase()}, resa))}).catch(function(){});
     Promise.race([Promise.all([fb, alerte]), new Promise(function(r){ setTimeout(r, 6000); })])
       .then(function(){ window.location.href = "/merci/?resa=1&l=" + lang; });
   }
