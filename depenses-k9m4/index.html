@@ -307,6 +307,7 @@ function waLink(r){
   const txt=`Bonjour${nom}, je me permets de vous relancer au sujet du paiement de ${eur(r.amt)} pour la course du ${new Date(r.date+'T12:00').toLocaleDateString('fr-FR',{day:'numeric',month:'long'})}. Merci d'avance. Taxis Van Paris`;
   return 'https://wa.me/'+p+'?text='+encodeURIComponent(txt);
 }
+const SRC_NOM={U:'Uber'};
 function render(){
   const J=view==='jour';
   $('seg').querySelectorAll('button').forEach(b=>b.className=b.dataset.v===view?'on':'');
@@ -359,6 +360,14 @@ function render(){
     const rows=Object.entries(by).sort((a,b)=>b[1]-a[1]);
     cs.hidden=false;
     cs.innerHTML='<div class="lbl">Par catégorie</div>'+rows.map(([k,v])=>`<div class="catline"><div class="row"><span>${k}</span><b>${eur(v)}</b></div><div class="bar"><i style="width:${Math.round(v/tot*100)}%"></i></div></div>`).join('');
+  }else if(!J&&tab==='rec'&&R.length){
+    // gains du mois classés par catégorie (source), encaissé + à recevoir + nombre de courses
+    const by={};R.forEach(i=>{const k=SRC_NOM[i.src]||i.src,o=by[k]=by[k]||{g:0,d:0,n:0};if(i.paid===false)o.d+=i.amt;else o.g+=i.amt;o.n+=Number(i.nb)||1});
+    const rows=Object.entries(by).sort((a,b)=>(b[1].g+b[1].d)-(a[1].g+a[1].d)),T=gain+due;
+    cs.hidden=false;
+    cs.innerHTML='<div class="lbl">Gains du mois par catégorie</div>'+rows.map(([k,o])=>{const t=o.g+o.d,pc=T?Math.round(t/T*100):0;
+      return `<div class="catline"><div class="row"><span>${esc(k)} <span class="mut" style="font-size:12px">· ${o.n} course${o.n>1?'s':''} · ${pc} %</span></span><b>${eur(t)}</b></div>${o.d?`<div class="mut" style="font-size:12px;margin-top:2px">dont ${eur(o.d)} à recevoir</div>`:''}<div class="bar"><i style="width:${pc}%"></i></div></div>`}).join('')
+      +`<div class="row" style="margin-top:10px;border-top:1px solid var(--line);padding-top:10px"><b>Total du mois</b><b>${eur(T)}</b></div>`;
   }else cs.hidden=true;
   // lists
   $('list').innerHTML=L.length?L.map(i=>`<div class="item" data-id="${i.id}"><div class="d"><div class="t">${i.cat}${i.photo?' 📷':''}</div><div class="s">${dshort(i.date)}${i.note?' · '+esc(i.note):''}</div></div><div class="m">${eur(i.amt)}</div></div>`).join(''):`<div class="empty">Aucune dépense ${J?'ce jour-là':'ce mois-ci'}.</div>`;
@@ -461,6 +470,8 @@ function csv(list,rl){
   const rows=[['Type','Date','Catégorie / Source','Montant','TVA','Contact','Téléphone','Statut','Note'].join(';')];
   [...rl].sort((a,b)=>a.date.localeCompare(b.date)).forEach(i=>rows.push(['Recette',f(i.date),q(i.src),n(i.amt),'',q(i.name||''),q(i.phone||''),i.paid===false?'À recevoir':'Reçu',q(i.note||'')].join(';')));
   [...list].sort((a,b)=>a.date.localeCompare(b.date)).forEach(i=>rows.push(['Dépense',f(i.date),q(i.cat),n(i.amt),n(i.tva),'','','',q(i.note||'')].join(';')));
+  const bySrc={};rl.forEach(i=>{const k=SRC_NOM[i.src]||i.src;bySrc[k]=(bySrc[k]||0)+i.amt});
+  Object.entries(bySrc).sort((a,b)=>b[1]-a[1]).forEach(([k,v])=>rows.push(['Total gains : '+k,'','',n(v),'','','','',''].join(';')));
   rows.push(['Total recettes','','',n(sum(rl.filter(x=>x.paid!==false))),'','','','',''].join(';'));
   rows.push(['Total dépenses','','',n(sum(list)),n(sum(list,'tva')),'','','',''].join(';'));
   return '\ufeff'+rows.join('\r\n');
