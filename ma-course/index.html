@@ -303,7 +303,7 @@ $('bOrig').onclick=()=>{$('origT').hidden=!$('origT').hidden};
 let etapeLocale=null;
 function rendreEtapes(){
   const es=(info&&info.etapes)||{},cur=etapeLocale||(info&&info.etape)||'',ci=ETK.indexOf(cur);
-  const h=k=>k in es?(tsMs(es[k])?hm(tsMs(es[k])):hm(Date.now())):'';
+  const h=k=>k in es?(typeof es[k+'_c']==='number'?hm(es[k+'_c']):tsMs(es[k])?hm(tsMs(es[k])):hm(Date.now())):'';
   if(CHAUF){
     $('tEtape').textContent='Étape de la course';
     $('cliIci').hidden=!('client_ici' in es)||ci>=2;$('cliIci').textContent='👤 Le client est au point de rendez-vous depuis '+h('client_ici');
@@ -320,8 +320,9 @@ function rendreEtapes(){
 async function marquerEtape(k){
   if(k==='fin'&&!confirm('Terminer la course ?'))return;
   const avant=etapeLocale;etapeLocale=k;rendreEtapes();try{navigator.vibrate&&navigator.vibrate(60)}catch(e){}
-  try{await setDoc(doc(db,'trad_g',code),{etape:k,etapes:{[k]:serverTimestamp()},t:serverTimestamp()},{merge:true});etapeLocale=null}
-  catch(e){etapeLocale=avant;rendreEtapes();toast(e&&e.code==='permission-denied'?'Étape bloquée : règle Firebase à ajouter':'Pas de connexion, réessaie')}
+  const lent=setTimeout(()=>toast('⏳ Étape gardée : elle partira dès que le réseau revient'),4000);
+  try{await setDoc(doc(db,'trad_g',code),{etape:k,etapes:{[k]:serverTimestamp(),[k+'_c']:Date.now()},t:serverTimestamp()},{merge:true});clearTimeout(lent);etapeLocale=null}
+  catch(e){clearTimeout(lent);etapeLocale=avant;rendreEtapes();toast(e&&e.code==='permission-denied'?'Étape bloquée : règle Firebase à ajouter':'Pas de connexion, réessaie')}
 }
 $('bIci').onclick=async()=>{
   $('bIci').disabled=true;
@@ -475,14 +476,24 @@ async function envoyerPos(p,force){
   const now=Date.now();
   if(!force&&now-dernierEnvoi<10000&&dernierPt&&distM(dernierPt,pt)<40)return;
   dernierEnvoi=now;dernierPt=pt;
+  autoSurPlace(pt);
   try{await setDoc(posRef(),{...pt,t:serverTimestamp()});$('gpsS').textContent='📡 Position partagée avec le client · '+hm(now)+' (±'+pt.acc+' m)'}
   catch(e){$('gpsS').textContent=e&&e.code==='permission-denied'?'📡 Partage bloqué : règle Firebase à ajouter':'📡 Pas de connexion, nouvel essai…'}
 }
 setInterval(()=>{if(CHAUF&&watchId!==null&&Date.now()-dernierEnvoi>45000)navigator.geolocation.getCurrentPosition(p=>envoyerPos(p,true),()=>{},{enableHighAccuracy:true,maximumAge:10000,timeout:15000})},15000);
+/* --- Chauffeur : « Sur place » validé tout seul à 150 m du point de rendez-vous --- */
+let rdvDrv=null,rdvDrvAdr='',autoFait=false;
+function autoSurPlace(pt){
+  const adr=pointRdv();
+  if(adr&&adr!==rdvDrvAdr){rdvDrvAdr=adr;chargerMaps().then(()=>new google.maps.Geocoder().geocode({address:adr},(r,st)=>{if(st==='OK'&&r[0]){const l=r[0].geometry.location;rdvDrv={lat:l.lat(),lng:l.lng()}}})).catch(()=>{})}
+  if(autoFait||!rdvDrv||etapeCour()!=='route')return;
+  const d=distM(rdvDrv,pt);
+  if(d<=Math.max(150,(pt.acc||0)*1.2)){autoFait=true;toast('📍 Arrivée détectée par le GPS');marquerEtape('place')}
+}
 /* --- Chauffeur : temps d'attente sur place --- */
 function attente(){
   let el=$('attente');if(!el){el=document.createElement('div');el.id='attente';el.className='att';$('etapes').after(el)}
-  const t0=tsMs((info.etapes||{}).place);
+  const e0=info.etapes||{},t0=typeof e0.place_c==='number'?e0.place_c:tsMs(e0.place);
   if(etapeCour()==='place'&&t0){el.hidden=false;el.textContent='⏱ Attente : '+Math.max(0,Math.floor((Date.now()-t0)/60000))+' min (sur place depuis '+hm(t0)+')'}else el.hidden=true;
 }
 setInterval(()=>{if(CHAUF&&info)attente()},30000);
@@ -512,7 +523,7 @@ function feuille(titre,txt,btns){
   s.onclick=e=>{if(e.target===s)s.remove()};document.body.appendChild(s);
 }
 $('bProb').onclick=()=>{
-  const c=info.course||{},es=info.etapes||{},t0=tsMs(es.place);
+  const c=info.course||{},es=info.etapes||{},t0=typeof es.place_c==='number'?es.place_c:tsMs(es.place);
   const envoyer=async quoi=>{const pt=dernierPt||await positionUnique();
     const l=['⚠️ '+quoi,'Course : '+[c.date,c.heure,c.nom||'Client'].filter(Boolean).join(' · '),'📍 '+(pointRdv()||'?')+' → '+(c.arr||'?'),'Étape : '+(ETC[etapeCour()]||'pas commencée')+(etapeCour()==='place'&&t0?' · attente '+Math.floor((Date.now()-t0)/60000)+' min':''),pt?'Ma position : https://maps.google.com/?q='+pt.lat+','+pt.lng:'','Conversation : '+location.origin+location.pathname+'?c='+code+'&d=1'].filter(Boolean).join('\n');
     location.href='https://wa.me/'+TVP_WA+'?text='+encodeURIComponent(l)};
