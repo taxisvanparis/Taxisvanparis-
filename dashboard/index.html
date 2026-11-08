@@ -1807,11 +1807,30 @@ function anonymise(title,location){
     });
   }
 
+  // Valeur d'un chauffeur dans la liste : son compte (uid) s'il en a un, sinon son nom
+  const chVal = c => c.uid ? c.uid : "nom:" + (c.nom || "");
+  let chEnAttente = null;
   function fillChauffeurDropdown() {
-    const sel = document.getElementById("f-chauffeur");
+    const sel = document.getElementById("f-chauffeur"), avant = chEnAttente || sel.value;
     sel.innerHTML = `<option value="">Non assigné</option>` +
-      chauffeursCache.map(c => `<option value="${c.uid || ""}" data-nom="${c.nom}">${c.nom}</option>`).join("");
+      chauffeursCache.map(c => `<option value="${esc(chVal(c))}" data-nom="${esc(c.nom || "")}">${esc(c.nom || "")}${c.tel ? " · " + esc(c.tel) : ""}</option>`).join("") +
+      `<option value="__nouveau">➕ Nouveau chauffeur…</option>`;
+    if (avant && avant !== "__nouveau" && [...sel.options].some(o => o.value === avant)) { sel.value = avant; if (avant === chEnAttente) chEnAttente = null; }
   }
+  // Ajouter un chauffeur directement depuis la fiche de la course
+  document.getElementById("f-chauffeur").addEventListener("change", async e => {
+    const sel = e.target; if (sel.value !== "__nouveau") return;
+    sel.value = "";
+    const nom = (prompt("Nom du chauffeur (ex. Ahmed) :") || "").trim(); if (!nom) return;
+    const tel = (prompt("Son numéro WhatsApp (facultatif) :") || "").trim();
+    const deja = chauffeursCache.find(c => String(c.nom || "").toLowerCase() === nom.toLowerCase());
+    if (deja) { sel.value = chVal(deja); return; }
+    chEnAttente = "nom:" + nom;
+    const o = document.createElement("option"); o.value = chEnAttente; o.dataset.nom = nom; o.textContent = nom + (tel ? " · " + tel : "");
+    sel.insertBefore(o, sel.lastElementChild); sel.value = chEnAttente;
+    try { await addDoc(collection(db, "chauffeurs"), { nom, tel, vehicule: "", statut: "disponible", uid: null, suivi: true }); toast("Chauffeur ajouté : " + nom); }
+    catch (err) { toast("Chauffeur non enregistré dans l'équipe (" + ((err && err.code) || "erreur") + ")", 5000); }
+  });
 
   // ---------------- MODALS: RÉSERVATION ----------------
   let editingResaId = null, editingChauffeur = null;
@@ -1828,8 +1847,9 @@ function anonymise(title,location){
   document.getElementById("btn-cancel-resa").addEventListener("click", () => document.getElementById("modal-reservation").classList.remove("shown"));
   document.getElementById("btn-save-resa").addEventListener("click", async () => {
     const chauffeurSel = document.getElementById("f-chauffeur");
-    const chauffeurUid = chauffeurSel.value;
-    const chauffeurNom = chauffeurUid ? chauffeurSel.selectedOptions[0].dataset.nom : "";
+    const chV = chauffeurSel.value === "__nouveau" ? "" : chauffeurSel.value;
+    const chauffeurUid = chV && !chV.startsWith("nom:") ? chV : "";
+    const chauffeurNom = chV ? (chauffeurSel.selectedOptions[0].dataset.nom || chV.slice(4)) : "";
     const data = {
       nom: document.getElementById("f-nom").value.trim(),
       tel: document.getElementById("f-tel").value.trim(),
@@ -1852,7 +1872,7 @@ function anonymise(title,location){
     if (editingResaId) {
       // Modification : on garde le statut, la date de création et les infos hôtel d'origine
       delete data.statut; delete data.createdAt;
-      if (editingChauffeur && !data.chauffeurUid) { data.chauffeurUid = editingChauffeur.uid; data.chauffeurNom = editingChauffeur.nom; }
+      if (editingChauffeur && !data.chauffeurUid && !data.chauffeurNom) { data.chauffeurUid = editingChauffeur.uid; data.chauffeurNom = editingChauffeur.nom; }
       data.note = noteTxt;
       try { await updateDoc(doc(db, "reservations", editingResaId), data); }
       catch (err) { console.error(err); alert("La modification n'a pas pu être enregistrée (" + ((err && err.code) || "erreur") + ")."); return; }
@@ -1881,8 +1901,9 @@ function anonymise(title,location){
     set("f-pax", parseInt(r.pax) || 1); set("f-bag", parseInt(r.bagages) || 0);
     const p = parseFloat(String(r.prix ?? "").replace(",", ".").replace(/[^\d.]/g, "")); set("f-prix", isNaN(p) ? "" : p);
     document.getElementById("f-vh").value = /van|classe v|vito|minivan/i.test(String(r.vehicule || "")) ? "Van" : "Berline";
-    const ch = document.getElementById("f-chauffeur"); ch.value = r.chauffeurUid || "";
-    editingChauffeur = (r.chauffeurUid && ch.value !== r.chauffeurUid) ? { uid: r.chauffeurUid, nom: r.chauffeurNom || "" } : null;
+    const ch = document.getElementById("f-chauffeur"), voulu = r.chauffeurUid || (r.chauffeurNom ? "nom:" + r.chauffeurNom : "");
+    chEnAttente = null; ch.value = voulu;
+    editingChauffeur = (voulu && ch.value !== voulu) ? { uid: r.chauffeurUid || "", nom: r.chauffeurNom || "" } : null;
     if (editingChauffeur) ch.value = "";
     set("f-note", r.note || "");
     set("f-vol", volCode(r) || String(r.vol || "").toUpperCase());
