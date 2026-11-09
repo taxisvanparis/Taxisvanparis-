@@ -1047,7 +1047,7 @@ function anonymise(title,location){
       <label for="imm-arr">Arrivée (facultatif)</label><input id="imm-arr" type="text" autocomplete="off" placeholder="Si tu la connais"><div class="imm-ac" id="imm-ac-arr" hidden></div>
       <div class="imm-chips" data-for="imm-arr">${["Aéroport CDG", "Aéroport d'Orly", "Disneyland Paris"].map(x => `<button type="button">${x}</button>`).join("")}</div>
       <label>Passagers</label><div class="imm-pax" id="imm-pax">${[1, 2, 3, 4, 5, 6, 7, 8].map(n => `<button type="button" data-n="${n}"${n === 1 ? ' class="on"' : ""}>${n}</button>`).join("")}</div>
-      <label for="imm-ch">Chauffeur</label><select id="imm-ch"><option value="__moi">🙋 Moi (je fais la course)</option>${opts}</select>
+      <label for="imm-ch">Chauffeur</label><select id="imm-ch"><option value="__moi">🙋 Moi (je fais la course)</option><option value="__disp">📢 Dispatcher (je ne sais pas encore qui)</option>${opts}</select>
       <label for="imm-nom">Nom du client (facultatif)</label><input id="imm-nom" type="text" autocomplete="off">
       <button id="imm-go" type="button">🚀 Créer et préparer les liens</button></div>`;
     document.body.appendChild(ov);
@@ -1072,14 +1072,14 @@ function anonymise(title,location){
     $i("imm-go").onclick = async () => {
       const tel = $i("imm-tel").value.trim(), dep = $i("imm-dep").value.trim();
       if (!dep) { toast("Indique au moins le départ", 3000); $i("imm-dep").focus(); return; }
-      const chSel = $i("imm-ch"), moi = chSel.value === "__moi", chV = moi ? "" : chSel.value, chOpt = chSel.selectedOptions[0];
+      const chSel = $i("imm-ch"), moi = chSel.value === "__moi", disp = chSel.value === "__disp", chV = moi || disp ? "" : chSel.value, chOpt = chSel.selectedOptions[0];
       try { localStorage.setItem("tvp_imm_ch", chSel.value); } catch (e) {}
       const now = new Date(), p2 = n => String(n).padStart(2, "0");
       const data = { nom: $i("imm-nom").value.trim() || "Client immédiat", tel, dep, arr: $i("imm-arr").value.trim(),
         date: now.getFullYear() + "-" + p2(now.getMonth() + 1) + "-" + p2(now.getDate()), heure: p2(now.getHours()) + ":" + p2(now.getMinutes()),
         pax, bagages: 0, vehicule: pax > 4 ? "Van" : "Berline", prix: 0, vol: "",
         chauffeurUid: chV && !chV.startsWith("nom:") ? chV : "", chauffeurNom: moi ? ((mcProfil().prenom) || "Badr") : chV ? (chOpt.dataset.nom || chV.slice(4)) : "",
-        statut: "confirmée", note: "⚡ Course immédiate", createdAt: serverTimestamp() };
+        statut: "confirmée", note: disp ? "⚡ Course immédiate · dispatchée" : "⚡ Course immédiate", createdAt: serverTimestamp() };
       const go = $i("imm-go"); go.disabled = true; go.textContent = "Création…";
       try {
         ajoutLocal = Date.now();
@@ -1090,6 +1090,7 @@ function anonymise(title,location){
         if (!reservationsCache.find(x => x.id === ref.id)) reservationsCache.push(Object.assign({ id: ref.id }, data));
         // lien créé en arrière-plan (même logique que « Lien client »), puis envoi depuis cet écran
         ouvrirLien(ref.id); document.getElementById("modal-lien").classList.remove("shown");
+        if (disp) { ["mc-prenom", "mc-modele", "mc-plaque"].forEach(id => document.getElementById(id).value = ""); document.getElementById("mc-tel").value = "06 67 40 20 05"; }
         document.getElementById("mc-save").click();
         for (let k = 0; k < 60 && !mcCode; k++) await new Promise(r => setTimeout(r, 100));
         if (!mcCode) throw { code: "lien non créé" };
@@ -1100,7 +1101,9 @@ function anonymise(title,location){
           <label>Au client</label>
           <a class="imm-send" style="background:#25d366;color:#08240f" target="_blank" rel="noopener" href="${h("mc-wa")}">💬 WhatsApp au client</a>
           ${nTel ? `<a class="imm-send" style="background:transparent;border:1px solid var(--border);color:inherit" href="${h("mc-sms")}">✉️ SMS au client</a>` : ""}
-          ${moi ? `<p class="sub" style="margin-top:12px">🙋 Tu fais la course : ton lien chauffeur (Waze, chat traduit, étapes) 👇</p><a class="imm-send" style="background:transparent;border:1px solid var(--gold);color:var(--gold)" target="_blank" rel="noopener" href="${mcUrl(mcCode)}&d=1">🚖 Ouvrir ma mission</a>`
+          ${disp ? `<label>Au groupe de chauffeurs</label><a class="imm-send" style="background:#d4b25e;color:#17120a" target="_blank" rel="noopener" href="${waLink("⚡ *IMMÉDIAT* ⚡\n" + shareMessage(shareItem(reservationsCache.find(x => x.id === ref.id) || Object.assign({ id: ref.id }, data))))}">📢 Envoyer au groupe</a>
+            <p class="sub" style="margin-top:10px">Le groupe reçoit la course sans adresse exacte ni lien. Quand un chauffeur la prend : ✏️ Modifier → son nom → « WhatsApp chauffeur ». Il remplira lui-même sa plaque sur son lien.</p>`
+          : moi ? `<p class="sub" style="margin-top:12px">🙋 Tu fais la course : ton lien chauffeur (Waze, chat traduit, étapes) 👇</p><a class="imm-send" style="background:transparent;border:1px solid var(--gold);color:var(--gold)" target="_blank" rel="noopener" href="${mcUrl(mcCode)}&d=1">🚖 Ouvrir ma mission</a>`
             : `<label>Au chauffeur</label><a class="imm-send" style="background:#25d366;color:#08240f" target="_blank" rel="noopener" href="${h("mc-wa-ch")}">🚖 WhatsApp au chauffeur</a><a class="imm-send" style="background:transparent;border:1px solid var(--border);color:inherit" href="${h("mc-sms-ch")}">✉️ SMS au chauffeur</a>`}
           <p class="sub" style="margin-top:12px">Prix à 0 € : complète-le plus tard avec ✏️ Modifier.</p>`;
         $i("imm-x").onclick = fermer;
@@ -1736,7 +1739,8 @@ function anonymise(title,location){
       etapesSubs[c] = onSnapshot(doc(db, "trad_g", c), s => {
         const d = s.data() || {}, v = JSON.stringify([d.etape || "", Object.keys(d.etapes || {}).sort(), etTs((d.etapes || {})[d.etape])]);
         const avant = etapesCache[c] && etapesCache[c].v;
-        etapesCache[c] = { v, etape: d.etape || "", etapes: d.etapes || {} };
+        const pris = d.chauffeur && d.chauffeur.par === "chauffeur" ? String(d.chauffeur.prenom || "") + (d.vehicule && d.vehicule.plaque ? " · " + d.vehicule.plaque : "") : "";
+        etapesCache[c] = { v: v + pris, etape: d.etape || "", etapes: d.etapes || {}, pris };
         if (avant !== v) renderReservations();
       }, () => {});
     });
@@ -1786,7 +1790,7 @@ function anonymise(title,location){
         + (x ? `<span class="big" style="color:${x[2]};border-color:${x[2]};background:${x[2]}1f">${x[0]} ${x[1]} · ${hmC(e.etape) || etHm(E[e.etape])}</span>` : "")
         + step
         + `<div class="rt">${esc(r.dep || "?")} → <b>${esc(r.arr || "?")}</b></div>`
-        + `<div class="tl">${r.chauffeurNom ? "🚖 " + esc(r.chauffeurNom) + " · " : ""}${volCode(r) ? "✈️ " + esc(volCode(r)) + " · " : ""}${r.pax ? r.pax + " pers." : ""}${r.prix ? " · " + esc(r.prix) + " €" : ""}</div>`
+        + `<div class="tl">${e.pris ? "🚖 pris par " + esc(e.pris) + " · " : r.chauffeurNom ? "🚖 " + esc(r.chauffeurNom) + " · " : ""}${volCode(r) ? "✈️ " + esc(volCode(r)) + " · " : ""}${r.pax ? r.pax + " pers." : ""}${r.prix ? " · " + esc(r.prix) + " €" : ""}</div>`
         + (chips.length ? `<div class="ec-live">${chips.join("")}</div>` : "")
         + `<a target="_blank" rel="noopener" href="../ma-course/?c=${encodeURIComponent(code)}&d=1">💬 Conversation</a>`
         + ` <a href="#" data-pos="${esc(code)}">📍 Position</a> <a href="#" data-preuve="${esc(code)}">📷 Preuve</a> ${e.etape === "fin" ? "" : `<a href="#" data-fin="${esc(code)}">🏁 Terminer</a>`}</div>`;

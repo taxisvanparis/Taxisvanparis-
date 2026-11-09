@@ -65,6 +65,7 @@ h1{font-size:26px;line-height:1.15;margin:4px 0 4px;font-weight:800;letter-spaci
 .dock input{flex:1;min-width:0;font:inherit;font-size:17px;color:var(--ink);background:rgba(255,255,255,.05);border:1.5px solid var(--line);border-radius:999px;padding:12px 16px}
 .dock input:focus{outline:none;border-color:var(--gold)}
 .dock button{flex:none;width:50px;height:50px;border-radius:50%;border:0;font-size:20px;background:linear-gradient(180deg,#e2c477,var(--gold) 45%,var(--gold2));color:#1a1408;font-weight:900}
+.qui{display:grid;gap:8px}.qui input{min-height:48px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:inherit;font:inherit;font-size:16px;padding:0 12px}
 .navg{display:grid;gap:10px}.navi{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;font-size:15px;font-weight:650}.navi small{display:block;color:var(--mut);font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:800}.navi .b{min-height:42px;padding:0 12px;font-size:14px}
 .acts2{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px}.acts2 .b{min-height:46px;font-size:14px;padding:0 6px;background:transparent}.acts2 .b.r{border-color:rgba(239,75,79,.6);color:#ff8a8d}
 .gps{margin:10px 0 0;font-size:13px;color:var(--mut)}.att{margin-top:10px;font-weight:800;color:var(--gold)}
@@ -128,6 +129,11 @@ h1{font-size:26px;line-height:1.15;margin:4px 0 4px;font-weight:800;letter-spaci
     <div class="chips" id="chips"></div>
   </section>
 
+  <section class="card" id="cQui" hidden><h2>🚖 Qui fait la course ?</h2>
+    <p class="sub" style="margin:0 0 10px">Le client verra ton prénom, ta voiture et ta plaque. Ton numéro n'est jamais montré.</p>
+    <div class="qui"><input id="quiP" placeholder="Ton prénom" autocomplete="given-name" aria-label="Prénom"><input id="quiM" placeholder="Voiture (ex. Mercedes Classe V noire)" aria-label="Voiture"><input id="quiI" placeholder="Plaque (ex. GT-420-NS)" autocapitalize="characters" aria-label="Plaque"></div>
+    <button type="button" class="b g" id="bQui" style="margin-top:10px;width:100%">✅ C'est moi, je prends la course</button>
+  </section>
   <section class="card" id="cEtape"><h2 id="tEtape"></h2>
     <div class="cli" id="cliIci" hidden></div>
     <div id="etapes"></div>
@@ -530,6 +536,21 @@ $('bProb').onclick=()=>{
     location.href='https://wa.me/'+TVP_WA+'?text='+encodeURIComponent(l)};
   feuille('⚠️ Un problème ?','Taxis Van Paris reçoit ton message avec la course et ta position.',[['👤 Client absent / introuvable',()=>envoyer('Client absent / introuvable')],['⏰ Je vais être en retard',()=>envoyer('Je vais être en retard')],['📍 Adresse introuvable',()=>envoyer('Adresse introuvable')],['🚗 Problème de véhicule',()=>envoyer('Problème de véhicule')],['💬 Autre problème',()=>envoyer('Problème')],['📞 Appeler Taxis Van Paris',()=>{location.href='tel:+33667402005'}]]);
 };
+/* --- Chauffeur : « Qui fait la course ? » — le chauffeur indique lui-même prénom, voiture, plaque (mémorisés sur son téléphone) --- */
+function quiCourse(){
+  if(!CHAUF||!info)return;const ch=info.chauffeur||{},box=$('cQui');
+  const libre=!String(ch.prenom||'').trim()&&etapeCour()!=='fin';box.hidden=!libre;if(!libre)return;
+  if(!box.dataset.ok){box.dataset.ok=1;let m={};try{m=JSON.parse(localStorage.getItem('tvp_ch_moi')||'{}')}catch(e){}
+    $('quiP').value=m.p||'';$('quiM').value=m.m||'';$('quiI').value=m.i||'';
+    $('bQui').onclick=async()=>{const p=$('quiP').value.trim(),mo=$('quiM').value.trim(),pl=$('quiI').value.trim().toUpperCase();
+      if(!p){toast('Indique ton prénom');$('quiP').focus();return}
+      try{localStorage.setItem('tvp_ch_moi',JSON.stringify({p,m:mo,i:pl}))}catch(e){}
+      $('bQui').disabled=true;
+      try{await setDoc(doc(db,'trad_g',code),{chauffeur:{prenom:p,tel:'',par:'chauffeur'},vehicule:{modele:mo,plaque:pl},t:serverTimestamp()},{merge:true});toast('✅ Course prise : le client voit ton prénom et ta plaque')}
+      catch(e){toast(e&&e.code==='permission-denied'?'Bloqué : règle Firebase à ajouter':'Pas de connexion, réessaie')}
+      $('bQui').disabled=false}}
+}
+{const rq=rendre;rendre=function(){rq();try{quiCourse()}catch(e){}}}
 /* --- Chauffeur : course terminée → message « vous pouvez fermer » --- */
 function finChauffeur(){
   if(!CHAUF)return;let el=$('finCh');
