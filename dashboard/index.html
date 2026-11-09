@@ -1652,9 +1652,14 @@ function anonymise(title,location){
   function renderEnCours() {
     const box = document.getElementById("encours-list");
     const vieux = r => { const m = String(r.date || "").match(/^(\d{4})-(\d{2})-(\d{2})$/), h = String(r.heure || "").match(/(\d{1,2})[:h](\d{2})/); if (!m) return false; const t = new Date(+m[1], +m[2] - 1, +m[3], h ? +h[1] : 12, h ? +h[2] : 0).getTime(); return Date.now() - t > 8 * 3600000; };
-    const rows = reservationsCache.filter(r => { const e = r.lienCourse && etapesCache[r.lienCourse]; return e && !vieux(r) && ("route place bord".includes(e.etape || "-") || (!e.etape && "client_ici" in e.etapes)); })
+    const rows = reservationsCache.filter(r => { const e = r.lienCourse && etapesCache[r.lienCourse]; if (!e) return false;
+      // terminée : reste visible 8 h après la fin (pour vérifier la preuve), puis disparaît
+      if (e.etape === "fin") { const tf = (typeof e.etapes.fin_c === "number" ? e.etapes.fin_c : etTs(e.etapes.fin)) || 0; return Date.now() - tf < 8 * 3600000; }
+      return !vieux(r) && ("route place bord".includes(e.etape || "-") || (!e.etape && "client_ici" in e.etapes)); })
       .sort((a, b) => ((a.date || "") + (a.heure || "")).localeCompare((b.date || "") + (b.heure || "")));
-    ["nb-encours"].forEach(id => { const el = document.getElementById(id); if (el) { el.textContent = rows.length; el.classList.toggle("on", rows.length > 0); } });
+    rows.sort((a, b) => (etapesCache[a.lienCourse].etape === "fin") - (etapesCache[b.lienCourse].etape === "fin"));
+    const actives = rows.filter(r => etapesCache[r.lienCourse].etape !== "fin").length;
+    ["nb-encours"].forEach(id => { const el = document.getElementById(id); if (el) { el.textContent = actives; el.classList.toggle("on", actives > 0); } });
     if (!box) return;
     if (!rows.length) { box.innerHTML = `<div class="rempty">Aucune course en cours.<br><small>Une course apparaît ici dès que le chauffeur touche « En route » sur sa page « Ma course ».</small></div>`; return; }
     box.innerHTML = rows.map(r => {
@@ -1666,7 +1671,7 @@ function anonymise(title,location){
         + `<div class="rt">${esc(r.dep || "?")} → <b>${esc(r.arr || "?")}</b></div>`
         + `<div class="tl">${r.chauffeurNom ? "Chauffeur : " + esc(r.chauffeurNom) + " · " : ""}${volCode(r) ? "✈️ " + esc(volCode(r)) + " · " : ""}${tl}</div>`
         + `<a target="_blank" rel="noopener" href="../ma-course/?c=${encodeURIComponent(r.lienCourse)}&d=1">💬 Conversation</a>`
-        + ` <a href="#" data-pos="${esc(r.lienCourse)}">📍 Position du chauffeur</a> <a href="#" data-dossier="${esc(r.lienCourse)}" data-rid="${esc(r.id)}">📁 Dossier / preuve</a> <a href="#" data-fin="${esc(r.lienCourse)}">🏁 Terminer</a></div>`;
+        + ` <a href="#" data-pos="${esc(r.lienCourse)}">📍 Position du chauffeur</a> <a href="#" data-dossier="${esc(r.lienCourse)}" data-rid="${esc(r.id)}">📁 Dossier / preuve</a> ${e.etape === "fin" ? "" : `<a href="#" data-fin="${esc(r.lienCourse)}">🏁 Terminer</a>`}</div>`;
     }).join("");
   }
   // Courses en cours : position en direct et preuve d'arrivée (photo datée + GPS) envoyées par la page chauffeur
