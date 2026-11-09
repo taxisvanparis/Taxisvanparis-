@@ -1651,7 +1651,8 @@ function anonymise(title,location){
   }
   function renderEnCours() {
     const box = document.getElementById("encours-list");
-    const rows = reservationsCache.filter(r => { const e = r.lienCourse && etapesCache[r.lienCourse]; return e && ("route place bord".includes(e.etape || "-") || (!e.etape && "client_ici" in e.etapes)); })
+    const vieux = r => { const m = String(r.date || "").match(/^(\d{4})-(\d{2})-(\d{2})$/), h = String(r.heure || "").match(/(\d{1,2})[:h](\d{2})/); if (!m) return false; const t = new Date(+m[1], +m[2] - 1, +m[3], h ? +h[1] : 12, h ? +h[2] : 0).getTime(); return Date.now() - t > 8 * 3600000; };
+    const rows = reservationsCache.filter(r => { const e = r.lienCourse && etapesCache[r.lienCourse]; return e && !vieux(r) && ("route place bord".includes(e.etape || "-") || (!e.etape && "client_ici" in e.etapes)); })
       .sort((a, b) => ((a.date || "") + (a.heure || "")).localeCompare((b.date || "") + (b.heure || "")));
     ["nb-encours"].forEach(id => { const el = document.getElementById(id); if (el) { el.textContent = rows.length; el.classList.toggle("on", rows.length > 0); } });
     if (!box) return;
@@ -1665,11 +1666,16 @@ function anonymise(title,location){
         + `<div class="rt">${esc(r.dep || "?")} → <b>${esc(r.arr || "?")}</b></div>`
         + `<div class="tl">${r.chauffeurNom ? "Chauffeur : " + esc(r.chauffeurNom) + " · " : ""}${volCode(r) ? "✈️ " + esc(volCode(r)) + " · " : ""}${tl}</div>`
         + `<a target="_blank" rel="noopener" href="../ma-course/?c=${encodeURIComponent(r.lienCourse)}&d=1">💬 Conversation</a>`
-        + ` <a href="#" data-pos="${esc(r.lienCourse)}">📍 Position du chauffeur</a> <a href="#" data-preuve="${esc(r.lienCourse)}">📷 Preuve d'arrivée</a></div>`;
+        + ` <a href="#" data-pos="${esc(r.lienCourse)}">📍 Position du chauffeur</a> <a href="#" data-preuve="${esc(r.lienCourse)}">📷 Preuve d'arrivée</a> <a href="#" data-fin="${esc(r.lienCourse)}">🏁 Terminer</a></div>`;
     }).join("");
   }
   // Courses en cours : position en direct et preuve d'arrivée (photo datée + GPS) envoyées par la page chauffeur
   document.getElementById("encours-list")?.addEventListener("click", async ev => {
+    const f = ev.target.closest("[data-fin]");
+    if (f) { ev.preventDefault();
+      try { await setDoc(doc(db, "trad_g", f.dataset.fin), { etape: "fin", etapes: { fin: serverTimestamp(), fin_c: Date.now() }, t: serverTimestamp() }, { merge: true }); toast("Course terminée"); }
+      catch (e) { toast("Impossible de terminer : " + ((e && e.code) || "erreur"), 5000); }
+      return; }
     const a = ev.target.closest("[data-pos],[data-preuve]"); if (!a) return; ev.preventDefault();
     const w = window.open("about:blank", "_blank");
     try {
