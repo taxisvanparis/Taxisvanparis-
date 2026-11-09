@@ -1715,14 +1715,14 @@ function anonymise(title,location){
     rows.forEach(r => { const a = r.dep; if (!a || a in ecRdv || ecGeo[a] || !(window.google && google.maps && google.maps.Geocoder)) return; ecGeo[a] = 1;
       new google.maps.Geocoder().geocode({ address: a }, (res, st) => { if (st === "OK" && res[0]) { const l = res[0].geometry.location; ecRdv[a] = { lat: l.lat(), lng: l.lng() }; ecRerender(); } }); });
   }
-  let ecMap = null, ecMk = {};
+  let ecMap = null, ecMk = {}, ecCadre = "";
   function ecCarte(rows) {
     const live = document.getElementById("ec-live"), pts = rows.filter(r => ecPos[r.lienCourse]);
     if (!live) return;
     live.hidden = !pts.length; if (!pts.length || !(window.google && google.maps && google.maps.Map)) return;
     const g = google.maps;
     if (!ecMap) ecMap = new g.Map(document.getElementById("ec-map"), { center: pts[0] && ecPos[pts[0].lienCourse], zoom: 12, disableDefaultUI: true, zoomControl: true, gestureHandling: "cooperative", clickableIcons: false,
-      styles: [{ elementType: "geometry", stylers: [{ color: "#1a1814" }] }, { elementType: "labels.text.fill", stylers: [{ color: "#9c9381" }] }, { elementType: "labels.text.stroke", stylers: [{ color: "#0b0a08" }] }, { featureType: "road", elementType: "geometry", stylers: [{ color: "#2c271f" }] }, { featureType: "water", stylers: [{ color: "#0f1a22" }] }, { featureType: "poi", stylers: [{ visibility: "off" }] }] });
+      maxZoom: 18, styles: [{ elementType: "geometry", stylers: [{ color: "#24211c" }] }, { elementType: "labels.text.fill", stylers: [{ color: "#c9bfa9" }] }, { elementType: "labels.text.stroke", stylers: [{ color: "#14120e" }] }, { featureType: "road", elementType: "geometry", stylers: [{ color: "#3d3629" }] }, { featureType: "road.arterial", elementType: "geometry", stylers: [{ color: "#4a4231" }] }, { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#6b5a33" }] }, { featureType: "water", stylers: [{ color: "#16293a" }] }, { featureType: "park", elementType: "geometry", stylers: [{ color: "#1f2a1c" }] }, { featureType: "poi.business", stylers: [{ visibility: "off" }] }, { featureType: "transit.station.airport", stylers: [{ visibility: "on" }] }] });
     const b = new g.LatLngBounds(), vus = new Set();
     pts.forEach(r => { const c = r.lienCourse, p = ecPos[c]; vus.add(c);
       const titre = (r.chauffeurNom || "Chauffeur") + " → " + (r.nom || "client");
@@ -1730,7 +1730,12 @@ function anonymise(title,location){
       ecMk[c].setPosition(p); b.extend(p);
       const R = ecRdv[r.dep]; if (R && etapesCache[c].etape === "route") b.extend(R); });
     Object.keys(ecMk).forEach(c => { if (!vus.has(c)) { ecMk[c].setMap(null); delete ecMk[c]; } });
-    if (pts.length === 1 && !ecRdv[pts[0].dep]) { ecMap.setCenter(ecPos[pts[0].lienCourse]); ecMap.setZoom(14); } else ecMap.fitBounds(b, 50);
+    // cadrage : seulement quand la liste des voitures change (on ne casse pas le zoom choisi à la main), jamais plus près qu'un quartier
+    const cle = [...vus].sort().join("|") + "#" + pts.map(r => etapesCache[r.lienCourse].etape).join("");
+    if (cle !== ecCadre) { ecCadre = cle;
+      const ne = b.getNorthEast(), sw = b.getSouthWest(), petit = Math.abs(ne.lat() - sw.lat()) < 0.004 && Math.abs(ne.lng() - sw.lng()) < 0.006;
+      if (petit) { ecMap.setCenter(b.getCenter()); ecMap.setZoom(15); }
+      else { ecMap.fitBounds(b, 50); g.event.addListenerOnce(ecMap, "idle", () => { if (ecMap.getZoom() > 15) ecMap.setZoom(15); }); } }
     document.getElementById("ec-leg").innerHTML = pts.map(r => `<span class="ec-chip">🚖 ${esc(r.chauffeurNom || "Chauffeur")} · ${esc(r.nom || "client")} · ${ETAPES[etapesCache[r.lienCourse].etape][1]}</span>`).join("");
   }
   // Courses à surveiller : dans moins de 45 min et le chauffeur n'est pas encore « En route »
