@@ -530,8 +530,18 @@ $('bProb').onclick=()=>{
     location.href='https://wa.me/'+TVP_WA+'?text='+encodeURIComponent(l)};
   feuille('⚠️ Un problème ?','Taxis Van Paris reçoit ton message avec la course et ta position.',[['👤 Client absent / introuvable',()=>envoyer('Client absent / introuvable')],['⏰ Je vais être en retard',()=>envoyer('Je vais être en retard')],['📍 Adresse introuvable',()=>envoyer('Adresse introuvable')],['🚗 Problème de véhicule',()=>envoyer('Problème de véhicule')],['💬 Autre problème',()=>envoyer('Problème')],['📞 Appeler Taxis Van Paris',()=>{location.href='tel:+33667402005'}]]);
 };
+/* --- Chauffeur : course terminée → message « vous pouvez fermer » --- */
+function finChauffeur(){
+  if(!CHAUF)return;let el=$('finCh');
+  if(etapeCour()!=='fin'){if(el)el.hidden=true;return}
+  if(!el){el=document.createElement('section');el.id='finCh';el.className='card';el.style.cssText='text-align:center;border-color:rgba(70,195,123,.5)';
+    el.innerHTML='<p style="font-size:34px;margin:0">✅</p><h2 style="margin:6px 0">Course terminée</h2><p class="sub" style="margin:0">Merci ! Le suivi est arrêté et l\'écran peut se mettre en veille.<br>Vous pouvez fermer cette page.</p>';
+    const ref=$('tRide').closest('section');ref.parentNode.insertBefore(el,ref)}
+  el.hidden=false;if($('cNav'))$('cNav').hidden=true;
+}
 /* --- Chauffeur : écran toujours allumé pendant la mission --- */
-if(CHAUF){let wl=null;const garder=async()=>{try{if('wakeLock' in navigator&&document.visibilityState==='visible'&&(!wl||wl.released))wl=await navigator.wakeLock.request('screen')}catch(e){}};
+if(CHAUF){let wl=null;const garder=async()=>{try{if(etapeCour()==='fin'){if(wl&&!wl.released){wl.release();wl=null}return}if('wakeLock' in navigator&&document.visibilityState==='visible'&&(!wl||wl.released))wl=await navigator.wakeLock.request('screen')}catch(e){}};
+  {const r9=rendre;rendre=function(){r9();garder();finChauffeur()}}
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){garder();if(watchId!==null)navigator.geolocation.getCurrentPosition(p=>envoyerPos(p,true),()=>{},{enableHighAccuracy:true,timeout:15000})}});
   ['pointerdown','touchstart'].forEach(ev=>document.addEventListener(ev,garder,{passive:true}));garder()}
 /* --- Client : carte en direct + heure d'arrivée --- */
