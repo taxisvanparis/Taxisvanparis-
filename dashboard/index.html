@@ -1682,23 +1682,29 @@ function anonymise(title,location){
       catch (e) { toast("Impossible de terminer : " + ((e && e.code) || "erreur"), 5000); }
       return; }
     const a = ev.target.closest("[data-pos],[data-preuve]"); if (!a) return; ev.preventDefault();
-    const w = window.open("about:blank", "_blank");
+    // pas de window.open (page « about:blank » dans l'appli iPhone) : on affiche le résultat dans une fenêtre du tableau de bord
+    const fen = (titre, html) => {
+      const ov = document.createElement("div");
+      ov.style.cssText = "position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.75);display:flex;align-items:flex-end;justify-content:center;padding:12px";
+      ov.innerHTML = `<div style="background:#14120e;color:#f4efe4;border:1px solid #2c271f;border-radius:18px;padding:18px;width:100%;max-width:520px;max-height:88vh;overflow:auto;margin-bottom:env(safe-area-inset-bottom)"><h3 style="margin:0 0 10px;font-size:18px">${titre}</h3>${html}<button type="button" style="margin-top:14px;width:100%;min-height:46px;border-radius:12px;border:1px solid #2c271f;background:transparent;color:#f4efe4;font:inherit;font-weight:700">Fermer</button></div>`;
+      ov.onclick = e => { if (e.target === ov || e.target.tagName === "BUTTON") ov.remove(); };
+      document.body.appendChild(ov);
+    };
+    const lienCarte = (lat, lng) => `<a target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${lat},${lng}" style="display:flex;align-items:center;justify-content:center;min-height:48px;border-radius:12px;background:#d4b25e;color:#17120a;font-weight:800;text-decoration:none">🗺️ Ouvrir dans Google Maps</a>`;
+    const hm2 = t => t ? new Date(t).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }) : "—";
     try {
       if (a.dataset.pos) {
         const s = await getDoc(doc(db, "trad_g", a.dataset.pos, "suivi", "pos")), d = s.exists() ? s.data() : null;
-        if (!d || typeof d.lat !== "number") { w && w.close(); toast("Pas encore de position : le chauffeur doit toucher « En route »", 4000); return; }
-        const age = d.t && d.t.toMillis ? Math.round((Date.now() - d.t.toMillis()) / 60000) : null;
-        if (age !== null && age >= 3) toast("Dernière position il y a " + age + " min", 4000);
-        w.location.href = "https://www.google.com/maps/search/?api=1&query=" + d.lat + "," + d.lng;
+        if (!d || typeof d.lat !== "number") { fen("📍 Position du chauffeur", `<p style="margin:0;color:#9c9381">Pas encore de position.<br>Elle est envoyée tant que la page <b>« Ma course » du chauffeur est ouverte à l'écran</b>, après « En route », avec la localisation autorisée. Si le chauffeur passe sur Waze ou sur une autre appli, elle reprend dès qu'il revient sur la page.</p>`); return; }
+        const t = d.t && d.t.toMillis ? d.t.toMillis() : 0, age = t ? Math.round((Date.now() - t) / 60000) : null;
+        fen("📍 Position du chauffeur", `<p style="margin:0 0 12px">Dernière position : <b>${hm2(t)}</b>${age !== null && age >= 2 ? ` <span style="color:#f2a63b">(il y a ${age} min)</span>` : " (en direct)"} · ±${d.acc || "?"} m${typeof d.v === "number" ? " · " + d.v + " km/h" : ""}</p>` + lienCarte(d.lat, d.lng));
       } else {
         const s = await getDoc(doc(db, "trad_g", a.dataset.preuve, "preuves", "arrivee")), d = s.exists() ? s.data() : null;
-        if (!d) { w && w.close(); toast("Pas encore de preuve : elle est prise quand le chauffeur touche « Sur place »", 4000); return; }
+        if (!d) { fen("📷 Preuve d'arrivée", `<p style="margin:0;color:#9c9381">Pas encore de preuve : elle est enregistrée quand le chauffeur arrive (« Sur place »).</p>`); return; }
         const h = x => x && x.toDate ? x.toDate().toLocaleString("fr-FR") : "—";
-        const gps = typeof d.lat === "number" ? `<a href="https://www.google.com/maps/search/?api=1&query=${d.lat},${d.lng}">${d.lat}, ${d.lng}</a> (±${d.acc || "?"} m)` : "indisponible";
-        w.document.write(`<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Preuve d'arrivée</title><body style="margin:0;background:#0b0a08;color:#f7f3ea;font:16px system-ui;padding:16px"><h2 style="color:#d4b25e;margin:0 0 10px">📍 Preuve d'arrivée</h2><p>Arrivée : <b>${h(d.t)}</b><br>Photo : <b>${d.img ? h(d.tPhoto) : "pas de photo"}</b><br>GPS : ${gps}</p>${d.img ? `<img src="${d.img}" style="width:100%;max-width:700px;border-radius:12px">` : ""}</body>`);
-        w.document.close();
+        fen("📷 Preuve d'arrivée", `<p style="margin:0 0 12px">Arrivée : <b>${h(d.t)}</b><br>Photo : <b>${d.img ? h(d.tPhoto) : "pas de photo"}</b><br>GPS : ${typeof d.lat === "number" ? d.lat + ", " + d.lng + " (±" + (d.acc || "?") + " m)" : "indisponible"}</p>` + (d.img ? `<img src="${d.img}" style="width:100%;border-radius:12px;margin-bottom:12px">` : "") + (typeof d.lat === "number" ? lienCarte(d.lat, d.lng) : ""));
       }
-    } catch (e) { w && w.close(); toast("Impossible : " + ((e && e.code) || "erreur") + (e && e.code === "permission-denied" ? " (règle Firebase)" : ""), 5000); }
+    } catch (e) { toast("Impossible : " + ((e && e.code) || "erreur") + (e && e.code === "permission-denied" ? " (règle Firebase)" : ""), 5000); }
   });
   function renderReservations() {
     renderEnCours();
