@@ -1427,6 +1427,12 @@ function anonymise(title,location){
     document.getElementById("mc-tel").value = (r.lien && r.lien.tel) || (ch && ch.tel) || pr.tel || "06 67 40 20 05";
     document.getElementById("mc-modele").value = (r.lien && r.lien.modele) || pr["modele_" + (vehLabel(r.vehicule) || "x")] || pr.modele || (vehLabel(r.vehicule) === "Van" ? "Mercedes Classe V noire" : "");
     document.getElementById("mc-plaque").value = (r.lien && r.lien.plaque) || pr["plaque_" + (vehLabel(r.vehicule) || "x")] || pr.plaque || "";
+    // infos saisies par le chauffeur sur son lien : on les affiche ici pour pouvoir les corriger
+    if (r.lienCourse) getDoc(doc(db, "trad_g", r.lienCourse)).then(s => { const d = s.exists() ? s.data() : {};
+      if (mcR !== r || !(d.chauffeur && d.chauffeur.par === "chauffeur")) return;
+      document.getElementById("mc-prenom").value = d.chauffeur.prenom || ""; document.getElementById("mc-modele").value = (d.vehicule || {}).modele || ""; document.getElementById("mc-plaque").value = (d.vehicule || {}).plaque || "";
+      const inf = document.getElementById("mc-infos"); if (inf) inf.open = true;
+      toast("🚖 Infos saisies par le chauffeur — corrige-les si besoin puis « Mettre à jour »", 4500); }).catch(() => {});
     mcPointRemplir(r);
     document.getElementById("mc-rdv").value = (r.lien && r.lien.rdv) || rdvDefaut(r);
     document.getElementById("mc-save").textContent = mcCode ? "Mettre à jour la page client" : "Créer le lien";
@@ -1740,7 +1746,7 @@ function anonymise(title,location){
         const d = s.data() || {}, v = JSON.stringify([d.etape || "", Object.keys(d.etapes || {}).sort(), etTs((d.etapes || {})[d.etape])]);
         const avant = etapesCache[c] && etapesCache[c].v;
         const pris = d.chauffeur && d.chauffeur.par === "chauffeur" ? String(d.chauffeur.prenom || "") + (d.vehicule && d.vehicule.plaque ? " · " + d.vehicule.plaque : "") : "";
-        etapesCache[c] = { v: v + pris, etape: d.etape || "", etapes: d.etapes || {}, pris };
+        etapesCache[c] = { v: v + pris, etape: d.etape || "", etapes: d.etapes || {}, pris, chInfo: d.chauffeur && d.chauffeur.par === "chauffeur" ? { prenom: d.chauffeur.prenom || "", modele: (d.vehicule || {}).modele || "", plaque: (d.vehicule || {}).plaque || "" } : null };
         if (avant !== v) renderReservations();
       }, () => {});
     });

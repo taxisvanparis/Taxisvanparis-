@@ -132,7 +132,7 @@ h1{font-size:26px;line-height:1.15;margin:4px 0 4px;font-weight:800;letter-spaci
   <section class="card" id="cQui" hidden><h2>🚖 Qui fait la course ?</h2>
     <p class="sub" style="margin:0 0 10px">Le client verra ton prénom, ta voiture et ta plaque. Ton numéro n'est jamais montré.</p>
     <div class="qui"><input id="quiP" placeholder="Ton prénom" autocomplete="given-name" aria-label="Prénom"><input id="quiM" placeholder="Voiture (ex. Mercedes Classe V noire)" aria-label="Voiture"><input id="quiI" placeholder="Plaque (ex. GT-420-NS)" autocapitalize="characters" aria-label="Plaque"></div>
-    <button type="button" class="b g" id="bQui" style="margin-top:10px;width:100%">✅ Je prends cette course</button>
+    <button type="button" class="b g" id="bQui" style="margin-top:10px;width:100%">✅ Valider</button>
   </section>
   <section class="card" id="cEtape"><h2 id="tEtape"></h2>
     <div class="cli" id="cliIci" hidden></div>
@@ -537,16 +537,19 @@ $('bProb').onclick=()=>{
   feuille('⚠️ Un problème ?','Taxis Van Paris reçoit ton message avec la course et ta position.',[['👤 Client absent / introuvable',()=>envoyer('Client absent / introuvable')],['⏰ Je vais être en retard',()=>envoyer('Je vais être en retard')],['📍 Adresse introuvable',()=>envoyer('Adresse introuvable')],['🚗 Problème de véhicule',()=>envoyer('Problème de véhicule')],['💬 Autre problème',()=>envoyer('Problème')],['📞 Appeler Taxis Van Paris',()=>{location.href='tel:+33667402005'}]]);
 };
 /* --- Chauffeur : « Qui fait la course ? » — le chauffeur indique lui-même prénom, voiture, plaque (mémorisés sur son téléphone) --- */
+let quiEdit=false;
 function quiCourse(){
   if(!CHAUF||!info)return;const ch=info.chauffeur||{},box=$('cQui');
-  const libre=!String(ch.prenom||'').trim()&&etapeCour()!=='fin';box.hidden=!libre;if(!libre)return;
+  const libre=(!String(ch.prenom||'').trim()||quiEdit)&&etapeCour()!=='fin';box.hidden=!libre;
+  let lk=$('quiEd');if(!lk){lk=document.createElement('button');lk.type='button';lk.id='quiEd';lk.className='b';lk.style.cssText='width:100%;min-height:44px;font-size:14px;background:transparent;margin:0 0 14px';lk.textContent='✏️ Corriger mes infos (prénom, voiture, plaque)';lk.onclick=()=>{quiEdit=true;box.dataset.ok='';quiCourse();box.scrollIntoView({behavior:'smooth',block:'center'})};box.after(lk)}
+  lk.hidden=libre||ch.par!=='chauffeur'||etapeCour()==='fin';if(!libre)return;
   if(!box.dataset.ok){box.dataset.ok=1;let m={};try{m=JSON.parse(localStorage.getItem('tvp_ch_moi')||'{}')}catch(e){}
-    $('quiP').value=m.p||'';$('quiM').value=m.m||'';$('quiI').value=m.i||'';
+    const vv=info.vehicule||{};$('quiP').value=quiEdit?(ch.prenom||m.p||''):(m.p||'');$('quiM').value=quiEdit?(vv.modele||m.m||''):(m.m||'');$('quiI').value=quiEdit?(vv.plaque||m.i||''):(m.i||'');
     $('bQui').onclick=async()=>{const p=$('quiP').value.trim(),mo=$('quiM').value.trim(),pl=$('quiI').value.trim().toUpperCase();
       if(!p){toast('Indique ton prénom');$('quiP').focus();return}
       try{localStorage.setItem('tvp_ch_moi',JSON.stringify({p,m:mo,i:pl}))}catch(e){}
       $('bQui').disabled=true;
-      try{await setDoc(doc(db,'trad_g',code),{chauffeur:{prenom:p,tel:'',par:'chauffeur'},vehicule:{modele:mo,plaque:pl},t:serverTimestamp()},{merge:true});toast('✅ Course prise : le client voit ton prénom et ta plaque')}
+      try{await setDoc(doc(db,'trad_g',code),{chauffeur:{prenom:p,tel:'',par:'chauffeur'},vehicule:{modele:mo,plaque:pl},t:serverTimestamp()},{merge:true});quiEdit=false;toast('✅ Enregistré : le client voit ton prénom, ta voiture et ta plaque')}
       catch(e){toast(e&&e.code==='permission-denied'?'Bloqué : règle Firebase à ajouter':'Pas de connexion, réessaie')}
       $('bQui').disabled=false}}
 }
