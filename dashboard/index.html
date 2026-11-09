@@ -639,7 +639,12 @@
         <a class="cal-btn sms-btn" id="mc-sms">✉️ Par SMS</a>
         <button type="button" class="cal-btn" id="mc-copy">📋 Copier le lien</button>
         <a class="cal-btn" id="mc-voir" target="_blank" rel="noopener">👁 Voir la page client</a>
-        <button type="button" class="cal-btn" id="mc-copy-ch">🚖 Copier le lien chauffeur</button>
+      </div>
+      <p class="mc-sub" style="margin:12px 0 6px;font-weight:700">🚖 Au chauffeur <span id="mc-ch-nom" style="font-weight:400;opacity:.75"></span></p>
+      <div class="mc-row">
+        <a class="cal-btn wa-btn" id="mc-wa-ch" target="_blank" rel="noopener">💬 WhatsApp chauffeur</a>
+        <a class="cal-btn sms-btn" id="mc-sms-ch">✉️ SMS chauffeur</a>
+        <button type="button" class="cal-btn" id="mc-copy-ch">📋 Copier le lien chauffeur</button>
       </div>
     </div>
     <div id="mc-chat" hidden>
@@ -1338,6 +1343,13 @@ function anonymise(title,location){
     const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
     const sms = document.getElementById("mc-sms"); sms.hidden = !n; sms.href = "sms:+" + n + (ios ? "&" : "?") + "body=" + encodeURIComponent(txt);
     document.getElementById("mc-voir").href = url;
+    // Envoi au chauffeur : la course + son lien (chat traduit, appel masqué, mission)
+    const ch = chauffeurDe(r), nc = ch ? waNumClient(ch.tel) : "", urlCh = url + "&d=1";
+    let txtCh = ""; try { txtCh = messageChauffeur(r) || ""; } catch (e) {}
+    if (!txtCh.includes(urlCh)) txtCh = (txtCh ? txtCh + "\n\n" : "") + "🚖 Ta mission (Waze, client, chat traduit, appel sans numéro) :\n" + urlCh;
+    document.getElementById("mc-ch-nom").textContent = ch ? "· " + ch.nom + (nc ? "" : " (pas de numéro enregistré)") : "· aucun chauffeur assigné : tu choisis le contact";
+    document.getElementById("mc-wa-ch").href = "https://wa.me/" + (nc || "") + "?text=" + encodeURIComponent(txtCh);
+    document.getElementById("mc-sms-ch").href = "sms:" + (nc ? "+" + nc : "") + (ios ? "&" : "?") + "body=" + encodeURIComponent(txtCh);
     mcEcouter();
   }
   function mcEcouter() {
@@ -1639,7 +1651,8 @@ function anonymise(title,location){
   }
   function renderEnCours() {
     const box = document.getElementById("encours-list");
-    const rows = reservationsCache.filter(r => { const e = r.lienCourse && etapesCache[r.lienCourse]; return e && ("route place bord".includes(e.etape || "-") || (!e.etape && "client_ici" in e.etapes)); })
+    const vieux = r => { const m = String(r.date || "").match(/^(\d{4})-(\d{2})-(\d{2})$/), h = String(r.heure || "").match(/(\d{1,2})[:h](\d{2})/); if (!m) return false; const t = new Date(+m[1], +m[2] - 1, +m[3], h ? +h[1] : 12, h ? +h[2] : 0).getTime(); return Date.now() - t > 8 * 3600000; };
+    const rows = reservationsCache.filter(r => { const e = r.lienCourse && etapesCache[r.lienCourse]; return e && !vieux(r) && ("route place bord".includes(e.etape || "-") || (!e.etape && "client_ici" in e.etapes)); })
       .sort((a, b) => ((a.date || "") + (a.heure || "")).localeCompare((b.date || "") + (b.heure || "")));
     ["nb-encours"].forEach(id => { const el = document.getElementById(id); if (el) { el.textContent = rows.length; el.classList.toggle("on", rows.length > 0); } });
     if (!box) return;
@@ -1653,11 +1666,16 @@ function anonymise(title,location){
         + `<div class="rt">${esc(r.dep || "?")} → <b>${esc(r.arr || "?")}</b></div>`
         + `<div class="tl">${r.chauffeurNom ? "Chauffeur : " + esc(r.chauffeurNom) + " · " : ""}${volCode(r) ? "✈️ " + esc(volCode(r)) + " · " : ""}${tl}</div>`
         + `<a target="_blank" rel="noopener" href="../ma-course/?c=${encodeURIComponent(r.lienCourse)}&d=1">💬 Conversation</a>`
-        + ` <a href="#" data-pos="${esc(r.lienCourse)}">📍 Position du chauffeur</a> <a href="#" data-preuve="${esc(r.lienCourse)}">📷 Preuve d'arrivée</a></div>`;
+        + ` <a href="#" data-pos="${esc(r.lienCourse)}">📍 Position du chauffeur</a> <a href="#" data-preuve="${esc(r.lienCourse)}">📷 Preuve d'arrivée</a> <a href="#" data-fin="${esc(r.lienCourse)}">🏁 Terminer</a></div>`;
     }).join("");
   }
   // Courses en cours : position en direct et preuve d'arrivée (photo datée + GPS) envoyées par la page chauffeur
   document.getElementById("encours-list")?.addEventListener("click", async ev => {
+    const f = ev.target.closest("[data-fin]");
+    if (f) { ev.preventDefault();
+      try { await setDoc(doc(db, "trad_g", f.dataset.fin), { etape: "fin", etapes: { fin: serverTimestamp(), fin_c: Date.now() }, t: serverTimestamp() }, { merge: true }); toast("Course terminée"); }
+      catch (e) { toast("Impossible de terminer : " + ((e && e.code) || "erreur"), 5000); }
+      return; }
     const a = ev.target.closest("[data-pos],[data-preuve]"); if (!a) return; ev.preventDefault();
     const w = window.open("about:blank", "_blank");
     try {
