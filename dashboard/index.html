@@ -639,7 +639,12 @@
         <a class="cal-btn sms-btn" id="mc-sms">✉️ Par SMS</a>
         <button type="button" class="cal-btn" id="mc-copy">📋 Copier le lien</button>
         <a class="cal-btn" id="mc-voir" target="_blank" rel="noopener">👁 Voir la page client</a>
-        <button type="button" class="cal-btn" id="mc-copy-ch">🚖 Copier le lien chauffeur</button>
+      </div>
+      <p class="mc-sub" style="margin:12px 0 6px;font-weight:700">🚖 Au chauffeur <span id="mc-ch-nom" style="font-weight:400;opacity:.75"></span></p>
+      <div class="mc-row">
+        <a class="cal-btn wa-btn" id="mc-wa-ch" target="_blank" rel="noopener">💬 WhatsApp chauffeur</a>
+        <a class="cal-btn sms-btn" id="mc-sms-ch">✉️ SMS chauffeur</a>
+        <button type="button" class="cal-btn" id="mc-copy-ch">📋 Copier le lien chauffeur</button>
       </div>
     </div>
     <div id="mc-chat" hidden>
@@ -1338,6 +1343,13 @@ function anonymise(title,location){
     const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
     const sms = document.getElementById("mc-sms"); sms.hidden = !n; sms.href = "sms:+" + n + (ios ? "&" : "?") + "body=" + encodeURIComponent(txt);
     document.getElementById("mc-voir").href = url;
+    // Envoi au chauffeur : la course + son lien (chat traduit, appel masqué, mission)
+    const ch = chauffeurDe(r), nc = ch ? waNumClient(ch.tel) : "", urlCh = url + "&d=1";
+    let txtCh = ""; try { txtCh = messageChauffeur(r) || ""; } catch (e) {}
+    if (!txtCh.includes(urlCh)) txtCh = (txtCh ? txtCh + "\n\n" : "") + "🚖 Ta mission (Waze, client, chat traduit, appel sans numéro) :\n" + urlCh;
+    document.getElementById("mc-ch-nom").textContent = ch ? "· " + ch.nom + (nc ? "" : " (pas de numéro enregistré)") : "· aucun chauffeur assigné : tu choisis le contact";
+    document.getElementById("mc-wa-ch").href = "https://wa.me/" + (nc || "") + "?text=" + encodeURIComponent(txtCh);
+    document.getElementById("mc-sms-ch").href = "sms:" + (nc ? "+" + nc : "") + (ios ? "&" : "?") + "body=" + encodeURIComponent(txtCh);
     mcEcouter();
   }
   function mcEcouter() {
