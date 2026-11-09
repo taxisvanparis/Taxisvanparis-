@@ -415,6 +415,16 @@
   .ec .big{display:inline-block;font-weight:800;font-size:14px;border-radius:999px;padding:5px 12px;border:1.5px solid;margin:4px 6px 4px 0;white-space:nowrap}
   .ec .tl{color:var(--muted);font-size:13px;margin:4px 0}
   .ec .rt{font-size:14.5px;margin:4px 0}
+  #ec-live{margin-bottom:12px}#ec-map{height:280px;border-radius:14px;overflow:hidden;border:1px solid var(--border);background:#0f0e0b}
+  #ec-leg{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;font-size:12.5px;color:var(--muted)}
+  .ec-step{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin:10px 0 4px}
+  .ec-step div{text-align:center;font-size:11px;color:var(--muted)}
+  .ec-step i{display:block;height:5px;border-radius:3px;background:var(--border);margin-bottom:5px}
+  .ec-step .on i{background:var(--gold)}.ec-step .on{color:var(--text)}.ec-step .now i{background:var(--gold-soft);box-shadow:0 0 0 2px rgba(212,178,94,.25)}
+  .ec-live{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 2px}
+  .ec-chip{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:700;border-radius:999px;padding:4px 10px;border:1px solid var(--border);color:var(--text)}
+  .ec-chip.ok{border-color:#46c37b;color:#46c37b}.ec-chip.warn{border-color:#f0a030;color:#f0a030}.ec-chip.bad{border-color:#e5534b;color:#e5534b}
+  .ec.fin{opacity:.6}.ec.alerte{border-color:#e5534b;box-shadow:0 0 0 1px #e5534b inset}
   .ec a{display:inline-block;margin-top:8px;color:var(--gold);font-weight:700;text-decoration:none;border:1px solid var(--gold);border-radius:10px;padding:7px 12px}
   .rc .src{display:inline-block;font-size:11px;font-weight:800;border-radius:999px;padding:3px 9px;margin:4px 6px 0 0;border:1px solid rgba(255,255,255,.18);color:#e9e2d0;background:rgba(255,255,255,.06)}
   .rc .src.site{border-color:#4f8ef7;color:#9cc0ff}.rc .src.hotel{border-color:#c9a84c;color:#f0d68a}.rc .src.tel{border-color:#a77bf3;color:#cdb2ff}
@@ -552,7 +562,7 @@
       </div>
 
       <!-- COURSES EN COURS -->
-      <div class="tab-panel" id="tab-encours"><div id="encours-list"></div></div>
+      <div class="tab-panel" id="tab-encours"><div id="ec-live" hidden><div id="ec-map"></div><div id="ec-leg"></div></div><div id="ec-watch"></div><div id="encours-list"></div></div>
 
       <!-- PARTAGE WHATSAPP -->
       <div class="tab-panel" id="tab-partage">
@@ -1662,18 +1672,79 @@ function anonymise(title,location){
     ["nb-encours"].forEach(id => { const el = document.getElementById(id); if (el) { el.textContent = actives; el.classList.toggle("on", actives > 0); } });
     if (!box) return;
     if (!rows.length) { box.innerHTML = `<div class="rempty">Aucune course en cours.<br><small>Une course apparaît ici dès que le chauffeur touche « En route » sur sa page « Ma course ».</small></div>`; return; }
+    ecSuivre(rows);
     box.innerHTML = rows.map(r => {
-      const e = etapesCache[r.lienCourse], x = ETAPES[e.etape];
-      const tl = [...Object.keys(ETAPES).filter(k => k in e.etapes).map(k => ETAPES[k][0] + " " + etHm(e.etapes[k])), "client_ici" in e.etapes ? "👤 " + etHm(e.etapes.client_ici) : ""].filter(Boolean).join(" · ");
-      return `<div class="ec"><div class="h"><b>${esc(r.heure || "—")}</b><span>${esc(r.nom || "Client")}</span></div>`
-        + (x ? `<span class="big" style="color:${x[2]};border-color:${x[2]};background:${x[2]}1f">${x[0]} ${x[1]} · ${etHm(e.etapes[e.etape])}</span>` : "")
-        + ("client_ici" in e.etapes && e.etape !== "bord" ? `<span class="big" style="color:#46c37b;border-color:#46c37b;background:#46c37b1f">👤 Client au RDV · ${etHm(e.etapes.client_ici)}</span>` : "")
+      const e = etapesCache[r.lienCourse], x = ETAPES[e.etape], code = r.lienCourse, E = e.etapes || {};
+      const tC = k => (typeof E[k + "_c"] === "number" ? E[k + "_c"] : etTs(E[k])) || 0;
+      const hmC = k => tC(k) ? new Date(tC(k)).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }) : "";
+      const ordre = ["route", "place", "bord", "fin"], idx = ordre.indexOf(e.etape);
+      const step = `<div class="ec-step">${ordre.map((k, i) => `<div class="${i <= idx ? "on" : ""}${i === idx ? " now" : ""}"><i></i>${ETAPES[k][0]} ${hmC(k) || ETAPES[k][1].replace("Chauffeur ", "").replace("Client ", "").replace("Course ", "")}</div>`).join("")}</div>`;
+      const chips = [];
+      const P = ecPos[code];
+      if (P && (e.etape === "route" || e.etape === "place")) {
+        const age = P.t ? Math.round((Date.now() - P.t) / 60000) : null;
+        chips.push(`<span class="ec-chip ${age !== null && age >= 3 ? "warn" : "ok"}">📡 ${age === null ? "position reçue" : age < 1 ? "position en direct" : "position il y a " + age + " min"}${typeof P.v === "number" && P.v > 3 ? " · " + P.v + " km/h" : ""}</span>`);
+        const R = ecRdv[r.dep];
+        if (R && e.etape === "route") { const d = ecDist(P, R); chips.push(`<span class="ec-chip">📍 ${d < 1000 ? Math.round(d / 10) * 10 + " m" : (d / 1000).toFixed(1).replace(".", ",") + " km"} du point de RDV</span>`); }
+      } else if (e.etape === "route" || e.etape === "place") chips.push(`<span class="ec-chip warn">📡 pas de position (page chauffeur fermée ?)</span>`);
+      if (e.etape === "place" && tC("place")) { const m = Math.floor((Date.now() - tC("place")) / 60000); chips.push(`<span class="ec-chip ${m >= 20 ? "bad" : m >= 10 ? "warn" : ""}">⏱ attente ${m} min</span>`); }
+      if ("client_ici" in E && e.etape !== "bord" && e.etape !== "fin") chips.push(`<span class="ec-chip ok">👤 client au RDV · ${etHm(E.client_ici)}</span>`);
+      if (e.etape === "route") { const tp = ecHeure(r); if (tp && Date.now() > tp + 5 * 60000) chips.push(`<span class="ec-chip bad">⚠️ ${Math.round((Date.now() - tp) / 60000)} min de retard sur l'heure prévue</span>`); }
+      const alerte = chips.some(c => c.includes('class="ec-chip bad"'));
+      return `<div class="ec${e.etape === "fin" ? " fin" : ""}${alerte ? " alerte" : ""}"><div class="h"><b>${esc(r.heure || "—")}</b><span>${esc(r.nom || "Client")}</span></div>`
+        + (x ? `<span class="big" style="color:${x[2]};border-color:${x[2]};background:${x[2]}1f">${x[0]} ${x[1]} · ${hmC(e.etape) || etHm(E[e.etape])}</span>` : "")
+        + step
         + `<div class="rt">${esc(r.dep || "?")} → <b>${esc(r.arr || "?")}</b></div>`
-        + `<div class="tl">${r.chauffeurNom ? "Chauffeur : " + esc(r.chauffeurNom) + " · " : ""}${volCode(r) ? "✈️ " + esc(volCode(r)) + " · " : ""}${tl}</div>`
-        + `<a target="_blank" rel="noopener" href="../ma-course/?c=${encodeURIComponent(r.lienCourse)}&d=1">💬 Conversation</a>`
-        + ` <a href="#" data-pos="${esc(r.lienCourse)}">📍 Position du chauffeur</a> <a href="#" data-preuve="${esc(r.lienCourse)}">📷 Preuve d'arrivée</a> ${e.etape === "fin" ? "" : `<a href="#" data-fin="${esc(r.lienCourse)}">🏁 Terminer</a>`}</div>`;
+        + `<div class="tl">${r.chauffeurNom ? "🚖 " + esc(r.chauffeurNom) + " · " : ""}${volCode(r) ? "✈️ " + esc(volCode(r)) + " · " : ""}${r.pax ? r.pax + " pers." : ""}${r.prix ? " · " + esc(r.prix) + " €" : ""}</div>`
+        + (chips.length ? `<div class="ec-live">${chips.join("")}</div>` : "")
+        + `<a target="_blank" rel="noopener" href="../ma-course/?c=${encodeURIComponent(code)}&d=1">💬 Conversation</a>`
+        + ` <a href="#" data-pos="${esc(code)}">📍 Position</a> <a href="#" data-preuve="${esc(code)}">📷 Preuve</a> ${e.etape === "fin" ? "" : `<a href="#" data-fin="${esc(code)}">🏁 Terminer</a>`}</div>`;
     }).join("");
+    ecCarte(rows);
   }
+  // ===== Suivi en direct : positions des chauffeurs, carte de toutes les courses, courses à surveiller =====
+  const ecPos = {}, ecSubs = {}, ecRdv = {}, ecGeo = {};
+  const ecDist = (a, b) => { const R = 6371e3, r = x => x * Math.PI / 180, dl = r(b.lat - a.lat), dn = r(b.lng - a.lng), h = Math.sin(dl / 2) ** 2 + Math.cos(r(a.lat)) * Math.cos(r(b.lat)) * Math.sin(dn / 2) ** 2; return 2 * R * Math.asin(Math.sqrt(h)); };
+  const ecHeure = r => { const m = String(r.date || "").match(/^(\d{4})-(\d{2})-(\d{2})$/), h = String(r.heure || "").match(/(\d{1,2})[:h](\d{2})/); return m && h ? new Date(+m[1], +m[2] - 1, +m[3], +h[1], +h[2]).getTime() : 0; };
+  let ecRendu = 0;
+  const ecRerender = () => { clearTimeout(ecRendu); ecRendu = setTimeout(() => { try { renderEnCours(); } catch (e) {} }, 400); };
+  function ecSuivre(rows) {
+    const voulus = new Set(rows.filter(r => "route place".includes(etapesCache[r.lienCourse].etape || "-")).map(r => r.lienCourse));
+    voulus.forEach(c => { if (!ecSubs[c]) ecSubs[c] = onSnapshot(doc(db, "trad_g", c, "suivi", "pos"), s => { const d = s.exists() ? s.data() : null; ecPos[c] = d && typeof d.lat === "number" ? { lat: d.lat, lng: d.lng, v: d.v, acc: d.acc, t: d.t && d.t.toMillis ? d.t.toMillis() : 0 } : null; ecRerender(); }, () => {}); });
+    Object.keys(ecSubs).forEach(c => { if (!voulus.has(c)) { ecSubs[c](); delete ecSubs[c]; delete ecPos[c]; } });
+    rows.forEach(r => { const a = r.dep; if (!a || a in ecRdv || ecGeo[a] || !(window.google && google.maps && google.maps.Geocoder)) return; ecGeo[a] = 1;
+      new google.maps.Geocoder().geocode({ address: a }, (res, st) => { if (st === "OK" && res[0]) { const l = res[0].geometry.location; ecRdv[a] = { lat: l.lat(), lng: l.lng() }; ecRerender(); } }); });
+  }
+  let ecMap = null, ecMk = {};
+  function ecCarte(rows) {
+    const live = document.getElementById("ec-live"), pts = rows.filter(r => ecPos[r.lienCourse]);
+    if (!live) return;
+    live.hidden = !pts.length; if (!pts.length || !(window.google && google.maps && google.maps.Map)) return;
+    const g = google.maps;
+    if (!ecMap) ecMap = new g.Map(document.getElementById("ec-map"), { center: pts[0] && ecPos[pts[0].lienCourse], zoom: 12, disableDefaultUI: true, zoomControl: true, gestureHandling: "cooperative", clickableIcons: false,
+      styles: [{ elementType: "geometry", stylers: [{ color: "#1a1814" }] }, { elementType: "labels.text.fill", stylers: [{ color: "#9c9381" }] }, { elementType: "labels.text.stroke", stylers: [{ color: "#0b0a08" }] }, { featureType: "road", elementType: "geometry", stylers: [{ color: "#2c271f" }] }, { featureType: "water", stylers: [{ color: "#0f1a22" }] }, { featureType: "poi", stylers: [{ visibility: "off" }] }] });
+    const b = new g.LatLngBounds(), vus = new Set();
+    pts.forEach(r => { const c = r.lienCourse, p = ecPos[c]; vus.add(c);
+      const titre = (r.chauffeurNom || "Chauffeur") + " → " + (r.nom || "client");
+      if (!ecMk[c]) ecMk[c] = new g.Marker({ map: ecMap, title: titre, label: { text: "🚖", fontSize: "14px" }, icon: { path: g.SymbolPath.CIRCLE, scale: 13, fillColor: "#d4b25e", fillOpacity: 1, strokeColor: "#17120a", strokeWeight: 3 } });
+      ecMk[c].setPosition(p); b.extend(p);
+      const R = ecRdv[r.dep]; if (R && etapesCache[c].etape === "route") b.extend(R); });
+    Object.keys(ecMk).forEach(c => { if (!vus.has(c)) { ecMk[c].setMap(null); delete ecMk[c]; } });
+    if (pts.length === 1 && !ecRdv[pts[0].dep]) { ecMap.setCenter(ecPos[pts[0].lienCourse]); ecMap.setZoom(14); } else ecMap.fitBounds(b, 50);
+    document.getElementById("ec-leg").innerHTML = pts.map(r => `<span class="ec-chip">🚖 ${esc(r.chauffeurNom || "Chauffeur")} · ${esc(r.nom || "client")} · ${ETAPES[etapesCache[r.lienCourse].etape][1]}</span>`).join("");
+  }
+  // Courses à surveiller : dans moins de 45 min et le chauffeur n'est pas encore « En route »
+  function ecSurveiller() {
+    const box = document.getElementById("ec-watch"); if (!box) return;
+    const now = Date.now();
+    const rows = reservationsCache.filter(r => r.statut !== "annulée" && r.statut !== "terminée").filter(r => { const t = ecHeure(r); if (!t || t - now > 45 * 60000 || now - t > 20 * 60000) return false; const e = r.lienCourse && etapesCache[r.lienCourse]; return !e || !e.etape; })
+      .sort((a, b) => ecHeure(a) - ecHeure(b));
+    box.innerHTML = rows.map(r => { const m = Math.round((ecHeure(r) - now) / 60000), ch = chauffeurDe(r), nc = ch ? waNumClient(ch.tel) : "";
+      return `<div class="ec alerte"><div class="h"><b>${esc(r.heure || "—")}</b><span>${esc(r.nom || "Client")}</span></div><div class="ec-live"><span class="ec-chip bad">⚠️ ${m >= 0 ? "Course dans " + m + " min" : "Heure passée de " + (-m) + " min"} · chauffeur pas encore « En route »</span></div><div class="rt">${esc(r.dep || "?")} → <b>${esc(r.arr || "?")}</b></div><div class="tl">${r.chauffeurNom ? "🚖 " + esc(r.chauffeurNom) : "Aucun chauffeur assigné"}</div>`
+        + (nc ? `<a target="_blank" rel="noopener" href="https://wa.me/${nc}?text=${encodeURIComponent("Bonjour " + (ch.nom || "") + ", tu es en route pour la course de " + (r.heure || "") + " (" + (r.nom || "client") + ") ? Pense à toucher « En route » sur ton lien 🙏")}">💬 Relancer ${esc(ch.nom || "le chauffeur")}</a> ` : "")
+        + (ch && ch.tel ? `<a href="tel:${esc(ch.tel)}">📞 Appeler</a>` : "") + `</div>`; }).join("");
+  }
+  setInterval(() => { try { renderEnCours(); ecSurveiller(); } catch (e) {} }, 30000);
   // Courses en cours : position en direct et preuve d'arrivée (photo datée + GPS) envoyées par la page chauffeur
   document.getElementById("encours-list")?.addEventListener("click", async ev => {
     const f = ev.target.closest("[data-fin]");
@@ -1707,7 +1778,7 @@ function anonymise(title,location){
     } catch (e) { toast("Impossible : " + ((e && e.code) || "erreur") + (e && e.code === "permission-denied" ? " (règle Firebase)" : ""), 5000); }
   });
   function renderReservations() {
-    renderEnCours();
+    renderEnCours(); try { ecSurveiller(); } catch (e) {}
     const aVenir = reservationsCache.filter(r => groupOf(r) === 0 && r.statut !== "annulée");
     document.getElementById("resa-cal-all").innerHTML = aVenir.length ? calLink(aVenir, "📅 Tout ajouter au calendrier", "cal-btn cal-all") : "";
     const key = r => (r.date || "9999-12-31") + " " + (r.heure || "00:00");
