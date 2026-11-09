@@ -271,6 +271,7 @@
     #sidebar.mobile-open{left:0;}
     #btn-menu{display:block;}
     #btn-new-primary{padding:9px 12px;font-size:13px;white-space:nowrap;}
+    #btn-imm{padding:9px 12px;font-size:15px}
     #main{padding:20px 16px;}
     #topbar{padding:16px 18px;}
     .grid2{grid-template-columns:1fr;}
@@ -443,6 +444,20 @@
   .field select{width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:8px;font-size:15px;background:var(--card);color:var(--text);}
   .rempty{text-align:center;padding:28px 16px;border:1px dashed var(--border);border-radius:14px;color:var(--muted);}
 .wa-direct{display:inline-block;background:#25D366;color:#fff!important;font-weight:700;text-decoration:none;padding:3px 10px;border-radius:12px;font-size:.82rem}
+
+  /* ⚡ Course immédiate */
+  #imm-ov{position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.72);display:flex;align-items:flex-end;justify-content:center}
+  #imm-box{background:var(--card,#14120e);border:1px solid var(--border);border-radius:20px 20px 0 0;width:100%;max-width:560px;max-height:94vh;overflow:auto;padding:18px 16px calc(18px + env(safe-area-inset-bottom))}
+  #imm-box h3{margin:0 0 4px;font-size:20px}#imm-box .sub{color:var(--muted);font-size:13px;margin:0 0 12px}
+  #imm-box label{display:block;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:12px 0 5px}
+  #imm-box input,#imm-box select{width:100%;min-height:48px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:inherit;font:inherit;font-size:16px;padding:0 12px}
+  .imm-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.imm-chips button,.imm-pax button{border:1px solid var(--border);background:transparent;color:inherit;border-radius:999px;padding:7px 11px;font:inherit;font-size:13px;font-weight:700;cursor:pointer}
+  .imm-pax{display:flex;gap:6px}.imm-pax button{flex:1;border-radius:10px;padding:10px 0}.imm-pax button.on,.imm-chips button.on{border-color:var(--gold);color:var(--gold);background:rgba(212,178,94,.12)}
+  .imm-ac{border:1px solid var(--border);border-radius:12px;margin-top:4px;overflow:hidden}.imm-ac button{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid var(--border);background:transparent;color:inherit;padding:10px 12px;font:inherit;font-size:14px}
+  #imm-go{width:100%;min-height:56px;margin-top:16px;border:0;border-radius:14px;font:inherit;font-size:17px;font-weight:900;color:#fff;background:linear-gradient(180deg,#ff7a6b,#e5534b);cursor:pointer}
+  #imm-go:disabled{opacity:.6}
+  .imm-send{display:flex;align-items:center;justify-content:center;min-height:54px;margin-top:8px;border-radius:14px;font-weight:900;font-size:16px;text-decoration:none}
+  #imm-x{float:right;border:1px solid var(--border);background:transparent;color:inherit;border-radius:10px;width:38px;height:38px;font-size:16px}
 </style>
 <style>/* iPhone : pas de zoom auto sur les champs */@media (max-width:900px){input,select,textarea{font-size:16px!important}}</style>
 </head>
@@ -491,6 +506,7 @@
         <h1 id="topbar-title">Réservations</h1>
         <div class="topbar-sub" id="topbar-sub">Toutes les courses en cours et à venir</div>
       </div>
+      <button class="btn-gold" id="btn-imm" type="button" style="background:linear-gradient(180deg,#ff7a6b,#e5534b);color:#fff;margin-right:6px" aria-label="Course immédiate">⚡</button>
       <button class="btn-gold" id="btn-new-primary">+ Nouvelle réservation</button>
     </div>
 
@@ -1017,6 +1033,84 @@ function anonymise(title,location){
   overlayEl.addEventListener("click", closeMenu);
   document.querySelectorAll(".nav-item").forEach(b => b.addEventListener("click", closeMenu));
 
+
+  // ===== ⚡ Course immédiate : client + départ + chauffeur → course créée, liens client et chauffeur prêts en un appui =====
+  function immOuvrir() {
+    try { fillChauffeurDropdown(); } catch (e) {}
+    const opts = [...document.getElementById("f-chauffeur").options].filter(o => o.value && o.value !== "__nouveau").map(o => `<option value="${esc(o.value)}" data-nom="${esc(o.dataset.nom || "")}">${esc(o.textContent)}</option>`).join("");
+    const ov = document.createElement("div"); ov.id = "imm-ov";
+    ov.innerHTML = `<div id="imm-box" role="dialog" aria-label="Course immédiate"><button id="imm-x" type="button" aria-label="Fermer">✕</button>
+      <h3>⚡ Course immédiate</h3><p class="sub">La course est créée pour maintenant, puis les liens client et chauffeur sont prêts à envoyer.</p>
+      <label for="imm-tel">Téléphone du client</label><div style="display:flex;gap:8px"><input id="imm-tel" type="tel" inputmode="tel" autocomplete="off" placeholder="06 12 34 56 78 ou +44…"><button type="button" id="imm-paste" style="flex:none;border:1px solid var(--border);background:transparent;color:inherit;border-radius:12px;padding:0 14px;font:inherit;font-weight:700">📋 Coller</button></div>
+      <label for="imm-dep">Départ</label><input id="imm-dep" type="text" autocomplete="off" placeholder="Adresse, hôtel, gare…"><div class="imm-ac" id="imm-ac-dep" hidden></div>
+      <div class="imm-chips" data-for="imm-dep">${["Aéroport CDG", "Aéroport d'Orly", "Gare du Nord", "Gare de Lyon", "Gare Montparnasse"].map(x => `<button type="button">${x}</button>`).join("")}</div>
+      <label for="imm-arr">Arrivée (facultatif)</label><input id="imm-arr" type="text" autocomplete="off" placeholder="Si tu la connais"><div class="imm-ac" id="imm-ac-arr" hidden></div>
+      <div class="imm-chips" data-for="imm-arr">${["Aéroport CDG", "Aéroport d'Orly", "Disneyland Paris"].map(x => `<button type="button">${x}</button>`).join("")}</div>
+      <label>Passagers</label><div class="imm-pax" id="imm-pax">${[1, 2, 3, 4, 5, 6, 7, 8].map(n => `<button type="button" data-n="${n}"${n === 1 ? ' class="on"' : ""}>${n}</button>`).join("")}</div>
+      <label for="imm-ch">Chauffeur</label><select id="imm-ch"><option value="__moi">🙋 Moi (je fais la course)</option><option value="__disp">📢 Dispatcher (je ne sais pas encore qui)</option>${opts}</select>
+      <label for="imm-nom">Nom du client (facultatif)</label><input id="imm-nom" type="text" autocomplete="off">
+      <button id="imm-go" type="button">🚀 Créer et préparer les liens</button></div>`;
+    document.body.appendChild(ov);
+    const $i = id => document.getElementById(id);
+    const fermer = () => ov.remove();
+    $i("imm-x").onclick = fermer; ov.onclick = e => { if (e.target === ov) fermer(); };
+    let pax = 1;
+    $i("imm-pax").onclick = e => { const b = e.target.closest("button"); if (!b) return; pax = +b.dataset.n; [...$i("imm-pax").children].forEach(x => x.classList.toggle("on", x === b)); };
+    ov.querySelectorAll(".imm-chips").forEach(c => c.onclick = e => { const b = e.target.closest("button"); if (b) { $i(c.dataset.for).value = b.textContent; } });
+    // suggestions d'adresses Google
+    ["dep", "arr"].forEach(k => { const inp = $i("imm-" + k), box = $i("imm-ac-" + k); let t = 0;
+      inp.addEventListener("input", () => { clearTimeout(t); const q = inp.value.trim();
+        if (q.length < 3 || !(window.google && google.maps && google.maps.places)) { box.hidden = true; return; }
+        t = setTimeout(() => new google.maps.places.AutocompleteService().getPlacePredictions({ input: q, language: "fr", componentRestrictions: { country: "fr" } }, (ps, st) => {
+          if (st !== "OK" || !ps) { box.hidden = true; return; }
+          box.innerHTML = ps.slice(0, 4).map(p => `<button type="button">${esc(p.description)}</button>`).join(""); box.hidden = false;
+          box.querySelectorAll("button").forEach(b => b.onclick = () => { inp.value = b.textContent; box.hidden = true; }); }), 250); });
+      inp.addEventListener("blur", () => setTimeout(() => box.hidden = true, 250)); });
+    try { const d = localStorage.getItem("tvp_imm_ch"); if (d && [...$i("imm-ch").options].some(o => o.value === d)) $i("imm-ch").value = d; } catch (e) {}
+    $i("imm-paste").onclick = async () => { try { const t = await navigator.clipboard.readText(); const m = String(t || "").match(/(\+|00)?\d[\d .-]{7,}\d/); if (m) $i("imm-tel").value = m[0].trim(); else toast("Pas de numéro dans le presse-papiers", 2500); } catch (e) { $i("imm-tel").focus(); toast("Colle le numéro dans le champ (appui long → Coller)", 3000); } };
+    setTimeout(() => $i("imm-tel").focus(), 50);
+    $i("imm-go").onclick = async () => {
+      const tel = $i("imm-tel").value.trim(), dep = $i("imm-dep").value.trim();
+      if (!dep) { toast("Indique au moins le départ", 3000); $i("imm-dep").focus(); return; }
+      const chSel = $i("imm-ch"), moi = chSel.value === "__moi", disp = chSel.value === "__disp", chV = moi || disp ? "" : chSel.value, chOpt = chSel.selectedOptions[0];
+      try { localStorage.setItem("tvp_imm_ch", chSel.value); } catch (e) {}
+      const now = new Date(), p2 = n => String(n).padStart(2, "0");
+      const data = { nom: $i("imm-nom").value.trim() || "Client immédiat", tel, dep, arr: $i("imm-arr").value.trim(),
+        date: now.getFullYear() + "-" + p2(now.getMonth() + 1) + "-" + p2(now.getDate()), heure: p2(now.getHours()) + ":" + p2(now.getMinutes()),
+        pax, bagages: 0, vehicule: pax > 4 ? "Van" : "Berline", prix: 0, vol: "",
+        chauffeurUid: chV && !chV.startsWith("nom:") ? chV : "", chauffeurNom: moi ? ((mcProfil().prenom) || "Badr") : chV ? (chOpt.dataset.nom || chV.slice(4)) : "",
+        statut: "confirmée", note: disp ? "⚡ Course immédiate · dispatchée" : "⚡ Course immédiate", createdAt: serverTimestamp() };
+      const go = $i("imm-go"); go.disabled = true; go.textContent = "Création…";
+      try {
+        ajoutLocal = Date.now();
+        const ref = await addDoc(collection(db, "reservations"), data);
+        marquerVues([ref.id]);
+        // on attend que la course arrive dans la liste, puis on crée son lien comme le bouton « Lien client »
+        for (let k = 0; k < 30 && !reservationsCache.find(x => x.id === ref.id); k++) await new Promise(r => setTimeout(r, 100));
+        if (!reservationsCache.find(x => x.id === ref.id)) reservationsCache.push(Object.assign({ id: ref.id }, data));
+        // lien créé en arrière-plan (même logique que « Lien client »), puis envoi depuis cet écran
+        ouvrirLien(ref.id); document.getElementById("modal-lien").classList.remove("shown");
+        if (disp) { ["mc-prenom", "mc-modele", "mc-plaque"].forEach(id => document.getElementById(id).value = ""); document.getElementById("mc-tel").value = "06 67 40 20 05"; }
+        document.getElementById("mc-save").click();
+        for (let k = 0; k < 60 && !mcCode; k++) await new Promise(r => setTimeout(r, 100));
+        if (!mcCode) throw { code: "lien non créé" };
+        const h = id => document.getElementById(id).getAttribute("href") || "#";
+        const nTel = waNumClient(tel);
+        $i("imm-box").innerHTML = `<button id="imm-x" type="button" aria-label="Fermer">✕</button><h3>✅ Course créée</h3>
+          <p class="sub">${esc(data.heure)} · ${esc(dep)}${data.arr ? " → " + esc(data.arr) : ""} · ${pax} pers. · ${esc(data.chauffeurNom || "")}</p>
+          <label>Au client</label>
+          <a class="imm-send" style="background:#25d366;color:#08240f" target="_blank" rel="noopener" href="${h("mc-wa")}">💬 WhatsApp au client</a>
+          ${nTel ? `<a class="imm-send" style="background:transparent;border:1px solid var(--border);color:inherit" href="${h("mc-sms")}">✉️ SMS au client</a>` : ""}
+          ${disp ? `<label>Au groupe de chauffeurs</label><a class="imm-send" style="background:#d4b25e;color:#17120a" target="_blank" rel="noopener" href="${waLink("⚡ *IMMÉDIAT* ⚡\n" + shareMessage(shareItem(reservationsCache.find(x => x.id === ref.id) || Object.assign({ id: ref.id }, data))))}">📢 Envoyer au groupe</a>
+            <p class="sub" style="margin-top:10px">Le groupe reçoit la course sans adresse exacte ni lien. Quand un chauffeur la prend : ✏️ Modifier → son nom → « WhatsApp chauffeur ». Il remplira lui-même sa plaque sur son lien.</p>`
+          : moi ? `<p class="sub" style="margin-top:12px">🙋 Tu fais la course : ton lien chauffeur (Waze, chat traduit, étapes) 👇</p><a class="imm-send" style="background:transparent;border:1px solid var(--gold);color:var(--gold)" target="_blank" rel="noopener" href="${mcUrl(mcCode)}&d=1">🚖 Ouvrir ma mission</a>`
+            : `<label>Au chauffeur</label><a class="imm-send" style="background:#25d366;color:#08240f" target="_blank" rel="noopener" href="${h("mc-wa-ch")}">🚖 WhatsApp au chauffeur</a><a class="imm-send" style="background:transparent;border:1px solid var(--border);color:inherit" href="${h("mc-sms-ch")}">✉️ SMS au chauffeur</a>`}
+          <p class="sub" style="margin-top:12px">Prix à 0 € : complète-le plus tard avec ✏️ Modifier.</p>`;
+        $i("imm-x").onclick = fermer;
+      } catch (e) { go.disabled = false; go.textContent = "🚀 Créer et préparer les liens"; toast("Impossible : " + ((e && e.code) || "erreur"), 5000); }
+    };
+  }
+  document.getElementById("btn-imm").addEventListener("click", immOuvrir);
   document.getElementById("btn-new-primary").dataset.target = "reservations";
   document.getElementById("btn-new-primary").addEventListener("click", () => {
     const target = document.getElementById("btn-new-primary").dataset.target;
@@ -1333,6 +1427,12 @@ function anonymise(title,location){
     document.getElementById("mc-tel").value = (r.lien && r.lien.tel) || (ch && ch.tel) || pr.tel || "06 67 40 20 05";
     document.getElementById("mc-modele").value = (r.lien && r.lien.modele) || pr["modele_" + (vehLabel(r.vehicule) || "x")] || pr.modele || (vehLabel(r.vehicule) === "Van" ? "Mercedes Classe V noire" : "");
     document.getElementById("mc-plaque").value = (r.lien && r.lien.plaque) || pr["plaque_" + (vehLabel(r.vehicule) || "x")] || pr.plaque || "";
+    // infos saisies par le chauffeur sur son lien : on les affiche ici pour pouvoir les corriger
+    if (r.lienCourse) getDoc(doc(db, "trad_g", r.lienCourse)).then(s => { const d = s.exists() ? s.data() : {};
+      if (mcR !== r || !(d.chauffeur && d.chauffeur.par === "chauffeur")) return;
+      document.getElementById("mc-prenom").value = d.chauffeur.prenom || ""; document.getElementById("mc-modele").value = (d.vehicule || {}).modele || ""; document.getElementById("mc-plaque").value = (d.vehicule || {}).plaque || "";
+      const inf = document.getElementById("mc-infos"); if (inf) inf.open = true;
+      toast("🚖 Infos saisies par le chauffeur — corrige-les si besoin puis « Mettre à jour »", 4500); }).catch(() => {});
     mcPointRemplir(r);
     document.getElementById("mc-rdv").value = (r.lien && r.lien.rdv) || rdvDefaut(r);
     document.getElementById("mc-save").textContent = mcCode ? "Mettre à jour la page client" : "Créer le lien";
@@ -1645,7 +1745,8 @@ function anonymise(title,location){
       etapesSubs[c] = onSnapshot(doc(db, "trad_g", c), s => {
         const d = s.data() || {}, v = JSON.stringify([d.etape || "", Object.keys(d.etapes || {}).sort(), etTs((d.etapes || {})[d.etape])]);
         const avant = etapesCache[c] && etapesCache[c].v;
-        etapesCache[c] = { v, etape: d.etape || "", etapes: d.etapes || {} };
+        const pris = d.chauffeur && d.chauffeur.par === "chauffeur" ? String(d.chauffeur.prenom || "") + (d.vehicule && d.vehicule.plaque ? " · " + d.vehicule.plaque : "") : "";
+        etapesCache[c] = { v: v + pris, etape: d.etape || "", etapes: d.etapes || {}, pris, chInfo: d.chauffeur && d.chauffeur.par === "chauffeur" ? { prenom: d.chauffeur.prenom || "", modele: (d.vehicule || {}).modele || "", plaque: (d.vehicule || {}).plaque || "" } : null };
         if (avant !== v) renderReservations();
       }, () => {});
     });
@@ -1695,7 +1796,7 @@ function anonymise(title,location){
         + (x ? `<span class="big" style="color:${x[2]};border-color:${x[2]};background:${x[2]}1f">${x[0]} ${x[1]} · ${hmC(e.etape) || etHm(E[e.etape])}</span>` : "")
         + step
         + `<div class="rt">${esc(r.dep || "?")} → <b>${esc(r.arr || "?")}</b></div>`
-        + `<div class="tl">${r.chauffeurNom ? "🚖 " + esc(r.chauffeurNom) + " · " : ""}${volCode(r) ? "✈️ " + esc(volCode(r)) + " · " : ""}${r.pax ? r.pax + " pers." : ""}${r.prix ? " · " + esc(r.prix) + " €" : ""}</div>`
+        + `<div class="tl">${e.pris ? "🚖 pris par " + esc(e.pris) + " · " : r.chauffeurNom ? "🚖 " + esc(r.chauffeurNom) + " · " : ""}${volCode(r) ? "✈️ " + esc(volCode(r)) + " · " : ""}${r.pax ? r.pax + " pers." : ""}${r.prix ? " · " + esc(r.prix) + " €" : ""}</div>`
         + (chips.length ? `<div class="ec-live">${chips.join("")}</div>` : "")
         + `<a target="_blank" rel="noopener" href="../ma-course/?c=${encodeURIComponent(code)}&d=1">💬 Conversation</a>`
         + ` <a href="#" data-pos="${esc(code)}">📍 Position</a> <a href="#" data-preuve="${esc(code)}">📷 Preuve</a> ${e.etape === "fin" ? "" : `<a href="#" data-fin="${esc(code)}">🏁 Terminer</a>`}</div>`;
