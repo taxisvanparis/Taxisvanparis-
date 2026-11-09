@@ -456,6 +456,7 @@
   .imm-ac{border:1px solid var(--border);border-radius:12px;margin-top:4px;overflow:hidden}.imm-ac button{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid var(--border);background:transparent;color:inherit;padding:10px 12px;font:inherit;font-size:14px}
   #imm-go{width:100%;min-height:56px;margin-top:16px;border:0;border-radius:14px;font:inherit;font-size:17px;font-weight:900;color:#fff;background:linear-gradient(180deg,#ff7a6b,#e5534b);cursor:pointer}
   #imm-go:disabled{opacity:.6}
+  .imm-send{display:flex;align-items:center;justify-content:center;min-height:54px;margin-top:8px;border-radius:14px;font-weight:900;font-size:16px;text-decoration:none}
   #imm-x{float:right;border:1px solid var(--border);background:transparent;color:inherit;border-radius:10px;width:38px;height:38px;font-size:16px}
 </style>
 <style>/* iPhone : pas de zoom auto sur les champs */@media (max-width:900px){input,select,textarea{font-size:16px!important}}</style>
@@ -1040,13 +1041,13 @@ function anonymise(title,location){
     const ov = document.createElement("div"); ov.id = "imm-ov";
     ov.innerHTML = `<div id="imm-box" role="dialog" aria-label="Course immédiate"><button id="imm-x" type="button" aria-label="Fermer">✕</button>
       <h3>⚡ Course immédiate</h3><p class="sub">La course est créée pour maintenant, puis les liens client et chauffeur sont prêts à envoyer.</p>
-      <label for="imm-tel">Téléphone du client</label><input id="imm-tel" type="tel" inputmode="tel" autocomplete="off" placeholder="06 12 34 56 78 ou +44…">
+      <label for="imm-tel">Téléphone du client</label><div style="display:flex;gap:8px"><input id="imm-tel" type="tel" inputmode="tel" autocomplete="off" placeholder="06 12 34 56 78 ou +44…"><button type="button" id="imm-paste" style="flex:none;border:1px solid var(--border);background:transparent;color:inherit;border-radius:12px;padding:0 14px;font:inherit;font-weight:700">📋 Coller</button></div>
       <label for="imm-dep">Départ</label><input id="imm-dep" type="text" autocomplete="off" placeholder="Adresse, hôtel, gare…"><div class="imm-ac" id="imm-ac-dep" hidden></div>
       <div class="imm-chips" data-for="imm-dep">${["Aéroport CDG", "Aéroport d'Orly", "Gare du Nord", "Gare de Lyon", "Gare Montparnasse"].map(x => `<button type="button">${x}</button>`).join("")}</div>
       <label for="imm-arr">Arrivée (facultatif)</label><input id="imm-arr" type="text" autocomplete="off" placeholder="Si tu la connais"><div class="imm-ac" id="imm-ac-arr" hidden></div>
       <div class="imm-chips" data-for="imm-arr">${["Aéroport CDG", "Aéroport d'Orly", "Disneyland Paris"].map(x => `<button type="button">${x}</button>`).join("")}</div>
       <label>Passagers</label><div class="imm-pax" id="imm-pax">${[1, 2, 3, 4, 5, 6, 7, 8].map(n => `<button type="button" data-n="${n}"${n === 1 ? ' class="on"' : ""}>${n}</button>`).join("")}</div>
-      <label for="imm-ch">Chauffeur</label><select id="imm-ch"><option value="">— Choisir —</option>${opts}</select>
+      <label for="imm-ch">Chauffeur</label><select id="imm-ch"><option value="__moi">🙋 Moi (je fais la course)</option>${opts}</select>
       <label for="imm-nom">Nom du client (facultatif)</label><input id="imm-nom" type="text" autocomplete="off">
       <button id="imm-go" type="button">🚀 Créer et préparer les liens</button></div>`;
     document.body.appendChild(ov);
@@ -1065,16 +1066,19 @@ function anonymise(title,location){
           box.innerHTML = ps.slice(0, 4).map(p => `<button type="button">${esc(p.description)}</button>`).join(""); box.hidden = false;
           box.querySelectorAll("button").forEach(b => b.onclick = () => { inp.value = b.textContent; box.hidden = true; }); }), 250); });
       inp.addEventListener("blur", () => setTimeout(() => box.hidden = true, 250)); });
+    try { const d = localStorage.getItem("tvp_imm_ch"); if (d && [...$i("imm-ch").options].some(o => o.value === d)) $i("imm-ch").value = d; } catch (e) {}
+    $i("imm-paste").onclick = async () => { try { const t = await navigator.clipboard.readText(); const m = String(t || "").match(/(\+|00)?\d[\d .-]{7,}\d/); if (m) $i("imm-tel").value = m[0].trim(); else toast("Pas de numéro dans le presse-papiers", 2500); } catch (e) { $i("imm-tel").focus(); toast("Colle le numéro dans le champ (appui long → Coller)", 3000); } };
     setTimeout(() => $i("imm-tel").focus(), 50);
     $i("imm-go").onclick = async () => {
       const tel = $i("imm-tel").value.trim(), dep = $i("imm-dep").value.trim();
       if (!dep) { toast("Indique au moins le départ", 3000); $i("imm-dep").focus(); return; }
-      const chSel = $i("imm-ch"), chV = chSel.value, chOpt = chSel.selectedOptions[0];
+      const chSel = $i("imm-ch"), moi = chSel.value === "__moi", chV = moi ? "" : chSel.value, chOpt = chSel.selectedOptions[0];
+      try { localStorage.setItem("tvp_imm_ch", chSel.value); } catch (e) {}
       const now = new Date(), p2 = n => String(n).padStart(2, "0");
       const data = { nom: $i("imm-nom").value.trim() || "Client immédiat", tel, dep, arr: $i("imm-arr").value.trim(),
         date: now.getFullYear() + "-" + p2(now.getMonth() + 1) + "-" + p2(now.getDate()), heure: p2(now.getHours()) + ":" + p2(now.getMinutes()),
         pax, bagages: 0, vehicule: pax > 4 ? "Van" : "Berline", prix: 0, vol: "",
-        chauffeurUid: chV && !chV.startsWith("nom:") ? chV : "", chauffeurNom: chV ? (chOpt.dataset.nom || chV.slice(4)) : "",
+        chauffeurUid: chV && !chV.startsWith("nom:") ? chV : "", chauffeurNom: moi ? ((mcProfil().prenom) || "Badr") : chV ? (chOpt.dataset.nom || chV.slice(4)) : "",
         statut: "confirmée", note: "⚡ Course immédiate", createdAt: serverTimestamp() };
       const go = $i("imm-go"); go.disabled = true; go.textContent = "Création…";
       try {
@@ -1084,10 +1088,22 @@ function anonymise(title,location){
         // on attend que la course arrive dans la liste, puis on crée son lien comme le bouton « Lien client »
         for (let k = 0; k < 30 && !reservationsCache.find(x => x.id === ref.id); k++) await new Promise(r => setTimeout(r, 100));
         if (!reservationsCache.find(x => x.id === ref.id)) reservationsCache.push(Object.assign({ id: ref.id }, data));
-        fermer();
-        ouvrirLien(ref.id);
+        // lien créé en arrière-plan (même logique que « Lien client »), puis envoi depuis cet écran
+        ouvrirLien(ref.id); document.getElementById("modal-lien").classList.remove("shown");
         document.getElementById("mc-save").click();
-        toast("⚡ Course créée — envoie le lien au client puis au chauffeur", 4500);
+        for (let k = 0; k < 60 && !mcCode; k++) await new Promise(r => setTimeout(r, 100));
+        if (!mcCode) throw { code: "lien non créé" };
+        const h = id => document.getElementById(id).getAttribute("href") || "#";
+        const nTel = waNumClient(tel);
+        $i("imm-box").innerHTML = `<button id="imm-x" type="button" aria-label="Fermer">✕</button><h3>✅ Course créée</h3>
+          <p class="sub">${esc(data.heure)} · ${esc(dep)}${data.arr ? " → " + esc(data.arr) : ""} · ${pax} pers. · ${esc(data.chauffeurNom || "")}</p>
+          <label>Au client</label>
+          <a class="imm-send" style="background:#25d366;color:#08240f" target="_blank" rel="noopener" href="${h("mc-wa")}">💬 WhatsApp au client</a>
+          ${nTel ? `<a class="imm-send" style="background:transparent;border:1px solid var(--border);color:inherit" href="${h("mc-sms")}">✉️ SMS au client</a>` : ""}
+          ${moi ? `<p class="sub" style="margin-top:12px">🙋 Tu fais la course : ton lien chauffeur (Waze, chat traduit, étapes) 👇</p><a class="imm-send" style="background:transparent;border:1px solid var(--gold);color:var(--gold)" target="_blank" rel="noopener" href="${mcUrl(mcCode)}&d=1">🚖 Ouvrir ma mission</a>`
+            : `<label>Au chauffeur</label><a class="imm-send" style="background:#25d366;color:#08240f" target="_blank" rel="noopener" href="${h("mc-wa-ch")}">🚖 WhatsApp au chauffeur</a><a class="imm-send" style="background:transparent;border:1px solid var(--border);color:inherit" href="${h("mc-sms-ch")}">✉️ SMS au chauffeur</a>`}
+          <p class="sub" style="margin-top:12px">Prix à 0 € : complète-le plus tard avec ✏️ Modifier.</p>`;
+        $i("imm-x").onclick = fermer;
       } catch (e) { go.disabled = false; go.textContent = "🚀 Créer et préparer les liens"; toast("Impossible : " + ((e && e.code) || "erreur"), 5000); }
     };
   }
