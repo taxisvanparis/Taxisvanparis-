@@ -317,8 +317,9 @@ function rendreEtapes(){
   $('bIci').hidden=ici||ci>=2;$('bIci').textContent=et('ici');
   $('iciOk').hidden=!ici||ci>=2;$('iciOk').textContent=et('iciOk')+(ici?' · '+h('client_ici'):'');
 }
-async function marquerEtape(k){
-  if(k==='fin'&&!confirm('Terminer la course ?'))return;
+async function marquerEtape(k,ok){
+  // pas de confirm() : il est bloqué dans le navigateur de WhatsApp → vraie fenêtre de confirmation
+  if(k==='fin'&&!ok){feuille('🏁 Terminer la course ?','',[['✅ Oui, course terminée',()=>marquerEtape('fin',true)],['Annuler',()=>{}]]);return}
   const avant=etapeLocale;etapeLocale=k;rendreEtapes();try{navigator.vibrate&&navigator.vibrate(60)}catch(e){}
   const lent=setTimeout(()=>toast('⏳ Étape gardée : elle partira dès que le réseau revient'),4000);
   try{await setDoc(doc(db,'trad_g',code),{etape:k,etapes:{[k]:serverTimestamp(),[k+'_c']:Date.now()},t:serverTimestamp()},{merge:true});clearTimeout(lent);etapeLocale=null}
@@ -514,7 +515,7 @@ $('fPhoto').onchange=async e=>{
   try{const pt=await positionUnique(),img=await photoTamponnee(f,pt);await setDoc(preuveRef(),{img,lat:pt?pt.lat:null,lng:pt?pt.lng:null,acc:pt?pt.acc:null,tPhoto:serverTimestamp()},{merge:true});toast('✅ Photo d\'arrivée enregistrée (heure + GPS)')}
   catch(err){toast(err&&err.code==='permission-denied'?'Photo bloquée : règle Firebase à ajouter':'Photo non enregistrée, réessaie')}
 };
-if(CHAUF){const mo=marquerEtape;marquerEtape=async function(k){const deja=info&&info.etapes&&info.etapes[k];await mo(k);gpsSuivi();if(k==='place'&&!deja)preuveArrivee()}}
+if(CHAUF){const mo=marquerEtape;marquerEtape=async function(k,ok){const deja=info&&info.etapes&&info.etapes[k];await mo(k,ok);gpsSuivi();if(k==='place'&&!deja)preuveArrivee()}}
 $('bPhoto').onclick=()=>$('fPhoto').click();
 /* --- Chauffeur : problème → message WhatsApp à Taxis Van Paris avec la course et la position --- */
 function feuille(titre,txt,btns){
