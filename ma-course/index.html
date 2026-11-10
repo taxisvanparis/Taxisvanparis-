@@ -113,6 +113,7 @@ h1{font-size:26px;line-height:1.15;margin:4px 0 4px;font-weight:800;letter-spaci
 .callov small{display:block;font-size:12px;color:var(--mut);margin-top:6px}
 
 /* ===== Carte en direct en tête de page, van vu du dessus ===== */
+.gpsbar{margin-top:12px;border:1.5px solid rgba(240,96,93,.55);background:rgba(240,96,93,.08);border-radius:14px;padding:12px}.gpsbar p{margin:0 0 10px;font-size:14.5px;line-height:1.45}.gpsbar .b{width:100%}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 .card.hero{position:relative;padding:0;min-height:72px;margin:0 -16px 14px;border-radius:0 0 26px 26px;border:0;border-bottom:1px solid var(--line);overflow:hidden;background:var(--card)}
 .card.hero #carte{height:min(50vh,440px);border-radius:0;border:0}
@@ -166,6 +167,7 @@ h1{font-size:26px;line-height:1.15;margin:4px 0 4px;font-weight:800;letter-spaci
     <div class="cli" id="cliIci" hidden></div>
     <div id="etapes"></div>
     <button type="button" class="b g ici" id="bIci" hidden></button><div class="iciok" id="iciOk" hidden></div>
+    <div class="gpsbar" id="gpsBar" hidden><p id="gpsBarT"></p><button type="button" class="b g" id="bGps">📡 Activer ma position</button></div>
   </section>
 
   <section class="card" id="cNav" hidden><h2>🧭 Mission</h2>
@@ -499,16 +501,28 @@ function mission(){
 }
 /* --- Chauffeur : position partagée de « En route » jusqu'à « Client à bord » --- */
 let watchId=null,dernierEnvoi=0,dernierPt=null;
+let gpsOk=false,gpsErr=0;
+const GPS_AIDE={1:'❌ Ton téléphone bloque la position, le client ne peut pas te suivre. Touche le bouton : si rien ne s\'affiche, va dans Réglages → Confidentialité et sécurité → Service de localisation → Safari (ou WhatsApp) → « Lorsque l\'app est active », puis recharge la page.',
+  2:'⚠️ Position introuvable pour l\'instant (GPS ou réseau). Rapproche-toi d\'une fenêtre ou sors, puis touche le bouton.',3:'⚠️ Le GPS met du temps à répondre. Touche le bouton pour réessayer.'};
+function gpsBarre(){if(!CHAUF)return;const e=etapeCour(),actif=e==='route'||e==='place',show=actif&&!gpsOk;
+  $('gpsBar').hidden=!show;if(show)$('gpsBarT').textContent=GPS_AIDE[gpsErr]||'📡 Ta position n\'est pas encore partagée : le client ne te voit pas sur la carte. Touche le bouton et choisis « Autoriser ».'}
+function gpsErreur(err){gpsErr=err&&err.code||2;gpsOk=false;$('gpsS').textContent=gpsErr===1?'📡 Localisation refusée : autorise-la pour que le client te suive sur la carte.':'📡 GPS indisponible pour l\'instant…';gpsBarre()}
+$('bGps').onclick=()=>{if(!('geolocation' in navigator)){gpsErr=2;gpsBarre();return}
+  const b=$('bGps');b.disabled=true;b.textContent='📡 Recherche…';
+  navigator.geolocation.getCurrentPosition(p=>{b.disabled=false;b.textContent='📡 Activer ma position';envoyerPos(p,true);
+    if(watchId!==null)navigator.geolocation.clearWatch(watchId);watchId=navigator.geolocation.watchPosition(envoyerPos,gpsErreur,{enableHighAccuracy:true,maximumAge:5000,timeout:20000})},
+    err=>{b.disabled=false;b.textContent='📡 Réessayer';gpsErreur(err)},{enableHighAccuracy:true,maximumAge:0,timeout:15000})};
 function gpsSuivi(){
-  const e=etapeCour(),actif=e==='route'||e==='place';
+  const e=etapeCour(),actif=e==='route'||e==='place';gpsBarre();
   if(actif&&watchId===null&&'geolocation' in navigator){
-    watchId=navigator.geolocation.watchPosition(envoyerPos,err=>{$('gpsS').textContent=err.code===1?'📡 Localisation refusée : autorise-la pour que le client te suive sur la carte.':'📡 GPS indisponible pour l\'instant…'},{enableHighAccuracy:true,maximumAge:5000,timeout:20000});
+    watchId=navigator.geolocation.watchPosition(envoyerPos,gpsErreur,{enableHighAccuracy:true,maximumAge:5000,timeout:20000});
     $('gpsS').textContent='📡 Recherche de ta position…';
   }else if(!actif&&watchId!==null){navigator.geolocation.clearWatch(watchId);watchId=null}
   if(!actif)$('gpsS').textContent=(e==='bord'||e==='fin')?'📡 Partage de position terminé.':'📡 Touche « En route » : le client te verra arriver sur la carte, avec l\'heure d\'arrivée.';
 }
 async function envoyerPos(p,force){
   const pt={lat:+p.coords.latitude.toFixed(6),lng:+p.coords.longitude.toFixed(6),acc:Math.round(p.coords.accuracy||0),cap:p.coords.heading==null||isNaN(p.coords.heading)?null:Math.round(p.coords.heading),v:p.coords.speed==null?null:Math.round(p.coords.speed*3.6)};
+  if(!gpsOk){gpsOk=true;gpsErr=0;gpsBarre()}
   const now=Date.now();
   if(!force&&now-dernierEnvoi<10000&&dernierPt&&distM(dernierPt,pt)<40)return;
   dernierEnvoi=now;dernierPt=pt;
