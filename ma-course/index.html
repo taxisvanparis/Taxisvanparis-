@@ -111,6 +111,34 @@ h1{font-size:26px;line-height:1.15;margin:4px 0 4px;font-weight:800;letter-spaci
 .callov .ok{background:var(--green)}.callov .no{background:var(--red)}.callov .opt{background:rgba(255,255,255,.12)}
 .callov .opt.on{background:var(--gold);color:#1a1408}
 .callov small{display:block;font-size:12px;color:var(--mut);margin-top:6px}
+
+/* ===== Carte en direct en tête de page, van vu du dessus ===== */
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.card.hero{position:relative;padding:0;min-height:72px;margin:0 -16px 14px;border-radius:0 0 26px 26px;border:0;border-bottom:1px solid var(--line);overflow:hidden;background:var(--card)}
+.card.hero #carte{height:min(50vh,440px);border-radius:0;border:0}
+.heta{position:absolute;left:12px;top:12px;display:flex;align-items:center;gap:10px;background:var(--ink);color:var(--bg);border-radius:18px;padding:6px 14px 6px 6px;box-shadow:0 10px 30px rgba(0,0,0,.35);max-width:calc(100% - 24px)}
+.heta b{display:block;font-size:16px;font-weight:850;line-height:1.15}.heta small{display:block;font-size:12px;opacity:.7;font-weight:650}
+.ring{position:relative;width:44px;height:44px;flex:none}.ring svg{width:44px;height:44px;transform:rotate(-90deg)}
+.ring circle{fill:none;stroke-width:4}.ring .rb{stroke:color-mix(in srgb,var(--bg) 18%,transparent)}.ring .rf{stroke:var(--gold);stroke-linecap:round;stroke-dasharray:119.4;stroke-dashoffset:119.4;transition:stroke-dashoffset .6s}
+.ring b{position:absolute;inset:0;display:grid;place-items:center;font-size:14px;font-weight:900}
+.hmaps{position:absolute;right:12px;bottom:12px;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:8px 11px;font-size:13px;font-weight:750;text-decoration:none;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.van{position:absolute;width:30px;height:58px;pointer-events:none;will-change:transform}
+.van svg{width:30px;height:58px;display:block;overflow:visible;filter:drop-shadow(0 4px 6px rgba(0,0,0,.45))}
+.ici2{position:fixed;left:12px;right:12px;bottom:calc(92px + var(--bot));z-index:45;max-width:500px;margin:0 auto;background:var(--card);border:1.5px solid var(--gold);border-radius:22px;padding:12px;box-shadow:0 30px 60px rgba(0,0,0,.45);animation:up .5s cubic-bezier(.2,.9,.3,1.2) both}
+@keyframes up{from{transform:translateY(130%)}to{transform:none}}
+.ici2 img{width:100%;max-height:170px;object-fit:cover;border-radius:14px;display:block}
+.ici2 h3{margin:10px 2px 4px;font-size:21px;font-weight:850}.ici2 p{margin:0 2px 10px;color:var(--mut);font-size:14px}
+@media (prefers-reduced-motion:reduce){.ici2{animation:none}.ring .rf{transition:none}}
+/* ===== Mode clair automatique (suit le réglage du téléphone) ===== */
+@media (prefers-color-scheme:light){
+  :root{--bg:#F3F0EA;--card:#FFFFFF;--card2:#FBF9F5;--line:#E3DCCE;--ink:#17150F;--mut:#6B655A;--gold:#B48D36;--gold2:#8E6C22;color-scheme:light}
+  html{background:var(--bg)}body{background:radial-gradient(120% 50% at 50% -10%,rgba(212,178,94,.22),transparent 60%),var(--bg)}
+  .chip,.dock input,.qui input,.sheet .fl button,.grid button,.eg button,.dock .quick button{background:#fff}
+  .bub{background:#fff}.bub.me{background:linear-gradient(160deg,rgba(212,178,94,.28),rgba(212,178,94,.12))}
+  .dock{background:rgba(243,240,234,.92);border-top-color:var(--line)}
+  .toast{background:#fff;color:var(--ink)}
+  .eg button.next small{color:#3a2d10}
+}
 </style>
 </head>
 <body>
@@ -145,9 +173,10 @@ h1{font-size:26px;line-height:1.15;margin:4px 0 4px;font-weight:800;letter-spaci
     <div class="acts2"><a class="b" id="bPanneau" target="_blank" rel="noopener">🪧 Panneau</a><button type="button" class="b" id="bPhoto">📷 Photo</button><button type="button" class="b r" id="bProb">⚠️ Problème</button></div>
     <p class="gps" id="gpsS"></p>
   </section>
-  <section class="card" id="cSuivi" hidden><h2 id="tSuivi"></h2>
-    <p class="eta2" id="etaT"></p><div id="carte"></div><p class="gps" id="majT"></p>
-    <a class="b" id="bVoirPos" target="_blank" rel="noopener" style="margin-top:10px"></a>
+  <section class="card hero" id="cSuivi" hidden><h2 id="tSuivi" class="sr"></h2>
+    <div id="carte"></div>
+    <div class="heta"><div class="ring"><svg viewBox="0 0 46 46"><circle class="rb" cx="23" cy="23" r="19"/><circle class="rf" id="ringF" cx="23" cy="23" r="19"/></svg><b id="ringT">•</b></div><div><b id="etaT"></b><small id="majT"></small></div></div>
+    <a class="hmaps" id="bVoirPos" target="_blank" rel="noopener"></a>
   </section>
   <input type="file" id="fPhoto" accept="image/*" capture="environment" hidden>
   <section class="card" id="cDrv"><h2 id="tDrv"></h2>
@@ -465,7 +494,7 @@ function mission(){
     const lig=(lbl,a)=>a?`<div class="navi"><div><small>${lbl}</small>${esc(a)}</div><a class="b" target="_blank" rel="noopener" href="https://waze.com/ul?q=${encodeURIComponent(a)}&navigate=yes">Waze</a><a class="b" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(a)}&travelmode=driving">Maps</a></div>`:'';
     $('navL').innerHTML=lig('Prise en charge',dep)+lig('Dépose',arr)+(dep&&arr?`<a class="b" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(dep)}&destination=${encodeURIComponent(arr)}&travelmode=driving">🗺️ Itinéraire complet</a>`:'');
     $('bPanneau').href='../pancarte-tvp-k7x2/?nom='+encodeURIComponent(c.nom||'');
-    gpsSuivi();attente();
+    gpsSuivi();attente();try{majCarte()}catch(e){}
   } else clientSuivi();
 }
 /* --- Chauffeur : position partagée de « En route » jusqu'à « Client à bord » --- */
@@ -484,6 +513,7 @@ async function envoyerPos(p,force){
   if(!force&&now-dernierEnvoi<10000&&dernierPt&&distM(dernierPt,pt)<40)return;
   dernierEnvoi=now;dernierPt=pt;
   autoSurPlace(pt);
+  posClient={...pt,t:Date.now()};try{majCarte()}catch(e){}
   try{await setDoc(posRef(),{...pt,t:serverTimestamp()});$('gpsS').textContent='📡 Position partagée avec le client · '+hm(now)+' (±'+pt.acc+' m)'}
   catch(e){$('gpsS').textContent=e&&e.code==='permission-denied'?'📡 Partage bloqué : règle Firebase à ajouter':'📡 Pas de connexion, nouvel essai…'}
 }
@@ -589,26 +619,68 @@ function clientSuivi(){
 }
 function chargerMaps(){if(window.google&&google.maps)return Promise.resolve();if(mapsP)return mapsP;
   mapsP=new Promise((ok,ko)=>{window.__tvpMaps=ok;const s=document.createElement('script');s.src='https://maps.googleapis.com/maps/api/js?key='+MAPS_KEY+'&callback=__tvpMaps&language='+encodeURIComponent(TR(L).split('-')[0]);s.async=true;s.onerror=ko;document.head.appendChild(s);setTimeout(()=>ko(new Error('maps')),12000)});return mapsP}
+// Style de carte : sombre aux couleurs TVP, ou clair (Google normal) selon le réglage du téléphone
+const CARTE_SOMBRE=[{elementType:'geometry',stylers:[{color:'#1c1b20'}]},{elementType:'labels.text.fill',stylers:[{color:'#a59f92'}]},{elementType:'labels.text.stroke',stylers:[{color:'#121114'}]},
+ {featureType:'road',elementType:'geometry',stylers:[{color:'#2d2c33'}]},{featureType:'road.arterial',elementType:'geometry',stylers:[{color:'#38363e'}]},{featureType:'road.highway',elementType:'geometry',stylers:[{color:'#4d4433'}]},
+ {featureType:'water',stylers:[{color:'#132331'}]},{featureType:'poi',elementType:'labels.icon',stylers:[{visibility:'off'}]},{featureType:'poi.park',elementType:'geometry',stylers:[{color:'#17231a'}]},{featureType:'transit.station.airport',stylers:[{visibility:'on'}]}];
+const CARTE_CLAIRE=[{featureType:'poi.business',stylers:[{visibility:'off'}]},{featureType:'poi',elementType:'labels.icon',stylers:[{saturation:-60}]}];
+const mqSombre=window.matchMedia?matchMedia('(prefers-color-scheme: dark)'):{matches:true};
+const styleCarte=()=>mqSombre.matches?CARTE_SOMBRE:CARTE_CLAIRE;
+try{mqSombre.addEventListener('change',()=>{if(carte)carte.setOptions({styles:styleCarte()})})}catch(e){}
+// Le van : Mercedes Classe V vue du dessus, tournée dans le sens de la route, qui glisse d'une position à l'autre
+const VAN_SVG='<svg viewBox="-15 -29 30 58" aria-hidden="true"><ellipse cx="0" cy="-40" rx="16" ry="18" fill="#fff6d0" opacity=".28"/><rect x="-14" y="-28" width="28" height="56" rx="8" fill="#141418" stroke="#d4b25e" stroke-width="1.6"/><rect x="-12" y="-27" width="24" height="9" rx="4" fill="#24242a"/><path d="M-11 -17L11 -17L9 -9L-9 -9Z" fill="#5b7487"/><rect x="-10" y="-8" width="20" height="26" rx="3" fill="#1d1d22"/><path d="M-9 19L9 19L8 24L-8 24Z" fill="#46596a"/><rect x="-18" y="-15" width="4" height="3" rx="1" fill="#141418"/><rect x="14" y="-15" width="4" height="3" rx="1" fill="#141418"/><rect x="-12" y="-29" width="6" height="3" rx="1.5" fill="#fff6d0"/><rect x="6" y="-29" width="6" height="3" rx="1.5" fill="#fff6d0"/><rect x="-13" y="26" width="5" height="2.5" rx="1" fill="#e5463f"/><rect x="8" y="26" width="5" height="2.5" rx="1" fill="#e5463f"/></svg>';
+let Van=null,van=null,vanAnim=0,trajet=null,trajetHalo=null,etaMax=null,cadre='';
+function classeVan(g){return class extends g.OverlayView{constructor(pos){super();this.pos=pos;this.ang=0;this.d=document.createElement('div');this.d.className='van';this.d.innerHTML=VAN_SVG}
+  onAdd(){this.getPanes().overlayLayer.appendChild(this.d)}onRemove(){this.d.remove()}
+  draw(){const pr=this.getProjection();if(!pr)return;const p=pr.fromLatLngToDivPixel(new g.LatLng(this.pos.lat,this.pos.lng));if(!p)return;this.d.style.left=(p.x-15)+'px';this.d.style.top=(p.y-29)+'px';this.d.style.transform='rotate('+this.ang+'deg)'}}}
+const cap=(a,b)=>{const r=x=>x*Math.PI/180,y=Math.sin(r(b.lng-a.lng))*Math.cos(r(b.lat)),x=Math.cos(r(a.lat))*Math.sin(r(b.lat))-Math.sin(r(a.lat))*Math.cos(r(b.lat))*Math.cos(r(b.lng-a.lng));return(Math.atan2(y,x)*180/Math.PI+360)%360};
+function glisser(vers,angle){if(!van)return;const de={...van.pos},a0=van.ang;let a1=angle==null?a0:angle;if(a1-a0>180)a1-=360;if(a1-a0<-180)a1+=360;
+  const t0=performance.now(),dur=matchMedia('(prefers-reduced-motion: reduce)').matches?0:1400;cancelAnimationFrame(vanAnim);
+  const pas=t=>{const k=dur?Math.min(1,(t-t0)/dur):1,e=1-Math.pow(1-k,3);van.pos={lat:de.lat+(vers.lat-de.lat)*e,lng:de.lng+(vers.lng-de.lng)*e};van.ang=a0+(a1-a0)*e;van.draw();if(k<1)vanAnim=requestAnimationFrame(pas)};vanAnim=requestAnimationFrame(pas)}
 function majCarte(){
   const e=etapeCour(),p=posClient,ok=(e==='route'||e==='place')&&p&&typeof p.lat==='number';
-  $('cSuivi').hidden=!ok;if(!ok)return;
-  $('tSuivi').textContent=lv('titre');
+  const sec=$('cSuivi');sec.hidden=!ok;if(!ok)return;
+  // la carte passe en tête de page, juste sous le logo
+  const ap=$('app'),tp=ap&&ap.querySelector('.top');if(tp&&tp.nextElementSibling!==sec)tp.after(sec);
+  $('tSuivi').textContent=CHAUF?'Ma position en direct':lv('titre');
   const age=tsMs(p.t)?Math.floor((Date.now()-tsMs(p.t))/60000):0;
-  $('bVoirPos').href='https://www.google.com/maps/search/?api=1&query='+p.lat+','+p.lng;$('bVoirPos').textContent='🗺️ '+lv('voir');
-  const ligne=()=>{$('etaT').textContent=e==='place'?'📍 '+lv('ici'):(etaMin!=null?'🚖 '+(etaMin<=1?lv('eta0'):lv('eta').replace('{n}',etaMin)):'🚖 '+lv('eta0'));$('majT').textContent=age>=3?lv('maj').replace('{n}',age):''};
+  $('bVoirPos').href='https://www.google.com/maps/search/?api=1&query='+p.lat+','+p.lng;$('bVoirPos').textContent='🗺️ '+(CHAUF?'Maps':lv('voir').replace(/^.*Google Maps.*$/i,'Google Maps'));
+  const ligne=()=>{
+    if(e==='place'){$('etaT').textContent=CHAUF?'Sur place':lv('ici');$('ringT').textContent='✓';$('ringF').style.strokeDashoffset=0}
+    else{const n=etaMin;$('ringT').textContent=n!=null?n:'•';$('etaT').textContent=n!=null?(n<=1?(CHAUF?'Presque arrivé':lv('eta0')):(CHAUF?'Chez le client dans '+n+' min':lv('eta').replace('{n}',n))):(CHAUF?'Calcul du trajet…':lv('eta0'));
+      if(n!=null){etaMax=Math.max(etaMax||0,n,5);$('ringF').style.strokeDashoffset=119.4*(n/etaMax)}}
+    $('majT').textContent=age>=3?lv('maj').replace('{n}',age):(e==='route'&&etaMin!=null?new Date(Date.now()+etaMin*60000).toLocaleTimeString(document.documentElement.lang||'fr',{hour:'2-digit',minute:'2-digit'}):'')};
   ligne();
   chargerMaps().then(()=>{
     const g=google.maps,pos={lat:p.lat,lng:p.lng};
-    if(!carte){carte=new g.Map($('carte'),{center:pos,zoom:14,disableDefaultUI:true,zoomControl:true,gestureHandling:'cooperative',clickableIcons:false});
-      mkV=new g.Marker({map:carte,position:pos,zIndex:2,icon:{path:g.SymbolPath.CIRCLE,scale:11,fillColor:'#d4b25e',fillOpacity:1,strokeColor:'#1a1408',strokeWeight:3},label:{text:'🚖',fontSize:'13px'}})}
-    else mkV.setPosition(pos);
+    if(!carte){carte=new g.Map($('carte'),{center:pos,zoom:15,disableDefaultUI:true,zoomControl:true,gestureHandling:'cooperative',clickableIcons:false,styles:styleCarte(),backgroundColor:mqSombre.matches?'#1c1b20':'#ece8e0'});
+      Van=Van||classeVan(g);van=new Van(pos);van.setMap(carte)}
+    else{const d=distM(van.pos,pos),ang=typeof p.cap==='number'&&p.cap!==null?p.cap:(d>6?cap(van.pos,pos):null);glisser(pos,ang)}
     const adr=pointRdv();
-    const cadrer=()=>{if(rdvLL&&e==='route'){const b=new g.LatLngBounds();b.extend(pos);b.extend(rdvLL);carte.fitBounds(b,48)}else carte.panTo(pos)};
-    if(adr&&adr!==rdvAdr){rdvAdr=adr;new g.Geocoder().geocode({address:adr},(r,st)=>{if(st==='OK'&&r[0]){rdvLL=r[0].geometry.location;mkR=new g.Marker({map:carte,position:rdvLL,zIndex:1});cadrer()}})}
+    const cadrer=()=>{const cle=e+'|'+(rdvLL?1:0);if(cle===cadre)return;cadre=cle;
+      if(rdvLL&&e==='route'){const b=new g.LatLngBounds();b.extend(pos);b.extend(rdvLL);carte.fitBounds(b,{top:90,bottom:50,left:40,right:40});g.event.addListenerOnce(carte,'idle',()=>{if(carte.getZoom()>16)carte.setZoom(16)})}
+      else{carte.setCenter(pos);carte.setZoom(17)}};
+    if(adr&&adr!==rdvAdr){rdvAdr=adr;new g.Geocoder().geocode({address:adr},(r,st)=>{if(st==='OK'&&r[0]){rdvLL=r[0].geometry.location;
+      mkR=new g.Marker({map:carte,position:rdvLL,zIndex:1,icon:{path:g.SymbolPath.CIRCLE,scale:9,fillColor:'#f7f3ea',fillOpacity:1,strokeColor:'#d4b25e',strokeWeight:4}});cadrer()}})}
     cadrer();
+    // trajet réel jusqu'au point de rendez-vous (avec la circulation) : tracé doré + heure d'arrivée
     if(e==='route'&&adr&&Date.now()-etaT>60000){etaT=Date.now();
-      new g.DistanceMatrixService().getDistanceMatrix({origins:[pos],destinations:[adr],travelMode:'DRIVING',drivingOptions:{departureTime:new Date()}},(r,st)=>{try{const el=r.rows[0].elements[0];if(st==='OK'&&el.status==='OK'){etaMin=Math.max(1,Math.round(((el.duration_in_traffic||el.duration).value)/60));ligne()}}catch(x){}})}
+      new g.DirectionsService().route({origin:pos,destination:adr,travelMode:'DRIVING',drivingOptions:{departureTime:new Date()}},(r,st)=>{try{if(st!=='OK')return;const leg=r.routes[0].legs[0],path=r.routes[0].overview_path;
+        etaMin=Math.max(1,Math.round(((leg.duration_in_traffic||leg.duration).value)/60));ligne();
+        if(!trajetHalo)trajetHalo=new g.Polyline({map:carte,strokeColor:'#d4b25e',strokeOpacity:.22,strokeWeight:14,zIndex:0});
+        if(!trajet)trajet=new g.Polyline({map:carte,strokeColor:'#d4b25e',strokeOpacity:1,strokeWeight:6,zIndex:1});
+        trajet.setPath(path);trajetHalo.setPath(path)}catch(x){}})}
+    if(e!=='route'&&trajet){trajet.setMap(null);trajetHalo.setMap(null);trajet=trajetHalo=null}
   }).catch(()=>{$('carte').hidden=true});
+  arriveeClient();
+}
+// Client : quand le chauffeur arrive, grand panneau avec la photo du point de rendez-vous (une seule fois)
+function arriveeClient(){
+  if(CHAUF||etapeCour()!=='place')return;const k='tvp_ici_'+code;try{if(localStorage.getItem(k))return;localStorage.setItem(k,'1')}catch(e){}
+  try{navigator.vibrate&&navigator.vibrate([250,120,250])}catch(e){}
+  const ph=$('meetPh'),d=document.createElement('div');d.className='ici2';d.setAttribute('role','dialog');
+  d.innerHTML=(ph&&!ph.hidden&&ph.src?'<img alt="" src="'+ph.src+'">':'')+'<h3>🚖 '+esc(lv('ici'))+'</h3><p>'+esc(String((info.vehicule||{}).modele||'')+((info.vehicule||{}).plaque?' · '+String(info.vehicule.plaque).toUpperCase():''))+'</p><button type="button" class="b g" style="width:100%">👍 OK</button>';
+  d.querySelector('button').onclick=()=>d.remove();document.body.appendChild(d);
 }
 setInterval(()=>{if(!CHAUF&&posClient)majCarte()},60000);
 {const r3=rendre;rendre=function(){r3();try{mission()}catch(e){console.warn(e)}}}
