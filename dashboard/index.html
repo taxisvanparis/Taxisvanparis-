@@ -457,6 +457,9 @@
   .imm-ac{border:1px solid var(--border);border-radius:12px;margin-top:4px;overflow:hidden}.imm-ac button{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid var(--border);background:transparent;color:inherit;padding:10px 12px;font:inherit;font-size:14px}
   #imm-go{width:100%;min-height:56px;margin-top:16px;border:0;border-radius:14px;font:inherit;font-size:17px;font-weight:900;color:#fff;background:linear-gradient(180deg,#ff7a6b,#e5534b);cursor:pointer}
   #imm-go:disabled{opacity:.6}
+  .imm-send.env-alt{min-height:42px;font-size:14px;background:transparent;border:1px solid var(--border);color:inherit}
+  .imm-send.fait{opacity:.55}
+  .envoi-btn{background:linear-gradient(135deg,#25d366,#1ea952)!important;color:#08240f!important;border-color:transparent!important;font-weight:800}
   .imm-send{display:flex;align-items:center;justify-content:center;min-height:54px;margin-top:8px;border-radius:14px;font-weight:900;font-size:16px;text-decoration:none}
   #imm-x{float:right;border:1px solid var(--border);background:transparent;color:inherit;border-radius:10px;width:38px;height:38px;font-size:16px}
 </style>
@@ -1394,6 +1397,42 @@ function anonymise(title,location){
   const MC_LANGS = { "en-GB": "anglais", "en-US": "anglais", fr: "français", ar: "arabe", "zh-CN": "chinois", ja: "japonais", pt: "portugais", it: "italien", ru: "russe", es: "espagnol", de: "allemand" };
   const mcTR = c => c === "zh-CN" ? "zh-CN" : String(c || "en").split("-")[0];
   let mcR = null, mcCode = null, mcLangue = null, mcMsgs = [], mcUnsubs = [], mcEnTrad = new Set();
+  function envoiBtn(r) {
+    return `<button type="button" class="cal-btn envoi-btn" style="font-family:inherit;cursor:pointer" data-envoi="${esc(r.id)}">📤 Envoyer les liens</button> `;
+  }
+  // 📤 Envoyer les liens : crée le lien si besoin, puis 1) client 2) chauffeur, sans ouvrir la fenêtre « Lien client »
+  async function envoyerLiens(id) {
+    const r = reservationsCache.find(x => x.id === id); if (!r) return;
+    const ov = document.createElement("div"); ov.id = "imm-ov";
+    ov.innerHTML = `<div id="imm-box" role="dialog" aria-label="Envoyer les liens"><h3>📤 Préparation…</h3></div>`;
+    document.body.appendChild(ov);
+    const fermer = () => ov.remove(); ov.onclick = e => { if (e.target === ov) fermer(); };
+    try {
+      ouvrirLien(id); document.getElementById("modal-lien").classList.remove("shown");
+      if (!mcCode) {
+        document.getElementById("mc-save").click();
+        for (let k = 0; k < 60 && !mcCode; k++) await new Promise(x => setTimeout(x, 100));
+        if (!mcCode) throw { code: "lien non créé" };
+      }
+      const h = i => document.getElementById(i).getAttribute("href") || "#";
+      const ch = chauffeurDe(r), nTel = waNumClient(r.tel);
+      const quand = r.date ? fmtDate(r) + (r.heure && !fmtDate(r).includes(r.heure) ? " · " + r.heure : "") : (r.heure || "");
+      document.getElementById("imm-box").innerHTML = `<button id="imm-x" type="button" aria-label="Fermer">✕</button><h3>📤 Envoyer les liens</h3>
+        <p class="sub">${esc(String(r.nom || "Client").replace(/^🏨\s*/, ""))}${quand ? " · " + esc(quand) : ""}</p>
+        <label>1 · Au client</label>
+        <a class="imm-send env-step" style="background:#25d366;color:#08240f" target="_blank" rel="noopener" href="${h("mc-wa")}">💬 WhatsApp au client</a>
+        ${nTel ? `<a class="imm-send env-step env-alt" href="${h("mc-sms")}">✉️ ou par SMS</a>` : ""}
+        ${ch ? `<label>2 · Au chauffeur — ${esc(ch.nom || "")}</label>
+          <a class="imm-send env-step" style="background:#25d366;color:#08240f" target="_blank" rel="noopener" href="${h("mc-wa-ch")}">🚖 WhatsApp au chauffeur</a>
+          <a class="imm-send env-step env-alt" href="${h("mc-sms-ch")}">✉️ ou par SMS</a>`
+        : `<label>2 · Aucun chauffeur choisi</label>
+          <a class="imm-send env-step" style="background:#d4b25e;color:#17120a" target="_blank" rel="noopener" href="${waLink(shareMessage(shareItem(r)))}">📢 Proposer au groupe</a>
+          <p class="sub" style="margin-top:8px">Quand un chauffeur la prend : ✏️ Modifier → son nom → reviens sur « 📤 Envoyer les liens ».</p>`}
+        <p class="sub" style="margin-top:12px">Chaque bouton passe en ✓ une fois touché. Reviens ici après WhatsApp pour le suivant.</p>`;
+      document.getElementById("imm-x").onclick = fermer;
+      ov.querySelectorAll(".env-step").forEach(a => a.addEventListener("click", () => { setTimeout(() => { a.classList.add("fait"); if (!a.textContent.startsWith("✓")) a.textContent = "✓ " + a.textContent.replace(/^\S+\s/, ""); }, 400); }));
+    } catch (e) { fermer(); toast("Impossible : " + ((e && e.code) || "erreur"), 5000); }
+  }
   function lienBtn(r) {
     return `<button type="button" class="cal-btn lien-btn${r.lienCourse ? " actif" : ""}" style="font-family:inherit;cursor:pointer" data-lien="${esc(r.id)}">${r.lienCourse ? "💬 Lien client ✓" : "🔗 Lien client"}</button> `;
   }
@@ -1931,7 +1970,7 @@ function anonymise(title,location){
         const actif = groupOf(r) === 0 && r.statut !== "annulée";
         const avant = ferme ? "" : (r.statut !== "confirmée" ? `<button class="ok" data-st="confirmée" data-id="${esc(r.id)}">✅ Confirmer</button>` : "") +
           waClient(r) + smsClient(r) +
-          (actif ? `<a class="grp-btn" target="_blank" rel="noopener" href="${waLink(shareMessage(shareItem(r)))}">📢 Dispatcher</a>` + waChauffeur(r) + lienBtn(r) + calLink([r], "📅 Calendrier", "cal-btn") : "");
+          (actif ? `<a class="grp-btn" target="_blank" rel="noopener" href="${waLink(shareMessage(shareItem(r)))}">📢 Dispatcher</a>` + envoiBtn(r) + waChauffeur(r) + lienBtn(r) + calLink([r], "📅 Calendrier", "cal-btn") : "");
         const jourJ = actif && (AERO_RX.test(String(r.dep || "") + " " + String(r.depZone || "")) || /\bgare\b|\bstation\b/i.test(String(r.dep || ""))) ? pancarteBtn(r) : "";
         const apres = (!ferme ? `<button class="done" data-st="terminée" data-id="${esc(r.id)}">✔️ Effectuée</button>` : "") +
           (r.statut === "terminée" ? `<button class="edit" data-facture="${esc(r.id)}">🧾 ${r.factureNumero ? "Facture n° " + esc(r.factureNumero) : "Facture"}</button>` : "") + waAvis(r);
@@ -1965,6 +2004,7 @@ function anonymise(title,location){
       catch (e) { clearTimeout(lent); toast("Échec envoi pancarte : " + ((e && e.code) || "erreur") + (e && e.code === "permission-denied" ? " (règle Firebase)" : ""), 8000); }
     }));
     box.querySelectorAll("[data-lien]").forEach(b => b.addEventListener("click", () => ouvrirLien(b.dataset.lien)));
+    box.querySelectorAll("[data-envoi]").forEach(b => b.addEventListener("click", () => envoyerLiens(b.dataset.envoi)));
     box.querySelectorAll("[data-avis]").forEach(b => b.addEventListener("click", () => { updateDoc(doc(db, "reservations", b.dataset.avis), { avisDemande: true }).catch(() => {}); }));
     box.querySelectorAll("[data-avistrip]").forEach(b => b.addEventListener("click", () => { updateDoc(doc(db, "reservations", b.dataset.avistrip), { avisTripDemande: true }).catch(() => {}); }));
     box.querySelectorAll("[data-edit]").forEach(b => b.addEventListener("click", () => openEditResa(b.dataset.edit)));
