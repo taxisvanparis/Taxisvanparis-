@@ -2264,6 +2264,7 @@ window.initGooglePlaces = window.initGooglePlaces || function(){};
       '<label for="client-tel">'+T.tel+'</label><span id="cf-tel"></span>'+
       '<label for="client-email">'+T.mail+' <small>'+T.mailS+'</small></label><input type="email" id="client-email" autocomplete="email" inputmode="email" placeholder="nom@exemple.com">'+
       (vol ? '<label for="vol">'+T.vol+' <small>'+T.volS+'</small></label><span id="cf-vol"></span>' : '')+
+      '<div aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden"><label for="cf-site">Site web</label><input id="cf-site" name="website" type="text" tabindex="-1" autocomplete="off"></div>'+
       '<label for="client-note">'+T.drv+' <small>'+T.drvS+'</small></label><textarea id="client-note" rows="3" maxlength="400" placeholder="'+T.drvP+'"></textarea>'+
       '<div class="cf-err" id="cf-err" hidden></div>'+
       '<button type="button" class="cf-go" id="cf-go">'+T.go+'</button>'+
@@ -2338,6 +2339,11 @@ window.initGooglePlaces = window.initGooglePlaces || function(){};
       pax: $("pax").value, vh: vh, vehicule: vh, siege: siege, langue: lang, date: date, heure: heure, prix: prix.trim(),
       statut: "en attente", source: "site", date_creation: new Date().toISOString()};
 
+    // Anti-spam : champ piège invisible (seuls les robots le remplissent) ou lien web dans le message → rien n'est envoyé
+    var noteSpam = (($("client-note") || {}).value || "") + " " + nom;
+    if ((($("cf-site") || {}).value || "").trim() || /(https?:\/\/|www\.|[a-z0-9-]+\.(com|net|org|online|site|xyz|top|info|ru|id|click|link|shop|store|live|io)\/)/i.test(noteSpam)) {
+      window.location.href = "/merci/?resa=1&l=" + lang; return;
+    }
     var b = $("cf-go"); b.disabled = true; b.textContent = T.env;
     // Firebase : exactement les mêmes champs qu'avant (pour ne pas être refusé) ; l'email part avec l'alerte
     var note = (($("client-note") || {}).value || "").trim().slice(0, 400);
