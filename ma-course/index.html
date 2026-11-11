@@ -722,6 +722,7 @@ else{
       {const c=info.course||{},m=String(c.date||'').match(/^(\d{4})-(\d{2})-(\d{2})$/),h=String(c.heure||'').match(/^(\d{1,2}):(\d{2})/);
        if(m&&h&&Date.now()>new Date(+m[1],+m[2]-1,+m[3],+h[1],+h[2]).getTime()+3*3600e3&&!CHAUF){finir();return}}
       $('load').hidden=true;$('app').hidden=false;$('dock').hidden=false;rendre();envoyerLangue();
+      if(!CHAUF&&!window.__ouvMarque){window.__ouvMarque=1;setDoc(doc(db,'trad_g',code),{vu_client:serverTimestamp()},{merge:true}).catch(()=>{})} // le tableau de bord voit que le client a ouvert son lien
     },()=>finir());
     ecouterAppels();
     let premier=true;

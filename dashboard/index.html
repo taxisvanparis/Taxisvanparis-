@@ -1122,8 +1122,8 @@ function anonymise(title,location){
         $i("imm-box").innerHTML = `<button id="imm-x" type="button" aria-label="Fermer">✕</button><h3>✅ Course créée</h3>
           <p class="sub">${esc(data.heure)} · ${esc(dep)}${data.arr ? " → " + esc(data.arr) : ""} · ${pax} pers. · ${esc(data.chauffeurNom || "")}</p>
           <label>Au client</label>
-          <a class="imm-send" style="background:#25d366;color:#08240f" target="_blank" rel="noopener" href="${h("mc-wa")}">💬 WhatsApp au client</a>
-          ${nTel ? `<a class="imm-send" style="background:transparent;border:1px solid var(--border);color:inherit" href="${h("mc-sms")}">✉️ SMS au client</a>` : ""}
+          <a class="imm-send" data-cli="${ref.id}" style="background:#25d366;color:#08240f" target="_blank" rel="noopener" href="${h("mc-wa")}">💬 WhatsApp au client</a>
+          ${nTel ? `<a class="imm-send" data-cli="${ref.id}" style="background:transparent;border:1px solid var(--border);color:inherit" href="${h("mc-sms")}">✉️ SMS au client</a>` : ""}
           ${disp ? `<label>Au groupe de chauffeurs</label><a class="imm-send" style="background:#d4b25e;color:#17120a" target="_blank" rel="noopener" href="${waLink("⚡ *IMMÉDIAT* ⚡\n" + shareMessage(shareItem(reservationsCache.find(x => x.id === ref.id) || Object.assign({ id: ref.id }, data))))}">📢 Envoyer au groupe</a>
             <p class="sub" style="margin-top:10px">Le groupe reçoit la course sans adresse exacte ni lien. Quand un chauffeur la prend : ✏️ Modifier → son nom → « WhatsApp chauffeur ». Il remplira lui-même sa plaque sur son lien.</p>`
           : moi ? `<p class="sub" style="margin-top:12px">🙋 Tu fais la course : ton lien chauffeur (Waze, chat traduit, étapes) 👇</p><a class="imm-send" style="background:transparent;border:1px solid var(--gold);color:var(--gold)" target="_blank" rel="noopener" href="${mcUrl(mcCode)}&d=1">🚖 Ouvrir ma mission</a>`
@@ -1420,8 +1420,8 @@ function anonymise(title,location){
       document.getElementById("imm-box").innerHTML = `<button id="imm-x" type="button" aria-label="Fermer">✕</button><h3>📤 Envoyer les liens</h3>
         <p class="sub">${esc(String(r.nom || "Client").replace(/^🏨\s*/, ""))}${quand ? " · " + esc(quand) : ""}</p>
         <label>1 · Au client</label>
-        <a class="imm-send env-step" style="background:#25d366;color:#08240f" target="_blank" rel="noopener" href="${h("mc-wa")}">💬 WhatsApp au client</a>
-        ${nTel ? `<a class="imm-send env-step env-alt" href="${h("mc-sms")}">✉️ ou par SMS</a>` : ""}
+        <a class="imm-send env-step" data-cli="${esc(r.id)}" style="background:#25d366;color:#08240f" target="_blank" rel="noopener" href="${h("mc-wa")}">💬 WhatsApp au client</a>
+        ${nTel ? `<a class="imm-send env-step env-alt" data-cli="${esc(r.id)}" href="${h("mc-sms")}">✉️ ou par SMS</a>` : ""}
         ${ch ? `<label>2 · Au chauffeur — ${esc(ch.nom || "")}</label>
           <a class="imm-send env-step" style="background:#25d366;color:#08240f" target="_blank" rel="noopener" href="${h("mc-wa-ch")}">🚖 WhatsApp au chauffeur</a>
           <a class="imm-send env-step env-alt" href="${h("mc-sms-ch")}">✉️ ou par SMS</a>`
@@ -1432,6 +1432,16 @@ function anonymise(title,location){
       document.getElementById("imm-x").onclick = fermer;
       ov.querySelectorAll(".env-step").forEach(a => a.addEventListener("click", () => { setTimeout(() => { a.classList.add("fait"); if (!a.textContent.startsWith("✓")) a.textContent = "✓ " + a.textContent.replace(/^\S+\s/, ""); }, 400); }));
     } catch (e) { fermer(); toast("Impossible : " + ((e && e.code) || "erreur"), 5000); }
+  }
+  document.addEventListener("click", ev => { const a = ev.target.closest("[data-cli]"); if (!a || !a.dataset.cli) return;
+    const r = reservationsCache.find(x => x.id === a.dataset.cli); const t = Date.now(); if (r) r.lienEnvoye = t;
+    updateDoc(doc(db, "reservations", a.dataset.cli), { lienEnvoye: t }).catch(() => {}); }, true);
+  function relanceClient(r) {
+    const n = waNumClient(r.tel), url = mcUrl(r.lienCourse), fr = !n || n.startsWith("33");
+    const txt = fr ? `Bonjour, votre chauffeur Taxis Van Paris arrive bientôt 🚖\nOuvrez ce lien pour voir le chauffeur, le véhicule et le point de rendez-vous :\n${url}`
+      : `Hello, your Taxis Van Paris driver is arriving soon 🚖\nPlease open this link to see your driver, the vehicle and the meeting point:\n${url}`;
+    const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    return { wa: "https://wa.me/" + (n || "") + "?text=" + encodeURIComponent(txt), sms: n ? "sms:+" + n + (ios ? "&" : "?") + "body=" + encodeURIComponent(txt) : "" };
   }
   function lienBtn(r) {
     return `<button type="button" class="cal-btn lien-btn${r.lienCourse ? " actif" : ""}" style="font-family:inherit;cursor:pointer" data-lien="${esc(r.id)}">${r.lienCourse ? "💬 Lien client ✓" : "🔗 Lien client"}</button> `;
@@ -1508,6 +1518,7 @@ function anonymise(title,location){
     const fr = !n || n.startsWith("33");
     const txt = fr ? `Bonjour${nom ? " " + nom : ""}, voici la page de votre course Taxis Van Paris 🚖\nChauffeur, véhicule, point de rendez-vous, et vous pouvez m'écrire directement :\n${url}`
       : `Hello${nom ? " " + nom : ""}, here is your Taxis Van Paris ride page 🚖\nDriver, vehicle, meeting point — and you can message me in your own language 🌍 :\n${url}`;
+    document.getElementById("mc-wa").dataset.cli = document.getElementById("mc-sms").dataset.cli = r.id;
     const wa = document.getElementById("mc-wa"); wa.href = "https://wa.me/" + (n || "") + "?text=" + encodeURIComponent(txt);
     const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
     const sms = document.getElementById("mc-sms"); sms.hidden = !n; sms.href = "sms:+" + n + (ios ? "&" : "?") + "body=" + encodeURIComponent(txt);
@@ -1805,8 +1816,9 @@ function anonymise(title,location){
         const d = s.data() || {}, v = JSON.stringify([d.etape || "", Object.keys(d.etapes || {}).sort(), etTs((d.etapes || {})[d.etape])]);
         const avant = etapesCache[c] && etapesCache[c].v;
         const pris = d.chauffeur && d.chauffeur.par === "chauffeur" ? String(d.chauffeur.prenom || "") + (d.vehicule && d.vehicule.plaque ? " · " + d.vehicule.plaque : "") : "";
-        etapesCache[c] = { v: v + pris, etape: d.etape || "", etapes: d.etapes || {}, pris, chInfo: d.chauffeur && d.chauffeur.par === "chauffeur" ? { prenom: d.chauffeur.prenom || "", modele: (d.vehicule || {}).modele || "", plaque: (d.vehicule || {}).plaque || "" } : null };
-        if (avant !== v) renderReservations();
+        const vuC = etTs(d.vu_client), ouvert = !!(vuC || d.langue);
+        etapesCache[c] = { v: v + pris + (ouvert ? "o" + vuC : ""), etape: d.etape || "", etapes: d.etapes || {}, pris, ouvert, vuC, chInfo: d.chauffeur && d.chauffeur.par === "chauffeur" ? { prenom: d.chauffeur.prenom || "", modele: (d.vehicule || {}).modele || "", plaque: (d.vehicule || {}).plaque || "" } : null };
+        if (avant !== etapesCache[c].v) { renderReservations(); try { ecSurveiller(); } catch (e) {} }
       }, () => {});
     });
   }
@@ -1816,6 +1828,11 @@ function anonymise(title,location){
     let h = "";
     const x = ETAPES[e.etape];
     if (x) h += `<span class="eta" style="color:${x[2]};border-color:${x[2]};background:${x[2]}1f">${x[0]} ${x[1]}${etHm(e.etapes[e.etape]) ? " · " + etHm(e.etapes[e.etape]) : ""}</span>`;
+    if (!e.etape) {
+      if (e.ouvert) h += `<span class="eta" style="color:#46c37b;border-color:#46c37b;background:#46c37b1f">👁 Lien ouvert${e.vuC ? " · " + etHm({ seconds: e.vuC / 1000 }) : ""}</span>`;
+      else if (r.lienEnvoye && Date.now() - r.lienEnvoye > 5 * 60000) h += `<span class="eta" style="color:#f0a030;border-color:#f0a030;background:#f0a0301f">⚠️ Lien pas ouvert · envoyé ${new Date(r.lienEnvoye).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</span>`;
+      else if (r.lienEnvoye) h += `<span class="eta" style="color:var(--muted);border-color:var(--border)">📤 Lien envoyé · ${new Date(r.lienEnvoye).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</span>`;
+    }
     if ("client_ici" in e.etapes && e.etape !== "bord" && e.etape !== "fin") h += `<span class="eta" style="color:#46c37b;border-color:#46c37b;background:#46c37b1f">👤 Client au RDV${etHm(e.etapes.client_ici) ? " · " + etHm(e.etapes.client_ici) : ""}</span>`;
     return h;
   }
@@ -1904,7 +1921,11 @@ function anonymise(title,location){
     const now = Date.now();
     const rows = reservationsCache.filter(r => r.statut !== "annulée" && r.statut !== "terminée").filter(r => { const t = ecHeure(r); if (!t || t - now > 45 * 60000 || now - t > 20 * 60000) return false; const e = r.lienCourse && etapesCache[r.lienCourse]; return !e || !e.etape; })
       .sort((a, b) => ecHeure(a) - ecHeure(b));
-    box.innerHTML = rows.map(r => { const m = Math.round((ecHeure(r) - now) / 60000), ch = chauffeurDe(r), nc = ch ? waNumClient(ch.tel) : "";
+    const pasOuv = reservationsCache.filter(r => r.statut !== "annulée" && r.statut !== "terminée" && r.lienEnvoye && r.lienCourse && now - r.lienEnvoye > 5 * 60000 && now - r.lienEnvoye < 6 * 3600000)
+      .filter(r => { const e = etapesCache[r.lienCourse]; return e && !e.ouvert && e.etape !== "bord" && e.etape !== "fin"; });
+    box.innerHTML = pasOuv.map(r => { const rl = relanceClient(r), env = new Date(r.lienEnvoye).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+      return `<div class="ec alerte"><div class="h"><b>${esc(r.heure || "—")}</b><span>${esc(r.nom || "Client")}</span></div><div class="ec-live"><span class="ec-chip warn">⚠️ Le client n'a pas ouvert son lien · envoyé à ${env}</span></div><div class="rt">${esc(r.dep || "?")} → <b>${esc(r.arr || "?")}</b></div><div class="tl">${r.chauffeurNom ? "🚖 " + esc(r.chauffeurNom) : "Aucun chauffeur assigné"}</div>`
+        + `<a target="_blank" rel="noopener" data-cli="${esc(r.id)}" href="${rl.wa}">💬 Relancer le client</a> ` + (rl.sms ? `<a data-cli="${esc(r.id)}" href="${rl.sms}">✉️ SMS</a> ` : "") + (r.tel ? `<a href="tel:${esc(r.tel)}">📞 Appeler</a>` : "") + `</div>`; }).join("") + rows.map(r => { const m = Math.round((ecHeure(r) - now) / 60000), ch = chauffeurDe(r), nc = ch ? waNumClient(ch.tel) : "";
       return `<div class="ec alerte"><div class="h"><b>${esc(r.heure || "—")}</b><span>${esc(r.nom || "Client")}</span></div><div class="ec-live"><span class="ec-chip bad">⚠️ ${m >= 0 ? "Course dans " + m + " min" : "Heure passée de " + (-m) + " min"} · chauffeur pas encore « En route »</span></div><div class="rt">${esc(r.dep || "?")} → <b>${esc(r.arr || "?")}</b></div><div class="tl">${r.chauffeurNom ? "🚖 " + esc(r.chauffeurNom) : "Aucun chauffeur assigné"}</div>`
         + (nc ? `<a target="_blank" rel="noopener" href="https://wa.me/${nc}?text=${encodeURIComponent("Bonjour " + (ch.nom || "") + ", tu es en route pour la course de " + (r.heure || "") + " (" + (r.nom || "client") + ") ? Pense à toucher « En route » sur ton lien 🙏")}">💬 Relancer ${esc(ch.nom || "le chauffeur")}</a> ` : "")
         + (ch && ch.tel ? `<a href="tel:${esc(ch.tel)}">📞 Appeler</a>` : "") + `</div>`; }).join("");
