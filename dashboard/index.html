@@ -433,6 +433,8 @@
   .rc .imm{display:inline-block;font-size:11px;font-weight:900;border-radius:999px;padding:3px 9px;margin:4px 6px 0 0;background:#d93025;color:#fff;animation:immb 1s infinite alternate}
   @keyframes immb{from{opacity:1}to{opacity:.55}}
   .rc.imm-card{box-shadow:0 0 0 2px #d93025 inset}
+  .rc .soon{display:inline-block;font-size:11px;font-weight:900;border-radius:999px;padding:3px 9px;margin:4px 6px 0 0;background:#E8890C;color:#fff}
+  .rc.soon-card{box-shadow:0 0 0 2px #E8890C inset}
   .rc .nv{display:inline-block;background:var(--gold);color:#141008;font-size:10.5px;font-weight:800;border-radius:999px;padding:3px 8px;letter-spacing:.5px;margin-right:6px;vertical-align:2px}
   .rc .acts .vu-btn{border-color:var(--gold);background:var(--gold);color:#141008;font-weight:700}
   .nb{display:none;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:#E5484D;color:#fff;font:700 12px/20px var(--body);text-align:center;margin-left:auto}
@@ -1796,11 +1798,22 @@ function anonymise(title,location){
     const t=new Date(d+"T"+m[1].padStart(2,"0")+":"+m[2]+":00");
     return (t-Date.now())/60000;
   }
-  function estImmediat(r){
-    if(r.statut==="terminée"||r.statut==="annulée") return false;
-    if(/maintenant/i.test(String(r.heure||""))&&groupOf(r)===0) return true;
-    const mn=minutesAvant(r); return mn!==null&&mn<=60&&mn>=-30;
+  // Date à laquelle la réservation a été faite (site/hôtel : date_creation ; saisie manuelle : createdAt)
+  function creeLe(r){
+    if(r.date_creation){ const d=new Date(r.date_creation); if(!isNaN(d)) return d; }
+    const c=r.createdAt; if(c){ if(typeof c.toDate==="function") return c.toDate(); if(c.seconds) return new Date(c.seconds*1000); }
+    return null;
   }
+  // ⚡ IMMÉDIAT = réservée moins de 90 min avant le départ (vraie urgence) ; sinon ⏰ Dans X min quand le départ approche
+  function urgence(r){
+    if(r.statut==="terminée"||r.statut==="annulée") return null;
+    if(/maintenant/i.test(String(r.heure||""))&&groupOf(r)===0) return {imm:true};
+    const mn=minutesAvant(r); if(mn===null||mn>60||mn<-30) return null;
+    const c=creeLe(r);
+    if(c){ const ecart=(Date.now()+mn*60000-c.getTime())/60000; if(ecart<=90) return {imm:true}; }
+    return {imm:false,mn:Math.round(mn)};
+  }
+  function estImmediat(r){ const u=urgence(r); return !!(u&&u.imm); }
   setInterval(()=>{try{if(typeof reservationsCache!=='undefined'&&reservationsCache.length)renderReservations()}catch(e){}},60000);
   // Étapes de la course (touchées par le chauffeur sur sa page « Ma course ») : pastille sur chaque réservation
   const ETAPES = { route: ["🚗", "En route", "#5b9cf0"], place: ["📍", "Chauffeur sur place", "#f0a030"], bord: ["🧳", "Client à bord", "#46c37b"], fin: ["🏁", "Course terminée", "#9b9384"] };
@@ -2000,10 +2013,10 @@ function anonymise(title,location){
         const grp = (lib, h) => h ? `<div class="ag"><span class="agl">${lib}</span>${h}</div>` : "";
         const boutons = (nouv ? `<div class="ag"><button class="vu-btn" data-vu="${esc(r.id)}">👁 Vu</button></div>` : "") +
           grp("Avant", avant) + grp("Jour J", jourJ) + grp("Après", apres) + `<div class="ag ag2">${autres}</div>`;
-        const imm = estImmediat(r);
+        const urg = urgence(r), imm = !!(urg&&urg.imm), bientot = !!(urg&&!urg.imm);
         const lg = String(r.langue||"").slice(0,2).toLowerCase();
-        const badges = etapeBadge(r) + (imm ? '<span class="imm">⚡ IMMÉDIAT</span>' : "") + provenance(r) + (lg && DRAP[lg] ? '<span class="src">'+DRAP[lg]+' '+lg.toUpperCase()+'</span>' : "");
-        return `<div class="rc s-${cls}${nouv ? " nouv" : ""}${imm ? " imm-card" : ""}" data-rid="${esc(r.id)}">
+        const badges = etapeBadge(r) + (imm ? '<span class="imm">⚡ IMMÉDIAT</span>' : bientot ? '<span class="soon">⏰ '+(urg.mn>0?'Dans '+urg.mn+' min':'Maintenant')+'</span>' : "") + provenance(r) + (lg && DRAP[lg] ? '<span class="src">'+DRAP[lg]+' '+lg.toUpperCase()+'</span>' : "");
+        return `<div class="rc s-${cls}${nouv ? " nouv" : ""}${imm ? " imm-card" : bientot ? " soon-card" : ""}" data-rid="${esc(r.id)}">
           <div class="t">${esc(r.heure || "—")}${r.ref ? `<small>${esc(r.ref)}</small>` : ""}</div>
           <div class="m">
             <div class="l1"><span class="nm">${nouv ? '<span class="nv">NOUVEAU</span>' : ""}${nom}</span><span class="pill">${lib}</span></div>
