@@ -14,6 +14,7 @@
 <meta name="theme-color" content="#0B0B0B">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+<script>try{document.documentElement.dataset.theme=localStorage.getItem("tvp_dash_theme")||"light"}catch(e){document.documentElement.dataset.theme="light"}</script>
 <style>
   :root{
     --ink:#16213A;
@@ -460,6 +461,24 @@
   #imm-x{float:right;border:1px solid var(--border);background:transparent;color:inherit;border-radius:10px;width:38px;height:38px;font-size:16px}
 </style>
 <style>/* iPhone : pas de zoom auto sur les champs */@media (max-width:900px){input,select,textarea{font-size:16px!important}}</style>
+<style id="theme-clair">
+  /* ===== Mode clair du tableau de bord (par défaut) — bouton ☀︎/☾ dans le menu ===== */
+  :root[data-theme="light"]{
+    --ink:#17150F; --ink-soft:#2A261D; --gold:#B48D36; --gold-soft:#8E6C22; --bg:#F3F0EA; --card:#FFFFFF; --border:#E3DCCE;
+    --text:#17150F; --muted:#6B655A; --heading:#17150F; --soft:#F7F4EE; --hover:#EFEAE0;
+    --green:#2E8B57; --green-bg:#E5F3EA; --amber:#9A6A12; --amber-bg:#FBF0DD;
+    --red:#B23A32; --red-bg:#FBEAE8; --blue:#2F5AA8; --blue-bg:#E4EBF7; --wa:#1F9D55; --bubble:#E3F6DA;
+    --new:#B48D36; --ok:#2F5AA8; --done:#2E8B57; --cancel:#8a8378; color-scheme:light;
+  }
+  :root[data-theme="light"] #sidebar{background:#FBF9F5}
+  :root[data-theme="light"] .btn-gold,:root[data-theme="light"] .btn-primary,:root[data-theme="light"] #toast,:root[data-theme="light"] .vol-search button{background:linear-gradient(180deg,#E2C477,#C9A24B);color:#141008}
+  :root[data-theme="light"] .btn-gold:hover,:root[data-theme="light"] .btn-primary:hover{background:#C9A24B}
+  :root[data-theme="light"] .rc .src{border-color:#d9d2c3;color:#4a453c;background:#f7f4ee}
+  :root[data-theme="light"] .rc .src.site{border-color:#4f8ef7;color:#2556b3}:root[data-theme="light"] .rc .src.hotel{border-color:#c9a84c;color:#8a6a1e}:root[data-theme="light"] .rc .src.tel{border-color:#a77bf3;color:#6a3fc0}
+  :root[data-theme="light"] #ec-map{background:#ece8e0}
+  :root[data-theme="light"] .rc,:root[data-theme="light"] .ec,:root[data-theme="light"] .stat,:root[data-theme="light"] .modal{box-shadow:0 1px 2px rgba(60,45,15,.06),0 6px 18px rgba(60,45,15,.05)}
+  #btn-theme{width:100%;margin:0 0 10px;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--soft);color:var(--text);font-weight:700}
+</style>
 </head>
 <body>
 
@@ -493,6 +512,7 @@
     <button class="nav-item" data-tab="facturation"><span class="dot"></span>Facturation</button>
     <button class="nav-item" data-tab="partage"><span class="dot"></span>Partage WhatsApp</button>
     <div id="sidebar-footer">
+      <button type="button" id="btn-theme"></button>
       <div class="who"><strong id="admin-name">—</strong><span id="admin-email">—</span></div>
       <button class="btn-logout" id="btn-logout-admin">Se déconnecter</button>
     </div>
@@ -1823,7 +1843,7 @@ function anonymise(title,location){
     live.hidden = !pts.length; if (!pts.length || !(window.google && google.maps && google.maps.Map)) return;
     const g = google.maps;
     if (!ecMap) ecMap = new g.Map(document.getElementById("ec-map"), { center: pts[0] && ecPos[pts[0].lienCourse], zoom: 12, disableDefaultUI: true, zoomControl: true, gestureHandling: "cooperative", clickableIcons: false,
-      maxZoom: 18, styles: [{ elementType: "geometry", stylers: [{ color: "#24211c" }] }, { elementType: "labels.text.fill", stylers: [{ color: "#c9bfa9" }] }, { elementType: "labels.text.stroke", stylers: [{ color: "#14120e" }] }, { featureType: "road", elementType: "geometry", stylers: [{ color: "#3d3629" }] }, { featureType: "road.arterial", elementType: "geometry", stylers: [{ color: "#4a4231" }] }, { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#6b5a33" }] }, { featureType: "water", stylers: [{ color: "#16293a" }] }, { featureType: "park", elementType: "geometry", stylers: [{ color: "#1f2a1c" }] }, { featureType: "poi.business", stylers: [{ visibility: "off" }] }, { featureType: "transit.station.airport", stylers: [{ visibility: "on" }] }] });
+      maxZoom: 18, styles: document.documentElement.dataset.theme === "dark" ? [{ elementType: "geometry", stylers: [{ color: "#24211c" }] }, { elementType: "labels.text.fill", stylers: [{ color: "#c9bfa9" }] }, { elementType: "labels.text.stroke", stylers: [{ color: "#14120e" }] }, { featureType: "road", elementType: "geometry", stylers: [{ color: "#3d3629" }] }, { featureType: "road.arterial", elementType: "geometry", stylers: [{ color: "#4a4231" }] }, { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#6b5a33" }] }, { featureType: "water", stylers: [{ color: "#16293a" }] }, { featureType: "park", elementType: "geometry", stylers: [{ color: "#1f2a1c" }] }, { featureType: "poi.business", stylers: [{ visibility: "off" }] }, { featureType: "transit.station.airport", stylers: [{ visibility: "on" }] }] : [{ featureType: "poi.business", stylers: [{ visibility: "off" }] }] });
     const b = new g.LatLngBounds(), vus = new Set();
     pts.forEach(r => { const c = r.lienCourse, p = ecPos[c]; vus.add(c);
       const titre = (r.chauffeurNom || "Chauffeur") + " → " + (r.nom || "client");
@@ -2785,5 +2805,7 @@ function analyserDictee(txt, now) {
   });
 })();
 </script>
+<script>(function(){const b=document.getElementById("btn-theme");if(!b)return;const maj=()=>{b.textContent=document.documentElement.dataset.theme==="dark"?"☀︎ Passer en clair":"☾ Passer en sombre"};maj();
+b.onclick=()=>{const t=document.documentElement.dataset.theme==="dark"?"light":"dark";document.documentElement.dataset.theme=t;try{localStorage.setItem("tvp_dash_theme",t)}catch(e){}maj()};})();</script>
 </body>
 </html>
