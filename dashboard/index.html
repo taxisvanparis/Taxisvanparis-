@@ -1439,6 +1439,37 @@ function anonymise(title,location){
   document.addEventListener("click", ev => { const a = ev.target.closest("[data-cli]"); if (!a || !a.dataset.cli) return;
     const r = reservationsCache.find(x => x.id === a.dataset.cli); const t = Date.now(); if (r) r.lienEnvoye = t;
     updateDoc(doc(db, "reservations", a.dataset.cli), { lienEnvoye: t }).catch(() => {}); }, true);
+  // 📢 Dispatcher : fenêtre de contrôle avant l'envoi au groupe, avec le prix chauffeur modifiable
+  function dispatcherOuvrir(id) {
+    const r = reservationsCache.find(x => x.id === id); if (!r) return;
+    const base = shareItem(r);
+    const ov = document.createElement("div"); ov.id = "imm-ov";
+    ov.innerHTML = `<div id="imm-box" role="dialog" aria-label="Dispatcher la course">
+      <button id="disp-x" type="button" aria-label="Fermer">✕</button>
+      <h3>📢 Dispatcher</h3>
+      <p class="sub">${escH(String(r.nom || "Course").replace(/^🏨\s*/, ""))}${r.date ? " · " + escH(fmtDate(r)) : ""}</p>
+      <label>Prix chauffeur (€)</label>
+      <input id="disp-prix" inputmode="decimal" value="${escH(base.prixCh)}" placeholder="Facultatif">
+      <label>Aperçu du message</label>
+      <div id="disp-apercu" style="white-space:pre-wrap;font-size:14px;border:1px solid var(--border);border-radius:12px;padding:12px;background:rgba(255,255,255,.04)"></div>
+      <a id="disp-go" class="imm-send" style="background:#25d366;color:#08240f" target="_blank" rel="noopener">📢 Envoyer au groupe</a>
+    </div>`;
+    const maj = () => {
+      const msg = shareMessage(Object.assign({}, base, { prixCh: document.getElementById("disp-prix").value.trim() }));
+      document.getElementById("disp-apercu").textContent = msg;
+      document.getElementById("disp-go").href = waLink(msg);
+    };
+    document.body.appendChild(ov);
+    document.getElementById("disp-prix").addEventListener("input", maj);
+    document.getElementById("disp-x").onclick = () => ov.remove();
+    ov.onclick = e => { if (e.target === ov) ov.remove(); };
+    document.getElementById("disp-go").addEventListener("click", () => setTimeout(() => ov.remove(), 400));
+    maj();
+  }
+  document.addEventListener("click", ev => {
+    const b = ev.target.closest && ev.target.closest("[data-dispatch]"); if (!b) return;
+    ev.preventDefault(); dispatcherOuvrir(b.dataset.dispatch);
+  });
   function relanceClient(r) {
     const n = waNumClient(r.tel), url = mcUrl(r.lienCourse), fr = !n || n.startsWith("33");
     const txt = fr ? `Bonjour, votre chauffeur Taxis Van Paris arrive bientôt 🚖\nOuvrez ce lien pour voir le chauffeur, le véhicule et le point de rendez-vous :\n${url}`
@@ -2005,7 +2036,7 @@ function anonymise(title,location){
         const actif = groupOf(r) === 0 && r.statut !== "annulée";
         const avant = ferme ? "" : (r.statut !== "confirmée" ? `<button class="ok" data-st="confirmée" data-id="${esc(r.id)}">✅ Confirmer</button>` : "") +
           waClient(r) + smsClient(r) +
-          (actif ? `<a class="grp-btn" target="_blank" rel="noopener" href="${waLink(shareMessage(shareItem(r)))}">📢 Dispatcher</a>` + envoiBtn(r) + waChauffeur(r) + lienBtn(r) + calLink([r], "📅 Calendrier", "cal-btn") : "");
+          (actif ? `<button type="button" class="grp-btn" style="font-family:inherit;cursor:pointer" data-dispatch="${esc(r.id)}">📢 Dispatcher</button>` + envoiBtn(r) + waChauffeur(r) + lienBtn(r) + calLink([r], "📅 Calendrier", "cal-btn") : "");
         const jourJ = actif && (AERO_RX.test(String(r.dep || "") + " " + String(r.depZone || "")) || /\bgare\b|\bstation\b/i.test(String(r.dep || ""))) ? pancarteBtn(r) : "";
         const apres = (!ferme ? `<button class="done" data-st="terminée" data-id="${esc(r.id)}">✔️ Effectuée</button>` : "") +
           (r.statut === "terminée" ? `<button class="edit" data-facture="${esc(r.id)}">🧾 ${r.factureNumero ? "Facture n° " + esc(r.factureNumero) : "Facture"}</button>` : "") + waAvis(r);
@@ -2491,7 +2522,9 @@ function anonymise(title,location){
                        set(k, v) { try { localStorage.setItem("tvp_share_" + k, JSON.stringify(v)); } catch (e) {} } };
   let shareEdits = shareStore.get("edits", {}), shareTab = "avenir";
   const sigEl = document.getElementById("share-sig"), vehEl = document.getElementById("share-veh");
-  sigEl.value = shareStore.get("sig", "Intéressé ? Répondez en privé 📲");
+  let sigInit = shareStore.get("sig", "");
+  if (sigInit === "Intéressé ? Répondez en privé 📲") sigInit = ""; // ancienne signature par défaut, retirée
+  sigEl.value = sigInit;
   vehEl.value = shareStore.get("veh", "");
   sigEl.addEventListener("input", () => { shareStore.set("sig", sigEl.value); renderShare(); });
   vehEl.addEventListener("change", () => { shareStore.set("veh", vehEl.value); renderShare(); });
