@@ -1006,6 +1006,7 @@ function anonymise(title,location){
       document.getElementById("admin-email").textContent = user.email;
       document.getElementById("app").classList.add("shown");
       startAdminListeners();
+      setTimeout(() => { try { resaDepuisLien(); } catch (e) { console.error(e); } }, 400);
     } else if (currentRole === "chauffeur") {
       document.getElementById("driver-name").textContent = profile.nom || "Chauffeur";
       document.getElementById("driver-view").classList.add("shown");
@@ -2178,9 +2179,30 @@ function anonymise(title,location){
   });
 
   // ---------------- MODALS: RÉSERVATION ----------------
-  let editingResaId = null, editingChauffeur = null;
+  let editingResaId = null, editingChauffeur = null, preStatut = "";
+  // 📥 Réservation pré-remplie par lien : …/dashboard/#ajout=<base64url(JSON)>
+  // Clés : n nom, t tél, d date AAAA-MM-JJ, h heure, dep, arr, p passagers, b bagages, v véhicule, px prix, vol, note, s statut
+  function resaDepuisLien() {
+    const m = location.hash.match(/ajout=([A-Za-z0-9_-]+)/); if (!m) return;
+    history.replaceState(null, "", location.pathname + location.search);
+    let o; try { const b = atob(m[1].replace(/-/g, "+").replace(/_/g, "/")); o = JSON.parse(new TextDecoder().decode(Uint8Array.from(b, c => c.charCodeAt(0)))); }
+    catch (e) { toast("Lien de réservation illisible", 4000); return; }
+    openResaModal();
+    const met = (id, v) => { if (v !== undefined && v !== null && v !== "") document.getElementById(id).value = v; };
+    met("f-nom", o.n); met("f-tel", o.t); met("f-dep", o.dep); met("f-arr", o.arr); met("f-date", o.d); met("f-heure", o.h);
+    met("f-pax", o.p); met("f-bag", o.b); met("f-prix", o.px); met("f-vol", o.vol); met("f-note", o.note);
+    if (o.v) document.getElementById("f-vh").value = /van/i.test(o.v) ? "Van" : "Berline";
+    preStatut = o.s === "confirmée" ? "confirmée" : "";
+    document.querySelector("#modal-reservation .dictee").style.display = "none";
+    let b = document.getElementById("resa-lien-info");
+    if (!b) { b = document.createElement("div"); b.id = "resa-lien-info"; b.style.cssText = "background:#d4b25e22;border:1px solid #d4b25e;border-radius:12px;padding:10px 12px;margin:0 0 12px;font-size:14px;line-height:1.4";
+      document.getElementById("resa-modal-title").after(b); }
+    b.innerHTML = "📥 <b>Réservation préparée</b> — vérifie les champs puis touche <b>Enregistrer</b>." + (preStatut ? "<br>Elle sera enregistrée comme <b>✅ confirmée</b>." : "");
+    b.hidden = false;
+  }
   function openResaModal() {
-    editingResaId = null;
+    editingResaId = null; preStatut = "";
+    { const b = document.getElementById("resa-lien-info"); if (b) b.hidden = true; }
     document.getElementById("resa-modal-title").textContent = "Nouvelle réservation";
     document.querySelector("#modal-reservation .dictee").style.display = "";
     ["f-nom","f-tel","f-dep","f-arr","f-date","f-heure","f-prix","f-vol","f-dictee","f-note"].forEach(id => document.getElementById(id).value = "");
@@ -2226,6 +2248,7 @@ function anonymise(title,location){
       return;
     }
     if (noteTxt || dictee) data.note = noteTxt || dictee;
+    if (preStatut) { data.statut = preStatut; preStatut = ""; }
     ajoutLocal = Date.now();
     const nvRef = await addDoc(collection(db, "reservations"), data);
     if (nvRef && nvRef.id) marquerVues([nvRef.id]);
