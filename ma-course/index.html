@@ -585,15 +585,17 @@ let quiEdit=false;
 function quiCourse(){
   if(!CHAUF||!info)return;const ch=info.chauffeur||{},box=$('cQui');
   const libre=(!String(ch.prenom||'').trim()||quiEdit)&&etapeCour()!=='fin';box.hidden=!libre;
-  let lk=$('quiEd');if(!lk){lk=document.createElement('button');lk.type='button';lk.id='quiEd';lk.className='b';lk.style.cssText='width:100%;min-height:44px;font-size:14px;background:transparent;margin:0 0 14px';lk.textContent='✏️ Corriger mes infos (prénom, voiture, plaque)';lk.onclick=()=>{quiEdit=true;box.dataset.ok='';quiCourse();box.scrollIntoView({behavior:'smooth',block:'center'})};box.after(lk)}
-  lk.hidden=libre||ch.par!=='chauffeur'||etapeCour()==='fin';if(!libre)return;
+  let lk=$('quiEd');if(!lk){lk=document.createElement('button');lk.type='button';lk.id='quiEd';lk.className='b';lk.style.cssText='display:flex;flex-direction:column;align-items:center;gap:2px;width:100%;min-height:56px;font-size:15px;background:transparent;margin:0 0 14px;line-height:1.35;padding:8px 12px';lk.onclick=()=>{quiEdit=true;box.dataset.ok='';quiCourse();box.scrollIntoView({behavior:'smooth',block:'center'})};box.after(lk)}
+  lk.hidden=libre||etapeCour()==='fin';
+  if(!lk.hidden){const vv=info.vehicule||{};lk.innerHTML='<span style="display:block;font-weight:800">🚖 '+esc(ch.prenom||'')+(vv.modele?' · '+esc(vv.modele):'')+(vv.plaque?' · '+esc(vv.plaque):'')+'</span><span style="font-size:13px;opacity:.75">✏️ Changer mon nom, mon véhicule ou ma plaque</span>'}
+  if(!libre)return;
   if(!box.dataset.ok){box.dataset.ok=1;let m={};try{m=JSON.parse(localStorage.getItem('tvp_ch_moi')||'{}')}catch(e){}
     const vv=info.vehicule||{};$('quiP').value=quiEdit?(ch.prenom||m.p||''):(m.p||'');$('quiM').value=quiEdit?(vv.modele||m.m||''):(m.m||'');$('quiI').value=quiEdit?(vv.plaque||m.i||''):(m.i||'');
     $('bQui').onclick=async()=>{const p=$('quiP').value.trim(),mo=$('quiM').value.trim(),pl=$('quiI').value.trim().toUpperCase();
       if(!p){toast('Indique ton prénom');$('quiP').focus();return}
       try{localStorage.setItem('tvp_ch_moi',JSON.stringify({p,m:mo,i:pl}))}catch(e){}
       $('bQui').disabled=true;
-      try{await setDoc(doc(db,'trad_g',code),{chauffeur:{prenom:p,tel:'',par:'chauffeur'},vehicule:{modele:mo,plaque:pl},t:serverTimestamp()},{merge:true});quiEdit=false;toast('✅ Enregistré : le client voit ton prénom, ta voiture et ta plaque')}
+      try{await setDoc(doc(db,'trad_g',code),{chauffeur:{prenom:p,par:'chauffeur'},vehicule:{modele:mo,plaque:pl},t:serverTimestamp()},{merge:true});quiEdit=false;toast('✅ Enregistré : le client voit ton prénom, ta voiture et ta plaque')}
       catch(e){toast(e&&e.code==='permission-denied'?'Bloqué : règle Firebase à ajouter':'Pas de connexion, réessaie')}
       $('bQui').disabled=false}}
 }
