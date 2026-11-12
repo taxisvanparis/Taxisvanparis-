@@ -670,7 +670,7 @@
 <!-- ===================== MODAL LIEN CLIENT « MA COURSE » ===================== -->
 <div class="modal-overlay" id="modal-lien">
   <div class="modal mc">
-    <div class="mc-h"><h2 id="mc-titre">🔗 Lien client</h2><button class="btn-ghost" id="mc-close" aria-label="Fermer">✕</button></div>
+    <div class="mc-h"><h2 id="mc-titre">💬 Chat client</h2><button class="btn-ghost" id="mc-close" aria-label="Fermer">✕</button></div>
     <p class="mc-aide" id="mc-aide">Le client reçoit une page dans sa langue : course, chauffeur, véhicule, point de rendez-vous et un chat traduit avec toi.</p>
     <details id="mc-infos" open><summary>🚖 Infos affichées au client</summary>
       <div class="grid2">
@@ -686,15 +686,15 @@
     </details>
     <div id="mc-send" hidden>
       <div class="mc-row">
-        <a class="cal-btn wa-btn" id="mc-wa" target="_blank" rel="noopener">💬 Envoyer par WhatsApp</a>
-        <a class="cal-btn sms-btn" id="mc-sms">✉️ Par SMS</a>
+        <a class="cal-btn wa-btn" id="mc-wa" style="display:none!important" target="_blank" rel="noopener">💬 Envoyer par WhatsApp</a>
+        <a class="cal-btn sms-btn" id="mc-sms" style="display:none!important">✉️ Par SMS</a>
         <button type="button" class="cal-btn" id="mc-copy">📋 Copier le lien</button>
         <a class="cal-btn" id="mc-voir" target="_blank" rel="noopener">👁 Voir la page client</a>
       </div>
-      <p class="mc-sub" style="margin:12px 0 6px;font-weight:700">🚖 Au chauffeur <span id="mc-ch-nom" style="font-weight:400;opacity:.75"></span></p>
+      <p class="mc-sub" style="margin:12px 0 6px;font-weight:700">🚖 Lien du chauffeur <span id="mc-ch-nom" style="font-weight:400;opacity:.75"></span></p>
       <div class="mc-row">
-        <a class="cal-btn wa-btn" id="mc-wa-ch" target="_blank" rel="noopener">💬 WhatsApp chauffeur</a>
-        <a class="cal-btn sms-btn" id="mc-sms-ch">✉️ SMS chauffeur</a>
+        <a class="cal-btn wa-btn" id="mc-wa-ch" style="display:none!important" target="_blank" rel="noopener">💬 WhatsApp chauffeur</a>
+        <a class="cal-btn sms-btn" id="mc-sms-ch" style="display:none!important">✉️ SMS chauffeur</a>
         <button type="button" class="cal-btn" id="mc-copy-ch">📋 Copier le lien chauffeur</button>
       </div>
     </div>
@@ -1471,7 +1471,7 @@ function anonymise(title,location){
     return { wa: "https://wa.me/" + (n || "") + "?text=" + encodeURIComponent(txt), sms: n ? "sms:+" + n + (ios ? "&" : "?") + "body=" + encodeURIComponent(txt) : "" };
   }
   function lienBtn(r) {
-    return `<button type="button" class="cal-btn lien-btn${r.lienCourse ? " actif" : ""}" style="font-family:inherit;cursor:pointer" data-lien="${esc(r.id)}">${r.lienCourse ? "💬 Lien client ✓" : "🔗 Lien client"}</button> `;
+    return `<button type="button" class="cal-btn lien-btn${r.lienCourse ? " actif" : ""}" style="font-family:inherit;cursor:pointer" data-lien="${esc(r.id)}">💬 Chat client</button> `;
   }
   function mcProfil() { try { return JSON.parse(localStorage.getItem("tvp_mc_prof") || "{}"); } catch (e) { return {}; } }
   // Points de RDV avec photo (rdv/points.js)
@@ -1518,7 +1518,7 @@ function anonymise(title,location){
     mcStop(); mcR = r; mcCode = r.lienCourse || null; mcMsgs = []; mcLangue = null;
     const pr = mcProfil(), ch = chauffeurDe(r);
     const prenomCh = ch && ch.nom ? String(ch.nom).trim().split(/\s+/)[0] : "";
-    document.getElementById("mc-titre").textContent = "🔗 Lien client — " + (String(r.nom || "").replace(/^🏨\s*/, "").trim() || "client");
+    document.getElementById("mc-titre").textContent = "💬 Chat client — " + (String(r.nom || "").replace(/^🏨\s*/, "").trim() || "client");
     document.getElementById("mc-prenom").value = (r.lien && r.lien.prenom) || prenomCh || pr.prenom || "";
     document.getElementById("mc-tel").value = (r.lien && r.lien.tel) || (ch && ch.tel) || pr.tel || "06 67 40 20 05";
     document.getElementById("mc-modele").value = (r.lien && r.lien.modele) || pr["modele_" + (vehLabel(r.vehicule) || "x")] || pr.modele || (vehLabel(r.vehicule) === "Van" ? "Mercedes Classe V noire" : "");
