@@ -1400,7 +1400,7 @@ function anonymise(title,location){
     return `<button type="button" class="cal-btn envoi-btn" style="font-family:inherit;cursor:pointer" data-envoi="${esc(r.id)}">📤 Envoyer les liens</button> `;
   }
   // 📤 Envoyer les liens : crée le lien si besoin, puis 1) client 2) chauffeur, sans ouvrir la fenêtre « Lien client »
-  async function envoyerLiens(id) {
+  async function envoyerLiens(id, majCh) {
     const r = reservationsCache.find(x => x.id === id); if (!r) return;
     const ov = document.createElement("div"); ov.id = "imm-ov";
     ov.innerHTML = `<div id="imm-box" role="dialog" aria-label="Envoyer les liens"><h3>📤 Préparation…</h3></div>`;
@@ -1408,9 +1408,11 @@ function anonymise(title,location){
     const fermer = () => ov.remove(); ov.onclick = e => { if (e.target === ov) fermer(); };
     try {
       ouvrirLien(id); document.getElementById("modal-lien").classList.remove("shown");
-      if (!mcCode) {
-        document.getElementById("mc-save").click();
-        for (let k = 0; k < 60 && !mcCode; k++) await new Promise(x => setTimeout(x, 100));
+      if (majCh) { const c = chauffeurDe(r); if (c) { document.getElementById("mc-prenom").value = String(c.nom || "").trim().split(/\s+/)[0]; if (c.tel) document.getElementById("mc-tel").value = c.tel; } }
+      if (!mcCode || majCh) {
+        const sv = document.getElementById("mc-save"); sv.click();
+        await new Promise(x => setTimeout(x, 150));
+        for (let k = 0; k < 80 && (!mcCode || sv.disabled); k++) await new Promise(x => setTimeout(x, 100));
         if (!mcCode) throw { code: "lien non créé" };
       }
       const h = i => document.getElementById(i).getAttribute("href") || "#";
@@ -1424,11 +1426,25 @@ function anonymise(title,location){
         ${ch ? `<label>2 · Au chauffeur — ${esc(ch.nom || "")}</label>
           <a class="imm-send env-step" style="background:#25d366;color:#08240f" target="_blank" rel="noopener" href="${h("mc-wa-ch")}">🚖 WhatsApp au chauffeur</a>
           <a class="imm-send env-step env-alt" href="${h("mc-sms-ch")}">✉️ ou par SMS</a>`
-        : `<label>2 · Aucun chauffeur choisi</label>
-          <a class="imm-send env-step" style="background:#d4b25e;color:#17120a" target="_blank" rel="noopener" href="${waLink(shareMessage(shareItem(r)))}">📢 Proposer au groupe</a>
-          <p class="sub" style="margin-top:8px">Quand un chauffeur la prend : ✏️ Modifier → son nom → reviens sur « 📤 Envoyer les liens ».</p>`}
+        : `<label>2 · Qui fait la course ?</label>
+          <select id="env-ch" style="width:100%;min-height:50px;font-size:16px;border-radius:12px;padding:0 12px;border:1px solid var(--border);background:var(--card);color:inherit">
+            <option value="">— Choisis le chauffeur —</option>
+            ${chauffeursCache.map((c, i) => `<option value="${i}">${esc(c.nom || "")}${c.tel ? "" : " (pas de numéro)"}</option>`).join("")}
+          </select>
+          <p class="sub" style="margin-top:6px">Dès que tu le choisis, le bouton « WhatsApp au chauffeur » apparaît avec son lien.</p>
+          <a class="imm-send env-alt" style="margin-top:10px;text-align:center;justify-content:center" target="_blank" rel="noopener" href="${waLink(shareMessage(shareItem(r)))}">📢 Pas encore de chauffeur ? Proposer la course au groupe</a>`}
         <p class="sub" style="margin-top:12px">Chaque bouton passe en ✓ une fois touché. Reviens ici après WhatsApp pour le suivant.</p>`;
       document.getElementById("imm-x").onclick = fermer;
+      const sel = document.getElementById("env-ch");
+      if (sel) sel.onchange = async () => {
+        const c = chauffeursCache[+sel.value]; if (!c) return;
+        sel.disabled = true;
+        const maj = { chauffeurUid: c.uid || "", chauffeurNom: c.nom || "" };
+        try { await updateDoc(doc(db, "reservations", r.id), maj); Object.assign(r, maj); }
+        catch (e) { sel.disabled = false; toast("Impossible d'assigner le chauffeur (" + ((e && e.code) || "erreur") + ")", 5000); return; }
+        fermer(); envoyerLiens(r.id, true);
+      };
+      if (majCh && r.lienEnvoye && Date.now() - r.lienEnvoye < 30 * 60000) ov.querySelectorAll(".env-step[data-cli]").forEach(a => { a.classList.add("fait"); a.textContent = "✓ " + a.textContent.replace(/^\S+\s/, ""); });
       ov.querySelectorAll(".env-step").forEach(a => a.addEventListener("click", () => { setTimeout(() => { a.classList.add("fait"); if (!a.textContent.startsWith("✓")) a.textContent = "✓ " + a.textContent.replace(/^\S+\s/, ""); }, 400); }));
     } catch (e) { fermer(); toast("Impossible : " + ((e && e.code) || "erreur"), 5000); }
   }
