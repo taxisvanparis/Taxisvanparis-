@@ -652,6 +652,9 @@
       <div class="field"><label>Véhicule</label>
         <select id="f-vh"><option>Berline</option><option>Van</option></select>
       </div>
+      <div class="field"><label>🌍 Langue des messages au client</label>
+        <select id="f-langue"><option value="">Auto (selon le numéro)</option><option value="fr">Français</option><option value="en">English</option><option value="es">Español</option><option value="it">Italiano</option><option value="pt">Português</option><option value="de">Deutsch</option></select>
+      </div>
       <div class="field"><label>Prix (€)</label><input id="f-prix" type="number" min="0" step="0.5"></div>
       <div class="field"><label>N° de vol</label><div class="vol-row"><input id="f-vol" type="text" autocapitalize="characters" autocomplete="off" placeholder="ex. AF1234"><button type="button" id="btn-f-vol" class="vol-go">✈️ Suivi</button></div></div>
       <div class="field"><label>Chauffeur assigné</label>
@@ -1326,7 +1329,7 @@ function anonymise(title,location){
     ["34","es"],["52","es"],["54","es"],["56","es"],["57","es"],["51","es"],["58","es"],["593","es"],["591","es"],["595","es"],["598","es"],["506","es"],["507","es"],["502","es"],["503","es"],["504","es"],["505","es"],["53","es"],["1809","es"],["1829","es"],["1849","es"],
     ["39","it"],["378","it"],["351","pt"],["55","pt"],["244","pt"],["258","pt"],["49","de"],["43","de"]];
   function langueClient(r) {
-    const l = String(r.langue || r.langue_tel || "").slice(0, 2).toLowerCase();
+    const l = String(r.langueMsg || r.langue || r.langue_tel || "").slice(0, 2).toLowerCase();
     if (["fr", "en", "es", "it", "pt", "de"].includes(l)) return l;
     const n = waNumClient(r.tel); if (!n) return "fr";
     const t = LG_IND.filter(([c]) => n.startsWith(c)).sort((a, b) => b[0].length - a[0].length)[0];
@@ -1493,7 +1496,7 @@ function anonymise(title,location){
     ev.preventDefault(); dispatcherOuvrir(b.dataset.dispatch);
   });
   function relanceClient(r) {
-    const n = waNumClient(r.tel), url = mcUrl(r.lienCourse), fr = !n || n.startsWith("33");
+    const n = waNumClient(r.tel), url = mcUrl(r.lienCourse), fr = langueClient(r) === "fr";
     const txt = fr ? `Bonjour, votre chauffeur Taxis Van Paris arrive bientôt 🚖\nOuvrez ce lien pour voir le chauffeur, le véhicule et le point de rendez-vous :\n${url}`
       : `Hello, your Taxis Van Paris driver is arriving soon 🚖\nPlease open this link to see your driver, the vehicle and the meeting point:\n${url}`;
     const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
@@ -1571,7 +1574,7 @@ function anonymise(title,location){
     if (!has) return;
     const url = mcUrl(mcCode), n = waNumClient(r.tel);
     const nom = String(r.nom || "").replace(/^🏨\s*/, "").replace(/\s*\(.*\)\s*$/, "").trim();
-    const fr = !n || n.startsWith("33");
+    const fr = langueClient(r) === "fr";
     const txt = fr ? `Bonjour${nom ? " " + nom : ""}, votre chauffeur Taxis Van Paris arrive bientôt 🚖\n👉 Ouvrez ce lien maintenant : vous verrez le chauffeur arriver sur la carte, son véhicule, sa plaque et le point de rendez-vous. Vous pouvez aussi lui écrire directement :\n${url}`
       : `Hello${nom ? " " + nom : ""}, your Taxis Van Paris driver is arriving soon 🚖\n👉 Please open this link now: you will see your driver arriving on the map, the vehicle, the plate number and the meeting point. You can also message the driver in your own language 🌍 :\n${url}`;
     document.getElementById("mc-wa").dataset.cli = document.getElementById("mc-sms").dataset.cli = r.id;
@@ -2262,6 +2265,7 @@ function anonymise(title,location){
     document.getElementById("f-chauffeur").value = "";
     document.getElementById("f-pax").value = 1;
     document.getElementById("f-bag").value = 0;
+    document.getElementById("f-langue").value = "";
     document.getElementById("modal-reservation").classList.add("shown");
   }
   document.getElementById("btn-cancel-resa").addEventListener("click", () => document.getElementById("modal-reservation").classList.remove("shown"));
@@ -2280,6 +2284,7 @@ function anonymise(title,location){
       pax: Number(document.getElementById("f-pax").value) || 1,
       bagages: Number(document.getElementById("f-bag").value) || 0,
       vehicule: document.getElementById("f-vh").value,
+      langueMsg: document.getElementById("f-langue").value,
       prix: Number(document.getElementById("f-prix").value) || 0,
       vol: document.getElementById("f-vol").value.toUpperCase().replace(/[^A-Z0-9]/g, ""),
       chauffeurUid, chauffeurNom,
@@ -2327,6 +2332,7 @@ function anonymise(title,location){
     editingChauffeur = (voulu && ch.value !== voulu) ? { uid: r.chauffeurUid || "", nom: r.chauffeurNom || "" } : null;
     if (editingChauffeur) ch.value = "";
     set("f-note", r.note || "");
+    set("f-langue", ["fr","en","es","it","pt","de"].includes(r.langueMsg) ? r.langueMsg : "");
     set("f-vol", volCode(r) || String(r.vol || "").toUpperCase());
   }
 
