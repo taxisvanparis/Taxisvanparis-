@@ -1375,10 +1375,6 @@ function anonymise(title,location){
     if (det.length) L.push(det.join(" · "));
     const enCompte = /\ben\s+compte\b/i.test([r.prix, r.paiement, r.note, r.nom].map(v => String(v ?? "")).join(" "));
     if (enCompte) L.push("💳 En compte");
-    const note = sansPrixNiTel(enCompte ? String(r.note || "").replace(/\ben\s+compte\b/gi, "") : r.note).replace(/^[\s,;.:-]+|[\s,;:-]+$/g, "").replace(/\s+([,;.])/g, "$1").replace(/([,;])\s*(?=[,;]|$)/g, "");
-    if (note) L.push(`📝 ${note}`);
-    const chS = chauffeurDe(r);
-    if (r.lienCourse && (!chS || chS.suivi !== false)) L.push("", "💬 Écrire au client (numéro masqué, traduit) :", new URL("../ma-course/?c=" + r.lienCourse + "&d=1", location.href).href);
     return L.join("\n");
   }
   function waChauffeur(r) {
