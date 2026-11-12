@@ -1420,13 +1420,10 @@ function anonymise(title,location){
         <p class="sub">${esc(String(r.nom || "Client").replace(/^🏨\s*/, ""))}${quand ? " · " + esc(quand) : ""}</p>
         <label>1 · Au client</label>
         <a class="imm-send env-step" data-cli="${esc(r.id)}" style="background:#25d366;color:#08240f" target="_blank" rel="noopener" href="${h("mc-wa")}">💬 WhatsApp au client</a>
-        ${nTel ? `<a class="imm-send env-step env-alt" data-cli="${esc(r.id)}" href="${h("mc-sms")}">✉️ ou par SMS</a>` : ""}
-        ${ch ? `<label>2 · Au chauffeur — ${esc(ch.nom || "")}</label>
-          <a class="imm-send env-step" style="background:#25d366;color:#08240f" target="_blank" rel="noopener" href="${h("mc-wa-ch")}">🚖 WhatsApp au chauffeur</a>
-          <a class="imm-send env-step env-alt" href="${h("mc-sms-ch")}">✉️ ou par SMS</a>`
-        : `<label>2 · Aucun chauffeur choisi</label>
-          <a class="imm-send env-step" style="background:#d4b25e;color:#17120a" target="_blank" rel="noopener" href="${waLink(shareMessage(shareItem(r)))}">📢 Proposer au groupe</a>
-          <p class="sub" style="margin-top:8px">Quand un chauffeur la prend : ✏️ Modifier → son nom → reviens sur « 📤 Envoyer les liens ».</p>`}
+        ${nTel ? `<a class="imm-send env-step env-alt" data-cli="${esc(r.id)}" href="${h("mc-sms")}">✉️ SMS au client</a>` : ""}
+        <label>2 · Au chauffeur${ch ? " — " + esc(ch.nom || "") : " (tu choisis le contact dans WhatsApp)"}</label>
+        <a class="imm-send env-step" style="background:#25d366;color:#08240f" target="_blank" rel="noopener" href="${h("mc-wa-ch")}">🚖 WhatsApp au chauffeur</a>
+        <a class="imm-send env-step env-alt" href="${h("mc-sms-ch")}">✉️ SMS au chauffeur</a>
         <p class="sub" style="margin-top:12px">Chaque bouton passe en ✓ une fois touché. Reviens ici après WhatsApp pour le suivant.</p>`;
       document.getElementById("imm-x").onclick = fermer;
       ov.querySelectorAll(".env-step").forEach(a => a.addEventListener("click", () => { setTimeout(() => { a.classList.add("fait"); if (!a.textContent.startsWith("✓")) a.textContent = "✓ " + a.textContent.replace(/^\S+\s/, ""); }, 400); }));
