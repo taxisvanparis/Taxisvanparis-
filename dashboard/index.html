@@ -1553,7 +1553,7 @@ function anonymise(title,location){
     // Envoi au chauffeur : la course + son lien (chat traduit, appel masqué, mission)
     const ch = chauffeurDe(r), nc = ch ? waNumClient(ch.tel) : "", urlCh = url + "&d=1";
     let txtCh = ""; try { txtCh = messageChauffeur(r) || ""; } catch (e) {}
-    if (!txtCh.includes(urlCh)) txtCh = (txtCh ? txtCh + "\n\n" : "") + "🚖 Ta mission (Waze, client, chat traduit, appel sans numéro) :\n" + urlCh;
+    if (!txtCh.includes(urlCh)) txtCh = (txtCh ? txtCh + "\n\n" : "") + "🚖 Ta mission (Waze, client, chat traduit, appel sans numéro) :\n" + urlCh + "\n\n✏️ Sur cette page, vérifie ton prénom, ta voiture (marque et modèle) et ta plaque : tu peux les changer, le client verra les bonnes infos.";
     document.getElementById("mc-ch-nom").textContent = ch ? "· " + ch.nom + (nc ? "" : " (pas de numéro enregistré)") : "· aucun chauffeur assigné : tu choisis le contact";
     document.getElementById("mc-wa-ch").href = "https://wa.me/" + (nc || "") + "?text=" + encodeURIComponent(txtCh);
     document.getElementById("mc-sms-ch").href = "sms:" + (nc ? "+" + nc : "") + (ios ? "&" : "?") + "body=" + encodeURIComponent(txtCh);
