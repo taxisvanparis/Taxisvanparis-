@@ -1543,8 +1543,8 @@ function anonymise(title,location){
     const url = mcUrl(mcCode), n = waNumClient(r.tel);
     const nom = String(r.nom || "").replace(/^🏨\s*/, "").replace(/\s*\(.*\)\s*$/, "").trim();
     const fr = !n || n.startsWith("33");
-    const txt = fr ? `Bonjour${nom ? " " + nom : ""}, voici la page de votre course Taxis Van Paris 🚖\nChauffeur, véhicule, point de rendez-vous, et vous pouvez m'écrire directement :\n${url}`
-      : `Hello${nom ? " " + nom : ""}, here is your Taxis Van Paris ride page 🚖\nDriver, vehicle, meeting point — and you can message me in your own language 🌍 :\n${url}`;
+    const txt = fr ? `Bonjour${nom ? " " + nom : ""}, votre chauffeur Taxis Van Paris arrive bientôt 🚖\n👉 Ouvrez ce lien maintenant : vous verrez le chauffeur arriver sur la carte, son véhicule, sa plaque et le point de rendez-vous. Vous pouvez aussi lui écrire directement :\n${url}`
+      : `Hello${nom ? " " + nom : ""}, your Taxis Van Paris driver is arriving soon 🚖\n👉 Please open this link now: you will see your driver arriving on the map, the vehicle, the plate number and the meeting point. You can also message the driver in your own language 🌍 :\n${url}`;
     document.getElementById("mc-wa").dataset.cli = document.getElementById("mc-sms").dataset.cli = r.id;
     const wa = document.getElementById("mc-wa"); wa.href = "https://wa.me/" + (n || "") + "?text=" + encodeURIComponent(txt);
     const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
