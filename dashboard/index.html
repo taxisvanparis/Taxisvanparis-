@@ -1321,29 +1321,58 @@ function anonymise(title,location){
     else if (d.length === 9 && /^[67]/.test(d)) d = "33" + d;
     return d.length >= 10 ? d : "";
   }
+  // Langue du client : langue enregistrée (site) sinon indicatif du téléphone ; par défaut anglais pour l'étranger
+  const LG_IND = [["33","fr"],["32","fr"],["41","fr"],["352","fr"],["377","fr"],["212","fr"],["213","fr"],["216","fr"],["221","fr"],["225","fr"],["237","fr"],["262","fr"],["590","fr"],["594","fr"],["596","fr"],["689","fr"],["687","fr"],
+    ["34","es"],["52","es"],["54","es"],["56","es"],["57","es"],["51","es"],["58","es"],["593","es"],["591","es"],["595","es"],["598","es"],["506","es"],["507","es"],["502","es"],["503","es"],["504","es"],["505","es"],["53","es"],["1809","es"],["1829","es"],["1849","es"],
+    ["39","it"],["378","it"],["351","pt"],["55","pt"],["244","pt"],["258","pt"],["49","de"],["43","de"]];
+  function langueClient(r) {
+    const l = String(r.langue || r.langue_tel || "").slice(0, 2).toLowerCase();
+    if (["fr", "en", "es", "it", "pt", "de"].includes(l)) return l;
+    const n = waNumClient(r.tel); if (!n) return "fr";
+    const t = LG_IND.filter(([c]) => n.startsWith(c)).sort((a, b) => b[0].length - a[0].length)[0];
+    return t ? t[1] : "en";
+  }
+  const CONF_TXT = {
+    fr: { loc: "fr-FR", bj: "Bonjour", moi: "c'est votre chauffeur Taxis Van Paris 🚖", conf: "Je vous confirme votre course", du: " du ", a: " à ", dep: "Départ", arr: "Arrivée", fin: "Je serai là à l'heure prévue. À bientôt !",
+      ok: "votre réservation Taxis Van Paris est confirmée.", date: "Date", veh: "Véhicule", pers: "pers.", prix: "Prix", pai: "Paiement à bord (CB ou espèces). Annulation gratuite jusqu'à 24 h avant.", van: "Van", ber: "Berline" },
+    en: { loc: "en-GB", bj: "Hello", moi: "this is your Taxis Van Paris driver 🚖", conf: "I confirm your ride", du: " on ", a: " at ", dep: "Pick-up", arr: "Drop-off", fin: "I will be there on time. See you soon!",
+      ok: "your Taxis Van Paris booking is confirmed.", date: "Date", veh: "Vehicle", pers: "pax", prix: "Price", pai: "Payment on board (card or cash). Free cancellation up to 24 h before.", van: "Van", ber: "Sedan" },
+    es: { loc: "es-ES", bj: "Hola", moi: "soy su chófer de Taxis Van Paris 🚖", conf: "Le confirmo su traslado", du: " del ", a: " a las ", dep: "Salida", arr: "Llegada", fin: "Estaré allí a la hora prevista. ¡Hasta pronto!",
+      ok: "su reserva con Taxis Van Paris está confirmada.", date: "Fecha", veh: "Vehículo", pers: "pers.", prix: "Precio", pai: "Pago a bordo (tarjeta o efectivo). Cancelación gratuita hasta 24 h antes.", van: "Van", ber: "Sedán" },
+    it: { loc: "it-IT", bj: "Buongiorno", moi: "sono il suo autista Taxis Van Paris 🚖", conf: "Le confermo la sua corsa", du: " di ", a: " alle ", dep: "Partenza", arr: "Arrivo", fin: "Sarò lì all'orario previsto. A presto!",
+      ok: "la sua prenotazione Taxis Van Paris è confermata.", date: "Data", veh: "Veicolo", pers: "pers.", prix: "Prezzo", pai: "Pagamento a bordo (carta o contanti). Cancellazione gratuita fino a 24 h prima.", van: "Van", ber: "Berlina" },
+    pt: { loc: "pt-PT", bj: "Olá", moi: "sou o seu motorista Taxis Van Paris 🚖", conf: "Confirmo a sua viagem", du: " de ", a: " às ", dep: "Partida", arr: "Chegada", fin: "Estarei lá à hora prevista. Até breve!",
+      ok: "a sua reserva Taxis Van Paris está confirmada.", date: "Data", veh: "Veículo", pers: "pess.", prix: "Preço", pai: "Pagamento a bordo (cartão ou dinheiro). Cancelamento gratuito até 24 h antes.", van: "Van", ber: "Berlina" },
+    de: { loc: "de-DE", bj: "Guten Tag", moi: "hier ist Ihr Fahrer von Taxis Van Paris 🚖", conf: "Ich bestätige Ihre Fahrt", du: " am ", a: " um ", dep: "Abholung", arr: "Ziel", fin: "Ich bin pünktlich da. Bis bald!",
+      ok: "Ihre Buchung bei Taxis Van Paris ist bestätigt.", date: "Datum", veh: "Fahrzeug", pers: "Pers.", prix: "Preis", pai: "Zahlung im Fahrzeug (Karte oder bar). Kostenlose Stornierung bis 24 Std. vorher.", van: "Van", ber: "Limousine" }
+  };
+  function confInfos(r) {
+    const L = CONF_TXT[langueClient(r)] || CONF_TXT.fr, fr = L === CONF_TXT.fr;
+    const m = String(r.date || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    const jour = m ? new Date(+m[1], +m[2] - 1, +m[3]).toLocaleDateString(L.loc, { weekday: "long", day: "numeric", month: "long" }) : "";
+    const nom = String(r.nom || "").replace(/^🏨\s*/, "").replace(/\s*\(.*\)\s*$/, "").trim();
+    const h = r.heure ? (fr ? r.heure.replace(":", "h") : r.heure) : "";
+    return { L, jour, nom, h };
+  }
   function waClient(r) {
     const n = waNumClient(r.tel); if (!n) return "";
-    const m = String(r.date || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
-    const jour = m ? new Date(+m[1], +m[2] - 1, +m[3]).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" }) : "";
-    const nom = String(r.nom || "").replace(/^🏨\s*/, "").replace(/\s*\(.*\)\s*$/, "").trim();
-    const txt = `Bonjour${nom ? " " + nom : ""}, c'est votre chauffeur Taxis Van Paris 🚖\nJe vous confirme votre course${jour ? " du " + jour : ""}${r.heure ? " à " + r.heure.replace(":", "h") : ""}` +
-      `${r.dep ? "\n📍 Départ : " + r.dep : ""}${r.arr ? "\n🏁 Arrivée : " + r.arr : ""}\nJe serai là à l'heure prévue. À bientôt !\nTaxis Van Paris — 06 67 40 20 05`;
+    const { L, jour, nom, h } = confInfos(r);
+    const txt = `${L.bj}${nom ? " " + nom : ""}, ${L.moi}\n${L.conf}${jour ? L.du + jour : ""}${h ? L.a + h : ""}` +
+      `${r.dep ? "\n📍 " + L.dep + " : " + r.dep : ""}${r.arr ? "\n🏁 " + L.arr + " : " + r.arr : ""}\n${L.fin}\nTaxis Van Paris — ${L === CONF_TXT.fr ? "06 67 40 20 05" : "+33 6 67 40 20 05"}`;
     return `<a class="cal-btn wa-btn" target="_blank" rel="noopener" href="https://wa.me/${n}?text=${encodeURIComponent(txt)}">📩 Confirmation client</a> `;
   }
   // SMS au client : même confirmation, envoyée par l'appli Messages du téléphone (gratuit, via le forfait)
   function smsClient(r) {
     const n = waNumClient(r.tel); if (!n) return "";
-    const m = String(r.date || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
-    const jour = m ? new Date(+m[1], +m[2] - 1, +m[3]).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" }) : "";
-    const nom = String(r.nom || "").replace(/^🏨\s*/, "").replace(/\s*\(.*\)\s*$/, "").trim();
-    const veh = /van|classe v|vito|minivan/i.test(String(r.vehicule || "")) ? "Van" : (r.vehicule ? "Berline" : "");
+    const { L, jour, nom, h } = confInfos(r);
+    const veh = /van|classe v|vito|minivan/i.test(String(r.vehicule || "")) ? L.van : (r.vehicule ? L.ber : "");
     const prix = String(r.prix || "").trim();
-    const txt = `Bonjour${nom ? " " + nom : ""}, votre réservation Taxis Van Paris est confirmée.` +
-      `${jour ? "\nDate : " + jour : ""}${r.heure ? " à " + r.heure.replace(":", "h") : ""}` +
-      `${r.dep ? "\nDépart : " + r.dep : ""}${r.arr ? "\nArrivée : " + r.arr : ""}` +
-      `${veh ? "\nVéhicule : " + veh + (r.pax ? " (" + r.pax + " pers.)" : "") : ""}` +
-      `${prix ? "\nPrix : " + prix.replace(/\s*(€|euros?)\s*$/i, "") + " €" : ""}` +
-      `\nPaiement à bord (CB ou espèces). Annulation gratuite jusqu'à 24 h avant.\nTaxis Van Paris — 06 67 40 20 05`;
+    const txt = `${L.bj}${nom ? " " + nom : ""}, ${L.ok}` +
+      `${jour ? "\n" + L.date + " : " + jour : ""}${h ? L.a + h : ""}` +
+      `${r.dep ? "\n" + L.dep + " : " + r.dep : ""}${r.arr ? "\n" + L.arr + " : " + r.arr : ""}` +
+      `${veh ? "\n" + L.veh + " : " + veh + (r.pax ? " (" + r.pax + " " + L.pers + ")" : "") : ""}` +
+      `${prix && +prix.replace(/[^\d.,]/g, "").replace(",", ".") > 0 ? "\n" + L.prix + " : " + prix.replace(/\s*(€|euros?)\s*$/i, "") + " €" : ""}` +
+      `\n${L.pai}\nTaxis Van Paris — ${L === CONF_TXT.fr ? "06 67 40 20 05" : "+33 6 67 40 20 05"}`;
     const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
     return `<a class="cal-btn sms-btn" href="sms:+${n}${ios ? "&" : "?"}body=${encodeURIComponent(txt)}">✉️ Confirmation SMS</a> `;
   }
