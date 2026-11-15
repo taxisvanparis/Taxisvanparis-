@@ -3091,7 +3091,12 @@ window.initGooglePlaces = window.initGooglePlaces || function(){};
   b.innerHTML='<a class="w" href="https://wa.me/33667402005" target="_blank" rel="noopener">💬 '+L[0]+'</a><a class="t" href="tel:+33667402005">📞 '+L[1]+'</a><a class="r" href="#" id="tvp-bar-r">🚖 '+L[2]+'</a>';
   document.getElementById("tvp-bar-r").addEventListener("click",function(e){ e.preventDefault();
     if(window.goPage) try{ window.goPage("home"); }catch(x){}
-    setTimeout(function(){ var q=document.querySelector("#page-home .hq")||document.getElementById("page-home"); if(q) q.scrollIntoView({behavior:"smooth",block:"start"}); },60);
+    setTimeout(function(){ var q=document.querySelector("#page-home .hq")||document.getElementById("page-home"); if(!q) return;
+      var haut=0; document.querySelectorAll("body *").forEach(function(e){ var s=getComputedStyle(e); if(s.position==="fixed"&&e.id!=="tvp-bar"&&e.id!=="tvp-ck"){ var r=e.getBoundingClientRect(); if(r.top<=0&&r.height<160&&r.bottom>haut) haut=r.bottom; } });
+      var bas=(document.getElementById("tvp-bar")||{}).offsetHeight||0, dispo=innerHeight-haut-bas, r=q.getBoundingClientRect();
+      var y=scrollY+r.top-haut-Math.max(10,(dispo-r.height)/2);
+      window.scrollTo({top:Math.max(0,y),behavior:"smooth"});
+    },60);
   });
 })();
 </script>
