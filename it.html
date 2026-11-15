@@ -2343,6 +2343,7 @@ window.initGooglePlaces = window.initGooglePlaces || function(){};
     }
     var alerte = fetch(APPS, {method: "POST", headers: {"Content-Type": "text/plain;charset=utf-8"},
       body: JSON.stringify(Object.assign({action: "site", email: mail, note: note}, resa))}).catch(function(){});
+    try { sessionStorage.setItem("tvp_resa", JSON.stringify({d: date, h: heure, dep: dep.replace(/,\s*France$/, ""), arr: arr.replace(/,\s*France$/, ""), p: resa.pax, n: nom})); } catch (e) {}
     Promise.race([Promise.all([fb, alerte]), new Promise(function(r){ setTimeout(r, 6000); })])
       .then(function(){ window.location.href = "/merci/?resa=1&l=" + lang; });
   }

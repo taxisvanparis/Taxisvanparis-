@@ -79,6 +79,29 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   if (l === "ar") document.documentElement.dir = "rtl";
 })();
 </script>
+<script>
+// 📲 Recevoir sa confirmation sur WhatsApp : le client envoie le récapitulatif à Taxis Van Paris (gratuit, il garde la conversation)
+(function(){
+  var q = new URLSearchParams(location.search); if (!q.get("resa")) return;
+  var r = null; try { r = JSON.parse(sessionStorage.getItem("tvp_resa") || "null"); } catch (e) {}
+  var l = (q.get("l") || "fr").slice(0,2);
+  var W = {
+    fr:["📲 Recevoir ma confirmation sur WhatsApp","Bonjour, je viens de réserver sur votre site 🚖","Merci de me confirmer ici sur WhatsApp.","pers."],
+    en:["📲 Get my confirmation on WhatsApp","Hello, I have just booked on your website 🚖","Please confirm here on WhatsApp.","pax"],
+    es:["📲 Recibir mi confirmación por WhatsApp","Hola, acabo de reservar en su web 🚖","Por favor, confírmenme aquí por WhatsApp.","pers."],
+    it:["📲 Ricevi la conferma su WhatsApp","Buongiorno, ho appena prenotato sul vostro sito 🚖","Per favore confermatemi qui su WhatsApp.","pers."],
+    ar:["📲 استلام التأكيد عبر واتساب","مرحبًا، لقد حجزت للتو على موقعكم 🚖","يرجى التأكيد هنا عبر واتساب.","أشخاص"]
+  }[l] || null; if (!W) return;
+  var t = W[1];
+  if (r) { var d = String(r.d || ""), m = d.match(/^(\d{4})-(\d{2})-(\d{2})$/); if (m) d = m[3] + "/" + m[2] + "/" + m[1];
+    t += "\n📅 " + d + " " + (r.h || "") + "\n📍 " + (r.dep || "") + "\n🏁 " + (r.arr || "") + (r.p ? "\n👥 " + r.p + " " + W[3] : "") + (r.n ? "\n👤 " + r.n : ""); }
+  t += "\n" + W[2];
+  var a = document.createElement("a"); a.className = "btn"; a.target = "_blank"; a.rel = "noopener";
+  a.href = "https://wa.me/33667402005?text=" + encodeURIComponent(t); a.textContent = W[0];
+  a.style.cssText = "background:#25D366;color:#fff;display:block;max-width:360px;margin:0 auto 14px;font-size:1.05rem;padding:16px 22px";
+  var ret = document.querySelector("a.btn"); if (ret) ret.parentNode.insertBefore(a, ret);
+})();
+</script>
 <!-- Bannière cookies -->
 <style>
   #tvp-ck{position:fixed;left:12px;right:12px;bottom:12px;z-index:100000;max-width:560px;margin:0 auto;background:#1B1813;color:#F3EDE2;border:1px solid rgba(201,168,76,.5);
