@@ -3090,6 +3090,10 @@ window.initGooglePlaces = window.initGooglePlaces || function(){};
   var L={fr:["WhatsApp","Appeler","Réserver"],en:["WhatsApp","Call","Book"],es:["WhatsApp","Llamar","Reservar"],it:["WhatsApp","Chiama","Prenota"],ar:["واتساب","اتصال","احجز"]}[lg]||["WhatsApp","Appeler","Réserver"];
   var b=document.getElementById("tvp-bar"); if(!b) return;
   b.innerHTML='<a class="w" href="https://wa.me/33667402005" target="_blank" rel="noopener">💬 '+L[0]+'</a><a class="t" href="tel:+33667402005">📞 '+L[1]+'</a><a class="r" href="#" id="tvp-bar-r">🚖 '+L[2]+'</a>';
+  // « Réserver » seulement sur l'accueil (sur la page de réservation, il ramenait en arrière)
+  (function(){ var r=document.getElementById("tvp-bar-r"), h=document.getElementById("page-home"); if(!r||!h) return;
+    function vis(){ r.style.display=h.classList.contains("active")?"":"none"; }
+    vis(); try{ new MutationObserver(vis).observe(h,{attributes:true,attributeFilter:["class"]}); }catch(x){} })();
   document.getElementById("tvp-bar-r").addEventListener("click",function(e){ e.preventDefault();
     if(window.goPage) try{ window.goPage("home"); }catch(x){}
     setTimeout(function(){ var q=document.querySelector("#page-home .hq")||document.getElementById("page-home"); if(!q) return;
