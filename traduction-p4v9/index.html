@@ -54,6 +54,8 @@ h1{font-size:30px;margin:0 0 6px;font-weight:800;letter-spacing:-.02em}h1 b{back
 .bub .sub{font-size:14.5px;color:var(--mut);margin-top:6px;padding-top:6px;border-top:1px dashed rgba(255,255,255,.08)}
 .bub .tm{font-size:11.5px;color:var(--mut);margin-top:6px;display:flex;justify-content:space-between;align-items:center;gap:10px}
 .bub .tm .fl{letter-spacing:.05em;opacity:.9}
+.bub .say,.bub .tm button.say{background:#d4b25e;color:#17120a;font-weight:800;font-size:15px;padding:8px 14px;border:0;border-radius:999px;display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+.bub .say.big{margin-top:8px}
 .bub .tm button{background:rgba(255,255,255,.05);border:0;border-radius:999px;color:var(--mut);font-size:12px;padding:4px 9px}
 .bub.me{align-self:flex-end;border-radius:20px 20px 6px 20px;background:linear-gradient(160deg,rgba(212,178,94,.22),rgba(212,178,94,.08));border-color:rgba(212,178,94,.35)}
 .bub.me .sub{border-top-color:rgba(212,178,94,.18);color:#c9bea4}
@@ -398,7 +400,7 @@ function bulle(m,pourClient){
   const sub=pourClient?(m.de==='chauffeur'?'':m.traduction):(m.de==='client'?m.texte:m.traduction);
   const dirMain=pourClient&&L&&RTL.includes(L.c.split('-')[0])?' dir="rtl"':'';
   const dirSub=!pourClient&&L&&RTL.includes(L.c.split('-')[0])?' dir="rtl"':'';
-  const lire=pourClient?(m.de==='chauffeur'?`<button data-say="${m.id}">🔊</button>`:''):(m.de==='client'?`<button data-say="${m.id}">🔊</button>`:`<button data-del="${m.id}">✕ effacer</button>`);
+  const lire=pourClient?(m.de==='chauffeur'&&tr?`<button class="say" data-say="${m.id}">🔊 ▶</button>`:''):(m.de==='client'&&tr?`<button class="say" data-say="${m.id}">🔊 Écouter</button>`:m.de==='client'?'':`<button data-del="${m.id}">✕ effacer</button>`);
   const fc=L?L.f:'🌍',fl=m.de==='chauffeur'?'🇫🇷 → '+fc:fc+' → 🇫🇷';
   return `<div class="bub${mine?' me':''}${m._p?' pend':''}"><div class="main"${dirMain}>${main==null?att:esc(main)}</div>${sub==null?`<div class="sub">${att}</div>`:sub?`<div class="sub"${dirSub}>${esc(sub)}</div>`:''}<div class="tm"><span>${hm(tsMs(m.t))} · <span class="fl">${fl}</span></span>${lire}</div></div>`;
 }
@@ -568,6 +570,9 @@ function majFace(){
   const rtl=L&&RTL.includes(L.c.split('-')[0])?' dir="rtl"':'';
   $('fcTop').innerHTML=fMsgs.map(m=>m.de==='client'?`<div class="bub me"><div class="main"${rtl}>${esc(m.texte)}</div></div>`:`<div class="bub"><div class="main"${rtl}>${esc(m.traduction)}</div></div>`).join('')||(L?`<div class="empty" style="font-size:20px">${esc(L.f+' '+L.p)} 🎤</div>`:'');
   $('fcBot').innerHTML=fMsgs.map(m=>m.de==='chauffeur'?`<div class="bub me"><div class="main">${esc(m.texte)}</div><div class="sub"${rtl}>${esc(m.traduction)}</div></div>`:`<div class="bub"><div class="main">${esc(m.traduction)}</div><div class="sub"${rtl}>${esc(m.texte)}</div></div>`).join('')||'<div class="empty"><i>🔄</i><b>Face à face</b>Appuie sur 🎤 et parle en français. Le client parle avec le 🎤 du haut.</div>';
+  // 🔊 Écouter : en haut (client) la traduction dans sa langue, en bas (chauffeur) la traduction en français
+  $('fcTop').querySelectorAll('.bub:not(.me)').forEach((b,i)=>{const m=fMsgs.filter(x=>x.de==='chauffeur')[i];if(!m)return;b.insertAdjacentHTML('beforeend','<button class="say big">🔊 ▶</button>');b.lastChild.onclick=()=>parler(m.traduction,L.v)});
+  $('fcBot').querySelectorAll('.bub:not(.me)').forEach((b,i)=>{const m=fMsgs.filter(x=>x.de==='client')[i];if(!m)return;b.insertAdjacentHTML('beforeend','<button class="say big">🔊 Écouter</button>');b.lastChild.onclick=()=>parler(m.traduction,'fr-FR')});
   $('fcTop').scrollTop=$('fcTop').scrollHeight;$('fcBot').scrollTop=$('fcBot').scrollHeight;
 }
 async function envoyerFace(de,texte){
