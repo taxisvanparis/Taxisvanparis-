@@ -73,6 +73,9 @@
   }
   .login-card p.tag{color:var(--muted);font-size:14px;margin:0 0 28px;}
   .field{margin-bottom:16px;}
+  .cli-connu{grid-column:1/-1;background:#d4b25e1f;border:1px solid #d4b25e;border-radius:12px;padding:10px 12px;margin:-4px 0 16px;font-size:14px;line-height:1.35}
+  .cc-a{display:flex;align-items:center;gap:6px;margin-top:8px}.cc-a span{flex:1;min-width:0;overflow-wrap:anywhere}
+  .cc-a button{flex:none;border:1px solid #d4b25e;background:transparent;border-radius:999px;padding:7px 10px;font:inherit;font-size:13px;font-weight:700;color:#b8954a;cursor:pointer}
   .field label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px;}
   .field input{
     width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:8px;
@@ -643,6 +646,7 @@
     <div class="grid2">
       <div class="field"><label>Client</label><input id="f-nom" type="text"></div>
       <div class="field"><label>Téléphone</label><input id="f-tel" type="tel"></div>
+      <div id="cli-connu" class="cli-connu" hidden></div>
       <div class="field ac-field"><label>Départ <button type="button" class="mic-mini" data-for="f-dep" aria-label="Dicter le départ">🎤</button></label><input id="f-dep" type="text" autocomplete="off"><div class="ac-l" id="ac-f-dep" hidden></div></div>
       <div class="field ac-field"><label>Arrivée <button type="button" class="mic-mini" data-for="f-arr" aria-label="Dicter l'arrivée">🎤</button></label><input id="f-arr" type="text" autocomplete="off"><div class="ac-l" id="ac-f-arr" hidden></div></div>
       <div class="field"><label>Date</label><input id="f-date" type="date"></div>
@@ -2099,7 +2103,8 @@ function anonymise(title,location){
           grp("Avant", avant) + grp("Jour J", jourJ) + grp("Après", apres) + `<div class="ag ag2">${autres}</div>`;
         const urg = urgence(r), imm = !!(urg&&urg.imm), bientot = !!(urg&&!urg.imm);
         const lg = String(r.langue||"").slice(0,2).toLowerCase();
-        const badges = etapeBadge(r) + (imm ? '<span class="imm">⚡ IMMÉDIAT</span>' : bientot ? '<span class="soon">⏰ '+(urg.mn>0?'Dans '+urg.mn+' min':'Maintenant')+'</span>' : "") + provenance(r) + (lg && DRAP[lg] ? '<span class="src">'+DRAP[lg]+' '+lg.toUpperCase()+'</span>' : "");
+        const rg = r.statut !== "annulée" ? rangClient(r) : 0;
+        const badges = (rg >= 2 ? '<span class="src">🔁 ' + rg + 'ᵉ course</span>' : "") + etapeBadge(r) + (imm ? '<span class="imm">⚡ IMMÉDIAT</span>' : bientot ? '<span class="soon">⏰ '+(urg.mn>0?'Dans '+urg.mn+' min':'Maintenant')+'</span>' : "") + provenance(r) + (lg && DRAP[lg] ? '<span class="src">'+DRAP[lg]+' '+lg.toUpperCase()+'</span>' : "");
         return `<div class="rc s-${cls}${nouv ? " nouv" : ""}${imm ? " imm-card" : bientot ? " soon-card" : ""}" data-rid="${esc(r.id)}">
           <div class="t">${esc(r.heure || "—")}${r.ref ? `<small>${esc(r.ref)}</small>` : ""}</div>
           <div class="m">
@@ -2296,7 +2301,27 @@ function anonymise(title,location){
     document.getElementById("f-bag").value = 0;
     document.getElementById("f-langue").value = "";
     document.getElementById("modal-reservation").classList.add("shown");
+    setTimeout(cliConnu, 0);
   }
+  // Client reconnu par son téléphone : ses courses passées et ses adresses à un toucher
+  const telCle = t => { const d = String(t || "").replace(/\D/g, ""); return d.length >= 9 ? d.slice(-9) : ""; };
+  const coursesClient = (tel, sauf) => { const k = telCle(tel); return k ? reservationsCache.filter(r => r.id !== sauf && r.statut !== "annulée" && telCle(r.tel) === k) : []; };
+  function cliConnu() {
+    const box = document.getElementById("cli-connu"); if (!box) return;
+    const L = coursesClient(document.getElementById("f-tel").value, editingResaId).sort((a, b) => ((b.date || "") + (b.heure || "")).localeCompare((a.date || "") + (a.heure || "")));
+    if (!L.length) { box.hidden = true; box.innerHTML = ""; return; }
+    const nomEl = document.getElementById("f-nom"), nom = (L.find(r => r.nom) || {}).nom || "";
+    if (nom && !nomEl.value.trim()) nomEl.value = nom;
+    const adr = []; L.forEach(r => [r.dep, r.arr].forEach(a => { a = String(a || "").trim(); if (a && !adr.some(x => x.toLowerCase() === a.toLowerCase())) adr.push(a); }));
+    const der = /^\d{4}-\d{2}-\d{2}$/.test(L[0].date || "") ? L[0].date.split("-").reverse().join("/") : "";
+    box.innerHTML = `<div>👤 <b>Client connu</b>${nom ? " : " + esc(nom) : ""} · ${L.length} course${L.length > 1 ? "s" : ""}${der ? " (dernière le " + der + ")" : ""}</div>` +
+      adr.slice(0, 5).map((a, i) => `<div class="cc-a"><span>📍 ${esc(a)}</span><button type="button" data-cc="f-dep" data-i="${i}">Départ</button><button type="button" data-cc="f-arr" data-i="${i}">Arrivée</button></div>`).join("");
+    box.querySelectorAll("[data-cc]").forEach(b => b.addEventListener("click", () => { document.getElementById(b.dataset.cc).value = adr[+b.dataset.i]; toast((b.dataset.cc === "f-dep" ? "Départ" : "Arrivée") + " rempli ✔"); }));
+    box.hidden = false;
+  }
+  ["input", "change", "blur"].forEach(ev => document.getElementById("f-tel").addEventListener(ev, cliConnu));
+  ["f-nom", "f-dep", "f-arr"].forEach(id => document.getElementById(id).addEventListener("focus", cliConnu));
+  const rangClient = r => { const k = (r.date || "") + (r.heure || ""); return coursesClient(r.tel, null).filter(x => ((x.date || "") + (x.heure || "")) <= k).length; };
   document.getElementById("btn-cancel-resa").addEventListener("click", () => document.getElementById("modal-reservation").classList.remove("shown"));
   document.getElementById("btn-save-resa").addEventListener("click", async () => {
     const chauffeurSel = document.getElementById("f-chauffeur");
