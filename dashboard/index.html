@@ -1952,6 +1952,33 @@ function anonymise(title,location){
   // ===== Suivi en direct : positions des chauffeurs, carte de toutes les courses, courses à surveiller =====
   const ecPos = {}, ecSubs = {}, ecRdv = {}, ecGeo = {};
   const ecDist = (a, b) => { const R = 6371e3, r = x => x * Math.PI / 180, dl = r(b.lat - a.lat), dn = r(b.lng - a.lng), h = Math.sin(dl / 2) ** 2 + Math.cos(r(a.lat)) * Math.cos(r(b.lat)) * Math.sin(dn / 2) ** 2; return 2 * R * Math.asin(Math.sqrt(h)); };
+  // Distance et durée du trajet (Google, circulation prévue à l'heure de la course), gardées en mémoire du téléphone
+  const TRAJ = (() => { try { return JSON.parse(localStorage.getItem("tvp_traj") || "{}"); } catch (e) { return {}; } })();
+  const trajCle = r => [r.dep, r.arr, r.date, r.heure].map(x => String(x || "").trim()).join("|");
+  const dureeTxt = m => m >= 60 ? Math.floor(m / 60) + " h " + String(m % 60).padStart(2, "0") : m + " min";
+  const trajTxt = r => { const t = TRAJ[trajCle(r)]; if (!t) return "🛣️ calcul du trajet…"; if (t.err) return ""; return "🛣️ <b>" + String(t.km).replace(".", ",") + " km</b> · ⏱️ <b>" + dureeTxt(t.min) + "</b>" + (t.trafic ? " <span style=\"opacity:.7\">(circulation prévue à " + esc(t.h) + ")</span>" : ""); };
+  let trajEnCours = false, trajEncore = false;
+  async function majTrajets() {
+    if (!(window.google && google.maps && google.maps.DirectionsService)) return;
+    if (trajEnCours) { trajEncore = true; return; }
+    trajEnCours = true;
+    try {
+      const svc = new google.maps.DirectionsService();
+      for (const el of [...document.querySelectorAll("[data-traj]")]) {
+        const r = reservationsCache.find(x => x.id === el.dataset.traj); if (!r) continue;
+        const k = trajCle(r);
+        if (!TRAJ[k]) {
+          const tp = ecHeure(r), quand = new Date(Math.max(tp || 0, Date.now() + 60000));
+          const res = await new Promise(ok => svc.route({ origin: String(r.dep), destination: String(r.arr), travelMode: "DRIVING", region: "fr", drivingOptions: { departureTime: quand, trafficModel: "bestguess" } }, (x, st) => ok(st === "OK" ? x : { st })));
+          if (res.st) { if (res.st === "NOT_FOUND" || res.st === "ZERO_RESULTS") TRAJ[k] = { err: res.st }; else { el.remove(); continue; } }
+          else { const leg = res.routes[0].legs[0]; TRAJ[k] = { km: Math.round(leg.distance.value / 100) / 10, min: Math.max(1, Math.round((leg.duration_in_traffic || leg.duration).value / 60)), trafic: !!leg.duration_in_traffic, h: quand.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }) }; }
+          try { localStorage.setItem("tvp_traj", JSON.stringify(TRAJ)); } catch (e) {}
+        }
+        const h = trajTxt(r); if (h) el.innerHTML = h; else el.remove();
+      }
+    } catch (e) {} finally { trajEnCours = false; if (trajEncore) { trajEncore = false; majTrajets(); } }
+  }
+  window.__trajets = majTrajets;
   const ecHeure = r => { const m = String(r.date || "").match(/^(\d{4})-(\d{2})-(\d{2})$/), h = String(r.heure || "").match(/(\d{1,2})[:h](\d{2})/); return m && h ? new Date(+m[1], +m[2] - 1, +m[3], +h[1], +h[2]).getTime() : 0; };
   let ecRendu = 0;
   const ecRerender = () => { clearTimeout(ecRendu); ecRendu = setTimeout(() => { try { renderEnCours(); } catch (e) {} }, 400); };
@@ -2080,6 +2107,7 @@ function anonymise(title,location){
             ${badges ? `<div>${badges}</div>` : ""}
             ${hotel ? `<div><span class="tag-hotel">🏨 ${esc(r.hotel || "Hôtel partenaire")}</span></div>` : ""}
             <div class="rt">${esc(r.dep || "?")} → <b>${esc(r.arr || "?")}</b></div>
+            ${actif && r.dep && r.arr && trajTxt(r) ? `<div class="mt" data-traj="${esc(r.id)}">${trajTxt(r)}</div>` : ""}
             ${meta ? `<div class="mt">${meta}</div>` : ""}
             ${r.tel ? `<div class="mt"><a href="tel:${esc(r.tel)}">${esc(r.tel)}</a>${waNumClient(r.tel) ? ` · <a class="wa-direct" target="_blank" rel="noopener" href="https://wa.me/${waNumClient(r.tel)}">💬 WhatsApp</a>` : ""}${r.chauffeurNom ? " · Chauffeur : " + esc(r.chauffeurNom) : ""}</div>` : (r.chauffeurNom ? `<div class="mt">Chauffeur : ${esc(r.chauffeurNom)}</div>` : "")}
             ${vol}${note}
@@ -2098,6 +2126,7 @@ function anonymise(title,location){
     box.querySelectorAll("[data-envoi]").forEach(b => b.addEventListener("click", () => envoyerLiens(b.dataset.envoi)));
     box.querySelectorAll("[data-avis]").forEach(b => b.addEventListener("click", () => { updateDoc(doc(db, "reservations", b.dataset.avis), { avisDemande: true }).catch(() => {}); }));
     box.querySelectorAll("[data-avistrip]").forEach(b => b.addEventListener("click", () => { updateDoc(doc(db, "reservations", b.dataset.avistrip), { avisTripDemande: true }).catch(() => {}); }));
+    majTrajets();
     box.querySelectorAll("[data-edit]").forEach(b => b.addEventListener("click", () => openEditResa(b.dataset.edit)));
     box.querySelectorAll("[data-facture]").forEach(b => b.addEventListener("click", () => {
       const r = reservationsCache.find(x => x.id === b.dataset.facture); if (!r) return;
@@ -2930,7 +2959,7 @@ function analyserDictee(txt, now) {
     $(id).addEventListener("input", function(){ suggestions(id); });
     $(id).addEventListener("blur", function(){ setTimeout(function(){ $("ac-" + id).hidden = true; }, 250); });
   });
-  window.initDashMaps = function(){ try { svc = new google.maps.places.AutocompleteService(); } catch (e) {} };
+  window.initDashMaps = function(){ try { svc = new google.maps.places.AutocompleteService(); } catch (e) {} try { window.__trajets && window.__trajets(); } catch (e) {} };
   var gm = document.createElement("script"); gm.async = true;
   gm.src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyCotWtH67rWpOKRwxTGXtxj-oVcc0vwOVg&libraries=places&callback=initDashMaps&language=fr";
   document.head.appendChild(gm);
