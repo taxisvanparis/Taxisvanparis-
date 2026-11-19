@@ -208,6 +208,10 @@
   }
   .modal h2{font-size:19px;margin:0 0 20px;color:var(--heading);}
   .mc{max-width:560px}
+  .ct-adr{display:grid;gap:8px;margin:12px 0 8px;font-size:14.5px;line-height:1.35}.ct-adr span{display:block;margin-top:2px}
+  .ct-info{font-size:14.5px;padding:8px 10px;border-radius:10px;background:#d4b25e1f;border:1px solid #d4b25e}
+  .ct-map{height:min(52vh,420px);border-radius:12px;margin:12px 0;background:#e9e4da;display:flex;align-items:center;justify-content:center;color:#776e5d;font-size:14px}
+  .ct-btns{display:flex;gap:10px}.ct-btns a{flex:1;text-align:center;padding:11px;border-radius:999px;border:1px solid var(--gold);color:var(--gold-soft);text-decoration:none;font-weight:700;font-size:14.5px}
   .mc-h{display:flex;justify-content:space-between;align-items:center;gap:10px}.mc-h h2{margin:0}
   .mc-aide{color:var(--muted);font-size:13.5px;margin:8px 0 14px;line-height:1.45}
   #modal-lien details summary{cursor:pointer;font-weight:700;margin-bottom:12px;color:var(--heading)}
@@ -675,6 +679,15 @@
 
 
 <!-- ===================== MODAL LIEN CLIENT « MA COURSE » ===================== -->
+<div class="modal-overlay" id="modal-carte">
+  <div class="modal mc">
+    <div class="mc-h"><h2 id="ct-titre">🗺️ Trajet</h2><button class="btn-ghost" id="ct-close" aria-label="Fermer">✕</button></div>
+    <div class="ct-adr"><div>🟢 <b>Départ</b><span id="ct-dep"></span></div><div>🏁 <b>Arrivée</b><span id="ct-arr"></span></div></div>
+    <div id="ct-info" class="ct-info"></div>
+    <div id="ct-map" class="ct-map"></div>
+    <div class="ct-btns"><a id="ct-gmaps" target="_blank" rel="noopener">📍 Google Maps</a><a id="ct-waze" target="_blank" rel="noopener">🚙 Waze</a></div>
+  </div>
+</div>
 <div class="modal-overlay" id="modal-lien">
   <div class="modal mc">
     <div class="mc-h"><h2 id="mc-titre">💬 Chat client</h2><button class="btn-ghost" id="mc-close" aria-label="Fermer">✕</button></div>
@@ -1983,6 +1996,37 @@ function anonymise(title,location){
     } catch (e) {} finally { trajEnCours = false; if (trajEncore) { trajEncore = false; majTrajets(); } }
   }
   window.__trajets = majTrajets;
+  // Carte du trajet (départ → arrivée) avec le tracé Google
+  let ctMap = null, ctRend = null;
+  function ouvrirCarte(id) {
+    const r = reservationsCache.find(x => x.id === id); if (!r) return;
+    const $ = k => document.getElementById(k);
+    $("ct-titre").textContent = "🗺️ " + (r.nom || "Trajet") + (r.heure ? " · " + r.heure : "");
+    $("ct-dep").textContent = r.dep || "?"; $("ct-arr").textContent = r.arr || "?";
+    $("ct-gmaps").href = "https://www.google.com/maps/dir/?api=1&travelmode=driving&origin=" + encodeURIComponent(r.dep || "") + "&destination=" + encodeURIComponent(r.arr || "");
+    $("ct-waze").href = "https://waze.com/ul?navigate=yes&q=" + encodeURIComponent(r.arr || "");
+    const info = $("ct-info"), deja = trajTxt(r);
+    info.innerHTML = deja && !/calcul/.test(deja) ? deja : "🛣️ calcul du trajet…";
+    $("modal-carte").classList.add("shown");
+    if (!(window.google && google.maps && google.maps.Map && google.maps.DirectionsService)) { $("ct-map").textContent = "Carte pas encore chargée, réessaie dans quelques secondes."; return; }
+    if (!ctMap) {
+      $("ct-map").textContent = "";
+      ctMap = new google.maps.Map($("ct-map"), { center: { lat: 48.8566, lng: 2.3522 }, zoom: 11, disableDefaultUI: true, zoomControl: true, gestureHandling: "greedy" });
+      ctRend = new google.maps.DirectionsRenderer({ map: ctMap, polylineOptions: { strokeColor: "#b8954a", strokeWeight: 6, strokeOpacity: .9 } });
+    }
+    ctRend.set("directions", null);
+    const quand = new Date(Math.max(ecHeure(r) || 0, Date.now() + 60000));
+    new google.maps.DirectionsService().route({ origin: String(r.dep), destination: String(r.arr), travelMode: "DRIVING", region: "fr", drivingOptions: { departureTime: quand, trafficModel: "bestguess" } }, (res, st) => {
+      if (st !== "OK") { info.textContent = "⚠️ Itinéraire introuvable pour ces adresses."; return; }
+      ctRend.setDirections(res);
+      const leg = res.routes[0].legs[0];
+      TRAJ[trajCle(r)] = { km: Math.round(leg.distance.value / 100) / 10, min: Math.max(1, Math.round((leg.duration_in_traffic || leg.duration).value / 60)), trafic: !!leg.duration_in_traffic, h: quand.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }) };
+      try { localStorage.setItem("tvp_traj", JSON.stringify(TRAJ)); } catch (e) {}
+      info.innerHTML = trajTxt(r);
+    });
+  }
+  document.getElementById("ct-close").addEventListener("click", () => document.getElementById("modal-carte").classList.remove("shown"));
+  document.getElementById("modal-carte").addEventListener("click", e => { if (e.target.id === "modal-carte") e.target.classList.remove("shown"); });
   const ecHeure = r => { const m = String(r.date || "").match(/^(\d{4})-(\d{2})-(\d{2})$/), h = String(r.heure || "").match(/(\d{1,2})[:h](\d{2})/); return m && h ? new Date(+m[1], +m[2] - 1, +m[3], +h[1], +h[2]).getTime() : 0; };
   let ecRendu = 0;
   const ecRerender = () => { clearTimeout(ecRendu); ecRendu = setTimeout(() => { try { renderEnCours(); } catch (e) {} }, 400); };
@@ -2092,7 +2136,8 @@ function anonymise(title,location){
         const actif = groupOf(r) === 0 && r.statut !== "annulée";
         const avant = ferme ? "" : (r.statut !== "confirmée" ? `<button class="ok" data-st="confirmée" data-id="${esc(r.id)}">✅ Confirmer</button>` : "") +
           waClient(r) + smsClient(r) +
-          (actif ? `<button type="button" class="grp-btn" style="font-family:inherit;cursor:pointer" data-dispatch="${esc(r.id)}">📢 Dispatcher</button>` + envoiBtn(r) + waChauffeur(r) + lienBtn(r) + calLink([r], "📅 Calendrier", "cal-btn") : "");
+          (actif ? `<button type="button" class="grp-btn" style="font-family:inherit;cursor:pointer" data-dispatch="${esc(r.id)}">📢 Dispatcher</button>` + envoiBtn(r) + waChauffeur(r) + lienBtn(r) + calLink([r], "📅 Calendrier", "cal-btn") : "") +
+          (r.dep && r.arr ? `<button type="button" class="cal-btn" data-carte="${esc(r.id)}">🗺️ Carte</button>` : "");
         const jourJ = actif && (AERO_RX.test(String(r.dep || "") + " " + String(r.depZone || "")) || /\bgare\b|\bstation\b/i.test(String(r.dep || ""))) ? pancarteBtn(r) : "";
         const apres = (!ferme ? `<button class="done" data-st="terminée" data-id="${esc(r.id)}">✔️ Effectuée</button>` : "") +
           (r.statut === "terminée" ? `<button class="edit" data-facture="${esc(r.id)}">🧾 ${r.factureNumero ? "Facture n° " + esc(r.factureNumero) : "Facture"}</button>` : "") + waAvis(r);
@@ -2131,6 +2176,7 @@ function anonymise(title,location){
     box.querySelectorAll("[data-envoi]").forEach(b => b.addEventListener("click", () => envoyerLiens(b.dataset.envoi)));
     box.querySelectorAll("[data-avis]").forEach(b => b.addEventListener("click", () => { updateDoc(doc(db, "reservations", b.dataset.avis), { avisDemande: true }).catch(() => {}); }));
     box.querySelectorAll("[data-avistrip]").forEach(b => b.addEventListener("click", () => { updateDoc(doc(db, "reservations", b.dataset.avistrip), { avisTripDemande: true }).catch(() => {}); }));
+    box.querySelectorAll("[data-carte]").forEach(b => b.addEventListener("click", () => ouvrirCarte(b.dataset.carte)));
     majTrajets();
     box.querySelectorAll("[data-edit]").forEach(b => b.addEventListener("click", () => openEditResa(b.dataset.edit)));
     box.querySelectorAll("[data-facture]").forEach(b => b.addEventListener("click", () => {
