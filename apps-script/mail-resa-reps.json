@@ -1,0 +1,22 @@
+[
+ [
+  "'Prix estimé : ' + s(d.prix, 20)",
+  "'Prix tout compris : ' + s(d.prix, 20)"
+ ],
+ [
+  "'Estimated price: ' + s(d.prix, 20)",
+  "'Price, all included: ' + s(d.prix, 20)"
+ ],
+ [
+  "'Child seat: ' + s(d.siege, 40)",
+  "'Child seat: ' + (({ 'Aucune': 'none', 'Siège bébé': 'baby seat', 'Rehausseur': 'booster seat', 'Siège bébé + Rehausseur': 'baby seat + booster seat' })[s(d.siege, 40).trim()] || s(d.siege, 40))"
+ ],
+ [
+  "    try {\n      MailApp.sendEmail({ to: mail, replyTo: EMAIL_ALERTE, name: 'Taxis Van Paris',",
+  "    const lgMail = bilingue ? (MAIL_TXT_[lt] ? lt : 'en') : (MAIL_TXT_[s(d.langue, 2).toLowerCase()] ? s(d.langue, 2).toLowerCase() : (fr ? 'fr' : 'en'));\n    let htmlMail = null; try { htmlMail = mailResaHtml_(d, lgMail, vol); } catch (x) {}\n    try {\n      MailApp.sendEmail({ to: mail, replyTo: EMAIL_ALERTE, name: 'Taxis Van Paris',"
+ ],
+ [
+  "        body: lignes.filter(l => l !== null).join('\\n') });",
+  "        body: lignes.filter(l => l !== null).join('\\n'), htmlBody: htmlMail || undefined });"
+ ]
+]
