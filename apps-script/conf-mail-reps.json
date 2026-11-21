@@ -1,0 +1,18 @@
+[
+ [
+  "function mailResaHtml_(d, lg, vol) {\n  const T = MAIL_TXT_[lg] || MAIL_TXT_.en, rtl = lg === 'ar';",
+  "function mailResaHtml_(d, lg, vol, C) {\n  const T = Object.assign({}, MAIL_TXT_[lg] || MAIL_TXT_.en, C || {}), rtl = lg === 'ar';"
+ ],
+ [
+  "<span style=\"display:inline-block;background:#eaf6ee;color:#1d7a3f;font-size:13px;font-weight:700;padding:5px 12px;border-radius:999px\">' + T.badge + '</span>'",
+  "<span style=\"display:inline-block;' + (T.plein ? 'background:#1d7a3f;color:#ffffff;font-size:14px' : 'background:#eaf6ee;color:#1d7a3f;font-size:13px') + ';font-weight:700;padding:5px 12px;border-radius:999px\">' + T.badge + '</span>'"
+ ],
+ [
+  "    if (d.action === 'site') return json(resaSite(d)); // réservation confirmée sur taxisvanparis.fr",
+  "    if (d.action === 'site') return json(resaSite(d)); // réservation confirmée sur taxisvanparis.fr\n    if (d.action === 'confmail') return json(confMail_(d)); // bouton « Confirmation e-mail » du tableau de bord"
+ ],
+ [
+  "  if (/^[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}$/.test(mail)) {\n    const fr = s(d.langue, 2) === 'fr';",
+  "  if (/^[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}$/.test(mail)) {\n    memoriserEmail_(d.tel, d.date, d.heure, d.nom, mail);\n    const fr = s(d.langue, 2) === 'fr';"
+ ]
+]
