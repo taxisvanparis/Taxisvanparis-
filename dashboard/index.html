@@ -2407,7 +2407,7 @@ function anonymise(title,location){
       ${metas ? `<div class="tf-mt">${metas}</div>` : ""}
       ${act ? `<button type="button" class="tf-go" data-step="${cur}" data-id="${id}">${act[0]}<small>${act[1]}</small></button>` : ""}
       <div class="tf-q">${tel}${wa}${r.dep && r.arr ? `<button type="button" data-carte="${id}"><b>🗺️</b>Carte</button>` : `<span class="off"><b>🗺️</b>Carte</span>`}<button type="button" data-edit="${id}"><b>✏️</b>Modifier</button></div>
-      ${r.dep || r.arr ? `<div class="tf-h">🚕 Commander un G7</div><div class="tf-g7"><button type="button" data-g7copie="dep" data-id="${id}">📋 Départ</button><button type="button" data-g7copie="arr" data-id="${id}">📋 Arrivée</button><a href="https://www.g7.fr/" target="_blank" rel="noopener">Ouvrir G7 ↗</a></div><p class="tf-g7i">Copie une adresse, puis dans G7 : appui long → Coller.</p>` : ""}
+      ${r.dep || r.arr ? `<div class="tf-h">🚕 Commander un G7</div><div class="tf-g7"><button type="button" data-g7copie="dep" data-id="${id}">📋 Départ</button><button type="button" data-g7copie="arr" data-id="${id}">📋 Arrivée</button><a href="https://apps.apple.com/fr/app/id402196027" target="_blank" rel="noopener">Ouvrir G7 ↗</a></div><p class="tf-g7i">Copie une adresse, puis dans G7 : appui long → Coller.</p>` : ""}
       <div class="tf-h">Autres actions</div><div class="tf-ac">${acts ? acts.innerHTML : ""}</div>`;
     lierActions(c);
     c.querySelectorAll("[data-step]").forEach(b => b.addEventListener("click", () => faireEtape(b.dataset.id, +b.dataset.step, b)));
