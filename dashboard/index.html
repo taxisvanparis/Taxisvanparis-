@@ -473,42 +473,58 @@
   #imm-x{float:right;border:1px solid var(--border);background:transparent;color:inherit;border-radius:10px;width:38px;height:38px;font-size:16px}
 </style>
 <style>
-/* ===== Vue moderne (essai) : étapes de la course, « À faire maintenant », raccourcis ===== */
-#mod-hero{position:relative;border-radius:20px;overflow:hidden;margin:0 0 14px;min-height:150px;background:#111 url(/img/van.jpg) center 62%/cover;color:#fff}
-#mod-hero:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,10,12,.35),rgba(10,10,12,.85))}
-#mod-hero>div{position:relative;padding:58px 18px 16px}
-#mod-hero h2{margin:0;font-size:26px;letter-spacing:-.5px}#mod-hero p{margin:4px 0 0;color:#ddd;font-size:14px}#mod-hero p b{color:#f4c35a}
-#mod-todo{margin:0 0 14px}
-#mod-todo h3{font-size:16px;margin:0 0 8px}
-.mt-row{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:16px;margin-bottom:8px;background:rgba(244,183,64,.12);border:1px solid rgba(244,183,64,.35)}
-.mt-row .ic{width:36px;height:36px;border-radius:11px;background:rgba(244,183,64,.2);display:flex;align-items:center;justify-content:center;font-size:17px;flex:none}
-.mt-row .x{flex:1;min-width:0}.mt-row .x b{display:block;font-size:14.5px}.mt-row .x span{font-size:12.5px;color:var(--muted)}
-.mt-row button{background:#f2b33d;color:#17191d;border:0;border-radius:11px;padding:10px 12px;font:700 14px inherit;font-family:inherit;cursor:pointer;white-space:nowrap}
-.rc.mod{display:block;padding:16px;border-radius:22px}
-.rc.mod .m1{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
-.rc.mod .mh{font-size:32px;font-weight:800;letter-spacing:-1px;line-height:1;font-variant-numeric:tabular-nums}
-.rc.mod .mw{color:var(--muted);font-size:13px;margin-top:4px}.rc.mod .mw.urg{color:#e8902a;font-weight:700}
-.rc.mod .mp{text-align:right;font-size:20px;font-weight:800;white-space:nowrap}
-.rc.mod .mn{margin-top:10px;font-size:16px;font-weight:700;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.rc.mod .mb{margin-top:6px}
-.rc.mod .mr{display:grid;grid-template-columns:12px 1fr;column-gap:10px;margin:10px 0 4px}
-.rc.mod .mr .l{display:flex;flex-direction:column;align-items:center;padding:6px 0}.rc.mod .mr .l i{width:9px;height:9px;border-radius:50%;background:var(--text)}.rc.mod .mr .l i.b{background:#d9a237}.rc.mod .mr .l u{flex:1;width:1.5px;margin:3px 0;background:repeating-linear-gradient(var(--border) 0 3px,transparent 3px 6px)}
-.rc.mod .mr p{margin:0;font-size:14.5px;line-height:1.35}.rc.mod .mr p+p{margin-top:10px}
-.rc.mod .mc{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 12px}.rc.mod .mc>span,.rc.mod .mc>div{font-size:12.5px;background:color-mix(in srgb,var(--border) 45%,transparent);border-radius:999px;padding:5px 10px}
-.rc.mod .mc .nt{border-radius:10px;margin:0}
-.mstp{display:grid;grid-template-columns:repeat(4,1fr);position:relative;margin:4px 0 12px}
-.mstp:before{content:"";position:absolute;left:12.5%;right:12.5%;top:14px;height:2px;background:var(--border)}
-.mstp .bar{position:absolute;left:12.5%;top:14px;height:2px;background:#3fb873}
-.mstp button{position:relative;background:none;border:0;padding:0;font:inherit;font-size:12px;color:var(--muted);cursor:pointer}
-.mstp button i{display:block;width:30px;height:30px;margin:0 auto 5px;border-radius:50%;background:var(--card);border:2px solid var(--border);font-style:normal;font-weight:700;font-size:13px;line-height:26px}
-.mstp button.d{color:#3fb873}.mstp button.d i{background:#3fb873;border-color:#3fb873;color:#0f2a1a}
-.mstp button.n{color:#d9a237;font-weight:700}.mstp button.n i{background:#f2b33d;border-color:#f2b33d;color:#17191d;box-shadow:0 0 0 5px rgba(242,179,61,.2)}
-.mgo{display:block;width:100%;background:#f2b33d;color:#17191d;border:0;border-radius:15px;padding:14px;font:700 15.5px inherit;font-family:inherit;cursor:pointer}
-.mq{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
-.mq>*{display:flex;flex-direction:column;align-items:center;gap:4px;font:inherit;font-size:11.5px;color:var(--muted);background:none;border:0;cursor:pointer;text-decoration:none;padding:0}
-.mq>* i{display:flex;width:42px;height:42px;border-radius:50%;align-items:center;justify-content:center;font-style:normal;font-size:18px;background:color-mix(in srgb,var(--border) 55%,transparent)}
-details.mplus{margin-top:10px}details.mplus>summary{list-style:none;cursor:pointer;text-align:center;color:var(--muted);font-size:13px;padding:6px}details.mplus>summary::-webkit-details-marker{display:none}
-details.mplus .acts{margin-top:6px}
+/* ===== Vue « Tableau des départs » : sombre, ambre comme le lumineux d'un taxi ; fiche course sur papier clair ===== */
+.tb{--a:#f2b33d;--bg:#17191d;--bg2:#20242a;--ln:#2c3138;--mu:#8b8f98;--go:#3fbf74;--bl:#6fa8ff;background:var(--bg);color:#fff;border-radius:22px;padding:16px 0 4px;margin:0 0 14px}
+.tb-hd{display:flex;justify-content:space-between;align-items:flex-end;padding:0 16px 14px;gap:10px}
+.tb-hd h2{margin:0;font-size:26px;letter-spacing:-.6px;line-height:1.05;color:#fff}.tb-hd p{margin:5px 0 0;color:var(--mu);font-size:13.5px}
+.tb-plus{width:46px;height:46px;border-radius:14px;background:var(--a);color:#17191d;border:0;font-size:26px;font-weight:700;cursor:pointer;flex:none}
+.tb-nx{margin:0 12px 6px;background:var(--bg2);border:1px solid var(--ln);border-radius:20px;padding:14px}
+.tb-nx1{display:flex;justify-content:space-between;color:var(--mu);font-size:13.5px}
+.tb-live{color:var(--a);font-weight:600}.tb-live:before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--a);margin-right:6px;vertical-align:1px;box-shadow:0 0 0 4px rgba(242,179,61,.2)}
+.tb-fl{display:flex;align-items:center;gap:4px;margin:12px 0 10px}
+.tb-f{width:46px;height:62px;flex:none;background:#0d0e10;border-radius:8px;position:relative;font-size:46px;line-height:62px;font-weight:800;text-align:center;color:var(--a);font-variant-numeric:tabular-nums}
+.tb-f:after{content:"";position:absolute;left:0;right:0;top:50%;height:2px;background:var(--bg2)}
+.tb-co{font-size:38px;font-weight:800;color:var(--a);margin:0 1px}
+.tb-txt{font-size:30px;font-weight:800;color:var(--a)}
+.tb-de{margin-left:10px;min-width:0}.tb-de b{display:block;font-size:24px;line-height:1.05;letter-spacing:-.5px;color:#fff;overflow-wrap:anywhere}.tb-de span{color:var(--mu);font-size:13px}
+.tb-in{display:flex;flex-wrap:wrap;gap:4px 12px;color:#d5d7dc;font-size:13.5px;margin-bottom:12px}.tb-in em{font-style:normal;color:var(--mu)}
+.tb-sg{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}.tb-sg i{height:5px;border-radius:3px;background:var(--ln)}.tb-sg i.on{background:var(--a)}
+.tb-sl{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;font-size:11px;color:var(--mu);margin:6px 0 12px;text-align:center}.tb-sl b{color:var(--a)}
+.tb-cta{display:flex;gap:8px}.tb-go{flex:1;background:var(--a);color:#17191d;border:0;border-radius:14px;padding:14px 10px;font-weight:700;font-size:15.5px;font-family:inherit;cursor:pointer}
+.tb-sq{width:50px;border-radius:14px;border:1px solid var(--ln);background:transparent;color:#fff;font-size:19px;cursor:pointer;flex:none}
+.tb-bh{display:flex;justify-content:space-between;align-items:baseline;padding:16px 16px 6px}.tb-bh h3{margin:0;font-size:19px;color:#fff}.tb-bh span{color:var(--mu);font-size:13px}
+.tb-day{padding:12px 16px 4px;color:var(--mu);font-size:13px;font-weight:600}
+.tb-row{display:grid;grid-template-columns:58px 1fr auto;gap:10px;align-items:center;padding:12px 16px;border:0;border-top:1px solid var(--ln);cursor:pointer;width:100%;background:none;color:#fff;text-align:left;font:inherit}
+.tb-row:hover{background:rgba(255,255,255,.03)}
+.tb-t{font-size:21px;font-weight:800;font-variant-numeric:tabular-nums}.tb-t.dim{color:var(--mu)}
+.tb-rc{min-width:0}.tb-rc b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tb-rc span{display:block;color:var(--mu);font-size:12.5px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tb-s{font-size:11px;font-weight:800;letter-spacing:.5px;white-space:nowrap;text-align:right}.tb-s.a{color:var(--a)}.tb-s.g{color:var(--go)}.tb-s.b{color:var(--bl)}.tb-s.m{color:var(--mu)}
+.tb-blink{animation:tbbl 1.4s steps(2) infinite}@keyframes tbbl{50%{opacity:.35}}
+@media (prefers-reduced-motion:reduce){.tb-blink{animation:none}}
+.tb-vide{padding:22px 16px;color:var(--mu);text-align:center;border-top:1px solid var(--ln)}
+#tb-fiche{position:fixed;inset:0;z-index:300;display:none}#tb-fiche.on{display:block}
+#tb-fiche .ov{position:absolute;inset:0;background:rgba(0,0,0,.55)}
+#tb-fiche .sh{position:absolute;left:0;right:0;bottom:0;max-height:92vh;overflow:auto;background:#f7f4ee;color:#1b1c1f;border-radius:24px 24px 0 0;padding:10px 18px calc(20px + env(safe-area-inset-bottom,0px));max-width:620px;margin:0 auto}
+#tb-fiche .gr{width:42px;height:5px;background:#d8d2c4;border-radius:9px;margin:0 auto 12px}
+.tf1{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding-right:34px}.tf1 h3{margin:0;font-size:25px;letter-spacing:-.5px;line-height:1.05;color:#1b1c1f}.tf1 p{margin:4px 0 0;color:#6b6e75;font-size:14px}
+.tf-bd{background:#fff1d6;color:#8a5a00;font-weight:700;font-size:12.5px;border-radius:999px;padding:6px 10px;white-space:nowrap}
+.tf-bd.g{background:#dff3e6;color:#1f7a45}.tf-bd.m{background:#ece8df;color:#6b6e75}
+.tf-x{position:absolute;right:14px;top:12px;border:0;background:#ece8df;border-radius:50%;width:32px;height:32px;font-size:15px;cursor:pointer;color:#1b1c1f}
+.tf-rt{display:grid;grid-template-columns:16px 1fr;gap:0 10px;margin:14px 0 4px}
+.tf-rt .d{display:flex;flex-direction:column;align-items:center;padding:5px 0 22px}.tf-rt .d i{flex:none;width:11px;height:11px;border-radius:50%;border:3px solid #1b1c1f;background:#f7f4ee}.tf-rt .d u{flex:1;width:2px;background:#cfc8b8;margin:3px 0}.tf-rt .d i.b{background:#1b1c1f}
+.tf-rt p{margin:0 0 12px;font-size:15.5px;line-height:1.3;color:#1b1c1f}
+.tf-fa{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid #e4ddcd;border-radius:16px;margin:4px 0 12px;overflow:hidden;background:#fff}
+.tf-fa div{padding:10px 12px;border-right:1px solid #e4ddcd;min-width:0}.tf-fa div:last-child{border:0}.tf-fa b{display:block;font-size:18px;white-space:nowrap;color:#1b1c1f}.tf-fa span{color:#6b6e75;font-size:12px}
+.tf-mt{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}.tf-mt>*{font-size:12.5px;background:#fff;border:1px solid #e4ddcd;border-radius:10px;padding:5px 9px;color:#3b3d42}
+.tf-go{display:block;width:100%;background:#1b1c1f;color:#fff;border:0;border-radius:16px;padding:15px;font-weight:700;font-size:16.5px;font-family:inherit;cursor:pointer;text-align:center}
+.tf-go small{display:block;font-weight:500;color:#c9c3b5;font-size:12.5px;margin-top:3px}
+.tf-q{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0 14px}.tf-q>*{background:#fff;border:1px solid #e4ddcd;border-radius:14px;padding:10px 4px;text-align:center;font:inherit;font-size:12px;color:#3b3d42;text-decoration:none;cursor:pointer}.tf-q>* b{display:block;font-size:19px;margin-bottom:3px}
+.tf-q .off{opacity:.35;pointer-events:none}
+.tf-h{font-size:15px;font-weight:700;margin:0 0 8px;color:#1b1c1f}
+.tf-ac .ag{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}.tf-ac .agl{display:none}
+.tf-ac button,.tf-ac a{background:#fff!important;color:#1b1c1f!important;border:1px solid #e4ddcd!important;border-radius:12px!important;padding:10px 12px!important;font-weight:600!important;font-size:13.5px!important;font-family:inherit!important;text-decoration:none}
+.tf-ac .no,.tf-ac .del{color:#c2412b!important}
+.tb h2,.tb h3,.tf1 h3{font-family:"DM Sans",system-ui,sans-serif;font-weight:700}
 #btn-moderne{margin-left:auto}
 </style>
 <style>/* iPhone : pas de zoom auto sur les champs */@media (max-width:900px){input,select,textarea{font-size:16px!important}}</style>
@@ -584,7 +600,6 @@ details.mplus .acts{margin-top:6px}
     <div id="main">
       <!-- RÉSERVATIONS -->
       <div class="tab-panel active" id="tab-reservations">
-        <div id="mod-hero" hidden><div><h2 id="mod-salut">Bonjour Badr</h2><p id="mod-jour"></p></div></div>
         <div class="kpis4">
           <div class="stat-card alert"><div class="label">à confirmer</div><div class="value" id="stat-attente">0</div></div>
           <div class="stat-card"><div class="label">courses à venir</div><div class="value" id="stat-avenir">0</div></div>
@@ -608,11 +623,10 @@ details.mplus .acts{margin-top:6px}
           </div>
           <select id="filter-statut-resa" hidden><option value=""></option></select>
           <span id="resa-cal-all"></span>
-          <button type="button" class="rchip" id="btn-moderne" aria-pressed="false">✨ Nouvelle vue</button>
+          <button type="button" class="rchip" id="btn-moderne" aria-pressed="true">↩️ Ancienne vue</button>
         </div>
         <div class="new-bar push-bar" id="push-bar"><span id="push-bar-txt"></span><button type="button" id="btn-push-plustard">Plus tard</button><button type="button" class="pl" id="btn-push">🔔 Activer</button></div>
         <div class="new-bar" id="new-bar"><span id="new-bar-txt"></span><button type="button" class="pl" id="btn-tout-vu">Tout marquer comme vu</button></div>
-        <div id="mod-todo" hidden></div>
         <div id="resa-list"><div class="rempty">Chargement…</div></div>
       </div>
 
@@ -2173,13 +2187,17 @@ function anonymise(title,location){
       }
     } catch (e) { toast("Impossible : " + ((e && e.code) || "erreur") + (e && e.code === "permission-denied" ? " (règle Firebase)" : ""), 5000); }
   });
-  // ===== Vue moderne (essai) =====
-  let MODERNE = false; try { MODERNE = localStorage.getItem("tvp_moderne") === "1" || /[?&]moderne=1/.test(location.search); } catch (e) {}
-  const ETAPES_MOD = [["✅", "Confirmer", "Confirmée", "✅ Confirmer la course"], ["🚖", "Chauffeur", "Chauffeur", "🚖 Choisir le chauffeur"], ["📤", "Liens", "Liens", "📤 Liens client + chauffeur"], ["🏁", "Terminer", "Terminée", "🏁 Course effectuée"]];
+  // ===== Vue « Tableau des départs » (par défaut ; bouton « Ancienne vue » pour revenir) =====
+  let MODERNE = true; try { MODERNE = localStorage.getItem("tvp_vue") !== "ancienne"; } catch (e) {}
+  const ETAPES_TB = ["Reçue", "Confirmée", "Chauffeur", "Liens", "Terminée"];
+  const ACTIONS_TB = [null, ["✅ Confirmer la course", "Le client reçoit la confirmation"], ["🚖 Choisir le chauffeur", "Dispatcher ou envoyer au chauffeur"], ["📤 Liens client + chauffeur", "WhatsApp ou SMS, tu choisis"], ["🏁 Course effectuée", "La course passe dans « Passées »"]];
+  // Étapes faites : 0 reçue, 1 confirmée, 2 chauffeur, 3 liens, 4 terminée
   function etapesFaites(r) {
     const e = r.lienCourse && etapesCache[r.lienCourse];
-    return [r.statut === "confirmée" || r.statut === "terminée", !!(r.chauffeurNom || r.chauffeurUid), !!(r.lienEnvoye || (e && (e.ouvert || e.etape))), r.statut === "terminée"];
+    const fin = r.statut === "terminée";
+    return [true, r.statut === "confirmée" || fin, fin || !!(r.chauffeurNom || r.chauffeurUid), fin || !!(r.lienEnvoye || (e && (e.ouvert || e.etape))), fin];
   }
+  const etapeCourante = r => r.statut === "annulée" ? -1 : etapesFaites(r).findIndex(x => !x);
   function dansTxt(r) {
     const t = ecHeure(r); if (!t) return "";
     const mn = Math.round((t - Date.now()) / 60000);
@@ -2187,70 +2205,142 @@ function anonymise(title,location){
     if (mn <= 0) return "maintenant";
     return "dans " + (mn >= 60 ? Math.floor(mn / 60) + " h " + String(mn % 60).padStart(2, "0") : mn + " min");
   }
-  function carteModerne(r, o) {
-    const id = esc(r.id), faites = etapesFaites(r), cur = r.statut === "annulée" ? -1 : faites.findIndex(x => !x);
-    const nbFaites = cur < 0 ? (r.statut === "annulée" ? 0 : 4) : cur;
-    const bar = Math.max(0, Math.min(3, nbFaites - (nbFaites === 4 ? 1 : 0))) / 3 * 75;
-    const stp = r.statut === "annulée" ? "" : `<div class="mstp"><div class="bar" style="width:${bar}%"></div>` + ETAPES_MOD.map((e, i) =>
-      `<button type="button" class="${faites[i] ? "d" : i === cur ? "n" : ""}" data-step="${i}" data-id="${id}"><i>${faites[i] ? "✓" : i === cur ? e[0] : i + 1}</i>${faites[i] ? e[2] : e[1]}</button>`).join("") + `</div>`;
-    const go = cur >= 0 ? `<button type="button" class="mgo" data-step="${cur}" data-id="${id}">${ETAPES_MOD[cur][3]}</button>` : "";
-    const wa = r.tel && waNumClient(r.tel) ? `<a target="_blank" rel="noopener" href="https://wa.me/${waNumClient(r.tel)}"><i>💬</i>WhatsApp</a>` : `<span style="opacity:.35"><i>💬</i>WhatsApp</span>`;
-    const tel = r.tel ? `<a href="tel:${esc(r.tel)}"><i>📞</i>Appeler</a>` : `<span style="opacity:.35"><i>📞</i>Appeler</span>`;
-    const dans = dansTxt(r);
-    const chips = [o.meta ? `<span>${o.meta}</span>` : "", r.chauffeurNom ? `<span>🚖 ${esc(r.chauffeurNom)}</span>` : ""].join("");
-    return `<div class="rc mod s-${o.cls}${o.nouv ? " nouv" : ""}${o.imm ? " imm-card" : o.bientot ? " soon-card" : ""}" data-rid="${id}">
-      <div class="m1"><div><div class="mh">${esc(r.heure || "—")}</div><div class="mw${o.imm || o.bientot ? " urg" : ""}">${esc(dans)}</div></div><div class="mp">${fmtPrix(r.prix)}</div></div>
-      <div class="mn">${o.nouv ? '<span class="nv">NOUVEAU</span>' : ""}${o.nom}<span class="pill">${o.lib}</span></div>
-      ${o.badges ? `<div class="mb">${o.badges}</div>` : ""}
-      ${o.hotel ? `<div class="mb"><span class="tag-hotel">🏨 ${esc(r.hotel || "Hôtel partenaire")}</span></div>` : ""}
-      <div class="mr"><div class="l"><i></i><u></u><i class="b"></i></div><div><p>${esc(r.dep || "?")}</p><p>${esc(r.arr || "?")}</p></div></div>
-      ${o.actif && r.dep && r.arr && trajTxt(r) ? `<div class="mt" data-traj="${id}">${trajTxt(r)}</div>` : ""}
-      <div class="mc">${chips}${o.vol}${o.note}</div>
-      ${stp}${go}
-      <div class="mq">${tel}${wa}${r.dep && r.arr ? `<button type="button" data-carte="${id}"><i>🗺️</i>Carte</button>` : `<span style="opacity:.35"><i>🗺️</i>Carte</span>`}<button type="button" data-edit="${id}"><i>✏️</i>Modifier</button></div>
-      <details class="mplus"><summary>⋯ Toutes les actions</summary><div class="acts">${o.boutons}</div></details>
-    </div>`;
+  // Nom court d'un lieu, comme sur un panneau : « CDG T2E », « ORLY », « Gare du Nord », « Porte Maillot »
+  function lieuCourt(a) {
+    const s = String(a || "").trim(); if (!s) return "?";
+    const term = (s.match(/\b(?:T|terminal\s*)([1-4][A-G]?)\b/i) || [])[1];
+    if (/\bCDG\b|charles[- ]de[- ]gaulle|roissy/i.test(s)) return "CDG" + (term ? " T" + term.toUpperCase() : "");
+    if (/\borly\b/i.test(s)) return "ORLY" + (term ? " " + term.toUpperCase() : "");
+    if (/beauvais/i.test(s)) return "BEAUVAIS";
+    if (/disney/i.test(s)) return "DISNEY";
+    const g = s.match(/gare\s+(?:du\s+|de\s+l['’]|de\s+la\s+|de\s+|d['’])?([A-Za-zÀ-ÿ-]+(?:[- ][A-Z][a-zà-ÿ-]+)?)/i);
+    if (g) return "Gare " + (/^(nord|est|lyon)$/i.test(g[1]) ? (/nord/i.test(g[1]) ? "du Nord" : /est/i.test(g[1]) ? "de l'Est" : "de Lyon") : g[1]);
+    const p = s.split(",")[0].trim();
+    return p.length > 24 ? p.slice(0, 23) + "…" : p;
   }
-  function ouvrirPlus(id) {
-    const d = document.querySelector('.rc[data-rid="' + CSS.escape(id) + '"] details.mplus');
-    if (d) { d.open = true; d.scrollIntoView({ behavior: "smooth", block: "center" }); }
+  function villeCourte(a) {
+    const s = String(a || ""), m = s.match(/\b(75)0?(\d{2})\b/);
+    if (m && /paris/i.test(s)) return "Paris " + (+m[2]) + (+m[2] === 1 ? "ᵉʳ" : "ᵉ");
+    const parts = s.split(",").map(x => x.trim()).filter(x => x && !/^france$/i.test(x));
+    return (parts[1] || parts[0] || "").replace(/^\d{5}\s*/, "");
+  }
+  function statutTb(r) {
+    if (r.statut === "annulée") return ["ANNULÉE", "m"];
+    if (r.statut === "terminée") return ["EFFECTUÉE", "m"];
+    const urg = urgence(r);
+    if (r.statut !== "confirmée") return [urg && urg.imm ? "IMMÉDIAT" : "À CONFIRMER", "a tb-blink"];
+    const e = r.lienCourse && etapesCache[r.lienCourse];
+    if (e && e.etape === "bord") return ["À BORD", "g"];
+    if (e && e.etape === "place") return ["SUR PLACE", "b"];
+    if (e && e.etape === "route") return ["EN ROUTE", "b"];
+    if (r.lienEnvoye || (e && e.ouvert)) return ["LIENS ENVOYÉS", "b"];
+    if (r.chauffeurNom || r.chauffeurUid) return ["CHAUFFEUR PRÊT", "b"];
+    return ["CONFIRMÉE", "g"];
+  }
+  const prixTb = r => parseFloat(String(r.prix ?? "").replace(",", ".").replace(/[^\d.]/g, "")) || 0;
+  function prochaineCourse() {
+    const now = Date.now();
+    return reservationsCache.filter(r => groupOf(r) === 0 && r.statut !== "annulée" && r.statut !== "terminée")
+      .map(r => [r, ecHeure(r)]).filter(([r, t]) => t ? t > now - 30 * 60000 : /maintenant/i.test(String(r.heure || "")))
+      .sort((a, b) => (a[1] || 0) - (b[1] || 0)).map(x => x[0])[0] || null;
+  }
+  function volets(h) {
+    const m = String(h || "").match(/^(\d{1,2})[:h](\d{2})$/);
+    if (!m) return `<span class="tb-txt">${esc(h || "—")}</span>`;
+    const d = m[1].padStart(2, "0") + m[2];
+    return `<div class="tb-f">${d[0]}</div><div class="tb-f">${d[1]}</div><span class="tb-co">:</span><div class="tb-f">${d[2]}</div><div class="tb-f">${d[3]}</div>`;
+  }
+  function tableauDeparts(rows) {
+    const auj = todayStr(), h = new Date().getHours();
+    const duJour = reservationsCache.filter(r => r.date === auj && r.statut !== "annulée");
+    const ca = Math.round(duJour.reduce((t, r) => t + prixTb(r), 0));
+    const jr = new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
+    let html = `<div class="tb"><div class="tb-hd"><div><h2>${h >= 18 || h < 5 ? "Bonsoir" : "Bonjour"} Badr</h2><p>${esc(jr.charAt(0).toUpperCase() + jr.slice(1))} · ${duJour.length} départ${duJour.length > 1 ? "s" : ""} · ${ca} €</p></div><button type="button" class="tb-plus" data-tb-new aria-label="Nouvelle réservation">+</button></div>`;
+    const nx = prochaineCourse();
+    if (nx && resaView === "avenir") {
+      const f = etapesFaites(nx), cur = etapeCourante(nx), act = ACTIONS_TB[cur] || null, rg = rangClient(nx), id = esc(nx.id);
+      const info = [esc(nx.nom || "Client") + (rg >= 2 ? ` <em>· ${rg}ᵉ course</em>` : ""), nx.pax ? "🚐 " + esc(nx.pax) + " pers." : "", volCode(nx) ? "✈️ " + esc(volCode(nx)) : "", trajTxt(nx) && !/calcul/.test(trajTxt(nx)) ? `<span data-traj="${id}">${trajTxt(nx)}</span>` : (nx.dep && nx.arr ? `<span data-traj="${id}">${trajTxt(nx)}</span>` : "")].filter(Boolean).map(x => `<span>${x}</span>`).join("");
+      html += `<div class="tb-nx"><div class="tb-nx1"><span>Prochain départ</span><span class="tb-live">${esc(dansTxt(nx) || jourTitre(nx.date))}</span></div>
+        <div class="tb-fl">${volets(nx.heure)}<div class="tb-de"><b>${esc(lieuCourt(nx.arr))}</b><span>depuis ${esc(villeCourte(nx.dep) || lieuCourt(nx.dep))}</span></div></div>
+        <div class="tb-in">${info}</div>
+        <div class="tb-sg">${f.map(x => `<i class="${x ? "on" : ""}"></i>`).join("")}</div>
+        <div class="tb-sl">${ETAPES_TB.map((x, i) => i === cur ? `<b>${x}</b>` : `<span>${x}</span>`).join("")}</div>
+        <div class="tb-cta">${act ? `<button type="button" class="tb-go" data-step="${cur}" data-id="${id}">${act[0]}</button>` : ""}${nx.dep && nx.arr ? `<button type="button" class="tb-sq" data-carte="${id}" aria-label="Carte du trajet">🗺️</button>` : ""}<button type="button" class="tb-sq" data-fiche="${id}" aria-label="Toutes les actions">⋯</button></div></div>`;
+    }
+    const titre = { avenir: "Départs", confirmer: "À confirmer", passees: "Courses passées", toutes: "Toutes les courses" }[resaView] || "Départs";
+    html += `<div class="tb-bh"><h3>${titre}</h3><span>${rows.length} course${rows.length > 1 ? "s" : ""}</span></div>`;
+    if (!rows.length) return html + `<div class="tb-vide">${resaView === "confirmer" ? "Aucune course à confirmer." : "Aucune course ici pour l'instant."}</div></div>`;
+    let jour = null;
+    rows.forEach(r => {
+      if ((r.date || "") !== jour) { jour = r.date || ""; html += `<div class="tb-day">${esc(jourTitre(jour))}</div>`; }
+      const [st, cl] = statutTb(r), passe = groupOf(r) !== 0;
+      html += `<button type="button" class="tb-row" data-fiche="${esc(r.id)}"><span class="tb-t${passe ? " dim" : ""}">${esc(r.heure || "—")}</span><span class="tb-rc"><b>${estNouvelle(r) ? "🆕 " : ""}${esc(r.nom || "—")}</b><span>${esc(lieuCourt(r.dep))} → ${esc(lieuCourt(r.arr))}</span></span><span class="tb-s ${cl}">${st}</span></button>`;
+    });
+    return html + `</div>`;
+  }
+  function lierTableau(box) {
+    box.querySelectorAll("[data-fiche]").forEach(b => b.addEventListener("click", () => ouvrirFiche(b.dataset.fiche)));
+    box.querySelectorAll("[data-step]").forEach(b => b.addEventListener("click", () => faireEtape(b.dataset.id, +b.dataset.step, b)));
+    box.querySelectorAll("[data-carte]").forEach(b => b.addEventListener("click", () => ouvrirCarte(b.dataset.carte)));
+    box.querySelectorAll("[data-tb-new]").forEach(b => b.addEventListener("click", () => document.getElementById("btn-new-primary").click()));
+  }
+  // ----- Fiche d'une course -----
+  let ficheId = null;
+  function ouvrirFiche(id) {
+    let f = document.getElementById("tb-fiche");
+    if (!f) {
+      f = document.createElement("div"); f.id = "tb-fiche";
+      f.innerHTML = `<div class="ov"></div><div class="sh" role="dialog" aria-modal="true"><div class="gr"></div><button type="button" class="tf-x" aria-label="Fermer">✕</button><div id="tf-c"></div></div>`;
+      document.body.appendChild(f);
+      f.querySelector(".ov").addEventListener("click", fermerFiche);
+      f.querySelector(".tf-x").addEventListener("click", fermerFiche);
+    }
+    ficheId = id; majFiche(); f.classList.add("on"); marquerVues([id], true);
+  }
+  function fermerFiche() { ficheId = null; const f = document.getElementById("tb-fiche"); if (f) f.classList.remove("on"); }
+  function majFiche() {
+    const r = reservationsCache.find(x => x.id === ficheId), c = document.getElementById("tf-c"); if (!c) return;
+    if (!r) { fermerFiche(); return; }
+    const id = esc(r.id), cur = etapeCourante(r), act = ACTIONS_TB[cur] || null, [st] = statutTb(r);
+    const bd = r.statut === "en attente" ? "" : r.statut === "confirmée" ? "g" : "m";
+    const quand = (r.date === todayStr() ? "Aujourd'hui" : jourTitre(r.date)) + " " + (r.heure || "");
+    const lg = String(r.langue || "").slice(0, 2).toLowerCase();
+    const sous = [esc(r.nom || "Client"), r.source === "site" ? "réservé sur le site" : r.hotel ? "🏨 " + esc(r.hotel) : "", lg && DRAP[lg] ? DRAP[lg] : ""].filter(Boolean).join(" · ");
+    const t = TRAJ[trajCle(r)];
+    const tmp = document.createElement("div"); tmp.innerHTML = carteClassique(r);
+    const acts = tmp.querySelector(".acts"), badges = tmp.querySelector(".m > div:nth-child(2)");
+    const tel = r.tel ? `<a href="tel:${esc(r.tel)}"><b>📞</b>Appeler</a>` : `<span class="off"><b>📞</b>Appeler</span>`;
+    const wa = r.tel && waNumClient(r.tel) ? `<a target="_blank" rel="noopener" href="https://wa.me/${waNumClient(r.tel)}"><b>💬</b>WhatsApp</a>` : `<span class="off"><b>💬</b>WhatsApp</span>`;
+    const metas = [r.siege && !/^aucun/i.test(r.siege) ? "👶 " + esc(r.siege) : "", r.bagages ? "🧳 " + esc(r.bagages) + " valise(s)" : "", volCode(r) ? "✈️ " + esc(volCode(r)) : "", r.chauffeurNom ? "🚖 " + esc(r.chauffeurNom) : "", r.tel ? "📱 " + esc(r.tel) : "", r.note ? "📝 " + esc(r.note) : ""].filter(Boolean).map(x => `<span>${x}</span>`).join("");
+    c.innerHTML = `<div class="tf1"><div><h3>${esc(quand.trim())}</h3><p>${sous}</p></div><span class="tf-bd ${bd}">${esc(st.charAt(0) + st.slice(1).toLowerCase())}</span></div>
+      ${badges && badges.innerHTML.trim() ? `<div style="margin-top:8px">${badges.innerHTML}</div>` : ""}
+      <div class="tf-rt"><div class="d"><i></i><u></u><i class="b"></i></div><div><p>${esc(r.dep || "?")}</p><p>${esc(r.arr || "?")}</p></div></div>
+      <div class="tf-fa"><div><b>${fmtPrix(r.prix)}</b><span>tout compris</span></div><div><b>${t && t.min ? dureeTxt(t.min) : "—"}</b><span>${t && t.km ? String(t.km).replace(".", ",") + " km" : "trajet"}</span></div><div><b>${esc(r.pax || "—")} pers.</b><span>${esc(r.vehicule || "")}</span></div></div>
+      ${metas ? `<div class="tf-mt">${metas}</div>` : ""}
+      ${act ? `<button type="button" class="tf-go" data-step="${cur}" data-id="${id}">${act[0]}<small>${act[1]}</small></button>` : ""}
+      <div class="tf-q">${tel}${wa}${r.dep && r.arr ? `<button type="button" data-carte="${id}"><b>🗺️</b>Carte</button>` : `<span class="off"><b>🗺️</b>Carte</span>`}<button type="button" data-edit="${id}"><b>✏️</b>Modifier</button></div>
+      <div class="tf-h">Autres actions</div><div class="tf-ac">${acts ? acts.innerHTML : ""}</div>`;
+    lierActions(c);
+    c.querySelectorAll("[data-step]").forEach(b => b.addEventListener("click", () => faireEtape(b.dataset.id, +b.dataset.step, b)));
+    c.querySelectorAll("[data-edit]").forEach(b => b.addEventListener("click", fermerFiche));
   }
   async function faireEtape(id, i, btn) {
     const r = reservationsCache.find(x => x.id === id); if (!r) return;
-    if (i === 0) {
+    if (i === 1) {
       marquerVues([id], true);
       try { await updateDoc(doc(db, "reservations", id), { statut: "confirmée" }); } catch (e) { toast("La confirmation n'a pas pu être enregistrée.", 5000); return; }
       if (r.email || r.source === "site") envoyerConfMail(id, btn);
-      else { toast("Confirmée ✔ Envoie la confirmation au client (WhatsApp ou SMS)", 5000); setTimeout(() => ouvrirPlus(id), 400); }
-    } else if (i === 1) { ouvrirPlus(id); toast("Choisis : 📢 Dispatcher ou 🚕 Envoyer au chauffeur", 4500); }
-    else if (i === 2) envoyerLiens(id);
-    else if (i === 3) { marquerVues([id], true); updateDoc(doc(db, "reservations", id), { statut: "terminée" }).catch(() => toast("Pas enregistré, réessaie.", 4000)); }
+      else { toast("Confirmée ✔ Envoie la confirmation au client avec « Confirmation client » ou « SMS »", 5000); if (ficheId !== id) ouvrirFiche(id); }
+    } else if (i === 2) { if (ficheId !== id) ouvrirFiche(id); toast("Choisis : 📢 Dispatcher ou 🚖 Envoyer au chauffeur", 4500); }
+    else if (i === 3) envoyerLiens(id);
+    else if (i === 4) { marquerVues([id], true); updateDoc(doc(db, "reservations", id), { statut: "terminée" }).catch(() => toast("Pas enregistré, réessaie.", 4000)); }
   }
-  function renderModerne() {
-    const hero = document.getElementById("mod-hero"), todo = document.getElementById("mod-todo"), bt = document.getElementById("btn-moderne");
-    if (bt) { bt.setAttribute("aria-pressed", MODERNE); bt.textContent = MODERNE ? "↩️ Ancienne vue" : "✨ Nouvelle vue"; }
-    hero.hidden = todo.hidden = !MODERNE; if (!MODERNE) return;
-    const h = new Date().getHours(), auj = todayStr();
-    document.getElementById("mod-salut").textContent = (h >= 18 || h < 5 ? "Bonsoir" : "Bonjour") + " Badr";
-    const duJour = reservationsCache.filter(r => r.date === auj && r.statut !== "annulée");
-    const ca = duJour.reduce((t, r) => t + (parseFloat(String(r.prix ?? "").replace(",", ".").replace(/[^\d.]/g, "")) || 0), 0);
-    const jr = new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
-    document.getElementById("mod-jour").innerHTML = esc(jr.charAt(0).toUpperCase() + jr.slice(1)) + " · <b>" + duJour.length + " course" + (duJour.length > 1 ? "s" : "") + " · " + Math.round(ca) + " €</b>";
-    const now = Date.now(), L = [];
-    reservationsCache.filter(r => groupOf(r) === 0 && r.statut !== "annulée" && r.statut !== "terminée").forEach(r => {
-      const t = ecHeure(r), mn = t ? (t - now) / 60000 : null, f = etapesFaites(r), qui = esc(r.nom || "Client") + (r.heure ? " · " + (r.date === auj ? "" : jourTitre(r.date).toLowerCase() + " ") + esc(r.heure) : "");
-      if (!f[0]) L.push([t || 9e15, 0, r, "✅", "Confirmer la course", qui, "Confirmer"]);
-      else if (!f[1] && mn !== null && mn < 24 * 60) L.push([t, 1, r, "🚖", "Choisir le chauffeur", qui, "Choisir"]);
-      else if (!f[2] && mn !== null && mn < 120) L.push([t, 2, r, "📤", "Envoyer les liens", qui + (dansTxt(r) ? " · " + dansTxt(r) : ""), "Envoyer"]);
-    });
-    L.sort((a, b) => a[0] - b[0]);
-    todo.innerHTML = L.length ? `<h3>À faire maintenant</h3>` + L.slice(0, 5).map(x => `<div class="mt-row"><div class="ic">${x[3]}</div><div class="x"><b>${x[4]}</b><span>${x[5]}</span></div><button type="button" data-step="${x[1]}" data-id="${esc(x[2].id)}">${x[6]}</button></div>`).join("") : "";
-    todo.querySelectorAll("[data-step]").forEach(b => b.addEventListener("click", () => faireEtape(b.dataset.id, +b.dataset.step, b)));
-  }
-  document.getElementById("btn-moderne").addEventListener("click", () => { MODERNE = !MODERNE; try { localStorage.setItem("tvp_moderne", MODERNE ? "1" : "0"); } catch (e) {} renderReservations(); });
+  document.getElementById("btn-moderne").addEventListener("click", () => { MODERNE = !MODERNE; try { localStorage.setItem("tvp_vue", MODERNE ? "tableau" : "ancienne"); } catch (e) {} renderReservations(); });
   function renderReservations() {
     renderEnCours(); try { ecSurveiller(); } catch (e) {}
-    try { renderModerne(); } catch (e) { console.error(e); }
+    try { document.querySelector("#tab-reservations .kpis4").hidden = MODERNE; } catch (e) {}
+    { const bt = document.getElementById("btn-moderne"); if (bt) { bt.setAttribute("aria-pressed", MODERNE); bt.textContent = MODERNE ? "↩️ Ancienne vue" : "✨ Nouvelle vue"; } }
+    try { if (ficheId) majFiche(); } catch (e) {}
     const aVenir = reservationsCache.filter(r => groupOf(r) === 0 && r.statut !== "annulée");
     document.getElementById("resa-cal-all").innerHTML = aVenir.length ? calLink(aVenir, "📅 Tout ajouter au calendrier", "cal-btn cal-all") : "";
     const key = r => (r.date || "9999-12-31") + " " + (r.heure || "00:00");
@@ -2260,11 +2350,15 @@ function anonymise(title,location){
     else if (resaView === "passees") rows = reservationsCache.filter(r => groupOf(r) !== 0).sort((a, b) => key(b).localeCompare(key(a)));
     else rows = sortReservations(reservationsCache.slice());
     const box = document.getElementById("resa-list");
+    if (MODERNE) { box.innerHTML = tableauDeparts(rows); lierTableau(box); majTrajets(); return; }
     if (!rows.length) { box.innerHTML = `<div class="rempty">${resaView === "confirmer" ? "Aucune course à confirmer." : "Aucune réservation ici pour l'instant."}</div>`; return; }
     const parJour = [];
     rows.forEach(r => { const k = r.date || ""; let g = parJour.find(x => x.k === k); if (!g) parJour.push(g = { k, items: [] }); g.items.push(r); });
     box.innerHTML = parJour.map(g => `<div class="rday"><h2>${esc(jourTitre(g.k))}</h2><span>${g.items.length} course${g.items.length > 1 ? "s" : ""}</span></div><div class="rlist">` +
-      g.items.map(r => {
+      g.items.map(carteClassique).join("") + `</div>`).join("");
+    lierActions(box);
+  }
+  function carteClassique(r) {
         const [cls, lib] = ST[r.statut] || ST["en attente"];
         const nouv = estNouvelle(r);
         const hotel = isHotelR(r);
@@ -2291,7 +2385,6 @@ function anonymise(title,location){
         const lg = String(r.langue||"").slice(0,2).toLowerCase();
         const rg = r.statut !== "annulée" ? rangClient(r) : 0;
         const badges = (rg >= 2 ? '<span class="src">🔁 ' + rg + 'ᵉ course</span>' : "") + etapeBadge(r) + (imm ? '<span class="imm">⚡ IMMÉDIAT</span>' : bientot ? '<span class="soon">⏰ '+(urg.mn>0?'Dans '+urg.mn+' min':'Maintenant')+'</span>' : "") + provenance(r) + (lg && DRAP[lg] ? '<span class="src">'+DRAP[lg]+' '+lg.toUpperCase()+'</span>' : "");
-        if (MODERNE) return carteModerne(r, { cls, lib, nouv, hotel, nom, meta, vol, note, actif, boutons, badges, imm, bientot, urg });
         return `<div class="rc s-${cls}${nouv ? " nouv" : ""}${imm ? " imm-card" : bientot ? " soon-card" : ""}" data-rid="${esc(r.id)}">
           <div class="t">${esc(r.heure || "—")}${r.ref ? `<small>${esc(r.ref)}</small>` : ""}</div>
           <div class="m">
@@ -2305,7 +2398,8 @@ function anonymise(title,location){
             ${vol}${note}
             <div class="l3"><span class="pr">${fmtPrix(r.prix)}${hotel && r.commission ? `<small>dont ${esc(r.commission)} € hôtel</small>` : ""}</span><div class="acts">${boutons}</div></div>
           </div></div>`;
-      }).join("") + `</div>`).join("");
+  }
+  function lierActions(box) {
     box.querySelectorAll("[data-vu]").forEach(b => b.addEventListener("click", () => marquerVues([b.dataset.vu])));
     box.querySelectorAll("[data-st]").forEach(b => b.addEventListener("click", () => { marquerVues([b.dataset.id], true); updateDoc(doc(db, "reservations", b.dataset.id), { statut: b.dataset.st }); }));
     box.querySelectorAll("[data-pancarte-send]").forEach(b => b.addEventListener("click", async () => {
@@ -2320,7 +2414,6 @@ function anonymise(title,location){
     box.querySelectorAll("[data-avistrip]").forEach(b => b.addEventListener("click", () => { updateDoc(doc(db, "reservations", b.dataset.avistrip), { avisTripDemande: true }).catch(() => {}); }));
     box.querySelectorAll("[data-confmail]").forEach(b => b.addEventListener("click", () => envoyerConfMail(b.dataset.confmail, b)));
     box.querySelectorAll("[data-carte]").forEach(b => b.addEventListener("click", () => ouvrirCarte(b.dataset.carte)));
-    box.querySelectorAll("[data-step]").forEach(b => b.addEventListener("click", () => faireEtape(b.dataset.id, +b.dataset.step, b)));
     majTrajets();
     box.querySelectorAll("[data-edit]").forEach(b => b.addEventListener("click", () => openEditResa(b.dataset.edit)));
     box.querySelectorAll("[data-facture]").forEach(b => b.addEventListener("click", () => {
