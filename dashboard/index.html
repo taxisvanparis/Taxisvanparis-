@@ -515,7 +515,7 @@
 .tf-rt p{margin:0 0 12px;font-size:15.5px;line-height:1.3;color:var(--text)}
 .tf-fa{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--border);border-radius:16px;margin:4px 0 12px;overflow:hidden;background:var(--card)}
 .tf-fa div{padding:10px 12px;border-right:1px solid var(--border);min-width:0}.tf-fa div:last-child{border:0}.tf-fa b{display:block;font-size:18px;white-space:nowrap;color:var(--heading)}.tf-fa span{color:var(--muted);font-size:12px}
-.tf-mt{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}.tf-mt>*{font-size:12.5px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:5px 9px;color:var(--text)}
+.tf-mt{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}.tf-mt .tf-tel{text-decoration:none;font-weight:700;color:var(--heading);border-color:var(--gold)}.tf-mt>*{font-size:12.5px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:5px 9px;color:var(--text)}
 .tf-go{display:block;width:100%;background:linear-gradient(180deg,#E2C477,#C9A24B);color:#17150F;border:0;border-radius:16px;padding:15px;font-weight:700;font-size:16.5px;font-family:inherit;cursor:pointer;text-align:center}
 .tf-go small{display:block;font-weight:500;color:#5a4a20;font-size:12.5px;margin-top:3px}
 .tf-q{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0 14px}.tf-q>*{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px 4px;text-align:center;font:inherit;font-size:12px;color:var(--text);text-decoration:none;cursor:pointer}.tf-q>* b{display:block;font-size:19px;margin-bottom:3px}
@@ -2369,7 +2369,7 @@ function anonymise(title,location){
     const acts = tmp.querySelector(".acts"), badges = tmp.querySelector(".m > div:nth-child(2)");
     const tel = r.tel ? `<a href="tel:${esc(r.tel)}"><b>📞</b>Appeler</a>` : `<span class="off"><b>📞</b>Appeler</span>`;
     const wa = r.tel && waNumClient(r.tel) ? `<a target="_blank" rel="noopener" href="https://wa.me/${waNumClient(r.tel)}"><b>💬</b>WhatsApp</a>` : `<span class="off"><b>💬</b>WhatsApp</span>`;
-    const metas = [r.siege && !/^aucun/i.test(r.siege) ? "👶 " + esc(r.siege) : "", r.bagages ? "🧳 " + esc(r.bagages) + " valise(s)" : "", volCode(r) ? "✈️ " + esc(volCode(r)) : "", r.chauffeurNom ? "🚖 " + esc(r.chauffeurNom) : "", r.tel ? "📱 " + esc(r.tel) : "", r.note ? "📝 " + esc(r.note) : ""].filter(Boolean).map(x => `<span>${x}</span>`).join("");
+    const metas = [r.siege && !/^aucun/i.test(r.siege) ? "👶 " + esc(r.siege) : "", r.bagages ? "🧳 " + esc(r.bagages) + " valise(s)" : "", volCode(r) ? "✈️ " + esc(volCode(r)) : "", r.chauffeurNom ? "🚖 " + esc(r.chauffeurNom) : "", r.tel ? `<a class="tf-tel" href="tel:${esc(String(r.tel).replace(/[^\d+]/g, ""))}">📞 ${esc(r.tel)}</a>` : "", noteUtile(r.note) ? "📝 " + esc(r.note) : ""].filter(Boolean).map(x => x.startsWith("<a") ? x : `<span>${x}</span>`).join("");
     c.innerHTML = `<div class="tf1"><div><h3>${esc(quand.trim())}</h3><p>${sous}</p></div><span class="tf-bd ${bd}">${esc(st.charAt(0) + st.slice(1).toLowerCase())}</span></div>
       ${badges && badges.innerHTML.trim() ? `<div style="margin-top:8px">${badges.innerHTML}</div>` : ""}
       <div class="tf-rt"><div class="d"><i></i><u></u><i class="b"></i></div><div><p>${esc(r.dep || "?")}</p><p>${esc(r.arr || "?")}</p></div></div>
@@ -2382,6 +2382,8 @@ function anonymise(title,location){
     c.querySelectorAll("[data-step]").forEach(b => b.addEventListener("click", () => faireEtape(b.dataset.id, +b.dataset.step, b)));
     c.querySelectorAll("[data-edit]").forEach(b => b.addEventListener("click", fermerFiche));
   }
+  // Note sans intérêt (« Chat », « Manuel »…) : pas affichée dans la fiche
+  const noteUtile = n => { const t = String(n || "").trim(); return t.length > 3 && !/^(chat|manuel|whatsapp|wa|site|sms|t[ée]l[ée]?phone|appel|tel)\.?$/i.test(t); };
   async function faireEtape(id, i, btn) {
     const r = reservationsCache.find(x => x.id === id); if (!r) return;
     if (i === 1) {
