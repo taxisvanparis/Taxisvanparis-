@@ -1592,6 +1592,11 @@ function anonymise(title,location){
     document.getElementById("disp-go").addEventListener("click", () => setTimeout(() => ov.remove(), 400));
     maj();
   }
+  // 🚕 G7 : sur Android on ouvre directement l'appli (sinon Play Store), sur iPhone la page App Store
+  const ANDROID = /Android/i.test(navigator.userAgent);
+  const G7_URL = ANDROID
+    ? "intent://#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package=fr.taxisg7.grandpublic;S.browser_fallback_url=" + encodeURIComponent("https://play.google.com/store/apps/details?id=fr.taxisg7.grandpublic") + ";end"
+    : "https://apps.apple.com/fr/app/id402196027";
   // 🚕 G7 : copier l'adresse de départ ou d'arrivée pour la coller dans l'appli G7
   document.addEventListener("click", async ev => {
     const b = ev.target.closest && ev.target.closest("[data-g7copie]"); if (!b) return;
@@ -2407,7 +2412,7 @@ function anonymise(title,location){
       ${metas ? `<div class="tf-mt">${metas}</div>` : ""}
       ${act ? `<button type="button" class="tf-go" data-step="${cur}" data-id="${id}">${act[0]}<small>${act[1]}</small></button>` : ""}
       <div class="tf-q">${tel}${wa}${r.dep && r.arr ? `<button type="button" data-carte="${id}"><b>🗺️</b>Carte</button>` : `<span class="off"><b>🗺️</b>Carte</span>`}<button type="button" data-edit="${id}"><b>✏️</b>Modifier</button></div>
-      ${r.dep || r.arr ? `<div class="tf-h">🚕 Commander un G7</div><div class="tf-g7"><a data-g7copie="dep" data-id="${id}" href="https://apps.apple.com/fr/app/id402196027" target="_blank" rel="noopener">1. 📋 Départ + ouvrir G7</a><button type="button" data-g7copie="arr" data-id="${id}">2. 📋 Arrivée</button></div><p class="tf-g7i">Dans G7 : appui long sur la case → Coller.</p>` : ""}
+      ${r.dep || r.arr ? `<div class="tf-h">🚕 Commander un G7</div><div class="tf-g7"><a data-g7copie="dep" data-id="${id}" href="${G7_URL}"${ANDROID ? "" : ' target="_blank" rel="noopener"'}>1. 📋 Départ + ouvrir G7</a><button type="button" data-g7copie="arr" data-id="${id}">2. 📋 Arrivée</button></div><p class="tf-g7i">Dans G7 : appui long sur la case → Coller.</p>` : ""}
       <div class="tf-h">Autres actions</div><div class="tf-ac">${acts ? acts.innerHTML : ""}</div>`;
     lierActions(c);
     c.querySelectorAll("[data-step]").forEach(b => b.addEventListener("click", () => faireEtape(b.dataset.id, +b.dataset.step, b)));
