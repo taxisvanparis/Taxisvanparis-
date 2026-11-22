@@ -1581,6 +1581,40 @@ function anonymise(title,location){
     document.getElementById("disp-go").addEventListener("click", () => setTimeout(() => ov.remove(), 400));
     maj();
   }
+  // 🚖 Choisir le chauffeur : ouvre directement WhatsApp (groupe ou chauffeur) ou Messages
+  function choisirChauffeur(id) {
+    const r = reservationsCache.find(x => x.id === id); if (!r) return;
+    const base = shareItem(r), ch = chauffeurDe(r), n = ch ? waNumClient(ch.tel) : "";
+    const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    const ov = document.createElement("div"); ov.id = "imm-ov";
+    ov.innerHTML = `<div id="imm-box" role="dialog" aria-label="Choisir le chauffeur">
+      <button id="imm-x" type="button" aria-label="Fermer">✕</button>
+      <h3>🚖 Choisir le chauffeur</h3>
+      <p class="sub">${escH(String(r.nom || "Course").replace(/^🏨\s*/, ""))}${r.date ? " · " + escH(fmtDate(r)) : ""}</p>
+      <label>Prix chauffeur (€) — pour le groupe</label>
+      <input id="cc-prix" inputmode="decimal" value="${escH(base.prixCh)}" placeholder="Facultatif">
+      <a id="cc-grp" class="imm-send cc-go" style="background:#25d366;color:#08240f" target="_blank" rel="noopener">📢 Envoyer au groupe WhatsApp</a>
+      <label>Ou directement à un chauffeur${ch ? " — " + escH(ch.nom || "") : " (tu choisis le contact)"}</label>
+      <a id="cc-wa" class="imm-send cc-go" style="background:#25d366;color:#08240f" target="_blank" rel="noopener">💬 WhatsApp au chauffeur</a>
+      <a id="cc-sms" class="imm-send cc-go env-alt">✉️ SMS au chauffeur</a>
+    </div>`;
+    document.body.appendChild(ov);
+    const maj = () => {
+      document.getElementById("cc-grp").href = waLink(shareMessage(Object.assign({}, base, { prixCh: document.getElementById("cc-prix").value.trim() })));
+      const m = messageChauffeur(r);
+      document.getElementById("cc-wa").href = "https://wa.me/" + n + "?text=" + encodeURIComponent(m);
+      document.getElementById("cc-sms").href = "sms:" + (ch && n ? "+" + n : "") + (ios ? "&" : "?") + "body=" + encodeURIComponent(m);
+    };
+    document.getElementById("cc-prix").addEventListener("input", maj);
+    document.getElementById("imm-x").onclick = () => ov.remove();
+    ov.onclick = e => { if (e.target === ov) ov.remove(); };
+    ov.querySelectorAll(".cc-go").forEach(a => a.addEventListener("click", () => {
+      const t = Date.now(); r.dispatchEnvoye = t;
+      updateDoc(doc(db, "reservations", id), { dispatchEnvoye: t }).catch(() => {});
+      setTimeout(() => ov.remove(), 400);
+    }));
+    maj();
+  }
   document.addEventListener("click", ev => {
     const b = ev.target.closest && ev.target.closest("[data-dispatch]"); if (!b) return;
     ev.preventDefault(); dispatcherOuvrir(b.dataset.dispatch);
@@ -2211,7 +2245,7 @@ function anonymise(title,location){
   function etapesFaites(r) {
     const e = r.lienCourse && etapesCache[r.lienCourse];
     const fin = r.statut === "terminée";
-    return [true, r.statut === "confirmée" || fin, fin || !!(r.chauffeurNom || r.chauffeurUid), fin || !!(r.lienEnvoye || (e && (e.ouvert || e.etape))), fin];
+    return [true, r.statut === "confirmée" || fin, fin || !!(r.chauffeurNom || r.chauffeurUid || r.dispatchEnvoye), fin || !!(r.lienEnvoye || (e && (e.ouvert || e.etape))), fin];
   }
   const etapeCourante = r => r.statut === "annulée" ? -1 : etapesFaites(r).findIndex(x => !x);
   function dansTxt(r) {
@@ -2355,7 +2389,7 @@ function anonymise(title,location){
       try { await updateDoc(doc(db, "reservations", id), { statut: "confirmée" }); } catch (e) { toast("La confirmation n'a pas pu être enregistrée.", 5000); return; }
       if (r.email || r.source === "site") envoyerConfMail(id, btn);
       else { toast("Confirmée ✔ Envoie la confirmation au client avec « Confirmation WhatsApp client » ou « Confirmation SMS client »", 5000); if (ficheId !== id) ouvrirFiche(id); }
-    } else if (i === 2) { if (ficheId !== id) ouvrirFiche(id); toast("Choisis : 📢 Dispatcher au groupe WhatsApp ou 🚖 Envoyer à un chauffeur", 4500); }
+    } else if (i === 2) choisirChauffeur(id);
     else if (i === 3) envoyerLiens(id);
     else if (i === 4) { marquerVues([id], true); updateDoc(doc(db, "reservations", id), { statut: "terminée" }).catch(() => toast("Pas enregistré, réessaie.", 4000)); }
   }
