@@ -1486,7 +1486,7 @@ function anonymise(title,location){
   function waChauffeur(r) {
     const c = chauffeurDe(r), n = c ? waNumClient(c.tel) : "";
     const href = (n ? "https://wa.me/" + n : "https://wa.me/") + "?text=" + encodeURIComponent(messageChauffeur(r));
-    return `<a class="cal-btn wa-btn" target="_blank" rel="noopener" href="${href}">🚖 Envoyer au chauffeur</a> `;
+    return `<a class="cal-btn wa-btn" target="_blank" rel="noopener" href="${href}">🚖 Envoyer à un chauffeur</a> `;
   }
   // Pancarte aéroport : ouvre l'appli tablette avec le nom du client déjà écrit
   function pancarteBtn(r) {
@@ -1545,7 +1545,7 @@ function anonymise(title,location){
     const ov = document.createElement("div"); ov.id = "imm-ov";
     ov.innerHTML = `<div id="imm-box" role="dialog" aria-label="Dispatcher la course">
       <button id="disp-x" type="button" aria-label="Fermer">✕</button>
-      <h3>📢 Dispatcher</h3>
+      <h3>📢 Dispatcher au groupe WhatsApp</h3>
       <p class="sub">${escH(String(r.nom || "Course").replace(/^🏨\s*/, ""))}${r.date ? " · " + escH(fmtDate(r)) : ""}</p>
       <label>Prix chauffeur (€)</label>
       <input id="disp-prix" inputmode="decimal" value="${escH(base.prixCh)}" placeholder="Facultatif">
@@ -2190,7 +2190,7 @@ function anonymise(title,location){
   // ===== Vue « Tableau des départs » (par défaut ; bouton « Ancienne vue » pour revenir) =====
   let MODERNE = true; try { MODERNE = localStorage.getItem("tvp_vue") !== "ancienne"; } catch (e) {}
   const ETAPES_TB = ["Reçue", "Confirmée", "Chauffeur", "Liens", "Terminée"];
-  const ACTIONS_TB = [null, ["✅ Confirmer la course", "Le client reçoit la confirmation"], ["🚖 Choisir le chauffeur", "Dispatcher ou envoyer au chauffeur"], ["📤 Liens client + chauffeur", "WhatsApp ou SMS, tu choisis"], ["🏁 Course effectuée", "La course passe dans « Passées »"]];
+  const ACTIONS_TB = [null, ["✅ Confirmer la course", "Le client reçoit la confirmation"], ["🚖 Choisir le chauffeur", "Groupe WhatsApp ou un chauffeur"], ["📤 Liens client + chauffeur", "WhatsApp ou SMS, tu choisis"], ["🏁 Course effectuée", "La course passe dans « Passées »"]];
   // Étapes faites : 0 reçue, 1 confirmée, 2 chauffeur, 3 liens, 4 terminée
   function etapesFaites(r) {
     const e = r.lienCourse && etapesCache[r.lienCourse];
@@ -2331,7 +2331,7 @@ function anonymise(title,location){
       try { await updateDoc(doc(db, "reservations", id), { statut: "confirmée" }); } catch (e) { toast("La confirmation n'a pas pu être enregistrée.", 5000); return; }
       if (r.email || r.source === "site") envoyerConfMail(id, btn);
       else { toast("Confirmée ✔ Envoie la confirmation au client avec « Confirmation WhatsApp client » ou « Confirmation SMS client »", 5000); if (ficheId !== id) ouvrirFiche(id); }
-    } else if (i === 2) { if (ficheId !== id) ouvrirFiche(id); toast("Choisis : 📢 Dispatcher ou 🚖 Envoyer au chauffeur", 4500); }
+    } else if (i === 2) { if (ficheId !== id) ouvrirFiche(id); toast("Choisis : 📢 Dispatcher au groupe WhatsApp ou 🚖 Envoyer à un chauffeur", 4500); }
     else if (i === 3) envoyerLiens(id);
     else if (i === 4) { marquerVues([id], true); updateDoc(doc(db, "reservations", id), { statut: "terminée" }).catch(() => toast("Pas enregistré, réessaie.", 4000)); }
   }
@@ -2371,7 +2371,7 @@ function anonymise(title,location){
         const actif = groupOf(r) === 0 && r.statut !== "annulée";
         const avant = ferme ? "" : (r.statut !== "confirmée" ? `<button class="ok" data-st="confirmée" data-id="${esc(r.id)}">✅ Confirmer</button>` : "") +
           waClient(r) + smsClient(r) + `<button type="button" class="cal-btn" data-confmail="${esc(r.id)}">📧 Confirmation e-mail client${r.confMailEnvoye ? " ✓" : ""}</button> ` +
-          (actif ? `<button type="button" class="grp-btn" style="font-family:inherit;cursor:pointer" data-dispatch="${esc(r.id)}">📢 Dispatcher</button>` + envoiBtn(r) + waChauffeur(r) + lienBtn(r) + calLink([r], "📅 Calendrier", "cal-btn") : "") +
+          (actif ? `<button type="button" class="grp-btn" style="font-family:inherit;cursor:pointer" data-dispatch="${esc(r.id)}">📢 Dispatcher au groupe WhatsApp</button>` + envoiBtn(r) + waChauffeur(r) + lienBtn(r) + calLink([r], "📅 Calendrier", "cal-btn") : "") +
           (r.dep && r.arr ? `<button type="button" class="cal-btn" data-carte="${esc(r.id)}">🗺️ Carte</button>` : "");
         const jourJ = actif && (AERO_RX.test(String(r.dep || "") + " " + String(r.depZone || "")) || /\bgare\b|\bstation\b/i.test(String(r.dep || ""))) ? pancarteBtn(r) : "";
         const apres = (!ferme ? `<button class="done" data-st="terminée" data-id="${esc(r.id)}">✔️ Effectuée</button>` : "") +
