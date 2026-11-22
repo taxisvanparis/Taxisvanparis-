@@ -2330,7 +2330,7 @@ function anonymise(title,location){
     const duJour = reservationsCache.filter(r => r.date === auj && r.statut !== "annulée");
     const ca = Math.round(duJour.reduce((t, r) => t + prixTb(r), 0));
     const jr = new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
-    let html = `<div class="tb"><div class="tb-hd"><div><h2>${h >= 18 || h < 5 ? "Bonsoir" : "Bonjour"} Badr</h2><p>${esc(jr.charAt(0).toUpperCase() + jr.slice(1))} · ${duJour.length} départ${duJour.length > 1 ? "s" : ""} · ${ca} €</p></div></div>`;
+    let html = `<div class="tb"><div class="tb-hd"><div><h2>${h >= 18 || h < 5 ? "Bonsoir" : "Bonjour"} Badr</h2><p>${esc(jr.charAt(0).toUpperCase() + jr.slice(1))} · ${duJour.length} départ${duJour.length > 1 ? "s" : ""} aujourd'hui</p></div></div>`;
     const nx = prochaineCourse();
     if (nx && resaView === "avenir") {
       const f = etapesFaites(nx), cur = etapeCourante(nx), act = ACTIONS_TB[cur] || null, rg = rangClient(nx), id = esc(nx.id);
