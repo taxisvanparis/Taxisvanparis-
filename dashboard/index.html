@@ -479,9 +479,9 @@
 .tb-hd h2{margin:0;font-size:26px;letter-spacing:-.6px;line-height:1.05;color:var(--heading)}.tb-hd p{margin:5px 0 0;color:var(--mu);font-size:13.5px}
 .tb-plus{width:46px;height:46px;border-radius:14px;background:var(--a);color:#17191d;border:0;font-size:26px;font-weight:700;cursor:pointer;flex:none}
 .tb-nx{margin:0 12px 6px;background:var(--bg2);border:1px solid var(--ln);border-radius:20px;padding:14px}
-.tb-nx1{display:flex;justify-content:space-between;color:var(--mu);font-size:13.5px}
+.tb-nx1{display:flex;justify-content:space-between;gap:8px;color:var(--mu);font-size:13.5px}.tb-jour{color:var(--heading);font-weight:700;font-size:17px;margin-top:8px}.tb-live{white-space:nowrap}
 .tb-live{color:var(--a2);font-weight:600}.tb-live:before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--a);margin-right:6px;vertical-align:1px;box-shadow:0 0 0 4px rgba(242,179,61,.2)}
-.tb-fl{display:flex;align-items:center;gap:4px;margin:12px 0 10px}
+.tb-fl{display:flex;align-items:center;gap:4px;margin:8px 0 10px}
 .tb-f{width:46px;height:62px;flex:none;background:var(--tile);border-radius:8px;position:relative;font-size:46px;line-height:62px;font-weight:800;text-align:center;color:var(--a);font-variant-numeric:tabular-nums}
 .tb-f:after{content:"";position:absolute;left:0;right:0;top:50%;height:2px;background:rgba(255,255,255,.08)}
 .tb-co{font-size:38px;font-weight:800;color:var(--a2);margin:0 1px}
@@ -2260,6 +2260,14 @@ function anonymise(title,location){
       .map(r => [r, ecHeure(r)]).filter(([r, t]) => t ? t > now - 30 * 60000 : /maintenant/i.test(String(r.heure || "")))
       .sort((a, b) => (a[1] || 0) - (b[1] || 0)).map(x => x[0])[0] || null;
   }
+  // « Aujourd'hui », « Demain, lundi 23 nov. » ou « samedi 28 nov. »
+  function jourProchain(d) {
+    const m = String(d || "").match(/^(\d{4})-(\d{2})-(\d{2})$/); if (!m) return "";
+    const dt = new Date(+m[1], +m[2] - 1, +m[3]), t0 = new Date(); t0.setHours(0, 0, 0, 0);
+    const ecart = Math.round((dt - t0) / 86400000);
+    const txt = dt.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "short" });
+    return ecart === 0 ? "Aujourd'hui" : ecart === 1 ? "Demain, " + txt : txt.charAt(0).toUpperCase() + txt.slice(1);
+  }
   function volets(h) {
     const m = String(h || "").match(/^(\d{1,2})[:h](\d{2})$/);
     if (!m) return `<span class="tb-txt">${esc(h || "—")}</span>`;
@@ -2277,7 +2285,7 @@ function anonymise(title,location){
       const f = etapesFaites(nx), cur = etapeCourante(nx), act = ACTIONS_TB[cur] || null, rg = rangClient(nx), id = esc(nx.id);
       const info = [esc(nx.nom || "Client") + (rg >= 2 ? ` <em>· ${rg}ᵉ course</em>` : ""), nx.pax ? "🚐 " + esc(nx.pax) + " pers." : "", volCode(nx) ? "✈️ " + esc(volCode(nx)) : "", trajTxt(nx) && !/calcul/.test(trajTxt(nx)) ? `<span data-traj="${id}">${trajTxt(nx)}</span>` : (nx.dep && nx.arr ? `<span data-traj="${id}">${trajTxt(nx)}</span>` : "")].filter(Boolean).map(x => `<span>${x}</span>`).join("");
       html += `<div class="tb-nx"><div class="tb-nx1"><span>Prochain départ</span><span class="tb-live">${esc(dansTxt(nx) || jourTitre(nx.date))}</span></div>
-        <div class="tb-fl">${volets(nx.heure)}</div><div class="tb-de"><small>📍 Prise en charge${villeCourte(nx.dep) && villeCourte(nx.dep) !== lieuCourt(nx.dep) ? " · " + esc(villeCourte(nx.dep)) : ""}</small><b>${esc(lieuCourt(nx.dep))}</b><span>🏁 vers ${esc(lieuCourt(nx.arr))}</span></div>
+        <div class="tb-jour">📅 ${esc(jourProchain(nx.date))}</div><div class="tb-fl">${volets(nx.heure)}</div><div class="tb-de"><small>📍 Prise en charge${villeCourte(nx.dep) && villeCourte(nx.dep) !== lieuCourt(nx.dep) ? " · " + esc(villeCourte(nx.dep)) : ""}</small><b>${esc(lieuCourt(nx.dep))}</b><span>🏁 vers ${esc(lieuCourt(nx.arr))}</span></div>
         <div class="tb-in">${info}</div>
         <div class="tb-sg">${f.map(x => `<i class="${x ? "on" : ""}"></i>`).join("")}</div>
         <div class="tb-sl">${ETAPES_TB.map((x, i) => i === cur ? `<b>${x}</b>` : `<span>${x}</span>`).join("")}</div>
