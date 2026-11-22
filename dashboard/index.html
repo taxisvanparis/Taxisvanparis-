@@ -472,6 +472,45 @@
   .imm-send{display:flex;align-items:center;justify-content:center;min-height:54px;margin-top:8px;border-radius:14px;font-weight:900;font-size:16px;text-decoration:none}
   #imm-x{float:right;border:1px solid var(--border);background:transparent;color:inherit;border-radius:10px;width:38px;height:38px;font-size:16px}
 </style>
+<style>
+/* ===== Vue moderne (essai) : étapes de la course, « À faire maintenant », raccourcis ===== */
+#mod-hero{position:relative;border-radius:20px;overflow:hidden;margin:0 0 14px;min-height:150px;background:#111 url(/img/van.jpg) center 62%/cover;color:#fff}
+#mod-hero:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,10,12,.35),rgba(10,10,12,.85))}
+#mod-hero>div{position:relative;padding:58px 18px 16px}
+#mod-hero h2{margin:0;font-size:26px;letter-spacing:-.5px}#mod-hero p{margin:4px 0 0;color:#ddd;font-size:14px}#mod-hero p b{color:#f4c35a}
+#mod-todo{margin:0 0 14px}
+#mod-todo h3{font-size:16px;margin:0 0 8px}
+.mt-row{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:16px;margin-bottom:8px;background:rgba(244,183,64,.12);border:1px solid rgba(244,183,64,.35)}
+.mt-row .ic{width:36px;height:36px;border-radius:11px;background:rgba(244,183,64,.2);display:flex;align-items:center;justify-content:center;font-size:17px;flex:none}
+.mt-row .x{flex:1;min-width:0}.mt-row .x b{display:block;font-size:14.5px}.mt-row .x span{font-size:12.5px;color:var(--muted)}
+.mt-row button{background:#f2b33d;color:#17191d;border:0;border-radius:11px;padding:10px 12px;font:700 14px inherit;font-family:inherit;cursor:pointer;white-space:nowrap}
+.rc.mod{display:block;padding:16px;border-radius:22px}
+.rc.mod .m1{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.rc.mod .mh{font-size:32px;font-weight:800;letter-spacing:-1px;line-height:1;font-variant-numeric:tabular-nums}
+.rc.mod .mw{color:var(--muted);font-size:13px;margin-top:4px}.rc.mod .mw.urg{color:#e8902a;font-weight:700}
+.rc.mod .mp{text-align:right;font-size:20px;font-weight:800;white-space:nowrap}
+.rc.mod .mn{margin-top:10px;font-size:16px;font-weight:700;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.rc.mod .mb{margin-top:6px}
+.rc.mod .mr{display:grid;grid-template-columns:12px 1fr;column-gap:10px;margin:10px 0 4px}
+.rc.mod .mr .l{display:flex;flex-direction:column;align-items:center;padding:6px 0}.rc.mod .mr .l i{width:9px;height:9px;border-radius:50%;background:var(--text)}.rc.mod .mr .l i.b{background:#d9a237}.rc.mod .mr .l u{flex:1;width:1.5px;margin:3px 0;background:repeating-linear-gradient(var(--border) 0 3px,transparent 3px 6px)}
+.rc.mod .mr p{margin:0;font-size:14.5px;line-height:1.35}.rc.mod .mr p+p{margin-top:10px}
+.rc.mod .mc{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 12px}.rc.mod .mc>span,.rc.mod .mc>div{font-size:12.5px;background:color-mix(in srgb,var(--border) 45%,transparent);border-radius:999px;padding:5px 10px}
+.rc.mod .mc .nt{border-radius:10px;margin:0}
+.mstp{display:grid;grid-template-columns:repeat(4,1fr);position:relative;margin:4px 0 12px}
+.mstp:before{content:"";position:absolute;left:12.5%;right:12.5%;top:14px;height:2px;background:var(--border)}
+.mstp .bar{position:absolute;left:12.5%;top:14px;height:2px;background:#3fb873}
+.mstp button{position:relative;background:none;border:0;padding:0;font:inherit;font-size:12px;color:var(--muted);cursor:pointer}
+.mstp button i{display:block;width:30px;height:30px;margin:0 auto 5px;border-radius:50%;background:var(--card);border:2px solid var(--border);font-style:normal;font-weight:700;font-size:13px;line-height:26px}
+.mstp button.d{color:#3fb873}.mstp button.d i{background:#3fb873;border-color:#3fb873;color:#0f2a1a}
+.mstp button.n{color:#d9a237;font-weight:700}.mstp button.n i{background:#f2b33d;border-color:#f2b33d;color:#17191d;box-shadow:0 0 0 5px rgba(242,179,61,.2)}
+.mgo{display:block;width:100%;background:#f2b33d;color:#17191d;border:0;border-radius:15px;padding:14px;font:700 15.5px inherit;font-family:inherit;cursor:pointer}
+.mq{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+.mq>*{display:flex;flex-direction:column;align-items:center;gap:4px;font:inherit;font-size:11.5px;color:var(--muted);background:none;border:0;cursor:pointer;text-decoration:none;padding:0}
+.mq>* i{display:flex;width:42px;height:42px;border-radius:50%;align-items:center;justify-content:center;font-style:normal;font-size:18px;background:color-mix(in srgb,var(--border) 55%,transparent)}
+details.mplus{margin-top:10px}details.mplus>summary{list-style:none;cursor:pointer;text-align:center;color:var(--muted);font-size:13px;padding:6px}details.mplus>summary::-webkit-details-marker{display:none}
+details.mplus .acts{margin-top:6px}
+#btn-moderne{margin-left:auto}
+</style>
 <style>/* iPhone : pas de zoom auto sur les champs */@media (max-width:900px){input,select,textarea{font-size:16px!important}}</style>
 <style id="theme-clair">
   /* ===== Mode clair du tableau de bord (par défaut) — bouton ☀︎/☾ dans le menu ===== */
@@ -545,6 +584,7 @@
     <div id="main">
       <!-- RÉSERVATIONS -->
       <div class="tab-panel active" id="tab-reservations">
+        <div id="mod-hero" hidden><div><h2 id="mod-salut">Bonjour Badr</h2><p id="mod-jour"></p></div></div>
         <div class="kpis4">
           <div class="stat-card alert"><div class="label">à confirmer</div><div class="value" id="stat-attente">0</div></div>
           <div class="stat-card"><div class="label">courses à venir</div><div class="value" id="stat-avenir">0</div></div>
@@ -568,9 +608,11 @@
           </div>
           <select id="filter-statut-resa" hidden><option value=""></option></select>
           <span id="resa-cal-all"></span>
+          <button type="button" class="rchip" id="btn-moderne" aria-pressed="false">✨ Nouvelle vue</button>
         </div>
         <div class="new-bar push-bar" id="push-bar"><span id="push-bar-txt"></span><button type="button" id="btn-push-plustard">Plus tard</button><button type="button" class="pl" id="btn-push">🔔 Activer</button></div>
         <div class="new-bar" id="new-bar"><span id="new-bar-txt"></span><button type="button" class="pl" id="btn-tout-vu">Tout marquer comme vu</button></div>
+        <div id="mod-todo" hidden></div>
         <div id="resa-list"><div class="rempty">Chargement…</div></div>
       </div>
 
@@ -2131,8 +2173,84 @@ function anonymise(title,location){
       }
     } catch (e) { toast("Impossible : " + ((e && e.code) || "erreur") + (e && e.code === "permission-denied" ? " (règle Firebase)" : ""), 5000); }
   });
+  // ===== Vue moderne (essai) =====
+  let MODERNE = false; try { MODERNE = localStorage.getItem("tvp_moderne") === "1" || /[?&]moderne=1/.test(location.search); } catch (e) {}
+  const ETAPES_MOD = [["✅", "Confirmer", "Confirmée", "✅ Confirmer la course"], ["🚖", "Chauffeur", "Chauffeur", "🚖 Choisir le chauffeur"], ["📤", "Liens", "Liens", "📤 Liens client + chauffeur"], ["🏁", "Terminer", "Terminée", "🏁 Course effectuée"]];
+  function etapesFaites(r) {
+    const e = r.lienCourse && etapesCache[r.lienCourse];
+    return [r.statut === "confirmée" || r.statut === "terminée", !!(r.chauffeurNom || r.chauffeurUid), !!(r.lienEnvoye || (e && (e.ouvert || e.etape))), r.statut === "terminée"];
+  }
+  function dansTxt(r) {
+    const t = ecHeure(r); if (!t) return "";
+    const mn = Math.round((t - Date.now()) / 60000);
+    if (mn < -5 || mn > 24 * 60) return "";
+    if (mn <= 0) return "maintenant";
+    return "dans " + (mn >= 60 ? Math.floor(mn / 60) + " h " + String(mn % 60).padStart(2, "0") : mn + " min");
+  }
+  function carteModerne(r, o) {
+    const id = esc(r.id), faites = etapesFaites(r), cur = r.statut === "annulée" ? -1 : faites.findIndex(x => !x);
+    const nbFaites = cur < 0 ? (r.statut === "annulée" ? 0 : 4) : cur;
+    const bar = Math.max(0, Math.min(3, nbFaites - (nbFaites === 4 ? 1 : 0))) / 3 * 75;
+    const stp = r.statut === "annulée" ? "" : `<div class="mstp"><div class="bar" style="width:${bar}%"></div>` + ETAPES_MOD.map((e, i) =>
+      `<button type="button" class="${faites[i] ? "d" : i === cur ? "n" : ""}" data-step="${i}" data-id="${id}"><i>${faites[i] ? "✓" : i === cur ? e[0] : i + 1}</i>${faites[i] ? e[2] : e[1]}</button>`).join("") + `</div>`;
+    const go = cur >= 0 ? `<button type="button" class="mgo" data-step="${cur}" data-id="${id}">${ETAPES_MOD[cur][3]}</button>` : "";
+    const wa = r.tel && waNumClient(r.tel) ? `<a target="_blank" rel="noopener" href="https://wa.me/${waNumClient(r.tel)}"><i>💬</i>WhatsApp</a>` : `<span style="opacity:.35"><i>💬</i>WhatsApp</span>`;
+    const tel = r.tel ? `<a href="tel:${esc(r.tel)}"><i>📞</i>Appeler</a>` : `<span style="opacity:.35"><i>📞</i>Appeler</span>`;
+    const dans = dansTxt(r);
+    const chips = [o.meta ? `<span>${o.meta}</span>` : "", r.chauffeurNom ? `<span>🚖 ${esc(r.chauffeurNom)}</span>` : ""].join("");
+    return `<div class="rc mod s-${o.cls}${o.nouv ? " nouv" : ""}${o.imm ? " imm-card" : o.bientot ? " soon-card" : ""}" data-rid="${id}">
+      <div class="m1"><div><div class="mh">${esc(r.heure || "—")}</div><div class="mw${o.imm || o.bientot ? " urg" : ""}">${esc(dans)}</div></div><div class="mp">${fmtPrix(r.prix)}</div></div>
+      <div class="mn">${o.nouv ? '<span class="nv">NOUVEAU</span>' : ""}${o.nom}<span class="pill">${o.lib}</span></div>
+      ${o.badges ? `<div class="mb">${o.badges}</div>` : ""}
+      ${o.hotel ? `<div class="mb"><span class="tag-hotel">🏨 ${esc(r.hotel || "Hôtel partenaire")}</span></div>` : ""}
+      <div class="mr"><div class="l"><i></i><u></u><i class="b"></i></div><div><p>${esc(r.dep || "?")}</p><p>${esc(r.arr || "?")}</p></div></div>
+      ${o.actif && r.dep && r.arr && trajTxt(r) ? `<div class="mt" data-traj="${id}">${trajTxt(r)}</div>` : ""}
+      <div class="mc">${chips}${o.vol}${o.note}</div>
+      ${stp}${go}
+      <div class="mq">${tel}${wa}${r.dep && r.arr ? `<button type="button" data-carte="${id}"><i>🗺️</i>Carte</button>` : `<span style="opacity:.35"><i>🗺️</i>Carte</span>`}<button type="button" data-edit="${id}"><i>✏️</i>Modifier</button></div>
+      <details class="mplus"><summary>⋯ Toutes les actions</summary><div class="acts">${o.boutons}</div></details>
+    </div>`;
+  }
+  function ouvrirPlus(id) {
+    const d = document.querySelector('.rc[data-rid="' + CSS.escape(id) + '"] details.mplus');
+    if (d) { d.open = true; d.scrollIntoView({ behavior: "smooth", block: "center" }); }
+  }
+  async function faireEtape(id, i, btn) {
+    const r = reservationsCache.find(x => x.id === id); if (!r) return;
+    if (i === 0) {
+      marquerVues([id], true);
+      try { await updateDoc(doc(db, "reservations", id), { statut: "confirmée" }); } catch (e) { toast("La confirmation n'a pas pu être enregistrée.", 5000); return; }
+      if (r.email || r.source === "site") envoyerConfMail(id, btn);
+      else { toast("Confirmée ✔ Envoie la confirmation au client (WhatsApp ou SMS)", 5000); setTimeout(() => ouvrirPlus(id), 400); }
+    } else if (i === 1) { ouvrirPlus(id); toast("Choisis : 📢 Dispatcher ou 🚕 Envoyer au chauffeur", 4500); }
+    else if (i === 2) envoyerLiens(id);
+    else if (i === 3) { marquerVues([id], true); updateDoc(doc(db, "reservations", id), { statut: "terminée" }).catch(() => toast("Pas enregistré, réessaie.", 4000)); }
+  }
+  function renderModerne() {
+    const hero = document.getElementById("mod-hero"), todo = document.getElementById("mod-todo"), bt = document.getElementById("btn-moderne");
+    if (bt) { bt.setAttribute("aria-pressed", MODERNE); bt.textContent = MODERNE ? "↩️ Ancienne vue" : "✨ Nouvelle vue"; }
+    hero.hidden = todo.hidden = !MODERNE; if (!MODERNE) return;
+    const h = new Date().getHours(), auj = todayStr();
+    document.getElementById("mod-salut").textContent = (h >= 18 || h < 5 ? "Bonsoir" : "Bonjour") + " Badr";
+    const duJour = reservationsCache.filter(r => r.date === auj && r.statut !== "annulée");
+    const ca = duJour.reduce((t, r) => t + (parseFloat(String(r.prix ?? "").replace(",", ".").replace(/[^\d.]/g, "")) || 0), 0);
+    const jr = new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
+    document.getElementById("mod-jour").innerHTML = esc(jr.charAt(0).toUpperCase() + jr.slice(1)) + " · <b>" + duJour.length + " course" + (duJour.length > 1 ? "s" : "") + " · " + Math.round(ca) + " €</b>";
+    const now = Date.now(), L = [];
+    reservationsCache.filter(r => groupOf(r) === 0 && r.statut !== "annulée" && r.statut !== "terminée").forEach(r => {
+      const t = ecHeure(r), mn = t ? (t - now) / 60000 : null, f = etapesFaites(r), qui = esc(r.nom || "Client") + (r.heure ? " · " + (r.date === auj ? "" : jourTitre(r.date).toLowerCase() + " ") + esc(r.heure) : "");
+      if (!f[0]) L.push([t || 9e15, 0, r, "✅", "Confirmer la course", qui, "Confirmer"]);
+      else if (!f[1] && mn !== null && mn < 24 * 60) L.push([t, 1, r, "🚖", "Choisir le chauffeur", qui, "Choisir"]);
+      else if (!f[2] && mn !== null && mn < 120) L.push([t, 2, r, "📤", "Envoyer les liens", qui + (dansTxt(r) ? " · " + dansTxt(r) : ""), "Envoyer"]);
+    });
+    L.sort((a, b) => a[0] - b[0]);
+    todo.innerHTML = L.length ? `<h3>À faire maintenant</h3>` + L.slice(0, 5).map(x => `<div class="mt-row"><div class="ic">${x[3]}</div><div class="x"><b>${x[4]}</b><span>${x[5]}</span></div><button type="button" data-step="${x[1]}" data-id="${esc(x[2].id)}">${x[6]}</button></div>`).join("") : "";
+    todo.querySelectorAll("[data-step]").forEach(b => b.addEventListener("click", () => faireEtape(b.dataset.id, +b.dataset.step, b)));
+  }
+  document.getElementById("btn-moderne").addEventListener("click", () => { MODERNE = !MODERNE; try { localStorage.setItem("tvp_moderne", MODERNE ? "1" : "0"); } catch (e) {} renderReservations(); });
   function renderReservations() {
     renderEnCours(); try { ecSurveiller(); } catch (e) {}
+    try { renderModerne(); } catch (e) { console.error(e); }
     const aVenir = reservationsCache.filter(r => groupOf(r) === 0 && r.statut !== "annulée");
     document.getElementById("resa-cal-all").innerHTML = aVenir.length ? calLink(aVenir, "📅 Tout ajouter au calendrier", "cal-btn cal-all") : "";
     const key = r => (r.date || "9999-12-31") + " " + (r.heure || "00:00");
@@ -2173,6 +2291,7 @@ function anonymise(title,location){
         const lg = String(r.langue||"").slice(0,2).toLowerCase();
         const rg = r.statut !== "annulée" ? rangClient(r) : 0;
         const badges = (rg >= 2 ? '<span class="src">🔁 ' + rg + 'ᵉ course</span>' : "") + etapeBadge(r) + (imm ? '<span class="imm">⚡ IMMÉDIAT</span>' : bientot ? '<span class="soon">⏰ '+(urg.mn>0?'Dans '+urg.mn+' min':'Maintenant')+'</span>' : "") + provenance(r) + (lg && DRAP[lg] ? '<span class="src">'+DRAP[lg]+' '+lg.toUpperCase()+'</span>' : "");
+        if (MODERNE) return carteModerne(r, { cls, lib, nouv, hotel, nom, meta, vol, note, actif, boutons, badges, imm, bientot, urg });
         return `<div class="rc s-${cls}${nouv ? " nouv" : ""}${imm ? " imm-card" : bientot ? " soon-card" : ""}" data-rid="${esc(r.id)}">
           <div class="t">${esc(r.heure || "—")}${r.ref ? `<small>${esc(r.ref)}</small>` : ""}</div>
           <div class="m">
@@ -2201,6 +2320,7 @@ function anonymise(title,location){
     box.querySelectorAll("[data-avistrip]").forEach(b => b.addEventListener("click", () => { updateDoc(doc(db, "reservations", b.dataset.avistrip), { avisTripDemande: true }).catch(() => {}); }));
     box.querySelectorAll("[data-confmail]").forEach(b => b.addEventListener("click", () => envoyerConfMail(b.dataset.confmail, b)));
     box.querySelectorAll("[data-carte]").forEach(b => b.addEventListener("click", () => ouvrirCarte(b.dataset.carte)));
+    box.querySelectorAll("[data-step]").forEach(b => b.addEventListener("click", () => faireEtape(b.dataset.id, +b.dataset.step, b)));
     majTrajets();
     box.querySelectorAll("[data-edit]").forEach(b => b.addEventListener("click", () => openEditResa(b.dataset.edit)));
     box.querySelectorAll("[data-facture]").forEach(b => b.addEventListener("click", () => {
