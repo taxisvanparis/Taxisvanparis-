@@ -497,7 +497,7 @@
 .tb-row{display:grid;grid-template-columns:58px 1fr auto;gap:10px;align-items:center;padding:12px 16px;border:0;border-top:1px solid var(--ln);cursor:pointer;width:100%;background:none;color:var(--text);text-align:left;font:inherit}
 .tb-row:hover{background:var(--hover)}
 .tb-t{font-size:21px;font-weight:800;font-variant-numeric:tabular-nums}.tb-t.dim{color:var(--mu)}
-.tb-rc{min-width:0}.tb-rc b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tb-rc span{display:block;color:var(--mu);font-size:12.5px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tb-rc{min-width:0}.tb-src{font-style:normal;font-size:11px;font-weight:800;border-radius:999px;padding:1px 7px;margin-right:6px;border:1px solid var(--border);color:var(--muted)}.tb-src.site{border-color:#4f8ef7;color:#2f6fe0}.tb-src.hotel{border-color:#c9a84c;color:#9a7a26}.tb-src.tel{border-color:#a77bf3;color:#7a4fd0}.tb-rc b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tb-rc span{display:block;color:var(--mu);font-size:12.5px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tb-s{font-size:11px;font-weight:800;letter-spacing:.5px;white-space:nowrap;text-align:right}.tb-s.a{color:var(--a2)}.tb-s.g{color:var(--go)}.tb-s.b{color:var(--bl)}.tb-s.m{color:var(--mu)}
 .tb-blink{animation:tbbl 1.4s steps(2) infinite}@keyframes tbbl{50%{opacity:.35}}
 @media (prefers-reduced-motion:reduce){.tb-blink{animation:none}}
@@ -2308,6 +2308,12 @@ function anonymise(title,location){
     const d = m[1].padStart(2, "0") + m[2];
     return `<div class="tb-f">${d[0]}</div><div class="tb-f">${d[1]}</div><span class="tb-co">:</span><div class="tb-f">${d[2]}</div><div class="tb-f">${d[3]}</div>`;
   }
+  // Provenance de la course dans le tableau : site, manuel, hôtel, téléphone IA
+  function srcTb(r) {
+    const s = String(r.source || "").toLowerCase();
+    const [k, t] = s === "hotel" || r.hotel ? ["hotel", "🏨 Hôtel"] : s === "site" ? ["site", "🌐 Site"] : s.indexOf("telephone") === 0 ? ["tel", "📞 IA"] : s ? ["", esc(r.source)] : ["man", "✍️ Manuel"];
+    return `<i class="tb-src ${k}">${t}</i>`;
+  }
   function tableauDeparts(rows) {
     const auj = todayStr(), h = new Date().getHours();
     const duJour = reservationsCache.filter(r => r.date === auj && r.statut !== "annulée");
@@ -2317,7 +2323,7 @@ function anonymise(title,location){
     const nx = prochaineCourse();
     if (nx && resaView === "avenir") {
       const f = etapesFaites(nx), cur = etapeCourante(nx), act = ACTIONS_TB[cur] || null, rg = rangClient(nx), id = esc(nx.id);
-      const info = [esc(nx.nom || "Client") + (rg >= 2 ? ` <em>· ${rg}ᵉ course</em>` : ""), nx.pax ? "🚐 " + esc(nx.pax) + " pers." : "", volCode(nx) ? "✈️ " + esc(volCode(nx)) : "", trajTxt(nx) && !/calcul/.test(trajTxt(nx)) ? `<span data-traj="${id}">${trajTxt(nx)}</span>` : (nx.dep && nx.arr ? `<span data-traj="${id}">${trajTxt(nx)}</span>` : "")].filter(Boolean).map(x => `<span>${x}</span>`).join("");
+      const info = [esc(nx.nom || "Client") + (rg >= 2 ? ` <em>· ${rg}ᵉ course</em>` : "") + " " + srcTb(nx), nx.pax ? "🚐 " + esc(nx.pax) + " pers." : "", volCode(nx) ? "✈️ " + esc(volCode(nx)) : "", trajTxt(nx) && !/calcul/.test(trajTxt(nx)) ? `<span data-traj="${id}">${trajTxt(nx)}</span>` : (nx.dep && nx.arr ? `<span data-traj="${id}">${trajTxt(nx)}</span>` : "")].filter(Boolean).map(x => `<span>${x}</span>`).join("");
       html += `<div class="tb-nx"><div class="tb-nx1"><span>Prochain départ</span><span class="tb-live">${esc(dansTxt(nx) || jourTitre(nx.date))}</span></div>
         <div class="tb-jour">📅 ${esc(jourProchain(nx.date))}</div><div class="tb-fl">${volets(nx.heure)}</div><div class="tb-de"><small>📍 Prise en charge${villeCourte(nx.dep) && villeCourte(nx.dep) !== lieuCourt(nx.dep) ? " · " + esc(villeCourte(nx.dep)) : ""}</small><b>${esc(lieuCourt(nx.dep))}</b><span>🏁 vers ${esc(lieuCourt(nx.arr))}</span></div>
         <div class="tb-in">${info}</div>
@@ -2332,7 +2338,7 @@ function anonymise(title,location){
     rows.forEach(r => {
       if ((r.date || "") !== jour) { jour = r.date || ""; html += `<div class="tb-day">${esc(jourTitre(jour))}</div>`; }
       const [st, cl] = statutTb(r), passe = groupOf(r) !== 0;
-      html += `<button type="button" class="tb-row" data-fiche="${esc(r.id)}"><span class="tb-t${passe ? " dim" : ""}">${esc(r.heure || "—")}</span><span class="tb-rc"><b>${estNouvelle(r) ? "🆕 " : ""}${esc(r.nom || "—")}</b><span>${esc(lieuCourt(r.dep))} → ${esc(lieuCourt(r.arr))}</span></span><span class="tb-s ${cl}">${st}</span></button>`;
+      html += `<button type="button" class="tb-row" data-fiche="${esc(r.id)}"><span class="tb-t${passe ? " dim" : ""}">${esc(r.heure || "—")}</span><span class="tb-rc"><b>${estNouvelle(r) ? "🆕 " : ""}${esc(r.nom || "—")}</b><span>${srcTb(r)}${esc(lieuCourt(r.dep))} → ${esc(lieuCourt(r.arr))}</span></span><span class="tb-s ${cl}">${st}</span></button>`;
     });
     return html + `</div>`;
   }
