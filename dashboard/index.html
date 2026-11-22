@@ -526,6 +526,21 @@
 .tf-ac .no,.tf-ac .del{color:#c2412b!important}
 .tb h2,.tb h3,.tf1 h3{font-family:"DM Sans",system-ui,sans-serif;font-weight:700}
 #btn-moderne{margin-left:auto}
+/* Mise en page en vue « Tableau » : les filtres, puis le tableau tout de suite ; les outils en dessous */
+#tab-reservations.tb-mode{display:flex;flex-direction:column}
+#tab-reservations.tb-mode>*{order:5}
+#tab-reservations.tb-mode .kpis4{display:none}
+#tab-reservations.tb-mode #push-bar,#tab-reservations.tb-mode #new-bar{order:1}
+#tab-reservations.tb-mode .rbar{order:2;flex-wrap:nowrap;margin-bottom:10px}
+#tab-reservations.tb-mode .rchips{flex-wrap:nowrap;width:100%}
+#tab-reservations.tb-mode .rchips .rchip{flex:none}
+#tab-reservations.tb-mode #resa-list{order:3}
+#tab-reservations.tb-mode #tb-outils-titre{order:4;display:block}
+#tab-reservations.tb-mode #vol-search{order:5}#tab-reservations.tb-mode #pancarte-rapide{order:6}
+#tab-reservations.tb-mode #tb-outils{order:7;display:flex}
+@media (max-width:640px){body.tb-on #topbar-sub{display:none}}
+#tb-outils-titre{display:none;font-size:15px;font-weight:700;margin:6px 2px 8px}
+#tb-outils{display:none;flex-wrap:wrap;gap:8px;align-items:center;margin:2px 0 16px}#tb-outils #btn-moderne{margin-left:0}
 </style>
 <style>/* iPhone : pas de zoom auto sur les champs */@media (max-width:900px){input,select,textarea{font-size:16px!important}}</style>
 <style id="theme-clair">
@@ -628,6 +643,8 @@
         <div class="new-bar push-bar" id="push-bar"><span id="push-bar-txt"></span><button type="button" id="btn-push-plustard">Plus tard</button><button type="button" class="pl" id="btn-push">🔔 Activer</button></div>
         <div class="new-bar" id="new-bar"><span id="new-bar-txt"></span><button type="button" class="pl" id="btn-tout-vu">Tout marquer comme vu</button></div>
         <div id="resa-list"><div class="rempty">Chargement…</div></div>
+        <div id="tb-outils-titre">Outils</div>
+        <div id="tb-outils"></div>
       </div>
 
       <!-- FACTURATION -->
@@ -2255,7 +2272,7 @@ function anonymise(title,location){
     const duJour = reservationsCache.filter(r => r.date === auj && r.statut !== "annulée");
     const ca = Math.round(duJour.reduce((t, r) => t + prixTb(r), 0));
     const jr = new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
-    let html = `<div class="tb"><div class="tb-hd"><div><h2>${h >= 18 || h < 5 ? "Bonsoir" : "Bonjour"} Badr</h2><p>${esc(jr.charAt(0).toUpperCase() + jr.slice(1))} · ${duJour.length} départ${duJour.length > 1 ? "s" : ""} · ${ca} €</p></div><button type="button" class="tb-plus" data-tb-new aria-label="Nouvelle réservation">+</button></div>`;
+    let html = `<div class="tb"><div class="tb-hd"><div><h2>${h >= 18 || h < 5 ? "Bonsoir" : "Bonjour"} Badr</h2><p>${esc(jr.charAt(0).toUpperCase() + jr.slice(1))} · ${duJour.length} départ${duJour.length > 1 ? "s" : ""} · ${ca} €</p></div></div>`;
     const nx = prochaineCourse();
     if (nx && resaView === "avenir") {
       const f = etapesFaites(nx), cur = etapeCourante(nx), act = ACTIONS_TB[cur] || null, rg = rangClient(nx), id = esc(nx.id);
@@ -2338,7 +2355,12 @@ function anonymise(title,location){
   document.getElementById("btn-moderne").addEventListener("click", () => { MODERNE = !MODERNE; try { localStorage.setItem("tvp_vue", MODERNE ? "tableau" : "ancienne"); } catch (e) {} renderReservations(); });
   function renderReservations() {
     renderEnCours(); try { ecSurveiller(); } catch (e) {}
-    try { document.querySelector("#tab-reservations .kpis4").hidden = MODERNE; } catch (e) {}
+    try {
+      document.getElementById("tab-reservations").classList.toggle("tb-mode", MODERNE);
+      document.body.classList.toggle("tb-on", MODERNE);
+      const out = document.getElementById("tb-outils"), barre = document.querySelector("#tab-reservations .rbar");
+      ["resa-cal-all", "btn-moderne"].forEach(k => { const el = document.getElementById(k); if (el) (MODERNE ? out : barre).appendChild(el); });
+    } catch (e) {}
     { const bt = document.getElementById("btn-moderne"); if (bt) { bt.setAttribute("aria-pressed", MODERNE); bt.textContent = MODERNE ? "↩️ Ancienne vue" : "✨ Nouvelle vue"; } }
     try { if (ficheId) majFiche(); } catch (e) {}
     const aVenir = reservationsCache.filter(r => groupOf(r) === 0 && r.statut !== "annulée");
