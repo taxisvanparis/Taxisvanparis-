@@ -1436,7 +1436,7 @@ function anonymise(title,location){
     const { L, jour, nom, h } = confInfos(r);
     const txt = `${L.bj}${nom ? " " + nom : ""}, ${L.moi}\n${L.conf}${jour ? L.du + jour : ""}${h ? L.a + h : ""}` +
       `${r.dep ? "\n📍 " + L.dep + " : " + r.dep : ""}${r.arr ? "\n🏁 " + L.arr + " : " + r.arr : ""}\n${L.fin}\nTaxis Van Paris — ${L === CONF_TXT.fr ? "06 67 40 20 05" : "+33 6 67 40 20 05"}`;
-    return `<a class="cal-btn wa-btn" target="_blank" rel="noopener" href="https://wa.me/${n}?text=${encodeURIComponent(txt)}">📩 Confirmation client</a> `;
+    return `<a class="cal-btn wa-btn" target="_blank" rel="noopener" href="https://wa.me/${n}?text=${encodeURIComponent(txt)}">💬 Confirmation WhatsApp client</a> `;
   }
   // SMS au client : même confirmation, envoyée par l'appli Messages du téléphone (gratuit, via le forfait)
   function smsClient(r) {
@@ -1451,7 +1451,7 @@ function anonymise(title,location){
       `${prix && +prix.replace(/[^\d.,]/g, "").replace(",", ".") > 0 ? "\n" + L.prix + " : " + prix.replace(/\s*(€|euros?)\s*$/i, "") + " €" : ""}` +
       `\n${L.pai}\nTaxis Van Paris — ${L === CONF_TXT.fr ? "06 67 40 20 05" : "+33 6 67 40 20 05"}`;
     const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-    return `<a class="cal-btn sms-btn" href="sms:+${n}${ios ? "&" : "?"}body=${encodeURIComponent(txt)}">✉️ Confirmation SMS</a> `;
+    return `<a class="cal-btn sms-btn" href="sms:+${n}${ios ? "&" : "?"}body=${encodeURIComponent(txt)}">✉️ Confirmation SMS client</a> `;
   }
   // Fiche course pour le chauffeur : sans numéro du client ni prix, avec lien Waze du départ (sauf aéroport)
   const AERO_RX = /\b(cdg|roissy|charles[ -]?de[ -]?gaulle|orly|beauvais|till[ée]|a[ée]roport|airport|terminal)\b/i;
@@ -2067,7 +2067,7 @@ function anonymise(title,location){
       if (res && res.ok) {
         toast("📧 Confirmation envoyée à " + res.email, 4000);
         updateDoc(doc(db, "reservations", id), { confMailEnvoye: Date.now(), email: res.email }).catch(() => {});
-        btn.textContent = "📧 Confirmation e-mail ✓";
+        btn.textContent = "📧 Confirmation e-mail client ✓";
       } else {
         btn.textContent = avant;
         toast(res && res.error === "pas_email" ? "Pas d'adresse e-mail pour ce client : ajoute-la avec ✏️ Modifier." : "L'e-mail n'a pas pu partir, réessaie dans un instant.", 5000);
@@ -2330,7 +2330,7 @@ function anonymise(title,location){
       marquerVues([id], true);
       try { await updateDoc(doc(db, "reservations", id), { statut: "confirmée" }); } catch (e) { toast("La confirmation n'a pas pu être enregistrée.", 5000); return; }
       if (r.email || r.source === "site") envoyerConfMail(id, btn);
-      else { toast("Confirmée ✔ Envoie la confirmation au client avec « Confirmation client » ou « SMS »", 5000); if (ficheId !== id) ouvrirFiche(id); }
+      else { toast("Confirmée ✔ Envoie la confirmation au client avec « Confirmation WhatsApp client » ou « Confirmation SMS client »", 5000); if (ficheId !== id) ouvrirFiche(id); }
     } else if (i === 2) { if (ficheId !== id) ouvrirFiche(id); toast("Choisis : 📢 Dispatcher ou 🚖 Envoyer au chauffeur", 4500); }
     else if (i === 3) envoyerLiens(id);
     else if (i === 4) { marquerVues([id], true); updateDoc(doc(db, "reservations", id), { statut: "terminée" }).catch(() => toast("Pas enregistré, réessaie.", 4000)); }
@@ -2370,7 +2370,7 @@ function anonymise(title,location){
         // Boutons rangés dans l'ordre de la vie d'une course : avant → jour J → après, puis le reste à part
         const actif = groupOf(r) === 0 && r.statut !== "annulée";
         const avant = ferme ? "" : (r.statut !== "confirmée" ? `<button class="ok" data-st="confirmée" data-id="${esc(r.id)}">✅ Confirmer</button>` : "") +
-          waClient(r) + smsClient(r) + `<button type="button" class="cal-btn" data-confmail="${esc(r.id)}">📧 Confirmation e-mail${r.confMailEnvoye ? " ✓" : ""}</button> ` +
+          waClient(r) + smsClient(r) + `<button type="button" class="cal-btn" data-confmail="${esc(r.id)}">📧 Confirmation e-mail client${r.confMailEnvoye ? " ✓" : ""}</button> ` +
           (actif ? `<button type="button" class="grp-btn" style="font-family:inherit;cursor:pointer" data-dispatch="${esc(r.id)}">📢 Dispatcher</button>` + envoiBtn(r) + waChauffeur(r) + lienBtn(r) + calLink([r], "📅 Calendrier", "cal-btn") : "") +
           (r.dep && r.arr ? `<button type="button" class="cal-btn" data-carte="${esc(r.id)}">🗺️ Carte</button>` : "");
         const jourJ = actif && (AERO_RX.test(String(r.dep || "") + " " + String(r.depZone || "")) || /\bgare\b|\bstation\b/i.test(String(r.dep || ""))) ? pancarteBtn(r) : "";
