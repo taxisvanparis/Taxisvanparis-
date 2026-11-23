@@ -516,7 +516,7 @@
 .tf-rt p{margin:0 0 12px;font-size:15.5px;line-height:1.3;color:var(--text)}
 .tf-fa{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--border);border-radius:16px;margin:4px 0 12px;overflow:hidden;background:var(--card)}
 .tf-fa div{padding:10px 12px;border-right:1px solid var(--border);min-width:0}.tf-fa div:last-child{border:0}.tf-fa b{display:block;font-size:18px;white-space:nowrap;color:var(--heading)}.tf-fa span{color:var(--muted);font-size:12px}
-.tf-mt{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}.vol-fr24{color:var(--blue,#2f6fe0);font-weight:700;text-decoration:underline;text-underline-offset:3px}.tf-mt .vol-fr24{color:#2f6fe0!important;display:inline-flex;align-items:center;border:1px solid var(--border);border-radius:999px;padding:6px 12px;background:var(--card);text-decoration:none}.tf-bg{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.tf-bg>*{display:inline-flex!important;align-items:center;border-radius:999px!important;padding:5px 11px!important;border:1px solid var(--border);font-size:13px!important;font-weight:700;margin:0!important;line-height:1.3}.tf-g7{display:grid;grid-template-columns:1.4fr 1fr;gap:8px;margin:0 0 4px}.tf-g7 button,.tf-g7 a{display:flex;align-items:center;justify-content:center;min-height:46px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--text);font:inherit;font-weight:700;font-size:14px;text-decoration:none;cursor:pointer}.tf-g7 a{background:#1c1c1c;color:#fff;border-color:#1c1c1c}.tf-g7 .ok{border-color:var(--green);color:var(--green)}.tf-g7i{margin:0 0 14px;color:var(--muted);font-size:12.5px}.tf-mt .tf-tel{text-decoration:none;font-weight:700;color:var(--heading);border-color:var(--gold)}.tf-mt>*{font-size:12.5px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:5px 9px;color:var(--text)}
+.tf-mt{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}.vol-fr24{color:var(--blue,#2f6fe0);font-weight:700;text-decoration:underline;text-underline-offset:3px}.tf-mt .vol-fr24{color:#2f6fe0!important;display:inline-flex;align-items:center;border:1px solid var(--border);border-radius:999px;padding:6px 12px;background:var(--card);text-decoration:none}.tf-bg{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.tf-bg>*{display:inline-flex!important;align-items:center;border-radius:999px!important;padding:5px 11px!important;border:1px solid var(--border);font-size:13px!important;font-weight:700;margin:0!important;line-height:1.3}.cf-warn{background:#f0a0301f;border:1px solid #f0a030;color:#9a5a00;border-radius:12px;padding:10px 12px;font-weight:700;font-size:14px;margin:0 0 10px}.cf-info{color:var(--muted);font-size:12.5px;margin:8px 0 0}#imm-box button.cf-go{width:100%;font:inherit;font-weight:800;cursor:pointer}#imm-box .cf-seul{background:var(--card);color:var(--text);border:1px solid var(--border)}.tf-g7{display:grid;grid-template-columns:1.4fr 1fr;gap:8px;margin:0 0 4px}.tf-g7 button,.tf-g7 a{display:flex;align-items:center;justify-content:center;min-height:46px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--text);font:inherit;font-weight:700;font-size:14px;text-decoration:none;cursor:pointer}.tf-g7 a{background:#1c1c1c;color:#fff;border-color:#1c1c1c}.tf-g7 .ok{border-color:var(--green);color:var(--green)}.tf-g7i{margin:0 0 14px;color:var(--muted);font-size:12.5px}.tf-mt .tf-tel{text-decoration:none;font-weight:700;color:var(--heading);border-color:var(--gold)}.tf-mt>*{font-size:12.5px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:5px 9px;color:var(--text)}
 .tf-go{display:block;width:100%;background:linear-gradient(180deg,#E2C477,#C9A24B);color:#17150F;border:0;border-radius:16px;padding:15px;font-weight:700;font-size:16.5px;font-family:inherit;cursor:pointer;text-align:center}
 .tf-go small{display:block;font-weight:500;color:#5a4a20;font-size:12.5px;margin-top:3px}
 .tf-q{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0 14px}.tf-q>*{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px 4px;text-align:center;font:inherit;font-size:12px;color:var(--text);text-decoration:none;cursor:pointer}.tf-q>* b{display:block;font-size:19px;margin-bottom:3px}
@@ -1612,6 +1612,35 @@ function anonymise(title,location){
     if (ok) { b.classList.add("ok"); setTimeout(() => b.classList.remove("ok"), 1500); toast((b.dataset.g7copie === "dep" ? "Départ" : "Arrivée") + " copié ✓ — colle-le dans G7"); }
     else toast("Copie impossible : " + txt, 5000);
   });
+  // ✅ Confirmer la course : on choisit d'envoyer (WhatsApp, SMS, e-mail) ou non un message au client
+  function choisirConfirmation(id, btn) {
+    const r = reservationsCache.find(x => x.id === id); if (!r) return;
+    const hrefDe = h => (String(h).match(/href="([^"]+)"/) || [])[1] || "";
+    const wa = hrefDe(waClient(r)), sms = hrefDe(smsClient(r)), mail = !!(r.email || r.source === "site");
+    const prix0 = !(+String(r.prix || "").replace(/[^\d.,]/g, "").replace(",", ".") > 0);
+    const ov = document.createElement("div"); ov.id = "imm-ov";
+    ov.innerHTML = `<div id="imm-box" role="dialog" aria-label="Confirmer la course">
+      <button id="imm-x" type="button" aria-label="Fermer">✕</button>
+      <h3>✅ Confirmer la course</h3>
+      <p class="sub">${escH(String(r.nom || "Course").replace(/^🏨\s*/, ""))}${r.date ? " · " + escH(fmtDate(r)) : ""}</p>
+      ${prix0 ? `<p class="cf-warn">⚠️ Le prix est à 0 €. Mets le prix avec ✏️ Modifier avant d'envoyer un message au client.</p>` : ""}
+      ${wa ? `<a class="imm-send cf-go" data-cf="wa" style="background:#25d366;color:#08240f" href="${escH(wa)}" target="_blank" rel="noopener">💬 Confirmer + WhatsApp au client</a>` : ""}
+      ${sms ? `<a class="imm-send cf-go env-alt" data-cf="sms" href="${escH(sms)}">✉️ Confirmer + SMS au client</a>` : ""}
+      ${mail ? `<button type="button" class="imm-send cf-go env-alt" data-cf="mail">📧 Confirmer + e-mail au client</button>` : ""}
+      <button type="button" class="imm-send cf-go cf-seul" data-cf="seul">✅ Confirmer sans message</button>
+      <p class="cf-info">« Sans message » : la course passe en Confirmée sur ton tableau de bord seulement.</p>
+    </div>`;
+    document.body.appendChild(ov);
+    const fermer = () => ov.remove();
+    document.getElementById("imm-x").onclick = fermer; ov.onclick = e => { if (e.target === ov) fermer(); };
+    ov.querySelectorAll(".cf-go").forEach(el => el.addEventListener("click", async () => {
+      const mode = el.dataset.cf; marquerVues([id], true);
+      try { await updateDoc(doc(db, "reservations", id), { statut: "confirmée" }); } catch (e) { toast("La confirmation n'a pas pu être enregistrée.", 5000); return; }
+      if (mode === "mail") envoyerConfMail(id, btn);
+      else toast(mode === "seul" ? "Confirmée ✔ (aucun message envoyé au client)" : "Confirmée ✔ — appuie sur Envoyer dans " + (mode === "wa" ? "WhatsApp" : "Messages"), 4000);
+      setTimeout(fermer, 300);
+    }));
+  }
   // 🚖 Choisir le chauffeur : ouvre directement WhatsApp (groupe ou chauffeur) ou Messages
   function choisirChauffeur(id) {
     const r = reservationsCache.find(x => x.id === id); if (!r) return;
@@ -2296,7 +2325,7 @@ function anonymise(title,location){
   // ===== Vue « Tableau des départs » (par défaut ; bouton « Ancienne vue » pour revenir) =====
   let MODERNE = true; try { MODERNE = localStorage.getItem("tvp_vue") !== "ancienne"; } catch (e) {}
   const ETAPES_TB = ["Reçue", "Confirmée", "Chauffeur", "Liens", "Terminée"];
-  const ACTIONS_TB = [null, ["✅ Confirmer la course", "Le client reçoit la confirmation"], ["🚖 Choisir le chauffeur", "Groupe WhatsApp ou un chauffeur"], ["📤 Liens client + chauffeur", "WhatsApp ou SMS, tu choisis"], ["🏁 Course effectuée", "La course passe dans « Passées »"]];
+  const ACTIONS_TB = [null, ["✅ Confirmer la course", "Avec ou sans message au client"], ["🚖 Choisir le chauffeur", "Groupe WhatsApp ou un chauffeur"], ["📤 Liens client + chauffeur", "WhatsApp ou SMS, tu choisis"], ["🏁 Course effectuée", "La course passe dans « Passées »"]];
   // Étapes faites : 0 reçue, 1 confirmée, 2 chauffeur, 3 liens, 4 terminée
   function etapesFaites(r) {
     const e = r.lienCourse && etapesCache[r.lienCourse];
@@ -2450,12 +2479,8 @@ function anonymise(title,location){
   const noteUtile = n => { const t = String(n || "").trim(); return t.length > 3 && !/^(chat|manuel|whatsapp|wa|site|sms|t[ée]l[ée]?phone|appel|tel)\.?$/i.test(t); };
   async function faireEtape(id, i, btn) {
     const r = reservationsCache.find(x => x.id === id); if (!r) return;
-    if (i === 1) {
-      marquerVues([id], true);
-      try { await updateDoc(doc(db, "reservations", id), { statut: "confirmée" }); } catch (e) { toast("La confirmation n'a pas pu être enregistrée.", 5000); return; }
-      if (r.email || r.source === "site") envoyerConfMail(id, btn);
-      else { toast("Confirmée ✔ Envoie la confirmation au client avec « Confirmation WhatsApp client » ou « Confirmation SMS client »", 5000); if (ficheId !== id) ouvrirFiche(id); }
-    } else if (i === 2) choisirChauffeur(id);
+    if (i === 1) choisirConfirmation(id, btn);
+    else if (i === 2) choisirChauffeur(id);
     else if (i === 3) envoyerLiens(id);
     else if (i === 4) { marquerVues([id], true); updateDoc(doc(db, "reservations", id), { statut: "terminée" }).catch(() => toast("Pas enregistré, réessaie.", 4000)); }
   }
