@@ -503,7 +503,7 @@
 .tb-row:hover{background:var(--hover)}
 .tb-t{font-size:21px;font-weight:800;font-variant-numeric:tabular-nums}.tb-t.dim{color:var(--mu)}
 .tb-rc{min-width:0}.tb-src{font-style:normal;font-size:11px;font-weight:800;border-radius:999px;padding:1px 7px;margin-right:6px;border:1px solid var(--border);color:var(--muted)}.tb-src.site{border-color:#4f8ef7;color:#2f6fe0}.tb-src.hotel{border-color:#c9a84c;color:#9a7a26}.tb-src.tel{border-color:#a77bf3;color:#7a4fd0}.tb-rc b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tb-rc span{display:block;color:var(--mu);font-size:12.5px;margin-top:4px;line-height:1.7;padding:1px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tb-src{display:inline-block;line-height:1.5;vertical-align:1px}
-.tb-s{font-size:11px;font-weight:800;letter-spacing:.5px;white-space:nowrap;text-align:right}.tb-s.a{color:var(--a2)}.tb-s.g{color:var(--go)}.tb-s.b{color:var(--bl)}.tb-s.m{color:var(--mu)}
+.tb-s{font-size:11px;font-weight:800;letter-spacing:.5px;white-space:nowrap;text-align:right}.tb-ch{display:block;font-style:normal;letter-spacing:0;font-size:12px;font-weight:700;margin-top:6px;text-transform:none}.tb-ch.ok{color:var(--text)}.tb-ch.grp{color:#2f6fe0}.tb-ch.no{color:#d9822b}.tb-s.a{color:var(--a2)}.tb-s.g{color:var(--go)}.tb-s.b{color:var(--bl)}.tb-s.m{color:var(--mu)}
 .tb-blink{animation:tbbl 1.4s steps(2) infinite}@keyframes tbbl{50%{opacity:.35}}
 @media (prefers-reduced-motion:reduce){.tb-blink{animation:none}}
 .tb-vide{padding:22px 16px;color:var(--mu);text-align:center;border-top:1px solid var(--ln)}
@@ -2403,6 +2403,14 @@ function anonymise(title,location){
     const [k, t] = s === "hotel" || r.hotel ? ["hotel", "🏨 Hôtel"] : s === "site" ? ["site", "🌐 Site"] : s.indexOf("telephone") === 0 ? ["tel", "📞 IA"] : s ? ["", esc(r.source)] : ["man", "✍️ Manuel"];
     return `<i class="tb-src ${k}">${t}</i>`;
   }
+  // Sous le statut : qui fait la course (chauffeur choisi, envoyée au groupe, ou personne)
+  function chTb(r) {
+    if (/annul|termin/i.test(r.statut || "")) return "";
+    const ch = typeof chauffeurDe === "function" ? chauffeurDe(r) : null, nom = r.chauffeurNom || (ch && ch.nom) || "";
+    if (nom) return `<i class="tb-ch ok">🚖 ${esc(String(nom).split(" ")[0])}</i>`;
+    if (r.dispatchEnvoye) return `<i class="tb-ch grp">📢 Envoyée au groupe</i>`;
+    return `<i class="tb-ch no">⚠️ Sans chauffeur</i>`;
+  }
   function tableauDeparts(rows) {
     const auj = todayStr(), h = new Date().getHours();
     const duJour = reservationsCache.filter(r => r.date === auj && r.statut !== "annulée");
@@ -2428,7 +2436,7 @@ function anonymise(title,location){
     rows.forEach(r => {
       if ((r.date || "") !== jour) { jour = r.date || ""; const n = nbJour[jour], jt = jourTitre(jour); html += `<div class="tb-day">${esc(jt.charAt(0).toUpperCase() + jt.slice(1))}<span>${n} course${n > 1 ? "s" : ""}</span></div>`; }
       const [st, cl] = statutTb(r), passe = groupOf(r) !== 0;
-      html += `<button type="button" class="tb-row" data-fiche="${esc(r.id)}"><span class="tb-t${passe ? " dim" : ""}">${esc(r.heure || "—")}</span><span class="tb-rc"><b>${estNouvelle(r) ? "🆕 " : ""}${esc(r.nom || "—")}</b><span>${srcTb(r)}${esc(lieuCourt(r.dep))} → ${esc(lieuCourt(r.arr))}</span></span><span class="tb-s ${cl}">${st}</span></button>`;
+      html += `<button type="button" class="tb-row" data-fiche="${esc(r.id)}"><span class="tb-t${passe ? " dim" : ""}">${esc(r.heure || "—")}</span><span class="tb-rc"><b>${estNouvelle(r) ? "🆕 " : ""}${esc(r.nom || "—")}</b><span>${srcTb(r)}${esc(lieuCourt(r.dep))} → ${esc(lieuCourt(r.arr))}</span></span><span class="tb-s ${cl}">${st}${chTb(r)}</span></button>`;
     });
     return html + `</div>`;
   }
