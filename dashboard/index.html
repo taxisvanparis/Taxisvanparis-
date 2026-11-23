@@ -299,6 +299,10 @@
   .share-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px;}
   .share-card.masked{opacity:.5;}
   .share-head{display:flex;gap:10px;align-items:center;}
+  .share-chk{display:flex;align-items:center;justify-content:center;min-width:34px;min-height:34px;cursor:pointer}.share-chk input{width:24px;height:24px;accent-color:#C9A24B;cursor:pointer}
+  .share-card.sel{border-color:var(--gold);box-shadow:0 0 0 2px #C9A24B55}
+  #share-bar{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));max-width:720px;margin:0 auto;z-index:60;display:none;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:12px;padding:12px 14px;border-radius:14px;background:#17150F;color:#fff;box-shadow:0 8px 24px #0004}
+  #share-bar.on{display:flex}#tab-partage{padding-bottom:90px}#share-bar div{display:flex;gap:8px}#share-bar .sbtn:not(.wa){background:#ffffff1a;color:#fff;border-color:#ffffff33}
   .share-time{background:var(--gold);color:#fff;font-weight:700;border-radius:6px;padding:2px 8px;font-variant-numeric:tabular-nums;}
   .share-route{font-weight:600;color:var(--heading);min-width:0;flex:1;}
   .share-route small{display:block;font-weight:400;color:var(--muted);font-size:12.5px;overflow-wrap:anywhere;}
@@ -3067,6 +3071,7 @@ function anonymise(title,location){
   const shareStore = { get(k, d) { try { const v = localStorage.getItem("tvp_share_" + k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
                        set(k, v) { try { localStorage.setItem("tvp_share_" + k, JSON.stringify(v)); } catch (e) {} } };
   let shareEdits = shareStore.get("edits", {}), shareTab = "avenir";
+  const shareSel = new Set(); // courses cochées pour un envoi groupé
   const sigEl = document.getElementById("share-sig"), vehEl = document.getElementById("share-veh");
   let sigInit = shareStore.get("sig", "");
   if (sigInit === "Intéressé ? Répondez en privé 📲") sigInit = ""; // ancienne signature par défaut, retirée
@@ -3114,42 +3119,52 @@ function anonymise(title,location){
     if (!document.getElementById("tab-partage").classList.contains("active")) return;
     const up = reservationsCache.filter(r => groupOf(r) === 0).sort((a, b) => resaDate(a) - resaDate(b));
     const libres = up.filter(r => !r.chauffeurNom && !r.chauffeurUid);
+    const list = document.getElementById("share-list");
     document.getElementById("share-tabs").innerHTML = [["avenir", `À venir (${up.length})`], ["libres", `Sans chauffeur (${libres.length})`]]
       .map(([k, l]) => `<button class="share-tab${shareTab === k ? " on" : ""}" data-stab="${k}">${l}</button>`).join("");
     document.querySelectorAll("[data-stab]").forEach(b => b.addEventListener("click", () => { shareTab = b.dataset.stab; renderShare(); }));
     const items = (shareTab === "libres" ? libres : up).map(shareItem);
-    const visibles = items.filter(i => !i.hide);
-    const digest = visibles.map(shareMessage).join("\n\n———\n\n");
-    document.getElementById("share-bulk").innerHTML =
-      (visibles.length > 1 ? `<button class="sbtn gold" id="share-copyall">Copier les ${visibles.length} courses</button><a class="sbtn wa" href="${waLink(digest)}" target="_blank" rel="noopener">Tout envoyer sur WhatsApp</a>` : "") +
-      (items.length > 1 ? calLink(items.map(i => i.r), `📅 Ajouter les ${items.length} courses à mon calendrier`, "sbtn") : "");
-    const ca = document.getElementById("share-copyall"); if (ca) ca.addEventListener("click", () => copyText(digest));
-    const list = document.getElementById("share-list");
+    // Cases à cocher : on choisit les courses à envoyer dans un seul message
+    [...shareSel].forEach(id => { if (!items.some(i => i.r.id === id)) shareSel.delete(id); });
+    const cochees = () => items.filter(i => shareSel.has(i.r.id));
+    const digestSel = () => cochees().map(shareMessage).join("\n\n———\n\n");
+    document.getElementById("share-bulk").innerHTML = items.length > 1
+      ? `<button class="sbtn" id="share-all">☑️ Tout cocher</button><button class="sbtn" id="share-none">Tout décocher</button>` + calLink(items.map(i => i.r), `📅 Ajouter les ${items.length} courses à mon calendrier`, "sbtn") : "";
+    const majBar = () => {
+      const n = cochees().length, bar = document.getElementById("share-bar"); if (!bar) return;
+      bar.classList.toggle("on", n > 0);
+      bar.innerHTML = n ? `<b>${n} course${n > 1 ? "s" : ""} cochée${n > 1 ? "s" : ""}</b><div><button class="sbtn" id="share-copysel">Copier</button><a class="sbtn wa" id="share-wasel" href="${waLink(digestSel())}" target="_blank" rel="noopener">💬 Envoyer sur WhatsApp</a></div>` : "";
+      const c = document.getElementById("share-copysel"); if (c) c.onclick = () => copyText(digestSel());
+      document.querySelectorAll(".share-card").forEach(card => card.classList.toggle("sel", shareSel.has(card.dataset.sid)));
+    };
+    const sa = document.getElementById("share-all"); if (sa) sa.onclick = () => { items.forEach(i => shareSel.add(i.r.id)); list.querySelectorAll("[data-chk]").forEach(c => c.checked = true); majBar(); };
+    const sn = document.getElementById("share-none"); if (sn) sn.onclick = () => { shareSel.clear(); list.querySelectorAll("[data-chk]").forEach(c => c.checked = false); majBar(); };
     if (!items.length) { list.innerHTML = `<div class="share-empty">Aucune course à venir${shareTab === "libres" ? " sans chauffeur" : ""}.</div>`; return; }
     let lastDay = "", html = "";
     items.forEach(it => {
       const r = it.r, day = r.date ? resaDate(r).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" }) : "Date non précisée";
       if (day !== lastDay) { html += `<div class="share-day">${day}</div>`; lastDay = day; }
       const msg = shareMessage(it);
-      html += `<div class="share-card${it.hide ? " masked" : ""}" data-sid="${escH(r.id)}">
-        <div class="share-head"><span class="share-time">${escH(r.heure ? r.heure.replace(":", "h") : "--h--")}</span>
+      html += `<div class="share-card${shareSel.has(r.id) ? " sel" : ""}" data-sid="${escH(r.id)}">
+        <div class="share-head"><label class="share-chk" title="Cocher pour l'envoi groupé"><input type="checkbox" data-chk ${shareSel.has(r.id) ? "checked" : ""}></label><span class="share-time">${escH(r.heure ? r.heure.replace(":", "h") : "--h--")}</span>
           <div class="share-route">${escH(it.dep || "?")} → ${escH(it.arr || "?")}<small>${it.isHotel ? "🏨 Course hôtel · commission retirée du prix chauffeur · " : ""}${escH(r.nom || "")} · ${escH(r.dep || "—")} → ${escH(r.arr || "—")}${r.chauffeurNom ? " · Chauffeur : " + escH(r.chauffeurNom) : ""}</small></div></div>
         ${it.warn ? `<div class="share-flag">Vérifie le départ et l'arrivée : l'adresse n'a pas pu être rattachée à un arrondissement ou une ville avec certitude.</div>` : ""}
-        ${it.hide ? "" : `<div class="bubble">${escH(msg)}</div>`}
+        <div class="bubble">${escH(msg)}</div>
         <details><summary>Modifier le message</summary><div class="share-fields">
           <label>Départ<input data-sf="dep" value="${escH(it.dep)}"></label><label>Arrivée<input data-sf="arr" value="${escH(it.arr)}"></label>
           <label>Véhicule<select data-sf="veh"><option value="">Auto</option><option ${it.veh === "Van" ? "selected" : ""}>Van</option><option ${it.veh === "Berline" ? "selected" : ""}>Berline</option></select></label>
           <label>Prix chauffeur (€)<input data-sf="prix" inputmode="decimal" value="${escH(it.prixCh)}" placeholder="Facultatif"></label>
           <label class="full">Note<input data-sf="note" value="${escH(it.note)}" placeholder="Ex. : siège bébé, vol AF1234"></label>
         </div></details>
-        <div class="share-actions">${it.hide ? `<button class="sbtn" data-sact="show">Réafficher</button>` :
-          `<button class="sbtn gold" data-sact="copy">Copier</button><a class="sbtn wa" href="${waLink(msg)}" target="_blank" rel="noopener">Envoyer sur WhatsApp</a><button class="sbtn" data-sact="hide">Ne pas partager</button>`}
+        <div class="share-actions"><button class="sbtn gold" data-sact="copy">Copier</button><a class="sbtn wa" href="${waLink(msg)}" target="_blank" rel="noopener">Envoyer celle-ci</a>
           ${calLink([r], "📅 Ajouter à mon calendrier", "sbtn")}</div>
       </div>`;
     });
-    list.innerHTML = html;
+    list.innerHTML = html + `<div id="share-bar"></div>`;
+    majBar();
     list.querySelectorAll(".share-card").forEach(card => {
       const id = card.dataset.sid, it = items.find(x => x.r.id === id);
+      const chk = card.querySelector("[data-chk]"); chk.addEventListener("change", () => { chk.checked ? shareSel.add(id) : shareSel.delete(id); majBar(); });
       card.querySelectorAll("[data-sf]").forEach(inp => inp.addEventListener("change", () => {
         shareEdits[id] = Object.assign({ dep: it.dep, arr: it.arr }, shareEdits[id] || {}, { [inp.dataset.sf]: inp.value });
         shareStore.set("edits", shareEdits); renderShare();
