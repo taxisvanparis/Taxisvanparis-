@@ -3129,7 +3129,7 @@ function anonymise(title,location){
     const cochees = () => items.filter(i => shareSel.has(i.r.id));
     const NUMS = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"];
     // plusieurs courses : chacune numérotée (« COURSE N°2 ») pour que les chauffeurs répondent « je prends la 2 »
-    const digestSel = () => { const c = cochees(); return c.map((it, k) => c.length > 1 ? shareMessage(it).replace("🚖 *COURSE DISPONIBLE*", `${NUMS[k] || "🚖"} *COURSE N°${k + 1}*`) : shareMessage(it)).join("\n\n———\n\n") + (c.length > 1 ? "\n\n👉 Réponds avec le numéro de la course que tu prends." : ""); };
+    const digestSel = () => { const c = cochees(); return c.map((it, k) => c.length > 1 ? shareMessage(it).replace("🚖 *COURSE DISPONIBLE*", `${NUMS[k] || "🚖"} *COURSE N°${k + 1}*`) : shareMessage(it)).join("\n\n———\n\n"); };
     document.getElementById("share-bulk").innerHTML = items.length > 1
       ? `<button class="sbtn" id="share-all">☑️ Tout cocher</button><button class="sbtn" id="share-none">Tout décocher</button>` + calLink(items.map(i => i.r), `📅 Ajouter les ${items.length} courses à mon calendrier`, "sbtn") : "";
     const majBar = () => {
