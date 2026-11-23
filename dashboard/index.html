@@ -2709,7 +2709,11 @@ function anonymise(title,location){
         const noms = []; parDate(actives(editingResaId)).forEach(r => { const k = nomCle(r.nom); if (nomOk(k) && (k.startsWith(kn) || k.split(" ").some(m => m.startsWith(kn)))) { if (!noms.some(x => x.k === k)) noms.push({ k, nom: r.nom, tel: r.tel }); } });
         if (noms.length) {
           box.innerHTML = `<div>👤 <b>Client déjà venu ?</b></div>` + noms.slice(0, 4).map((x, i) => `<div class="cc-a"><span>${esc(x.nom)}${x.tel ? " · " + esc(x.tel) : ""}</span><button type="button" data-ccn="${i}">C'est lui</button></div>`).join("");
-          box.querySelectorAll("[data-ccn]").forEach(b => b.addEventListener("click", () => { const x = noms[+b.dataset.ccn]; nomEl.value = x.nom; if (!telEl.value.trim() && x.tel) telEl.value = x.tel; cliConnu(); }));
+          box.querySelectorAll("[data-ccn]").forEach(b => {
+            // iPhone : le mot en cours de frappe écrasait le nom choisi → on ferme d'abord le clavier, puis on remplit
+            b.addEventListener("pointerdown", e => e.preventDefault());
+            b.addEventListener("click", () => { const x = noms[+b.dataset.ccn]; nomEl.blur(); telEl.blur(); setTimeout(() => { nomEl.value = x.nom; if (!telEl.value.trim() && x.tel) telEl.value = x.tel; cliConnu(); toast("Client rempli ✔"); }, 60); });
+          });
           box.hidden = false; return;
         }
       }
