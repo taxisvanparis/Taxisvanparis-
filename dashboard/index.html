@@ -515,7 +515,7 @@
 .tf-rt p{margin:0 0 12px;font-size:15.5px;line-height:1.3;color:var(--text)}
 .tf-fa{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--border);border-radius:16px;margin:4px 0 12px;overflow:hidden;background:var(--card)}
 .tf-fa div{padding:10px 12px;border-right:1px solid var(--border);min-width:0}.tf-fa div:last-child{border:0}.tf-fa b{display:block;font-size:18px;white-space:nowrap;color:var(--heading)}.tf-fa span{color:var(--muted);font-size:12px}
-.tf-mt{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}.tf-g7{display:grid;grid-template-columns:1.4fr 1fr;gap:8px;margin:0 0 4px}.tf-g7 button,.tf-g7 a{display:flex;align-items:center;justify-content:center;min-height:46px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--text);font:inherit;font-weight:700;font-size:14px;text-decoration:none;cursor:pointer}.tf-g7 a{background:#1c1c1c;color:#fff;border-color:#1c1c1c}.tf-g7 .ok{border-color:var(--green);color:var(--green)}.tf-g7i{margin:0 0 14px;color:var(--muted);font-size:12.5px}.tf-mt .tf-tel{text-decoration:none;font-weight:700;color:var(--heading);border-color:var(--gold)}.tf-mt>*{font-size:12.5px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:5px 9px;color:var(--text)}
+.tf-mt{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}.vol-fr24{color:var(--blue,#2f6fe0);font-weight:700;text-decoration:underline;text-underline-offset:3px}.tf-mt .vol-fr24{color:#2f6fe0!important;display:inline-flex;align-items:center;border:1px solid var(--border);border-radius:999px;padding:6px 12px;background:var(--card);text-decoration:none}.tf-g7{display:grid;grid-template-columns:1.4fr 1fr;gap:8px;margin:0 0 4px}.tf-g7 button,.tf-g7 a{display:flex;align-items:center;justify-content:center;min-height:46px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--text);font:inherit;font-weight:700;font-size:14px;text-decoration:none;cursor:pointer}.tf-g7 a{background:#1c1c1c;color:#fff;border-color:#1c1c1c}.tf-g7 .ok{border-color:var(--green);color:var(--green)}.tf-g7i{margin:0 0 14px;color:var(--muted);font-size:12.5px}.tf-mt .tf-tel{text-decoration:none;font-weight:700;color:var(--heading);border-color:var(--gold)}.tf-mt>*{font-size:12.5px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:5px 9px;color:var(--text)}
 .tf-go{display:block;width:100%;background:linear-gradient(180deg,#E2C477,#C9A24B);color:#17150F;border:0;border-radius:16px;padding:15px;font-weight:700;font-size:16.5px;font-family:inherit;cursor:pointer;text-align:center}
 .tf-go small{display:block;font-weight:500;color:#5a4a20;font-size:12.5px;margin-top:3px}
 .tf-q{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0 14px}.tf-q>*{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px 4px;text-align:center;font:inherit;font-size:12px;color:var(--text);text-decoration:none;cursor:pointer}.tf-q>* b{display:block;font-size:19px;margin-bottom:3px}
@@ -1282,6 +1282,8 @@ function anonymise(title,location){
   }
 
   // Vol : numéro + aéroport de provenance, sauf s'ils figurent déjà dans l'adresse de départ
+  // ✈️ Numéro de vol cliquable → ouvre Flightradar24 (l'appli si elle est installée)
+  const volFr24 = r => `<a class="vol-fr24" href="https://www.flightradar24.com/data/flights/${volCode(r).toLowerCase()}" target="_blank" rel="noopener" onclick="event.stopPropagation()">✈️ ${esc(volCode(r))} ↗</a>`;
   function volCode(r) {
     const ok = x => /^(?=.*[A-Z])[A-Z0-9]{2,3}\d{1,4}[A-Z]?$/.test(x);
     const v = String(r.vol || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
@@ -2351,7 +2353,7 @@ function anonymise(title,location){
     const nx = prochaineCourse();
     if (nx && resaView === "avenir") {
       const f = etapesFaites(nx), cur = etapeCourante(nx), act = ACTIONS_TB[cur] || null, rg = rangClient(nx), id = esc(nx.id);
-      const info = [esc(nx.nom || "Client") + (rg >= 2 ? ` <em>· ${rg}ᵉ course</em>` : "") + " " + srcTb(nx), nx.pax ? "🚐 " + esc(nx.pax) + " pers." : "", volCode(nx) ? "✈️ " + esc(volCode(nx)) : "", trajTxt(nx) && !/calcul/.test(trajTxt(nx)) ? `<span data-traj="${id}">${trajTxt(nx)}</span>` : (nx.dep && nx.arr ? `<span data-traj="${id}">${trajTxt(nx)}</span>` : "")].filter(Boolean).map(x => `<span>${x}</span>`).join("");
+      const info = [esc(nx.nom || "Client") + (rg >= 2 ? ` <em>· ${rg}ᵉ course</em>` : "") + " " + srcTb(nx), nx.pax ? "🚐 " + esc(nx.pax) + " pers." : "", volCode(nx) ? volFr24(nx) : "", trajTxt(nx) && !/calcul/.test(trajTxt(nx)) ? `<span data-traj="${id}">${trajTxt(nx)}</span>` : (nx.dep && nx.arr ? `<span data-traj="${id}">${trajTxt(nx)}</span>` : "")].filter(Boolean).map(x => `<span>${x}</span>`).join("");
       html += `<div class="tb-nx"><div class="tb-nx1"><span>Prochain départ</span><span class="tb-live">${esc(dansTxt(nx) || jourTitre(nx.date))}</span></div>
         <div class="tb-jour">📅 ${esc(jourProchain(nx.date))}</div><div class="tb-fl">${volets(nx.heure)}</div><div class="tb-de"><small>📍 Prise en charge${villeCourte(nx.dep) && villeCourte(nx.dep) !== lieuCourt(nx.dep) ? " · " + esc(villeCourte(nx.dep)) : ""}</small><b>${esc(lieuCourt(nx.dep))}</b><span>🏁 vers ${esc(lieuCourt(nx.arr))}</span></div>
         <div class="tb-in">${info}</div>
@@ -2404,7 +2406,7 @@ function anonymise(title,location){
     const acts = tmp.querySelector(".acts"), badges = tmp.querySelector(".m > div:nth-child(2)");
     const tel = r.tel ? `<a href="tel:${esc(r.tel)}"><b>📞</b>Appeler</a>` : `<span class="off"><b>📞</b>Appeler</span>`;
     const wa = r.tel && waNumClient(r.tel) ? `<a target="_blank" rel="noopener" href="https://wa.me/${waNumClient(r.tel)}"><b>💬</b>WhatsApp</a>` : `<span class="off"><b>💬</b>WhatsApp</span>`;
-    const metas = [r.siege && !/^aucun/i.test(r.siege) ? "👶 " + esc(r.siege) : "", r.bagages ? "🧳 " + esc(r.bagages) + " valise(s)" : "", volCode(r) ? "✈️ " + esc(volCode(r)) : "", r.chauffeurNom ? "🚖 " + esc(r.chauffeurNom) : "", r.tel ? `<a class="tf-tel" href="tel:${esc(String(r.tel).replace(/[^\d+]/g, ""))}">📞 ${esc(r.tel)}</a>` : "", noteUtile(r.note) ? "📝 " + esc(r.note) : ""].filter(Boolean).map(x => x.startsWith("<a") ? x : `<span>${x}</span>`).join("");
+    const metas = [r.siege && !/^aucun/i.test(r.siege) ? "👶 " + esc(r.siege) : "", r.bagages ? "🧳 " + esc(r.bagages) + " valise(s)" : "", volCode(r) ? volFr24(r) : "", r.chauffeurNom ? "🚖 " + esc(r.chauffeurNom) : "", r.tel ? `<a class="tf-tel" href="tel:${esc(String(r.tel).replace(/[^\d+]/g, ""))}">📞 ${esc(r.tel)}</a>` : "", noteUtile(r.note) ? "📝 " + esc(r.note) : ""].filter(Boolean).map(x => x.startsWith("<a") ? x : `<span>${x}</span>`).join("");
     c.innerHTML = `<div class="tf1"><div><h3>${esc(quand.trim())}</h3><p>${sous}</p></div><span class="tf-bd ${bd}">${esc(st.charAt(0) + st.slice(1).toLowerCase())}</span></div>
       ${badges && badges.innerHTML.trim() ? `<div style="margin-top:8px">${badges.innerHTML}</div>` : ""}
       <div class="tf-rt"><div class="d"><i></i><u></u><i class="b"></i></div><div><p>${esc(r.dep || "?")}</p><p>${esc(r.arr || "?")}</p></div></div>
