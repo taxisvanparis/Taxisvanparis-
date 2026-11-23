@@ -1562,17 +1562,13 @@ function anonymise(title,location){
         <a class="imm-send env-step" data-cli="${esc(r.id)}" style="background:#25d366;color:#08240f" target="_blank" rel="noopener" href="${h("mc-wa")}">💬 WhatsApp au client</a>
         ${nTel ? `<a class="imm-send env-step env-alt" data-cli="${esc(r.id)}" href="${h("mc-sms")}">✉️ SMS au client</a>` : ""}
         <label>2 · Au chauffeur${ch ? " — " + esc(ch.nom || "") : " (tu choisis le contact dans WhatsApp)"}</label>
-        <a class="imm-send env-step" data-chl="${esc(r.id)}" style="background:#25d366;color:#08240f" target="_blank" rel="noopener" href="${h("mc-wa-ch")}">🚖 WhatsApp au chauffeur</a>
-        <a class="imm-send env-step env-alt" data-chl="${esc(r.id)}" href="${h("mc-sms-ch")}">✉️ SMS au chauffeur</a>
+        <a class="imm-send env-step" style="background:#25d366;color:#08240f" target="_blank" rel="noopener" href="${h("mc-wa-ch")}">🚖 WhatsApp au chauffeur</a>
+        <a class="imm-send env-step env-alt" href="${h("mc-sms-ch")}">✉️ SMS au chauffeur</a>
         <p class="sub" style="margin-top:12px">Chaque bouton passe en ✓ une fois touché. Reviens ici après WhatsApp pour le suivant.</p>`;
       document.getElementById("imm-x").onclick = fermer;
       ov.querySelectorAll(".env-step").forEach(a => a.addEventListener("click", () => { setTimeout(() => { a.classList.add("fait"); if (!a.textContent.startsWith("✓")) a.textContent = "✓ " + a.textContent.replace(/^\S+\s/, ""); }, 400); }));
     } catch (e) { fermer(); toast("Impossible : " + ((e && e.code) || "erreur"), 5000); }
   }
-  // Lien envoyé au chauffeur seulement : l'étape « Liens » compte comme faite
-  document.addEventListener("click", ev => { const a = ev.target.closest("[data-chl]"); if (!a) return;
-    const r = reservationsCache.find(x => x.id === a.dataset.chl); const t = Date.now(); if (r) r.lienChEnvoye = t;
-    updateDoc(doc(db, "reservations", a.dataset.chl), { lienChEnvoye: t }).catch(() => {}); }, true);
   document.addEventListener("click", ev => { const a = ev.target.closest("[data-cli]"); if (!a || !a.dataset.cli) return;
     const r = reservationsCache.find(x => x.id === a.dataset.cli); const t = Date.now(); if (r) r.lienEnvoye = t;
     updateDoc(doc(db, "reservations", a.dataset.cli), { lienEnvoye: t }).catch(() => {}); }, true);
@@ -2338,7 +2334,7 @@ function anonymise(title,location){
   function etapesFaites(r) {
     const e = r.lienCourse && etapesCache[r.lienCourse];
     const fin = r.statut === "terminée";
-    return [true, r.statut === "confirmée" || fin, fin || !!(r.chauffeurNom || r.chauffeurUid || r.dispatchEnvoye), fin || !!(r.lienEnvoye || r.lienChEnvoye || (e && (e.ouvert || e.etape))), fin];
+    return [true, r.statut === "confirmée" || fin, fin || !!(r.chauffeurNom || r.chauffeurUid || r.dispatchEnvoye), fin || !!(r.lienEnvoye || (e && (e.ouvert || e.etape))), fin];
   }
   const etapeCourante = r => r.statut === "annulée" ? -1 : etapesFaites(r).findIndex(x => !x);
   function dansTxt(r) {
