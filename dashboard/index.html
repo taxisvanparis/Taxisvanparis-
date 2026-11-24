@@ -2456,6 +2456,18 @@ function anonymise(title,location){
   }, true);
   // 📜 Historique d'une course : étapes, ouvertures des liens, messages et appels (lu dans trad_g/<code>)
   document.addEventListener("click", ev => { const b = ev.target.closest && ev.target.closest("[data-histo]"); if (!b) return; ev.preventDefault(); ouvrirHistorique(b.dataset.histo); });
+  // 📲 Partager (ou retirer) le numéro du client sur la page du chauffeur
+  document.addEventListener("click", async ev => {
+    const b = ev.target.closest && ev.target.closest("[data-telch]"); if (!b) return; ev.preventDefault();
+    const r = reservationsCache.find(x => x.id === b.dataset.telch); if (!r || !r.lienCourse || !r.tel) return;
+    const donner = !r.telChauffeur;
+    try {
+      await setDoc(doc(db, "trad_g", r.lienCourse), { telClient: donner ? String(r.tel) : "" }, { merge: true });
+      await updateDoc(doc(db, "reservations", r.id), { telChauffeur: donner });
+      r.telChauffeur = donner; if (ficheId === r.id) majFiche();
+      toast(donner ? "📲 Numéro visible sur la page du chauffeur" : "🔒 Numéro retiré de la page du chauffeur");
+    } catch (e) { toast("Pas enregistré : " + ((e && e.code) || "erreur"), 5000); }
+  });
   async function ouvrirHistorique(id) {
     const r = reservationsCache.find(x => x.id === id); if (!r || !r.lienCourse) return;
     const ov = document.createElement("div"); ov.id = "imm-ov";
@@ -2548,7 +2560,7 @@ function anonymise(title,location){
     const acts = tmp.querySelector(".acts"), badges = tmp.querySelector(".m > div:nth-child(2)");
     const tel = r.tel ? `<a href="tel:${esc(r.tel)}"><b>📞</b>Appeler</a>` : `<span class="off"><b>📞</b>Appeler</span>`;
     const wa = r.tel && waNumClient(r.tel) ? `<a target="_blank" rel="noopener" href="https://wa.me/${waNumClient(r.tel)}"><b>💬</b>WhatsApp</a>` : `<span class="off"><b>💬</b>WhatsApp</span>`;
-    const metas = [r.siege && !/^aucun/i.test(r.siege) ? "👶 " + esc(r.siege) : "", r.bagages ? "🧳 " + esc(r.bagages) + " valise(s)" : "", volCode(r) ? volFr24(r) : "", r.chauffeurNom ? `<a class="tf-tel tf-callch" href="#" data-callch="${esc(r.id)}">📞 Appeler ${esc(r.chauffeurNom)}</a>` : "", r.lienCourse ? `<a class="tf-tel tf-histo" href="#" data-histo="${esc(r.id)}">📜 Historique de la course</a>` : "", r.tel ? `<a class="tf-tel" href="tel:${esc(String(r.tel).replace(/[^\d+]/g, ""))}">📞 ${esc(r.tel)}</a>` : "", noteUtile(r.note) ? "📝 " + esc(r.note) : ""].filter(Boolean).map(x => x.startsWith("<a") ? x : `<span>${x}</span>`).join("");
+    const metas = [r.siege && !/^aucun/i.test(r.siege) ? "👶 " + esc(r.siege) : "", r.bagages ? "🧳 " + esc(r.bagages) + " valise(s)" : "", volCode(r) ? volFr24(r) : "", r.chauffeurNom ? `<a class="tf-tel tf-callch" href="#" data-callch="${esc(r.id)}">📞 Appeler ${esc(r.chauffeurNom)}</a>` : "", r.lienCourse ? `<a class="tf-tel tf-histo" href="#" data-histo="${esc(r.id)}">📜 Historique de la course</a>` : "", r.lienCourse && r.tel ? `<a class="tf-tel" href="#" data-telch="${esc(r.id)}">${r.telChauffeur ? "🔒 Retirer le numéro au chauffeur" : "📲 Donner le numéro du client au chauffeur"}</a>` : "", r.tel ? `<a class="tf-tel" href="tel:${esc(String(r.tel).replace(/[^\d+]/g, ""))}">📞 ${esc(r.tel)}</a>` : "", noteUtile(r.note) ? "📝 " + esc(r.note) : ""].filter(Boolean).map(x => x.startsWith("<a") ? x : `<span>${x}</span>`).join("");
     c.innerHTML = `<div class="tf1"><div><h3>${esc(quand.trim())}</h3><p>${sous}</p></div><span class="tf-bd ${bd}">${esc(st.charAt(0) + st.slice(1).toLowerCase())}</span></div>
       ${badges && badges.innerHTML.trim() ? `<div class="tf-bg">${badges.innerHTML}</div>` : ""}
       <div class="tf-rt"><div class="d"><i></i><u></u><i class="b"></i></div><div><p>${esc(r.dep || "?")}</p><p>${esc(r.arr || "?")}</p></div></div>
