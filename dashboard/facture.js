@@ -2,7 +2,9 @@
 function factureHTML(f, p){
   const e=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   const eur=n=>(Math.round(n*100)/100).toFixed(2).replace('.',',')+' €';
-  const ttc=Number(f.montant)||0, ht=Math.round(ttc/1.10*100)/100, tva=Math.round((ttc-ht)*100)/100;
+  const L=Array.isArray(f.lignes)&&f.lignes.length?f.lignes:null; // facture groupée : une ligne par course
+  const ttc=L?Math.round(L.reduce((t,l)=>t+(Number(l.prix)||0),0)*100)/100:(Number(f.montant)||0), ht=Math.round(ttc/1.10*100)/100, tva=Math.round((ttc-ht)*100)/100;
+  const dd=x=>x?String(x).split('-').reverse().join('/'):'';
   const d=f.date?f.date.split('-').reverse().join('/'):'';
   const de=f.dateEmission?f.dateEmission.split('-').reverse().join('/'):d;
   const rib=(p.iban||p.titulaire)?`<div class="rib"><b>Coordonnées bancaires</b><br>${[p.titulaire&&'Titulaire : '+e(p.titulaire),p.banque&&'Banque : '+e(p.banque),p.iban&&'IBAN : '+e(p.iban),p.bic&&'BIC : '+e(p.bic)].filter(Boolean).join('<br>')}</div>`:'';
@@ -21,11 +23,11 @@ td{padding:11px 10px;border-bottom:1px solid #e5e5e5;vertical-align:top}
 @media print{.bar{display:none}body{padding:0}}</style></head><body>
 <div class="bar"><button onclick="window.print()">🖨️ Imprimer / Enregistrer en PDF</button></div>
 <div class="w"><div class="top"><div><div class="logo">Taxis <b>Van</b> Paris</div><div class="pres"><b>AB Taxis Services</b><br>99 rue Alfred Dinin, 92000 Nanterre<br>SIREN 912 763 133 · TVA FR72 912 763 133<br>+33 6 67 40 20 05 · taxisvanparis@gmail.com</div></div>
-<div class="fn"><h1>FACTURE</h1><div class="n">N° ${e(f.numero)}</div><div class="dt">Date d'émission : ${e(de)}${d?'<br>Date de la prestation : '+e(d):''}</div></div></div>
+<div class="fn"><h1>FACTURE</h1><div class="n">N° ${e(f.numero)}</div><div class="dt">Date d'émission : ${e(de)}${L?'<br>'+L.length+' courses':''}${!L&&d?'<br>Date de la prestation : '+e(d):''}</div></div></div>
 <div class="cli"><div class="l">Facturé à</div><b>${e(f.societe||f.client)}</b>${f.clientAdresse?'<br>'+e(f.clientAdresse).replace(/\n/g,'<br>'):''}${f.siret?'<br>SIRET : '+e(f.siret):''}${f.tvaClient?'<br>N° TVA : '+e(f.tvaClient):''}</div>
 ${(f.reference||f.passager)?`<div class="ref">${f.reference?'<b>Votre référence :</b> '+e(f.reference):''}${f.reference&&f.passager?' &nbsp;·&nbsp; ':''}${f.passager?'<b>Passager(s) :</b> '+e(f.passager):''}</div>`:''}
 <table><thead><tr><th>Désignation</th><th class="r">Qté</th><th class="r">Prix HT</th><th class="r">TVA</th><th class="r">Total HT</th></tr></thead>
-<tbody><tr><td><b>Transport de personnes${f.vehicule?' – '+e(f.vehicule):''}</b>${f.depart?'<br>Départ : '+e(f.depart):''}${f.arrivee?'<br>Arrivée : '+e(f.arrivee):''}${(!f.depart&&!f.arrivee&&f.trajet)?'<br>'+e(f.trajet):''}${f.date?'<br>Date : '+e(d)+(f.heure?' à '+e(f.heure.replace(':','h')):''):(f.heure?'<br>Heure : '+e(f.heure.replace(':','h')):'')}${f.detail?'<br><span style="color:#666">'+e(f.detail)+'</span>':''}</td><td class="r">1</td><td class="r">${eur(ht)}</td><td class="r">10 %</td><td class="r">${eur(ht)}</td></tr></tbody></table>
+<tbody>${L?L.map(l=>{const t=Number(l.prix)||0,h=Math.round(t/1.10*100)/100;return `<tr><td><b>Transport de personnes</b>${l.date?' – '+e(dd(l.date)):''}${l.heure?' à '+e(String(l.heure).replace(':','h')):''}${l.depart?'<br>Départ : '+e(l.depart):''}${l.arrivee?'<br>Arrivée : '+e(l.arrivee):''}</td><td class="r">1</td><td class="r">${eur(h)}</td><td class="r">10 %</td><td class="r">${eur(h)}</td></tr>`}).join(''):`<tr><td><b>Transport de personnes${f.vehicule?' – '+e(f.vehicule):''}</b>${f.depart?'<br>Départ : '+e(f.depart):''}${f.arrivee?'<br>Arrivée : '+e(f.arrivee):''}${(!f.depart&&!f.arrivee&&f.trajet)?'<br>'+e(f.trajet):''}${f.date?'<br>Date : '+e(d)+(f.heure?' à '+e(f.heure.replace(':','h')):''):(f.heure?'<br>Heure : '+e(f.heure.replace(':','h')):'')}${f.detail?'<br><span style="color:#666">'+e(f.detail)+'</span>':''}</td><td class="r">1</td><td class="r">${eur(ht)}</td><td class="r">10 %</td><td class="r">${eur(ht)}</td></tr>`}</tbody></table>
 <div class="tot"><div><span>Total HT</span><span>${eur(ht)}</span></div><div><span>TVA 10 %</span><span>${eur(tva)}</span></div><div class="g"><span>Total TTC</span><span>${eur(ttc)}</span></div></div>
 <div class="pay">${f.paiement?'<b>Mode de paiement :</b> '+e(f.paiement)+' &nbsp;·&nbsp; ':''}<b>Statut :</b> ${e(f.statut==='payée'?'Payée':'À régler')}${f.statut==='payée'?'':'<br>'+(/jour/i.test(f.paiement||'')?'Paiement selon l\'échéance indiquée.':'Paiement à réception de facture.')+' En cas de retard, pénalités au taux légal et indemnité forfaitaire de 40 € pour frais de recouvrement.'}</div>
 ${f.notes?'<div class="note"><b>Informations :</b> '+e(f.notes).replace(/\n/g,'<br>')+'</div>':''}
