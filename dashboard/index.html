@@ -857,6 +857,7 @@
     </div>
 
     <div class="grid2">
+      <div class="field" style="grid-column:1/-1"><label>En-tête de la facture</label><select id="ff-entete"><option value="tvp">Taxis Van Paris + AB Taxis Services</option><option value="abts">AB Taxis Services seulement</option></select></div>
       <div class="field"><label>N° de facture</label><input id="ff-numero" type="number" min="1"></div>
       <div class="field"><label>Date d'émission</label><input id="ff-emission" type="date"></div>
       <div class="field"><label>Nom du client *</label><input id="ff-client" type="text"></div>
@@ -2899,7 +2900,7 @@ function anonymise(title,location){
   }
 
   // ---------------- MODALS: FACTURE ----------------
-  const FF = ["numero","emission","client","societe","adresse","siret","tvaclient","reference","passager","vehicule","depart","arrivee","date","heure","detail","montant","paiement","statut","notes"];
+  const FF = ["entete", "numero","emission","client","societe","adresse","siret","tvaclient","reference","passager","vehicule","depart","arrivee","date","heure","detail","montant","paiement","statut","notes"];
   const FKEY = { emission: "dateEmission", adresse: "clientAdresse", tvaclient: "tvaClient" };
   let factureEditId = null;
   function prochainNumero() {
@@ -2918,6 +2919,7 @@ function anonymise(title,location){
     document.getElementById("ff-titre").textContent = editId ? "Modifier la facture" : "Nouvelle facture";
     FF.forEach(k => { const el = document.getElementById("ff-" + k); el.value = pre[FKEY[k] || k] ?? ""; });
     if (!pre.numero) document.getElementById("ff-numero").value = prochainNumero();
+    if (!pre.entete) { let m = ""; try { m = localStorage.getItem("tvp_fact_entete") || ""; } catch (e) {} document.getElementById("ff-entete").value = m === "abts" ? "abts" : "tvp"; }
     if (!pre.dateEmission) document.getElementById("ff-emission").value = todayStr();
     if (!pre.statut) document.getElementById("ff-statut").value = "en attente";
     document.getElementById("ff-coller").value = ""; document.getElementById("ff-remplir-etat").textContent = "";
@@ -2996,6 +2998,7 @@ function anonymise(title,location){
     const data = {};
     FF.forEach(k => { const v = document.getElementById("ff-" + k).value; data[FKEY[k] || k] = typeof v === "string" ? v.trim() : v; });
     data.numero = Number(data.numero) || prochainNumero();
+    try { localStorage.setItem("tvp_fact_entete", data.entete); } catch (e) {}
     if (fgLignes) {
       FG_SIMPLE.forEach(k => delete data[k]);
       data.lignes = fgLignes.map(l => ({ date: l.date, heure: l.heure, depart: String(l.depart).trim(), arrivee: String(l.arrivee).trim(), prix: Number(String(l.prix).replace(",", ".")) || 0 }));
