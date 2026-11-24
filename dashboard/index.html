@@ -902,6 +902,7 @@
       </div>
     </div>
     <datalist id="ff-pay-list"><option value="Carte bancaire"><option value="Espèces"><option value="Virement"><option value="Virement à 30 jours"></datalist>
+    <label id="ff-dep-box" style="display:flex;gap:10px;align-items:center;padding:10px 12px;border:1px solid var(--border);border-radius:10px;margin:4px 0 12px;cursor:pointer"><input type="checkbox" id="ff-depenses" style="width:22px;height:22px;accent-color:#C9A24B;flex:none"><span>💶 Ajouter dans « À recevoir » de <b>mon</b> TVP dépenses</span></label>
     <div class="field"><label>Informations (note libre)</label><textarea id="ff-notes" rows="2" style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--border);background:transparent;color:inherit;font:inherit"></textarea></div>
     <div class="modal-actions">
       <button class="btn-ghost" id="btn-cancel-facture">Annuler</button>
@@ -2660,7 +2661,7 @@ function anonymise(title,location){
         <td>${f.numero ? esc(f.numero) : "—"}</td>
         <td>${esc(f.dateEmission || f.date || "")}</td>
         <td>${esc(f.societe || f.client || "")}</td>
-        <td>${esc(f.depart || f.arrivee ? [f.depart, f.arrivee].filter(Boolean).join(" → ") : (f.trajet || ""))}</td>
+        <td>${Array.isArray(f.lignes) && f.lignes.length ? f.lignes.length + " courses" : esc(f.depart || f.arrivee ? [f.depart, f.arrivee].filter(Boolean).join(" → ") : (f.trajet || ""))}</td>
         <td>${f.montant ? f.montant + " €" : "—"}</td>
         <td>
           <select class="statut-select" data-id="${f.id}" data-kind="facture">
@@ -2669,13 +2670,18 @@ function anonymise(title,location){
             <option value="impayée" ${f.statut === "impayée" ? "selected" : ""}>Impayée</option>
           </select>
         </td>
-        <td style="white-space:nowrap"><button class="icon-btn" data-id="${f.id}" data-kind="voir-facture">🧾 PDF</button> <button class="icon-btn" data-id="${f.id}" data-kind="edit-facture">✏️</button> <button class="icon-btn danger" data-id="${f.id}" data-kind="del-facture">Suppr.</button></td>
+        <td style="white-space:nowrap"><button class="icon-btn" data-id="${f.id}" data-kind="voir-facture">🧾 PDF</button> <button class="icon-btn" data-id="${f.id}" data-kind="edit-facture">✏️</button> ${f.depensesUid ? `<span title="Envoyée dans TVP dépenses" style="font-size:12px;color:var(--muted)">💶✓</span>` : `<button class="icon-btn" data-id="${f.id}" data-kind="dep-facture" title="Ajouter dans « À recevoir » de mon TVP dépenses">💶</button>`} <button class="icon-btn danger" data-id="${f.id}" data-kind="del-facture">Suppr.</button></td>
       </tr>
     `).join("");
 
     tbody.querySelectorAll('select[data-kind="facture"]').forEach(sel => {
       sel.addEventListener("change", () => updateDoc(doc(db, "factures", sel.dataset.id), { statut: sel.value }));
     });
+    tbody.querySelectorAll('[data-kind="dep-facture"]').forEach(btn => btn.addEventListener("click", () => {
+      if (!auth.currentUser) return;
+      updateDoc(doc(db, "factures", btn.dataset.id), { depensesUid: auth.currentUser.uid, depensesEnvoi: Date.now() })
+        .then(() => toast("💶 Envoyée dans « À recevoir » de ton TVP dépenses")).catch(() => toast("Pas envoyée, réessaie.", 4000));
+    }));
     tbody.querySelectorAll('[data-kind="voir-facture"]').forEach(btn => btn.addEventListener("click", () => {
       const f = facturesCache.find(x => x.id === btn.dataset.id); if (f) ouvrirFacture(f);
     }));
@@ -2938,6 +2944,8 @@ function anonymise(title,location){
     if (!pre.statut) document.getElementById("ff-statut").value = "en attente";
     document.getElementById("ff-coller").value = ""; document.getElementById("ff-remplir-etat").textContent = "";
     fgMode(Array.isArray(pre.lignes) && pre.lignes.length ? pre.lignes : null);
+    { const c = document.getElementById("ff-depenses"), deja = !!pre.depensesUid; c.checked = !editId && pre.statut !== "payée"; c.disabled = deja;
+      c.nextElementSibling.innerHTML = deja ? "💶 Déjà envoyée dans TVP dépenses" : "💶 Ajouter dans « À recevoir » de <b>mon</b> TVP dépenses"; if (deja) c.checked = true; }
     document.getElementById("modal-facture").classList.add("shown");
   }
   // ---------- Facture groupée : plusieurs courses, une ligne chacune (date, heure, départ, arrivée, prix modifiables) ----------
@@ -3024,6 +3032,8 @@ function anonymise(title,location){
     if (!data.client && !data.societe) { alert("Merci de renseigner au moins le nom du client ou la société."); return; }
     if (!data.montant) { alert("Merci de renseigner le montant TTC."); return; }
     if (!factureEditId && facturesCache.some(f => Number(f.numero) === data.numero)) { alert("Le numéro " + data.numero + " existe déjà."); return; }
+    // TVP dépenses : la facture ira dans « À recevoir » de celui qui la crée (son compte)
+    { const c = document.getElementById("ff-depenses"); if (c.checked && !c.disabled && auth.currentUser) { data.depensesUid = auth.currentUser.uid; data.depensesEnvoi = Date.now(); } }
     const w = window.open("", "_blank");
     try {
       if (factureEditId) await updateDoc(doc(db, "factures", factureEditId), data);
