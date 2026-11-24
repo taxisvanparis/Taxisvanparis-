@@ -278,13 +278,16 @@ var TVP = (function(){
   function isOrly(p){var a=p.address;return /orly|94390|94547/.test(a)||dg(p.lat,p.lon,48.7262,2.3652)<5;}
   function isBeauvais(p){var a=p.address;return /beauvais|tille|60000/.test(a)||dg(p.lat,p.lon,49.4544,2.1128)<6;}
   function isGare(p){return /(^|\s)gare(\s|$)/.test(p.address||'');}
+  function isDisney(p){return /disney|chessy|marne[- ]la[- ]vall|77700|77777|val d.europe|serris|magny[- ]le[- ]hongre|bailly[- ]romainvilliers|coupvray/i.test(p.address||'')||dg(p.lat,p.lon,48.8722,2.7758)<6;}
   // dep, arr : {lat,lon,address,dept} ; veh : 'berline'|'van'
   function price(dep,arr,pax,veh,heure){
     var km=Math.round(dg(dep.lat,dep.lon,arr.lat,arr.lon)*1.35), c=creuse(heure);
     var supp=pax>3?(pax-3)*5.5:0, total=15+kmPrice(km,c)+supp, fixed=false;
     var dP=forfaitZone(dep), aP=forfaitZone(arr);
     function set(b,v5,v8,thr){total=veh==='berline'?b:(pax<=thr?v5:v8);fixed=true;}
-    if((isRoissy(dep)&&isOrly(arr))||(isOrly(dep)&&isRoissy(arr))) set(80,109,109,8); // Roissy ⇄ Orly
+    if((isRoissy(dep)&&isDisney(arr))||(isDisney(dep)&&isRoissy(arr))) set(90,100,115,5); // CDG ⇄ Disneyland
+    else if((isOrly(dep)&&isDisney(arr))||(isDisney(dep)&&isOrly(arr))) set(105,115,130,5); // Orly ⇄ Disneyland
+    else if((isRoissy(dep)&&isOrly(arr))||(isOrly(dep)&&isRoissy(arr))) set(80,109,109,8); // Roissy ⇄ Orly
     else if(dP&&isRoissy(arr)) set(75,85,95,5);
     else if(aP&&isRoissy(dep)) set(85,95,105,5);
     else if(dP&&isOrly(arr)) set(70,80,95,6);

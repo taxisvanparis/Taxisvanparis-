@@ -1931,10 +1931,24 @@ let forfaitGare = false;
   // Type aéroport depuis coords arr si sélectionné via modal
   const arrAddrType = coords['arr'] ? (coords['arr'].address || '') : '';
   const aerotype = ['roissy','orly','beauvais'].includes(arrAddrType) ? arrAddrType : null;
+  // Aéroports ⇄ Disneyland Paris : forfaits (berline / van ≤ 5 / grand van 6-8)
+  const isDisney = (addr, id) => /disney|chessy|marne[- ]la[- ]vall|77700|77777|val d.europe|serris|magny[- ]le[- ]hongre|bailly[- ]romainvilliers|coupvray/i.test(addr || '') || (!!coords[id] && distGPS(coords[id].lat, coords[id].lon, 48.8722, 2.7758) < 6);
+  const depAddrType = coords['dep'] ? (coords['dep'].address || '') : '';
+  const estCDG = (addr, id, t) => t === 'roissy' || isRoissy(addr, id), estOrly = (addr, id, t) => t === 'orly' || isOrly(addr, id);
+  const cdgDisney = (estCDG(depAddr, 'dep', depAddrType) && isDisney(arrAddr, 'arr')) || (isDisney(depAddr, 'dep') && estCDG(arrAddr, 'arr', aerotype));
+  const orlyDisney = (estOrly(depAddr, 'dep', depAddrType) && isDisney(arrAddr, 'arr')) || (isDisney(depAddr, 'dep') && estOrly(arrAddr, 'arr', aerotype));
   // Roissy ⇄ Orly : forfait 80 € berline, 109 € van
   const roissyOrly = (isRoissy(depAddr, 'dep') && (aerotype === 'orly' || isOrly(arrAddr, 'arr')))
                   || (isOrly(depAddr, 'dep') && (aerotype === 'roissy' || isRoissy(arrAddr, 'arr')));
-  if (roissyOrly) {
+  if (cdgDisney) {
+    total = vehicule === 'berline' ? 90 : (pax <= 5 ? 100 : 115);
+    forfaitApplique = true;
+  }
+  else if (orlyDisney) {
+    total = vehicule === 'berline' ? 105 : (pax <= 5 ? 115 : 130);
+    forfaitApplique = true;
+  }
+  else if (roissyOrly) {
     total = vehicule === 'berline' ? 80 : 109;
     forfaitApplique = true;
   }
