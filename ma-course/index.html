@@ -317,7 +317,7 @@ function rendre(){
   const prenom=String(c.nom||'').trim();
   $('hello').textContent=prenom?t('hello').replace('{n}',prenom):t('hello0');$('helloS').textContent=t('helloS');
   $('when').textContent=fmtDate(c.date,c.heure);
-  $('route').innerHTML=`<i><span class="dot"></span></i><div><small>${esc(t('from'))}</small>${esc(c.dep||'—')}</div><i><span class="ln"></span></i><div></div><i><span class="dot f"></span></i><div><small>${esc(t('to'))}</small>${esc(c.arr||'—')}</div>`;
+  $('route').innerHTML=`<i><span class="dot"></span></i><div><small>${esc(t('from'))}</small>${esc(c.dep||'—')}</div><i><span class="ln"></span></i><div></div>${(Array.isArray(c.arrets)&&c.arrets.length>1?c.arrets.slice(0,-1):[]).map(a=>`<i><span class="dot"></span></i><div><small>🛑 ${esc(a.nom||'')}</small>${esc(a.adr||'')}</div><i><span class="ln"></span></i><div></div>`).join('')}<i><span class="dot f"></span></i><div><small>${esc(t('to'))}${Array.isArray(c.arrets)&&c.arrets.length>1&&c.arrets[c.arrets.length-1].nom?' · '+esc(c.arrets[c.arrets.length-1].nom):''}</small>${esc(c.arr||'—')}</div>`;
   $('chips').innerHTML=[c.pax&&`👥 ${esc(c.pax)} ${esc(t('pax'))}`,+c.bagages>0&&`🧳 ${esc(c.bagages)} ${esc(t('bags'))}`,c.vol&&`✈️ ${esc(t('flight'))} ${esc(c.vol)}`].filter(Boolean).map(x=>x.startsWith('✈️')?volLien(c.vol,x):`<span class="chip">${x}</span>`).join('');
   // Vol cliquable : fiche Google du vol (heure réelle, terminal, porte) dans la langue du client
   function volLien(v,txt){const code=String(v||'').toUpperCase().replace(/[^A-Z0-9]/g,'');if(!code)return `<span class="chip">${txt}</span>`;const hl=(document.documentElement.lang||'fr').split('-')[0];return `<a class="chip chipL" href="https://www.google.com/search?q=${encodeURIComponent(code)}&hl=${encodeURIComponent(hl)}" target="_blank" rel="noopener">${txt} <span aria-hidden="true">↗</span></a>`;}
@@ -495,7 +495,8 @@ function mission(){
     const c=info.course||{},dep=pointRdv(),arr=c.arr||'';
     $('cNav').hidden=false;
     const lig=(lbl,a)=>a?`<div class="navi"><div><small>${lbl}</small>${esc(a)}</div><a class="b" target="_blank" rel="noopener" href="https://waze.com/ul?q=${encodeURIComponent(a)}&navigate=yes">Waze</a><a class="b" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(a)}&travelmode=driving">Maps</a></div>`:'';
-    $('navL').innerHTML=lig('Prise en charge',dep)+lig('Dépose',arr)+(dep&&arr?`<a class="b" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(dep)}&destination=${encodeURIComponent(arr)}&travelmode=driving">🗺️ Itinéraire complet</a>`:'');
+    const ars=Array.isArray(c.arrets)&&c.arrets.length>1?c.arrets:null;
+    $('navL').innerHTML=lig('Prise en charge',dep)+(ars?ars.map((a,i)=>lig('🛑 Dépose '+(i+1)+(a.nom?' · '+a.nom:''),a.adr)).join(''):lig('Dépose',arr))+(dep&&arr?`<a class="b" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(dep)}&destination=${encodeURIComponent(arr)}${ars?'&waypoints='+encodeURIComponent(ars.slice(0,-1).map(a=>a.adr).join('|')):''}&travelmode=driving">🗺️ Itinéraire complet</a>`:'');
     $('bPanneau').href='../pancarte-tvp-k7x2/?nom='+encodeURIComponent(c.nom||'');
     gpsSuivi();attente();try{majCarte()}catch(e){}
   } else clientSuivi();

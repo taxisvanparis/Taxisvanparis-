@@ -515,6 +515,7 @@
 .tf-bd{background:var(--amber-bg);color:var(--amber);font-weight:700;font-size:12.5px;border-radius:999px;padding:6px 10px;white-space:nowrap}
 .tf-bd.g{background:var(--green-bg);color:var(--green)}.tf-bd.m{background:var(--soft);color:var(--muted)}
 .tf-x{position:absolute;right:14px;top:12px;border:0;background:var(--soft);border-radius:50%;width:32px;height:32px;font-size:15px;cursor:pointer;color:var(--text)}
+.tb-rc span.tb-dp{color:#b7791f;font-weight:700;margin-top:0}.tf-rt p small{display:block;font-size:12px;font-weight:700;color:#b7791f}
 .tf-rt{display:grid;grid-template-columns:16px 1fr;gap:0 10px;margin:14px 0 4px}
 .tf-rt .d{display:flex;flex-direction:column;align-items:center;padding:5px 0 22px}.tf-rt .d i{flex:none;width:11px;height:11px;border-radius:50%;border:3px solid var(--text);background:var(--bg)}.tf-rt .d u{flex:1;width:2px;background:var(--border);margin:3px 0}.tf-rt .d i.b{background:var(--gold);border-color:var(--gold)}
 .tf-rt p{margin:0 0 12px;font-size:15.5px;line-height:1.3;color:var(--text)}
@@ -1564,7 +1565,8 @@ function anonymise(title,location){
     L.push(`📍 Départ : ${r.dep || "à préciser"}`);
     if (r.dep && !depAero) L.push(`🧭 Waze : https://waze.com/ul?q=${encodeURIComponent(r.dep)}&navigate=yes`);
     if (volInfo(r) || volCode(r)) L.push(`✈️ ${volInfo(r) || "Vol " + volCode(r)}`);
-    L.push(`🏁 Arrivée : ${r.arr || "à préciser"}`);
+    if (arretsDe(r)) { L.push(`🛑 ${arretsDe(r).length} déposes :`); arretsDe(r).forEach((a, i) => L.push(`${i + 1}. ${a.nom ? a.nom + " — " : ""}${a.adr}`)); }
+    else L.push(`🏁 Arrivée : ${r.arr || "à préciser"}`);
     const det = [vehLabel(r.vehicule) && "🚐 " + vehLabel(r.vehicule), r.pax && "👥 " + r.pax + " pers.", r.bagages && +r.bagages > 0 && "🧳 " + r.bagages + " bagage" + (+r.bagages > 1 ? "s" : ""),
       r.siege && r.siege !== "Aucun" && r.siege !== "Aucune" && "👶 " + r.siege].filter(Boolean);
     if (det.length) L.push(det.join(" · "));
@@ -1885,7 +1887,7 @@ function anonymise(title,location){
     const nom = String(r.nom || "").replace(/^🏨\s*/, "").replace(/\s*\(.*\)\s*$/, "").trim().split(/\s+/).filter(x => !/^(m|mr|mme|mlle|monsieur|madame|mrs|ms|miss)\.?$/i.test(x))[0] || "";
     const data = {
       type: "course",
-      course: { nom: nom.length > 1 ? nom.charAt(0).toUpperCase() + nom.slice(1) : "", date: r.date || "", heure: r.heure || "", dep: r.dep || "", arr: r.arr || "", pax: r.pax || "", bagages: r.bagages || "", vol: volCode(r) || r.vol || "" },
+      course: { nom: nom.length > 1 ? nom.charAt(0).toUpperCase() + nom.slice(1) : "", date: r.date || "", heure: r.heure || "", dep: r.dep || "", arr: r.arr || "", pax: r.pax || "", bagages: r.bagages || "", vol: volCode(r) || r.vol || "", arrets: arretsDe(r) ? arretsDe(r).map(a => ({ nom: a.nom || "", adr: a.adr })) : [] },
       chauffeur: { prenom: lien.prenom, tel: lien.tel.replace(/[^\d+]/g, "").replace(/^0/, "+33") },
       vehicule: { modele: lien.modele, plaque: lien.plaque },
       rdv: { texte: lien.rdv, lieu: r.dep || "", point: lien.point, photo: (window.TVP_RDV && (window.TVP_RDV.parId(lien.point) || {}).photo) || "" }, t: serverTimestamp()
@@ -2273,7 +2275,7 @@ function anonymise(title,location){
     const $ = k => document.getElementById(k);
     $("ct-titre").textContent = "🗺️ " + (r.nom || "Trajet") + (r.heure ? " · " + r.heure : "");
     $("ct-dep").textContent = r.dep || "?"; $("ct-arr").textContent = r.arr || "?";
-    $("ct-gmaps").href = "https://www.google.com/maps/dir/?api=1&travelmode=driving&origin=" + encodeURIComponent(r.dep || "") + "&destination=" + encodeURIComponent(r.arr || "");
+    $("ct-gmaps").href = "https://www.google.com/maps/dir/?api=1&travelmode=driving&origin=" + encodeURIComponent(r.dep || "") + "&destination=" + encodeURIComponent(r.arr || "") + (arretsDe(r) ? "&waypoints=" + encodeURIComponent(arretsDe(r).slice(0, -1).map(a => a.adr).join("|")) : "");
     $("ct-waze").href = "https://waze.com/ul?navigate=yes&q=" + encodeURIComponent(r.arr || "");
     const info = $("ct-info"), deja = trajTxt(r);
     info.innerHTML = deja && !/calcul/.test(deja) ? deja : "🛣️ calcul du trajet…";
@@ -2400,6 +2402,8 @@ function anonymise(title,location){
     return "dans " + (mn >= 60 ? Math.floor(mn / 60) + " h " + String(mn % 60).padStart(2, "0") : mn + " min");
   }
   // Nom court d'un lieu, comme sur un panneau : « CDG T2E », « ORLY », « Gare du Nord », « Porte Maillot »
+  // Plusieurs déposes : r.arrets = [{nom, adr}] dans l'ordre, la dernière = arrivée
+  function arretsDe(r) { return Array.isArray(r && r.arrets) && r.arrets.length > 1 ? r.arrets.filter(a => a && a.adr) : null; }
   function lieuCourt(a) {
     const s = String(a || "").trim(); if (!s) return "?";
     const term = (s.match(/\b(?:T|terminal\s*)([1-4][A-G]?)\b/i) || [])[1];
@@ -2562,7 +2566,7 @@ function anonymise(title,location){
     rows.forEach(r => {
       if ((r.date || "") !== jour) { jour = r.date || ""; const n = nbJour[jour], jt = jourTitre(jour); html += `<div class="tb-day">${esc(jt.charAt(0).toUpperCase() + jt.slice(1))}<span>${n} course${n > 1 ? "s" : ""}</span></div>`; }
       const [st, cl] = statutTb(r), passe = groupOf(r) !== 0;
-      html += `<button type="button" class="tb-row" data-fiche="${esc(r.id)}"><span class="tb-t${passe ? " dim" : ""}">${esc(r.heure || "—")}</span><span class="tb-rc"><b>${estNouvelle(r) ? "🆕 " : ""}${esc(r.nom || "—")}</b><span>${srcTb(r)}${esc(lieuCourt(r.dep))} → ${esc(lieuCourt(r.arr))}</span></span><span class="tb-s ${cl}">${st}${chTb(r)}</span></button>`;
+      html += `<button type="button" class="tb-row" data-fiche="${esc(r.id)}"><span class="tb-t${passe ? " dim" : ""}">${esc(r.heure || "—")}</span><span class="tb-rc"><b>${estNouvelle(r) ? "🆕 " : ""}${esc(r.nom || "—")}</b><span>${srcTb(r)}${esc(lieuCourt(r.dep))} → ${esc(lieuCourt(r.arr))}</span>${arretsDe(r) ? `<span class="tb-dp">🛑 ${arretsDe(r).length} déposes : ${esc(arretsDe(r).map(a => a.nom || lieuCourt(a.adr)).join(" → "))}</span>` : ""}</span><span class="tb-s ${cl}">${st}${chTb(r)}</span></button>`;
     });
     return html + `</div>`;
   }
@@ -2602,7 +2606,7 @@ function anonymise(title,location){
     const metas = [r.siege && !/^aucun/i.test(r.siege) ? "👶 " + esc(r.siege) : "", r.bagages ? "🧳 " + esc(r.bagages) + " valise(s)" : "", volCode(r) ? volFr24(r) : "", r.chauffeurNom ? `<a class="tf-tel tf-callch" href="#" data-callch="${esc(r.id)}">📞 Appeler ${esc(r.chauffeurNom)}</a>` : "", r.lienCourse ? `<a class="tf-tel tf-histo" href="#" data-histo="${esc(r.id)}">📜 Historique de la course</a>` : "", r.lienCourse && r.tel ? `<a class="tf-tel" href="#" data-telch="${esc(r.id)}">${r.telChauffeur ? "🔒 Retirer le numéro au chauffeur" : "📲 Donner le numéro du client au chauffeur"}</a>` : "", r.tel ? `<a class="tf-tel" href="tel:${esc(String(r.tel).replace(/[^\d+]/g, ""))}">📞 ${esc(r.tel)}</a>` : "", noteUtile(r.note) ? "📝 " + esc(r.note) : ""].filter(Boolean).map(x => x.startsWith("<a") ? x : `<span>${x}</span>`).join("");
     c.innerHTML = `<div class="tf1"><div><h3>${esc(quand.trim())}</h3><p>${sous}</p></div><span class="tf-bd ${bd}">${esc(st.charAt(0) + st.slice(1).toLowerCase())}</span></div>
       ${badges && badges.innerHTML.trim() ? `<div class="tf-bg">${badges.innerHTML}</div>` : ""}
-      <div class="tf-rt"><div class="d"><i></i><u></u><i class="b"></i></div><div><p>${esc(r.dep || "?")}</p><p>${esc(r.arr || "?")}</p></div></div>
+      <div class="tf-rt"><div class="d"><i></i><u></u><i class="b"></i></div><div><p>${esc(r.dep || "?")}</p>${arretsDe(r) ? arretsDe(r).map((a, i, l) => `<p><small>🛑 ${i === l.length - 1 ? "Dernière dépose" : "Dépose " + (i + 1)}${a.nom ? " · " + esc(a.nom) : ""}</small>${esc(a.adr)}</p>`).join("") : `<p>${esc(r.arr || "?")}</p>`}</div></div>
       <div class="tf-fa"><div><b>${fmtPrix(r.prix)}</b><span>tout compris</span></div><div><b>${t && t.min ? dureeTxt(t.min) : "—"}</b><span>${t && t.km ? String(t.km).replace(".", ",") + " km" : "trajet"}</span></div><div><b>${esc(r.pax || "—")} pers.</b><span>${esc(r.vehicule || "")}</span></div></div>
       ${metas ? `<div class="tf-mt">${metas}</div>` : ""}
       ${act ? `<button type="button" class="tf-go" data-step="${cur}" data-id="${id}">${act[0]}<small>${act[1]}</small></button>` : ""}
@@ -2982,7 +2986,7 @@ function anonymise(title,location){
     ["date", /^(date|jour)$/], ["heure", /^(heure|horaire)$/], ["dep", /^(d[ée]part|prise en charge)$/], ["arr", /^(arriv[ée]e|destination)$/],
     ["vol", /^(vol|train|n° de vol)$/], ["vehicule", /^(v[ée]hicule)$/], ["pax", /^(passagers?|pax|personnes?)$/], ["bagages", /^(bagages?|valises?)$/],
     ["siege", /^(si[èe]ges? (b[ée]b[ée]|enfant)|rehausseur)$/], ["prix", /^(prix|tarif|montant)$/], ["paiement", /^(paiement)$/], ["langue", /^(langue( client)?)$/],
-    ["chauffeur", /^(chauffeur)$/], ["statut", /^(statut)$/], ["note", /^(note|infos?|remarques?)$/]
+    ["chauffeur", /^(chauffeur)$/], ["depose", /^(d[ée]pose|arr[êe]t|[ée]tape)\s*\d*$/], ["statut", /^(statut)$/], ["note", /^(note|infos?|remarques?)$/]
   ];
   function impDate(v) {
     v = String(v || "").toLowerCase();
@@ -3003,6 +3007,7 @@ function anonymise(title,location){
       const m = t.match(/^([^:]{2,30}?)\s*:\s*(.*)$/); if (!m) { if (cur) cur.note = (cur.note ? cur.note + " · " : "") + t; return; }
       const k = (impCles.find(([, re]) => re.test(m[1].trim().toLowerCase())) || [])[0];
       if (!k) { if (cur) cur.note = (cur.note ? cur.note + " · " : "") + t; return; }
+      if (k === "depose") { if (!cur) { cur = {}; blocs.push(cur); } (cur.deposes = cur.deposes || []).push(m[2].trim()); return; }
       if (!cur || cur[k] !== undefined) { cur = {}; blocs.push(cur); }
       cur[k] = m[2].trim();
     });
@@ -3027,6 +3032,10 @@ function anonymise(title,location){
         chauffeurUid: chObj && chObj.uid ? chObj.uid : "", chauffeurNom: ch && !/^(non|aucun|-)$/i.test(ch) ? (chObj ? chObj.nom : ch) : "",
         statut: /termin|effectu/.test(st) ? "terminée" : /confirm/.test(st) ? "confirmée" : /annul/.test(st) ? "annulée" : "en attente"
       };
+      if (b.deposes && b.deposes.length) {
+        r.arrets = b.deposes.map(d => { const m = d.match(/^(.{1,40}?)\s+[—–-]\s+(.+)$/); return m ? { nom: m[1].trim(), adr: m[2].trim() } : { nom: "", adr: d }; });
+        if (r.arrets.length < 2) { if (!r.arr) r.arr = r.arrets[0].adr; delete r.arrets; } else r.arr = r.arrets[r.arrets.length - 1].adr;
+      }
       if (notes.length) r.note = notes.join(" · ");
       const pb = [];
       if (!r.nom) pb.push("client manquant"); if (!r.date) pb.push("date manquante"); if (!r.heure) pb.push("heure manquante");
@@ -3041,7 +3050,7 @@ function anonymise(title,location){
   function impEtape(n) { $imp("imp-etape1").hidden = n !== 1; $imp("imp-etape2").hidden = n !== 2; }
   function impRendu() {
     const fr = d => { const p = (d || "").split("-"); return p.length === 3 ? p[2] + "/" + p[1] + "/" + p[0] : "?"; };
-    $imp("imp-liste").innerHTML = impCourses.map((c, i) => `<label class="imp-c${c.pb.length ? " err" : ""}${c.ok ? "" : " off"}"><input type="checkbox" data-i="${i}"${c.ok ? " checked" : ""}><div><b>${esc(fr(c.r.date))} · ${esc(c.r.heure || "--:--")} · ${esc(c.r.nom || "?")}</b><br>📍 ${esc(c.r.dep || "?")}<br>🏁 ${esc(c.r.arr || "?")}<br>${esc(c.r.vehicule)} · ${c.r.pax} pers. · <b>${c.r.prix} €</b>${c.r.vol ? " · ✈️ " + esc(c.r.vol) : ""}${c.r.chauffeurNom ? " · 🚖 " + esc(c.r.chauffeurNom) : ""} · ${esc(c.r.statut)}${c.pb.length ? `<br><span class="imp-x">⚠️ ${esc(c.pb.join(", "))}</span>` : ""}</div></label>`).join("");
+    $imp("imp-liste").innerHTML = impCourses.map((c, i) => `<label class="imp-c${c.pb.length ? " err" : ""}${c.ok ? "" : " off"}"><input type="checkbox" data-i="${i}"${c.ok ? " checked" : ""}><div><b>${esc(fr(c.r.date))} · ${esc(c.r.heure || "--:--")} · ${esc(c.r.nom || "?")}</b><br>📍 ${esc(c.r.dep || "?")}${c.r.arrets ? c.r.arrets.map((a, j) => `<br>🛑 ${j + 1}. ${esc(a.nom ? a.nom + " — " : "")}${esc(a.adr)}`).join("") : `<br>🏁 ${esc(c.r.arr || "?")}`}<br>${esc(c.r.vehicule)} · ${c.r.pax} pers. · <b>${c.r.prix} €</b>${c.r.vol ? " · ✈️ " + esc(c.r.vol) : ""}${c.r.chauffeurNom ? " · 🚖 " + esc(c.r.chauffeurNom) : ""} · ${esc(c.r.statut)}${c.pb.length ? `<br><span class="imp-x">⚠️ ${esc(c.pb.join(", "))}</span>` : ""}</div></label>`).join("");
     $imp("imp-liste").querySelectorAll("input[data-i]").forEach(cb => cb.addEventListener("change", () => { impCourses[+cb.dataset.i].ok = cb.checked; cb.closest(".imp-c").classList.toggle("off", !cb.checked); impCompte(); }));
     impCompte();
   }
@@ -3427,6 +3436,7 @@ function anonymise(title,location){
     const veh = it.veh || vehEl.value || vehLabel(r.vehicule);
     const L = ["🚖 *COURSE DISPONIBLE*", `📅 ${jour} à ${r.heure ? r.heure.replace(":", "h") : "heure à préciser"}`,
       `📍 Départ : ${it.dep || "à préciser"}`, `🏁 Arrivée : ${it.arr || "à préciser"}`];
+    if (arretsDe(r)) L.push(`🛑 ${arretsDe(r).length} déposes`);
     if (veh) L.push(`🚐 ${veh}`);
     if (r.pax) L.push(`👥 ${r.pax} passager${+r.pax > 1 ? "s" : ""}`);
     if (r.bagages && +r.bagages > 0) L.push(`🧳 ${r.bagages} bagage${+r.bagages > 1 ? "s" : ""}`);
