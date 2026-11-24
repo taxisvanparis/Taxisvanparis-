@@ -725,12 +725,37 @@
   <div id="driver-list"></div>
 </div>
 
+<!-- ===================== MODAL IMPORT PLUSIEURS COURSES ===================== -->
+<div class="modal-overlay" id="modal-import">
+  <div class="modal">
+    <h2>📥 Importer plusieurs courses</h2>
+    <div id="imp-etape1">
+      <p class="dictee-aide" style="margin:0 0 8px">Colle ici le texte rangé par Claude (une course par bloc « Nouvelle réservation »).</p>
+      <textarea id="imp-txt" rows="10" placeholder="Nouvelle réservation&#10;Client : Client 1&#10;Téléphone : +33 6 00 00 00 00&#10;Date : 28/11/2026&#10;Heure : 08:30&#10;Départ : …&#10;Arrivée : …&#10;Prix : 85 €" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--text);font:inherit;font-size:14px;resize:vertical"></textarea>
+      <div class="modal-actions"><button class="btn-ghost" id="imp-annuler">Annuler</button><button class="btn-ghost" id="imp-coller">📋 Coller</button><button class="btn-gold" id="imp-lire">Lire les courses</button></div>
+    </div>
+    <div id="imp-etape2" hidden>
+      <p class="dictee-aide" id="imp-resume" style="margin:0 0 8px"></p>
+      <div id="imp-liste"></div>
+      <div class="modal-actions"><button class="btn-ghost" id="imp-retour">← Retour</button><button class="btn-gold" id="imp-go">Enregistrer tout</button></div>
+    </div>
+  </div>
+</div>
+<style>
+#imp-liste{display:grid;gap:8px;max-height:55vh;overflow:auto;margin-bottom:8px}
+.imp-c{display:flex;gap:10px;align-items:flex-start;padding:10px;border:1px solid var(--border);border-radius:10px;background:var(--card);font-size:13px;line-height:1.4}
+.imp-c input{margin-top:3px;width:18px;height:18px;flex:none}
+.imp-c b{font-size:14px}
+.imp-c .imp-x{color:#e5534b;font-weight:600}
+.imp-c.err{border-color:#e5534b}
+.imp-c.off{opacity:.45}
+</style>
 <!-- ===================== MODAL RÉSERVATION ===================== -->
 <div class="modal-overlay" id="modal-reservation">
   <div class="modal">
     <h2 id="resa-modal-title">Nouvelle réservation</h2>
     <div class="dictee">
-      <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn-gold" id="btn-dicter">🎤 Dicter la course</button><button type="button" class="btn-ghost" id="btn-coller">📋 Coller un message</button></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn-gold" id="btn-dicter">🎤 Dicter la course</button><button type="button" class="btn-ghost" id="btn-coller">📋 Coller un message</button><button type="button" class="btn-ghost" id="btn-import">📥 Importer plusieurs courses</button></div>
       <textarea id="f-dictee" rows="2" placeholder="Colle ici le message du client (WhatsApp, SMS, mail) ou dicte la course, puis « Remplir les champs »"></textarea>
       <button type="button" class="btn-ghost" id="btn-remplir">Remplir les champs</button>
       <button type="button" id="btn-ia" style="background:none;border:none;padding:4px 0;font-size:12px;color:#8a6d3b;text-decoration:underline;cursor:pointer">✨ Lecture IA : activer</button>
@@ -2948,6 +2973,108 @@ function anonymise(title,location){
     const nvRef = await addDoc(collection(db, "reservations"), data);
     if (nvRef && nvRef.id) marquerVues([nvRef.id]);
     document.getElementById("modal-reservation").classList.remove("shown");
+  });
+
+
+  // ===== Import de plusieurs courses (texte rangé par Claude, lu sans IA) =====
+  const impCles = [
+    ["nom", /^(client|nom|name)$/], ["tel", /^(t[ée]l[ée]phone|t[ée]l|num[ée]ro|phone)$/], ["email", /^(e-?mail|mail)$/],
+    ["date", /^(date|jour)$/], ["heure", /^(heure|horaire)$/], ["dep", /^(d[ée]part|prise en charge)$/], ["arr", /^(arriv[ée]e|destination)$/],
+    ["vol", /^(vol|train|n° de vol)$/], ["vehicule", /^(v[ée]hicule)$/], ["pax", /^(passagers?|pax|personnes?)$/], ["bagages", /^(bagages?|valises?)$/],
+    ["siege", /^(si[èe]ges? (b[ée]b[ée]|enfant)|rehausseur)$/], ["prix", /^(prix|tarif|montant)$/], ["paiement", /^(paiement)$/], ["langue", /^(langue( client)?)$/],
+    ["chauffeur", /^(chauffeur)$/], ["statut", /^(statut)$/], ["note", /^(note|infos?|remarques?)$/]
+  ];
+  function impDate(v) {
+    v = String(v || "").toLowerCase();
+    let m = v.match(/(\d{4})-(\d{2})-(\d{2})/); if (m) return m[0];
+    m = v.match(/(\d{1,2})[\/.-](\d{1,2})(?:[\/.-](\d{2,4}))?/);
+    if (!m) return "";
+    let y = m[3] ? (m[3].length === 2 ? "20" + m[3] : m[3]) : String(new Date().getFullYear());
+    return y + "-" + m[2].padStart(2, "0") + "-" + m[1].padStart(2, "0");
+  }
+  function impHeure(v) { const m = String(v || "").match(/(\d{1,2})\s*[h:.]\s*(\d{2})?/i); return m ? m[1].padStart(2, "0") + ":" + (m[2] || "00") : ""; }
+  function impNum(v) { const m = String(v || "").replace(",", ".").match(/\d+(?:\.\d+)?/); return m ? Number(m[0]) : 0; }
+  function impLire(txt) {
+    const blocs = []; let cur = null;
+    String(txt || "").replace(/\r/g, "").split("\n").forEach(l => {
+      const t = l.replace(/^[\s*•>-]+/, "").replace(/\*\*/g, "").trim();
+      if (!t || /^`{3}/.test(t)) return;
+      if (/^(nouvelle r[ée]servation|course\s*\d*|-{3,}|={3,})\s*:?\s*$/i.test(t)) { cur = null; return; }
+      const m = t.match(/^([^:]{2,30}?)\s*:\s*(.*)$/); if (!m) { if (cur) cur.note = (cur.note ? cur.note + " · " : "") + t; return; }
+      const k = (impCles.find(([, re]) => re.test(m[1].trim().toLowerCase())) || [])[0];
+      if (!k) { if (cur) cur.note = (cur.note ? cur.note + " · " : "") + t; return; }
+      if (!cur || cur[k] !== undefined) { cur = {}; blocs.push(cur); }
+      cur[k] = m[2].trim();
+    });
+    return blocs.map(b => {
+      const notes = [];
+      if (b.siege && !/^non$/i.test(b.siege)) notes.push("Siège bébé : " + b.siege);
+      if (b.bagages && !/^\d+$/.test(b.bagages)) notes.push("Bagages : " + b.bagages);
+      if (b.pax && /[a-zà-ÿ(]/i.test(b.pax)) notes.push("Passagers : " + b.pax);
+      if (b.paiement) notes.push("Paiement : " + b.paiement);
+      if (b.note) notes.push(b.note);
+      const st = String(b.statut || "").toLowerCase();
+      const ch = String(b.chauffeur || "").trim();
+      const chObj = ch ? chauffeursCache.find(c => (c.nom || "").toLowerCase() === ch.toLowerCase()) : null;
+      const lg = String(b.langue || "").toLowerCase();
+      const r = {
+        nom: b.nom || "", tel: b.tel || "", email: b.email || "", dep: b.dep || "", arr: b.arr || "",
+        date: impDate(b.date), heure: impHeure(b.heure),
+        pax: impNum(b.pax) || 1, bagages: impNum(b.bagages) || 0,
+        vehicule: /van|classe v|monospace/i.test(b.vehicule || "") ? "Van" : "Berline",
+        langueMsg: /angl|engl/.test(lg) ? "en" : /espa/.test(lg) ? "es" : /ital/.test(lg) ? "it" : /portu/.test(lg) ? "pt" : /allem|deut/.test(lg) ? "de" : /fran/.test(lg) ? "fr" : "",
+        prix: impNum(b.prix), vol: ((String(b.vol || "").toUpperCase().match(/\b([A-Z0-9]{2,3})\s?(\d{1,4}[A-Z]?)\b/) || []).slice(1).join("")),
+        chauffeurUid: chObj && chObj.uid ? chObj.uid : "", chauffeurNom: ch && !/^(non|aucun|-)$/i.test(ch) ? (chObj ? chObj.nom : ch) : "",
+        statut: /termin|effectu/.test(st) ? "terminée" : /confirm/.test(st) ? "confirmée" : /annul/.test(st) ? "annulée" : "en attente"
+      };
+      if (notes.length) r.note = notes.join(" · ");
+      const pb = [];
+      if (!r.nom) pb.push("client manquant"); if (!r.date) pb.push("date manquante"); if (!r.heure) pb.push("heure manquante");
+      if (!r.dep) pb.push("départ manquant"); if (!r.arr) pb.push("arrivée manquante"); if (!r.prix) pb.push("prix 0 €");
+      const doublon = reservationsCache.some(x => x.date === r.date && x.heure === r.heure && r.date && ((r.tel && String(x.tel || "").replace(/\D/g, "").slice(-9) === r.tel.replace(/\D/g, "").slice(-9)) || (r.nom && (x.nom || "").toLowerCase() === r.nom.toLowerCase())));
+      if (doublon) pb.push("déjà dans le tableau ?");
+      return { r, pb, ok: !!(r.nom && r.date) && !doublon };
+    });
+  }
+  let impCourses = [];
+  const $imp = id => document.getElementById(id);
+  function impEtape(n) { $imp("imp-etape1").hidden = n !== 1; $imp("imp-etape2").hidden = n !== 2; }
+  function impRendu() {
+    const fr = d => { const p = (d || "").split("-"); return p.length === 3 ? p[2] + "/" + p[1] + "/" + p[0] : "?"; };
+    $imp("imp-liste").innerHTML = impCourses.map((c, i) => `<label class="imp-c${c.pb.length ? " err" : ""}${c.ok ? "" : " off"}"><input type="checkbox" data-i="${i}"${c.ok ? " checked" : ""}><div><b>${esc(fr(c.r.date))} · ${esc(c.r.heure || "--:--")} · ${esc(c.r.nom || "?")}</b><br>📍 ${esc(c.r.dep || "?")}<br>🏁 ${esc(c.r.arr || "?")}<br>${esc(c.r.vehicule)} · ${c.r.pax} pers. · <b>${c.r.prix} €</b>${c.r.vol ? " · ✈️ " + esc(c.r.vol) : ""}${c.r.chauffeurNom ? " · 🚖 " + esc(c.r.chauffeurNom) : ""} · ${esc(c.r.statut)}${c.pb.length ? `<br><span class="imp-x">⚠️ ${esc(c.pb.join(", "))}</span>` : ""}</div></label>`).join("");
+    $imp("imp-liste").querySelectorAll("input[data-i]").forEach(cb => cb.addEventListener("change", () => { impCourses[+cb.dataset.i].ok = cb.checked; cb.closest(".imp-c").classList.toggle("off", !cb.checked); impCompte(); }));
+    impCompte();
+  }
+  function impCompte() {
+    const n = impCourses.filter(c => c.ok).length, e = impCourses.filter(c => c.pb.length).length;
+    $imp("imp-resume").innerHTML = `${impCourses.length} course${impCourses.length > 1 ? "s" : ""} lue${impCourses.length > 1 ? "s" : ""}` + (e ? ` · <span style="color:#e5534b">${e} à vérifier</span>` : " · tout est bon ✔") + ". Décoche celles que tu ne veux pas.";
+    $imp("imp-go").textContent = n ? `Enregistrer ${n} course${n > 1 ? "s" : ""}` : "Rien à enregistrer";
+    $imp("imp-go").disabled = !n;
+  }
+  $imp("btn-import").addEventListener("click", () => {
+    document.getElementById("modal-reservation").classList.remove("shown");
+    $imp("imp-txt").value = ""; impEtape(1); $imp("modal-import").classList.add("shown");
+  });
+  $imp("imp-annuler").addEventListener("click", () => $imp("modal-import").classList.remove("shown"));
+  $imp("imp-retour").addEventListener("click", () => impEtape(1));
+  $imp("imp-coller").addEventListener("click", async () => { try { $imp("imp-txt").value = await navigator.clipboard.readText(); } catch (e) { toast("Appui long dans la case puis « Coller »"); } });
+  $imp("imp-lire").addEventListener("click", () => {
+    impCourses = impLire($imp("imp-txt").value);
+    if (!impCourses.length) { toast("Aucune course trouvée dans le texte", 4000); return; }
+    impRendu(); impEtape(2);
+  });
+  $imp("imp-go").addEventListener("click", async () => {
+    const liste = impCourses.filter(c => c.ok); if (!liste.length) return;
+    const go = $imp("imp-go"); go.disabled = true;
+    const ids = []; let ko = 0;
+    for (let i = 0; i < liste.length; i++) {
+      go.textContent = `Enregistrement ${i + 1}/${liste.length}…`;
+      try { ajoutLocal = Date.now(); const ref = await addDoc(collection(db, "reservations"), { ...liste[i].r, createdAt: serverTimestamp() }); if (ref && ref.id) ids.push(ref.id); }
+      catch (e) { console.error(e); ko++; }
+    }
+    if (ids.length) marquerVues(ids);
+    $imp("modal-import").classList.remove("shown");
+    toast(`✔ ${ids.length} course${ids.length > 1 ? "s" : ""} ajoutée${ids.length > 1 ? "s" : ""}` + (ko ? ` · ${ko} en erreur` : ""), 5000);
   });
 
   // Ouvre la fiche d'une réservation existante pour la modifier
