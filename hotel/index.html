@@ -372,6 +372,7 @@ textarea{min-height:64px;resize:vertical}
   function orly(p){ var a=(p.address||"").toLowerCase(); return /orly|94390|94547/.test(a)||gps(p.lat,p.lon,48.7262,2.3652)<5; }
   function beauvais(p){ var a=(p.address||"").toLowerCase(); return /beauvais|tille|60000/.test(a)||gps(p.lat,p.lon,49.4544,2.1128)<6; }
   function gare(p){ return (p.address||"").toLowerCase().indexOf("gare")>=0; }
+  function disney(p){ return /disney|chessy|marne[- ]la[- ]vall|77700|77777|val d.europe|serris|magny[- ]le[- ]hongre|bailly[- ]romainvilliers|coupvray/i.test((p.address||"").toLowerCase())||gps(p.lat,p.lon,48.8722,2.7758)<6; }
   // Paris intra-muros (75) : code postal 75xxx, ou adresse « …, Paris » sans autre département
   function intraParis(p){ if(!p) return false; if(p.dept) return p.dept==="75"; return /(^|,\s*)paris(\s*,|\s*$|\s+france)/i.test(p.address||""); }
   var MIN_PARIS=50, MIN_PARIS_SIEGE=60; // minimum Paris → Paris, sans / avec siège enfant (avant commission)
@@ -382,7 +383,9 @@ textarea{min-height:64px;resize:vertical}
     var cr=creuse(heure), supp=pax>3?(pax-3)*5.50:0;
     var total=15+montantKm(dist,cr)+supp, forfait=true;
     var dP=forfaitVille(dep), aP=forfaitVille(arr), van=veh==="van";
-    if((roissy(dep)&&orly(arr))||(orly(dep)&&roissy(arr))) total=!van?80:109; // Roissy ⇄ Orly
+    if((roissy(dep)&&disney(arr))||(disney(dep)&&roissy(arr))) total=!van?90:(pax<=5?100:115); // CDG ⇄ Disneyland
+    else if((orly(dep)&&disney(arr))||(disney(dep)&&orly(arr))) total=!van?105:(pax<=5?115:130); // Orly ⇄ Disneyland
+    else if((roissy(dep)&&orly(arr))||(orly(dep)&&roissy(arr))) total=!van?80:109; // Roissy ⇄ Orly
     else if(dP&&roissy(arr)) total=!van?75:(pax<=5?85:95);
     else if(aP&&roissy(dep)) total=!van?85:(pax<=5?95:105);
     else if(dP&&orly(arr)) total=!van?70:(pax<=6?80:95);
