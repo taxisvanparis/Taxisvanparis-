@@ -8,6 +8,7 @@ function factureHTML(f, p){
   const dd=x=>x?String(x).split('-').reverse().join('/'):'';
   const d=f.date?f.date.split('-').reverse().join('/'):'';
   const de=f.dateEmission?f.dateEmission.split('-').reverse().join('/'):d;
+  { const n=String(f.rib||'1'); p=n==='0'?{}:n==='2'?{titulaire:p.titulaire2,banque:p.banque2,iban:p.iban2,bic:p.bic2}:p; } // RIB choisi : 1, 2 ou aucun
   const rib=(p.iban||p.titulaire)?`<div class="rib"><b>Coordonnées bancaires</b><br>${[p.titulaire&&'Titulaire : '+e(p.titulaire),p.banque&&'Banque : '+e(p.banque),p.iban&&'IBAN : '+e(p.iban),p.bic&&'BIC : '+e(p.bic)].filter(Boolean).join('<br>')}</div>`:'';
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Facture ${e(f.numero)} – ${e(f.client)}</title><style>
 @page{size:A4;margin:14mm}*{box-sizing:border-box}body{font-family:Helvetica,Arial,sans-serif;color:#1a1a1a;margin:0;padding:14px;font-size:13px;background:#fff}

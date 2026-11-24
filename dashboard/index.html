@@ -821,11 +821,19 @@
   <div class="modal">
     <h2>⚙️ Réglages facture</h2>
     <div class="field"><label>Prochain numéro de facture</label><input id="rg-prochain" type="number" min="1"></div>
+    <h3 style="margin:14px 0 6px;font-size:15px">🏦 RIB 1</h3>
+    <div class="field"><label>Nom du RIB (pour le choisir)</label><input id="rg-nomRib1" type="text" placeholder="ex. Compte pro"></div>
     <div class="field"><label>Titulaire du compte</label><input id="rg-titulaire" type="text"></div>
     <div class="field"><label>Banque</label><input id="rg-banque" type="text"></div>
     <div class="field"><label>IBAN</label><input id="rg-iban" type="text"></div>
     <div class="field"><label>BIC</label><input id="rg-bic" type="text"></div>
-    <p style="font-size:12px;color:var(--muted)">Le RIB s'affiche en bas des factures. Laissé vide, il n'apparaît pas.</p>
+    <h3 style="margin:16px 0 6px;font-size:15px">🏦 RIB 2</h3>
+    <div class="field"><label>Nom du RIB (pour le choisir)</label><input id="rg-nomRib2" type="text" placeholder="ex. Autre compte"></div>
+    <div class="field"><label>Titulaire du compte</label><input id="rg-titulaire2" type="text"></div>
+    <div class="field"><label>Banque</label><input id="rg-banque2" type="text"></div>
+    <div class="field"><label>IBAN</label><input id="rg-iban2" type="text"></div>
+    <div class="field"><label>BIC</label><input id="rg-bic2" type="text"></div>
+    <p style="font-size:12px;color:var(--muted)">Sur chaque facture, tu choisis quel RIB s'affiche en bas (ou aucun).</p>
     <div class="modal-actions">
       <button class="btn-ghost" id="btn-cancel-reglages">Annuler</button>
       <button class="btn-gold" id="btn-save-reglages">Enregistrer</button>
@@ -858,6 +866,7 @@
 
     <div class="grid2">
       <div class="field" style="grid-column:1/-1"><label>En-tête de la facture</label><select id="ff-entete"><option value="tvp">Taxis Van Paris + AB Taxis Services</option><option value="abts">AB Taxis Services seulement</option></select></div>
+      <div class="field" style="grid-column:1/-1"><label>RIB en bas de la facture</label><select id="ff-rib"></select></div>
       <div class="field"><label>N° de facture</label><input id="ff-numero" type="number" min="1"></div>
       <div class="field"><label>Date d'émission</label><input id="ff-emission" type="date"></div>
       <div class="field"><label>Nom du client *</label><input id="ff-client" type="text"></div>
@@ -2900,7 +2909,7 @@ function anonymise(title,location){
   }
 
   // ---------------- MODALS: FACTURE ----------------
-  const FF = ["entete", "numero","emission","client","societe","adresse","siret","tvaclient","reference","passager","vehicule","depart","arrivee","date","heure","detail","montant","paiement","statut","notes"];
+  const FF = ["entete", "rib", "numero","emission","client","societe","adresse","siret","tvaclient","reference","passager","vehicule","depart","arrivee","date","heure","detail","montant","paiement","statut","notes"];
   const FKEY = { emission: "dateEmission", adresse: "clientAdresse", tvaclient: "tvaClient" };
   let factureEditId = null;
   function prochainNumero() {
@@ -2914,12 +2923,17 @@ function anonymise(title,location){
     w.document.open(); w.document.write(html); w.document.close();
   }
   function prixNum(p) { const n = parseFloat(String(p ?? "").replace(",", ".").replace(/[^\d.]/g, "")); return isFinite(n) ? n : ""; }
+  function ribOptions() {
+    const g = reglagesFacture, lib = (n, nom, iban) => `RIB ${n}${nom ? " – " + nom : ""}${iban ? " (…" + String(iban).replace(/\s/g, "").slice(-4) + ")" : " (vide)"}`;
+    document.getElementById("ff-rib").innerHTML = `<option value="1">${escH(lib(1, g.nomRib1, g.iban))}</option><option value="2">${escH(lib(2, g.nomRib2, g.iban2))}</option><option value="0">Aucun RIB</option>`;
+  }
   function openFactureModal(pre, editId) {
-    pre = pre || {}; factureEditId = editId || null; window._factureResaId = null;
+    pre = pre || {}; ribOptions(); factureEditId = editId || null; window._factureResaId = null;
     document.getElementById("ff-titre").textContent = editId ? "Modifier la facture" : "Nouvelle facture";
     FF.forEach(k => { const el = document.getElementById("ff-" + k); el.value = pre[FKEY[k] || k] ?? ""; });
     if (!pre.numero) document.getElementById("ff-numero").value = prochainNumero();
     if (!pre.entete) { let m = ""; try { m = localStorage.getItem("tvp_fact_entete") || ""; } catch (e) {} document.getElementById("ff-entete").value = m === "abts" ? "abts" : "tvp"; }
+    if (!pre.rib) { let m = ""; try { m = localStorage.getItem("tvp_fact_rib") || ""; } catch (e) {} document.getElementById("ff-rib").value = ["1", "2", "0"].includes(m) ? m : "1"; }
     if (!pre.dateEmission) document.getElementById("ff-emission").value = todayStr();
     if (!pre.statut) document.getElementById("ff-statut").value = "en attente";
     document.getElementById("ff-coller").value = ""; document.getElementById("ff-remplir-etat").textContent = "";
@@ -2998,7 +3012,7 @@ function anonymise(title,location){
     const data = {};
     FF.forEach(k => { const v = document.getElementById("ff-" + k).value; data[FKEY[k] || k] = typeof v === "string" ? v.trim() : v; });
     data.numero = Number(data.numero) || prochainNumero();
-    try { localStorage.setItem("tvp_fact_entete", data.entete); } catch (e) {}
+    try { localStorage.setItem("tvp_fact_entete", data.entete); localStorage.setItem("tvp_fact_rib", data.rib); } catch (e) {}
     if (fgLignes) {
       FG_SIMPLE.forEach(k => delete data[k]);
       data.lignes = fgLignes.map(l => ({ date: l.date, heure: l.heure, depart: String(l.depart).trim(), arrivee: String(l.arrivee).trim(), prix: Number(String(l.prix).replace(",", ".")) || 0 }));
@@ -3056,15 +3070,16 @@ function anonymise(title,location){
       .catch(() => { etatEl.textContent = (n1 ? "✓ " + n1 + " champ(s) rempli(s) par la lecture simple. " : "") + "IA injoignable."; });
   });
   // ---------------- MODAL: REGLAGES FACTURE ----------------
+  const RG_RIB = ["nomRib1", "titulaire", "banque", "iban", "bic", "nomRib2", "titulaire2", "banque2", "iban2", "bic2"];
   document.getElementById("btn-reglages").addEventListener("click", () => {
     document.getElementById("rg-prochain").value = prochainNumero();
-    ["titulaire","banque","iban","bic"].forEach(k => document.getElementById("rg-" + k).value = reglagesFacture[k] || "");
+    RG_RIB.forEach(k => document.getElementById("rg-" + k).value = reglagesFacture[k] || "");
     document.getElementById("modal-reglages").classList.add("shown");
   });
   document.getElementById("btn-cancel-reglages").addEventListener("click", () => document.getElementById("modal-reglages").classList.remove("shown"));
   document.getElementById("btn-save-reglages").addEventListener("click", async () => {
     const d = { prochain: Number(document.getElementById("rg-prochain").value) || 235 };
-    ["titulaire","banque","iban","bic"].forEach(k => d[k] = document.getElementById("rg-" + k).value.trim());
+    RG_RIB.forEach(k => d[k] = document.getElementById("rg-" + k).value.trim());
     try { await setDoc(doc(db, "factures", "_reglages"), d, { merge: true }); } catch (e) { alert("Erreur d'enregistrement des réglages."); return; }
     document.getElementById("modal-reglages").classList.remove("shown");
   });
