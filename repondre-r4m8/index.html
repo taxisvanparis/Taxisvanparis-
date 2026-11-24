@@ -140,6 +140,7 @@ const attendreMaps=()=>new Promise(ok=>{let n=0;(function w(){if(window.google&&
   const villeForfait = p => p.dept === "75" || VILLES.some(v => low(p).indexOf(v) >= 0);
   const roissy = p => /cdg|charles de gaulle|roissy|9570[012]|mesnil.amelot/.test(low(p)) || gps(p.lat, p.lon, 49.0097, 2.5479) < 8;
   const orly = p => /orly|94390|94547/.test(low(p)) || gps(p.lat, p.lon, 48.7262, 2.3652) < 5;
+  const disney = p => /disney|chessy|marne.la.vall|77700|77777|val d.europe|serris|magny.le.hongre|bailly.romainvilliers|coupvray/.test(low(p)) || gps(p.lat, p.lon, 48.8722, 2.7758) < 6;
   const beauvais = p => /beauvais|till[ée]|60000/.test(low(p)) || gps(p.lat, p.lon, 49.4544, 2.1128) < 6;
   const GARES = [[48.8809, 2.3553], [48.8449, 2.3735], [48.8408, 2.3205], [48.8760, 2.3245], [48.8765, 2.3590], [48.8426, 2.3655], [48.8402, 2.3793]];
   const gareParis = p => GARES.some(g => gps(p.lat, p.lon, g[0], g[1]) < 0.7) || /\bgare\b/.test(low(p));
@@ -149,7 +150,9 @@ const attendreMaps=()=>new Promise(ok=>{let n=0;(function w(){if(window.google&&
     const cr = creuse(heure), supp = pax > 3 ? (pax - 3) * 5.5 : 0;
     let total = 15 + montantKm(km, cr) + supp, forfait = "", fGare = false;
     const dP = villeForfait(dep), aP = villeForfait(arr);
-    if ((roissy(dep) && orly(arr)) || (orly(dep) && roissy(arr))) { total = van ? 109 : 80; forfait = "Roissy ⇄ Orly"; }
+    if ((roissy(dep) && disney(arr)) || (disney(dep) && roissy(arr))) { total = !van ? 90 : pax <= 5 ? 100 : 115; forfait = "CDG ⇄ Disneyland"; }
+    else if ((orly(dep) && disney(arr)) || (disney(dep) && orly(arr))) { total = !van ? 105 : pax <= 5 ? 115 : 130; forfait = "Orly ⇄ Disneyland"; }
+    else if ((roissy(dep) && orly(arr)) || (orly(dep) && roissy(arr))) { total = van ? 109 : 80; forfait = "Roissy ⇄ Orly"; }
     else if (dP && roissy(arr)) { total = !van ? 75 : pax <= 5 ? 85 : 95; forfait = "Paris → CDG"; }
     else if (aP && roissy(dep)) { total = !van ? 85 : pax <= 5 ? 95 : 105; forfait = "CDG → Paris"; }
     else if (dP && orly(arr)) { total = !van ? 70 : pax <= 6 ? 80 : 95; forfait = "Paris → Orly"; }
