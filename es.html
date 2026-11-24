@@ -1443,6 +1443,7 @@ function goPage(id) {
 function toggleMenu() {
   document.getElementById('navlinks').classList.toggle('open');
 }
+document.addEventListener('click',function(e){var n=document.getElementById('navlinks');if(n&&n.classList.contains('open')&&!e.target.closest('nav')){n.classList.remove('open');e.preventDefault();e.stopPropagation();}},true);
 
 let timers = {};
 let coords = { dep: null, arr: null };
