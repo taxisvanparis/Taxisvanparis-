@@ -543,6 +543,15 @@ onAuthStateChanged(auth,async u=>{
   people.sort((a,b)=>(a.b===b.b?a.nom.localeCompare(b.nom):a.b?1:-1));
   people.forEach((p,i)=>p.lettre=p.b?'B':'A');
   unsub.push(onSnapshot(collection(db,'frais_communs'),{includeMetadataChanges:true},s=>{all=s.docs.map(d=>({id:d.id,...d.data(),_pend:!!(d.metadata&&d.metadata.hasPendingWrites)}));fromCache=!!(s.metadata&&s.metadata.fromCache);draw()},e=>{toast('Accès refusé aux frais communs');console.error(e)}));
+  // Factures du tableau de bord envoyées par CE compte → ajoutées dans « À recevoir » (une seule fois chacune)
+  unsub.push(onSnapshot(query(collection(db,'factures'),where('depensesUid','==',u.uid)),s=>{
+    let n=0;
+    s.docs.forEach(d=>{const f=d.data();if(f.depensesImporte||recs.some(r=>r.fid===d.id))return;
+      const amt=Math.round((Number(f.montant)||0)*100)/100;if(!amt)return;
+      recs.push({id:Date.now()+n,src:'En compte',amt,date:/^\d{4}-\d{2}-\d{2}$/.test(f.dateEmission||'')?f.dateEmission:today(),nb:Array.isArray(f.lignes)?f.lignes.length:1,name:String(f.societe||f.client||''),phone:'',paid:f.statut==='payée',note:'Facture N° '+(f.numero||''),fid:d.id});
+      n++;updateDoc(doc(db,'factures',d.id),{depensesImporte:true}).catch(()=>{});});
+    if(n){save();render();toast(n>1?n+' factures ajoutées dans « À recevoir »':'Facture ajoutée dans « À recevoir »')}
+  },()=>{}));
   unsub.push(onSnapshot(collection(db,'frais_communs_mois'),s=>{regles={};s.docs.forEach(d=>regles[d.id]=d.data());draw()},()=>{}));
 });
 function draw(){
