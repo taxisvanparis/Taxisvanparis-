@@ -2540,17 +2540,11 @@ function anonymise(title,location){
     const inp = document.getElementById("pym-" + r.id), mt = inp ? parseFloat(String(inp.value).replace(",", ".")) : NaN;
     if (par && !(mt > 0)) { toast("Écris d'abord le montant payé au chauffeur", 4000); if (inp) inp.focus(); return; }
     const maj = { paye: par ? { par, montant: Math.round(mt * 100) / 100, le: Date.now() } : null };
-    // Frais commun dans TVP dépenses (A = associé, B = Badr) : ajouté quand on paie, supprimé quand on annule
+    // Dépense « Chauffeur » dans le TVP dépenses personnel de celui qui a payé (A = associé, B = Badr) — pas dans les frais communs
     let fcOk = true;
     try {
-      if (par) {
-        const p = (await associesTvp()).find(x => x.lettre === par);
-        if (!p) throw new Error("associé introuvable");
-        const ref = await addDoc(collection(db, "frais_communs"), { cat: "Chauffeur", montant: maj.paye.montant, date: /^\d{4}-\d{2}-\d{2}$/.test(r.date || "") ? r.date : todayStr(),
-          note: [r.chauffeurNom, String(r.nom || "").replace(/^🏨\s*/, "")].filter(Boolean).join(" · ").slice(0, 80), payePar: p.uid, photo: null, resaId: r.id,
-          par: auth.currentUser.uid, cree: serverTimestamp(), modifie: serverTimestamp(), modifiePar: auth.currentUser.uid });
-        maj.paye.fcId = ref.id;
-      } else if (r.paye && r.paye.fcId) await deleteDoc(doc(db, "frais_communs", r.paye.fcId));
+      if (par) { const p = (await associesTvp()).find(x => x.lettre === par); if (!p) throw new Error("associé introuvable"); maj.paye.uid = p.uid; }
+      else if (r.paye && r.paye.fcId) await deleteDoc(doc(db, "frais_communs", r.paye.fcId)); // ancien système (frais communs)
     } catch (e) { console.error(e); fcOk = false; }
     try { await updateDoc(doc(db, "reservations", r.id), maj); Object.assign(r, maj); if (ficheId === r.id) majFiche(); renderReservations(); toast((par ? "💶 Noté : " + maj.paye.montant + " € payé par " + par : "Paiement annulé") + (fcOk ? (par ? " · ajouté à TVP dépenses" : "") : " · ⚠️ TVP dépenses pas mis à jour"), 5000); }
     catch (e) { toast("Pas enregistré, réessaie.", 4000); }

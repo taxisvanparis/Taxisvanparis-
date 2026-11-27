@@ -267,7 +267,7 @@ label{display:block;color:var(--mut);font-size:13px;text-transform:uppercase;let
 
 <script>
 const $=id=>document.getElementById(id);
-const CATS=['Carburant','Péage','Entretien','Lavage','Parking','Téléphone','Autre'];
+const CATS=['Carburant','Péage','Entretien','Lavage','Parking','Téléphone','Chauffeur','Autre'];
 const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}}};
 let items=store.get('dep-items',[]);   // {id,cat,amt,tva,date,note,photo:bool}
 let recs=store.get('dep-rec',[]);
@@ -522,7 +522,7 @@ const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth
 const shift=(m,n)=>{const [y,mo]=m.split('-').map(Number);const d=new Date(y,mo-1+n,1);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')};
 const mName=m=>{const [y,mo]=m.split('-');return new Date(+y,+mo-1,1).toLocaleDateString('fr-FR',{month:'long',year:'numeric'})};
 const toast=t=>{const e=$('toast');e.textContent=t;e.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>e.hidden=true,2600)};
-const CATS=['Carburant','Péage','Entretien','Lavage','Parking','Assurance','Chauffeur','Autre'];
+const CATS=['Carburant','Péage','Entretien','Lavage','Parking','Assurance','Autre'];
 let user=null,people=[],all=[],regles={},fm=today().slice(0,7),unsub=[],fromCache=false;
 const MAX=5000;
 const locked=m=>!!(regles[m]&&regles[m].regle);
@@ -551,6 +551,20 @@ onAuthStateChanged(auth,async u=>{
       recs.push({id:Date.now()+n,src:'En compte',amt,date:/^\d{4}-\d{2}-\d{2}$/.test(f.dateEmission||'')?f.dateEmission:today(),nb:Array.isArray(f.lignes)?f.lignes.length:1,name:String(f.societe||f.client||''),phone:'',paid:f.statut==='payée',note:'Facture N° '+(f.numero||''),fid:d.id});
       n++;updateDoc(doc(db,'factures',d.id),{depensesImporte:true}).catch(()=>{});});
     if(n){save();render();toast(n>1?n+' factures ajoutées dans « À recevoir »':'Facture ajoutée dans « À recevoir »')}
+  },()=>{}));
+  // Chauffeurs payés depuis le tableau de bord par CE compte → dépenses « Chauffeur » (retirées si le paiement est annulé)
+  unsub.push(onSnapshot(query(collection(db,'reservations'),where('paye.uid','==',u.uid)),s=>{
+    if(s.metadata&&s.metadata.fromCache)return;
+    const vus=new Set();let n=0,ch=false;
+    s.docs.forEach(d=>{const r=d.data(),p=r.paye||{};const amt=Math.round((Number(p.montant)||0)*100)/100;if(!amt)return;vus.add(d.id);
+      const note=[r.chauffeurNom,String(r.nom||'').replace(/^🏨\s*/,'')].filter(Boolean).join(' · ').slice(0,80);
+      const date=/^\d{4}-\d{2}-\d{2}$/.test(r.date||'')?r.date:today();
+      const it=items.find(i=>i.pid===d.id);
+      if(!it){items.push({id:Date.now()+n,cat:'Chauffeur',amt,tva:0,date,note,photo:false,pid:d.id});n++;ch=true}
+      else if(it.amt!==amt||it.date!==date){it.amt=amt;it.date=date;ch=true}});
+    const av=items.length;items=items.filter(i=>!i.pid||vus.has(i.pid));if(items.length!==av)ch=true;
+    if(ch){save();render()}
+    if(n)toast(n>1?n+' paiements chauffeur ajoutés':'Paiement chauffeur ajouté');
   },()=>{}));
   unsub.push(onSnapshot(collection(db,'frais_communs_mois'),s=>{regles={};s.docs.forEach(d=>regles[d.id]=d.data());draw()},()=>{}));
 });
