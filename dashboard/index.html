@@ -2475,6 +2475,15 @@ function anonymise(title,location){
   // Sous le statut : qui fait la course (chauffeur choisi, envoyée au groupe, ou personne)
   // 💶 Chauffeur payé (par Badr ou par Ahmed)
   const PAYEURS = ["A", "B"];
+  let associesCache = null;
+  async function associesTvp() { // même règle que TVP dépenses : B = Badr, A = l'associé
+    if (associesCache) return associesCache;
+    const snap = await getDocs(collection(db, "users"));
+    const pp = snap.docs.map(d => { const o = {}; Object.entries(d.data()).forEach(([k, v]) => o[k.trim().toLowerCase()] = typeof v === "string" ? v.trim() : v); return { uid: d.id, nom: o.nom || o.name || o.email || "Associé", role: String(o.role || "").toLowerCase() }; }).filter(p => p.role.startsWith("admin"));
+    pp.forEach(p => p.b = /badr/i.test(p.nom)); if (!pp.some(p => p.b) && pp.length) pp[pp.length - 1].b = true;
+    pp.forEach(p => p.lettre = p.b ? "B" : "A");
+    return (associesCache = pp);
+  }
   function payTb(r) { return r.paye && r.paye.par ? `<i class="tb-py">💶 Payé ${esc(r.paye.par)}${r.paye.montant ? " · " + esc(String(r.paye.montant).replace(".", ",")) + " €" : ""}</i>` : ""; }
   function chTb(r) {
     if (/annul|termin/i.test(r.statut || "")) return "";
@@ -2518,7 +2527,19 @@ function anonymise(title,location){
     const inp = document.getElementById("pym-" + r.id), mt = inp ? parseFloat(String(inp.value).replace(",", ".")) : NaN;
     if (par && !(mt > 0)) { toast("Écris d'abord le montant payé au chauffeur", 4000); if (inp) inp.focus(); return; }
     const maj = { paye: par ? { par, montant: Math.round(mt * 100) / 100, le: Date.now() } : null };
-    try { await updateDoc(doc(db, "reservations", r.id), maj); Object.assign(r, maj); if (ficheId === r.id) majFiche(); renderReservations(); toast(par ? "💶 Noté : " + maj.paye.montant + " € payé par " + par : "Paiement annulé"); }
+    // Frais commun dans TVP dépenses (A = associé, B = Badr) : ajouté quand on paie, supprimé quand on annule
+    let fcOk = true;
+    try {
+      if (par) {
+        const p = (await associesTvp()).find(x => x.lettre === par);
+        if (!p) throw new Error("associé introuvable");
+        const ref = await addDoc(collection(db, "frais_communs"), { cat: "Chauffeur", montant: maj.paye.montant, date: /^\d{4}-\d{2}-\d{2}$/.test(r.date || "") ? r.date : todayStr(),
+          note: [r.chauffeurNom, String(r.nom || "").replace(/^🏨\s*/, "")].filter(Boolean).join(" · ").slice(0, 80), payePar: p.uid, photo: null, resaId: r.id,
+          par: auth.currentUser.uid, cree: serverTimestamp(), modifie: serverTimestamp(), modifiePar: auth.currentUser.uid });
+        maj.paye.fcId = ref.id;
+      } else if (r.paye && r.paye.fcId) await deleteDoc(doc(db, "frais_communs", r.paye.fcId));
+    } catch (e) { console.error(e); fcOk = false; }
+    try { await updateDoc(doc(db, "reservations", r.id), maj); Object.assign(r, maj); if (ficheId === r.id) majFiche(); renderReservations(); toast((par ? "💶 Noté : " + maj.paye.montant + " € payé par " + par : "Paiement annulé") + (fcOk ? (par ? " · ajouté à TVP dépenses" : "") : " · ⚠️ TVP dépenses pas mis à jour"), 5000); }
     catch (e) { toast("Pas enregistré, réessaie.", 4000); }
   });
   // ↩️ Retour en arrière d'une étape (confirmation demandée)
