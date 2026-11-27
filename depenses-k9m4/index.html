@@ -522,7 +522,7 @@ const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth
 const shift=(m,n)=>{const [y,mo]=m.split('-').map(Number);const d=new Date(y,mo-1+n,1);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')};
 const mName=m=>{const [y,mo]=m.split('-');return new Date(+y,+mo-1,1).toLocaleDateString('fr-FR',{month:'long',year:'numeric'})};
 const toast=t=>{const e=$('toast');e.textContent=t;e.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>e.hidden=true,2600)};
-const CATS=['Carburant','Péage','Entretien','Lavage','Parking','Assurance','Autre'];
+const CATS=['Carburant','Péage','Entretien','Lavage','Parking','Assurance','Chauffeur','Autre'];
 let user=null,people=[],all=[],regles={},fm=today().slice(0,7),unsub=[],fromCache=false;
 const MAX=5000;
 const locked=m=>!!(regles[m]&&regles[m].regle);
@@ -576,7 +576,7 @@ function draw(){
   res.innerHTML=!tot?'Aucun frais commun ce mois-ci':r.regle?`✓ Mois réglé${r.le?' le '+new Date(r.le).toLocaleDateString('fr-FR'):''}`:Math.abs(diff)<0.01?'A et B sont à égalité 👍':diff>0?`<span>B</span><span class="arrow">➜</span><span>A</span><span class="amt">${eur(diff)}</span>`:`<span>A</span><span class="arrow">➜</span><span>B</span><span class="amt">${eur(-diff)}</span>`;
   if(!ok)res.title=diff>0?'B doit rembourser A':'A doit rembourser B';
   const rg=$('fcRegle');rg.hidden=!tot;rg.className='regle'+(r.regle?' on':'');rg.textContent=r.regle?'✓ Comptes faits — toucher pour annuler':'Marquer le mois comme réglé';
-  const ICO={'Carburant':'⛽','Péage':'🛣️','Entretien':'🔧','Lavage':'🧽','Parking':'🅿️','Assurance':'🛡️','Autre':'📦'};
+  const ICO={'Carburant':'⛽','Péage':'🛣️','Entretien':'🔧','Lavage':'🧽','Parking':'🅿️','Assurance':'🛡️','Chauffeur':'🚖','Autre':'📦'};
   let last='',h='';
   M.forEach(f=>{const L=nameOf(f.payePar);
     if(f.date!==last){last=f.date;const dd=new Date(f.date+'T12:00');h+=`<div class="fc-day">${f.date===today()?"Aujourd'hui":dd.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})}</div>`}
