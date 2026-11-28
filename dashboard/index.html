@@ -3270,12 +3270,24 @@ function anonymise(title,location){
       if (t.dataset.dpx) { const r = reservationsCache.find(x => x.id === t.dataset.dpx); if (!r) return; const n = r.chauffeurNom; Object.assign(r, { chauffeurNom: null, chauffeurUid: null }); dpDraw(); renderReservations(); updateDoc(doc(db, "reservations", r.id), { chauffeurNom: null, chauffeurUid: null, dispatchEnvoye: null }).then(() => toast("↩︎ Retirée de " + n)).catch(() => toast("Pas enregistré, réessaie", 4000)); return; }
       if (t.dataset.dpcli !== undefined) {
         const r = reservationsCache.find(x => x.id === t.dataset.dpcli); if (!r) return;
-        const ouvrir = () => { const x = relanceClient(r); window.open(x.wa, "_blank"); };
-        if (r.lienCourse) return ouvrir();
-        const w = window.open("", "_blank"), c = dpCh(r.chauffeurNom);
+        const num = waNumClient(r.tel); if (!num) return toast("Pas de numéro pour ce client", 3500);
+        const w = r.lienCourse ? null : window.open("", "_blank");
+        const go = () => {
+          const fr = langueClient(r) === "fr", url = mcUrl(r.lienCourse);
+          const txt = fr ? `Bonjour, voici le lien de votre course Taxis Van Paris 🚖 (chauffeur, véhicule, point de rendez-vous, chat) :\n${url}`
+            : `Hello, here is the link to your Taxis Van Paris ride 🚖 (driver, vehicle, meeting point, chat):\n${url}`;
+          if (w) w.location.href = "https://wa.me/" + num + "?text=" + encodeURIComponent(txt); else window.open("https://wa.me/" + num + "?text=" + encodeURIComponent(txt), "_blank");
+          if (num.startsWith("33")) { // numéro français : SMS aussi
+            const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+            const a = document.createElement("a"); a.href = "sms:+" + num + (ios ? "&" : "?") + "body=" + encodeURIComponent(txt); a.rel = "noopener";
+            document.body.appendChild(a); a.click(); a.remove();
+          }
+        };
+        if (r.lienCourse) return go();
+        const c = dpCh(r.chauffeurNom);
         dpCreerLien(r, r.chauffeurNom, c && c.tel).then(code => {
           if (!code) { if (w) w.close(); return toast("⚠️ Lien pas créé, réessaie", 4000); }
-          const x = relanceClient(r); if (w) w.location.href = x.wa; else window.open(x.wa, "_blank");
+          go();
         }).catch(e => { console.error(e); if (w) w.close(); toast("⚠️ Lien pas créé, réessaie", 4000); });
         return;
       }
