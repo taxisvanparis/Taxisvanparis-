@@ -3131,7 +3131,7 @@ function anonymise(title,location){
     o = o || dpOpt();
     const L = ["🚖 *COURSE ATTRIBUÉE*", `Chauffeur : ${nom}`];
     rs.forEach((r, i) => L.push("", (rs.length > 1 ? (NUMS[i] || (i + 1) + ".") + " " : "") + messageChauffeur(r).replace(/^🚖 \*COURSE ATTRIBUÉE\*\n(Chauffeur : .*\n)?\n?/, "")
-      + (o.prix && r.prixChauffeur ? `\n💶 Prix : ${eurTxt(r.prixChauffeur)}` : "") + (o.lien && r.lienCourse ? `\n🔗 Ta page course : ${mcUrl(r.lienCourse)}&d=1` : "")));
+      + (o.prix && r.prixChauffeur ? `\n💶 Prix : ${eurTxt(r.prixChauffeur)}` : "") + (o.lien && r.lienCourse ? `\n📍 Clique sur le lien pour activer le suivi de la course et partager ta position :\n${mcUrl(r.lienCourse)}&d=1` : "")));
     return L.join("\n");
   }
   // Crée la page « Ma course » d'une course qui n'en a pas encore (comme le bouton Lien, avec le chauffeur choisi)
