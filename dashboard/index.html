@@ -541,6 +541,11 @@
 .dp-g .dp-c{border-color:transparent;background:var(--card)}
 .dp-wa{flex:none;border:0;border-radius:10px;background:#25d366;color:#08240f;font:inherit;font-weight:800;font-size:13px;padding:8px 10px;cursor:pointer}.dp-ok{color:#1f7a45;font-weight:700}
 .dp-vide{color:var(--muted);text-align:center;margin:24px 0;font-weight:700}
+.dp-gt{display:flex;align-items:center;gap:6px;padding:0 4px}.dp-gt a{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}.dp-gt button{white-space:nowrap}.dp-gt a{color:var(--text);font-weight:800;text-decoration:none;border:1px solid var(--border);border-radius:10px;padding:7px 10px;background:var(--card)}.dp-gt button{border:1px solid var(--border);border-radius:10px;padding:7px 10px;background:var(--card);color:var(--text);font:inherit;font-weight:700;cursor:pointer}
+.dp-gt .dp-payer{margin-left:auto;border-color:#1f7a45;color:#1f7a45;font-weight:800}.dp-addtel{border:1px dashed #b7791f!important;color:#b7791f!important;background:transparent!important;border-radius:10px;padding:8px 10px;font:inherit;font-weight:800;cursor:pointer}
+.dp-ntel{min-height:46px;border:1px solid var(--border);border-radius:12px;padding:0 12px;background:var(--bg);color:var(--text);font:inherit;font-size:16px}.dp-ntel[hidden]{display:none}
+.dp-pr{display:flex;align-items:center;gap:10px;border:1px solid var(--border);border-radius:12px;padding:8px 10px}.dp-pr span{flex:1;min-width:0}.dp-pr span::first-letter{text-transform:uppercase}.dp-pr small{display:block;color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dp-pr input{width:86px;flex:none;min-height:42px;border:1px solid var(--border);border-radius:10px;padding:0 8px;background:var(--bg);color:var(--text);font:inherit;font-size:16px;text-align:right}
+.dp-ptot{text-align:right;font-size:16px}.dp-pab{display:grid;grid-template-columns:1fr 1fr;gap:8px}.dp-pab button{min-height:50px;border-radius:12px;border:2px solid #b7791f;background:rgba(201,168,76,.15);color:var(--text);font:inherit;font-weight:800;font-size:16px;cursor:pointer}.dp-pab button.A{border-color:#2f5fb3;background:rgba(47,95,179,.1)}.dp-pn{color:var(--muted);text-align:center}
 .dp-fond{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:2001}.dp-fond[hidden],.dp-sheet[hidden]{display:none}
 .dp-sheet{position:fixed;z-index:2002;left:50%;bottom:0;transform:translateX(-50%);width:min(560px,100%);max-height:88vh;overflow:auto;background:var(--card);border-radius:20px 20px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom));box-shadow:0 -10px 40px rgba(0,0,0,.2);display:flex;flex-direction:column;gap:10px}
 .dp-sh-h{display:flex;align-items:center;gap:10px}.dp-sh-h b{flex:1;font-size:18px}.dp-sh-x{width:40px;height:40px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);cursor:pointer}
@@ -3095,7 +3100,14 @@ function anonymise(title,location){
 
 
   // ===== 🚖 Mode dispatch : 1) envoyer au groupe  2) « Qui l'a prise ? » sur chaque course  3) elle passe chez son chauffeur =====
-  let dpJour = "", dpTab = "a", dpNum = new Map(), dpCur = null, dpAussi = new Set();
+  let dpJour = "", dpTab = "a", dpNum = new Map(), dpCur = null, dpAussi = new Set(), dpPay = null;
+  const dpCh = nom => chauffeursCache.find(x => (x.nom || "").trim().toLowerCase() === String(nom || "").trim().toLowerCase());
+  async function dpTel(nom, tel) { // enregistre le numéro du chauffeur (fiche Chauffeurs)
+    tel = String(tel || "").trim(); if (!tel) return;
+    const c = dpCh(nom);
+    try { if (c && c.id) { await updateDoc(doc(db, "chauffeurs", c.id), { tel }); c.tel = tel; } else { const ref = await addDoc(collection(db, "chauffeurs"), { nom, tel, vehicule: "", statut: "disponible", uid: null, suivi: true }); chauffeursCache.push({ id: ref.id, nom, tel }); } toast("📞 Numéro de " + nom + " enregistré"); }
+    catch (e) { toast("Numéro pas enregistré, réessaie", 4000); }
+  }
   const dpCourses = () => reservationsCache.filter(r => r.statut !== "annulée" && r.statut !== "terminée" && (r.date || "") >= todayStr() && (!dpJour || r.date === dpJour))
     .sort((a, b) => ((a.date || "") + (a.heure || "")).localeCompare((b.date || "") + (b.heure || "")));
   // Noms des chauffeurs déjà utilisés (les plus fréquents des 60 derniers jours d'abord)
@@ -3137,11 +3149,27 @@ function anonymise(title,location){
         + `<div class="dp-step">② Quand un chauffeur répond, touche « Qui l'a prise ? »</div>` + A.map(r => dpCarte(r, true)).join("")
       : `<p class="dp-vide">✓ Toutes les courses ont un chauffeur 👍</p>`;
     const g = new Map(); B.forEach(r => { const n = r.chauffeurNom; if (!g.has(n)) g.set(n, []); g.get(n).push(r); });
-    ov.querySelector(".dp-b .dp-l").innerHTML = B.length ? [...g.entries()].sort((x, y) => x[0].localeCompare(y[0], "fr")).map(([n, rs]) => `<div class="dp-g"><div class="dp-gh"><span>🚖 ${esc(n)} <i>${rs.length}</i></span><button type="button" class="dp-wa" data-dpwa="${esc(n)}">💬 Lui confirmer</button></div>${rs.map(r => dpCarte(r, false)).join("")}</div>`).join("") : `<p class="dp-vide">Les courses attribuées viendront ici, rangées par chauffeur.</p>`;
+    ov.querySelector(".dp-b .dp-l").innerHTML = B.length ? [...g.entries()].sort((x, y) => x[0].localeCompare(y[0], "fr")).map(([n, rs]) => { const c = dpCh(n), tel = c && c.tel ? String(c.tel) : "", np = reservationsCache.filter(r => r.chauffeurNom === n && r.statut !== "annulée" && !(r.paye && Number(r.paye.montant) > 0) && (r.date || "") <= (dpJour || "9999")).length;
+      return `<div class="dp-g"><div class="dp-gh"><span>🚖 ${esc(n)} <i>${rs.length}</i></span><button type="button" class="dp-wa" data-dpwa="${esc(n)}">💬 Lui confirmer</button></div>
+      <div class="dp-gt">${tel ? `<a href="tel:${esc(tel.replace(/[^\d+]/g, ""))}">📞 ${esc(tel)}</a><button type="button" data-dptel="${esc(n)}">✏️</button>` : `<button type="button" class="dp-addtel" data-dptel="${esc(n)}">📞 + numéro</button>`}<button type="button" class="dp-payer" data-dppay="${esc(n)}">💶 Payer${np ? " (" + np + ")" : ""}</button></div>${rs.map(r => dpCarte(r, false)).join("")}</div>`; }).join("") : `<p class="dp-vide">Les courses attribuées viendront ici, rangées par chauffeur.</p>`;
     dpSheet();
+  }
+  function dpPaySheet() {
+    const ov = document.getElementById("dp-ov"), sh = ov && ov.querySelector(".dp-sheet"); if (!sh || !dpPay) return;
+    const rs = reservationsCache.filter(r => r.chauffeurNom === dpPay && r.statut !== "annulée" && !(r.paye && Number(r.paye.montant) > 0)).sort((a, b) => ((a.date || "") + (a.heure || "")).localeCompare((b.date || "") + (b.heure || "")));
+    const c = dpCh(dpPay), tel = c && c.tel ? String(c.tel) : "";
+    sh.hidden = false; ov.querySelector(".dp-fond").hidden = false;
+    sh.innerHTML = `<div class="dp-sh-h"><b>💶 Payer ${esc(dpPay)}</b><button type="button" class="dp-sh-x" data-dpfermer aria-label="Fermer">✕</button></div>
+      ${tel ? `<div class="dp-sh-tr"><small>📞 ${esc(tel)} — pour le virement ou Wero</small></div>` : `<button type="button" class="dp-addtel" data-dptel="${esc(dpPay)}">📞 Ajouter son numéro</button>`}
+      ${rs.length ? `<div class="dp-step">Courses pas encore payées</div>${rs.map(r => `<div class="dp-pr"><span><b>${esc(dpJ(r.date))} ${esc(r.heure || "")}</b> · ${dpNom(r)}<small>${dpTr(r)}</small></span><input data-pyr="${esc(r.id)}" inputmode="decimal" placeholder="€" value="${r.prixChauffeur ? String(r.prixChauffeur).replace(".", ",") : ""}"></div>`).join("")}
+        <div class="dp-ptot">Total : <b id="dp-ptot"></b></div><div class="dp-pab"><button type="button" class="A" data-dppar="A">Payé par A</button><button type="button" data-dppar="B">Payé par B</button></div>
+        <small class="dp-pn">Ça va dans TVP dépenses → Paiements chauffeurs.</small>` : `<p class="dp-vide">Rien à payer à ${esc(dpPay)} 👍</p>`}`;
+    const tot = () => { const e = sh.querySelector("#dp-ptot"); if (e) e.textContent = eurTxt([...sh.querySelectorAll("[data-pyr]")].reduce((a, i) => a + (prixChNum(i.value) || 0), 0)); };
+    sh.querySelectorAll("[data-pyr]").forEach(i => i.addEventListener("input", tot)); tot();
   }
   function dpSheet() {
     const ov = document.getElementById("dp-ov"), sh = ov && ov.querySelector(".dp-sheet"); if (!sh) return;
+    if (dpPay) return dpPaySheet();
     const r = dpCur && reservationsCache.find(x => x.id === dpCur);
     if (!r || r.chauffeurNom) { sh.hidden = true; ov.querySelector(".dp-fond").hidden = true; return; }
     sh.hidden = false; ov.querySelector(".dp-fond").hidden = false;
@@ -3152,6 +3180,7 @@ function anonymise(title,location){
       <div class="dp-step">Qui l'a prise ?</div>
       <div class="dp-noms">${dpChauffeurs().slice(0, 10).map(n => { const [c, t] = etat(n); return `<button type="button" class="${c}" data-dpch="${esc(n)}"><b>${esc(n)}</b><small>${t}</small></button>`; }).join("")}</div>
       <div class="dp-in"><input id="dp-nom" placeholder="Autre chauffeur : écris son nom" autocomplete="off"><button type="button" data-dpok>✓</button></div>
+      <input id="dp-ntel" class="dp-ntel" type="tel" inputmode="tel" placeholder="📞 Son numéro (facultatif, pour le joindre et le payer)" hidden>
       <label class="dp-px">💶 Prix chauffeur <input id="dp-pxc" inputmode="decimal" placeholder="€ (facultatif)" value="${r.prixChauffeur ? String(r.prixChauffeur).replace(".", ",") : ""}"></label>
       ${autres.length ? `<div class="dp-step">Il prend aussi ?</div><div class="dp-aussi">${autres.map(x => `<button type="button" class="${dpAussi.has(x.id) ? "on" : ""}" data-dpaussi="${esc(x.id)}">${dpNum.get(x.id) ? "N°" + dpNum.get(x.id) + " · " : ""}${esc(x.heure || "")} ${dpNom(x)}</button>`).join("")}</div>` : ""}`;
   }
@@ -3176,13 +3205,23 @@ function anonymise(title,location){
     ov.addEventListener("click", ev => {
       const t = ev.target.closest("button,[data-dpfermer]"); if (!t) return;
       if (t.classList.contains("dp-close")) { ov.remove(); document.body.style.overflow = ""; return; }
-      if (t.dataset.dpfermer !== undefined) { dpCur = null; dpAussi.clear(); return dpSheet(); }
+      if (t.dataset.dpfermer !== undefined) { dpCur = null; dpPay = null; dpAussi.clear(); return dpSheet(); }
       if (t.dataset.dpj !== undefined) { dpJour = t.dataset.dpj; return dpDraw(); }
       if (t.dataset.dptab) { dpTab = t.dataset.dptab; return dpDraw(); }
       if (t.dataset.dpqui) { dpCur = t.dataset.dpqui; dpAussi.clear(); dpSheet(); setTimeout(() => { const s = ov.querySelector(".dp-sheet"); if (s) s.scrollTop = 0; }, 0); return; }
       if (t.dataset.dpaussi) { const id = t.dataset.dpaussi; dpAussi.has(id) ? dpAussi.delete(id) : dpAussi.add(id); return dpSheet(); }
       if (t.dataset.dpch) return dpAttribuer(t.dataset.dpch);
-      if (t.dataset.dpok !== undefined) { const n = document.getElementById("dp-nom").value.trim(); if (!n) { toast("Écris le nom du chauffeur"); document.getElementById("dp-nom").focus(); return; } return dpAttribuer(n); }
+      if (t.dataset.dpok !== undefined) { const n = document.getElementById("dp-nom").value.trim(); if (!n) { toast("Écris le nom du chauffeur"); document.getElementById("dp-nom").focus(); return; } const tl = document.getElementById("dp-ntel").value; if (tl.trim()) dpTel(n, tl); return dpAttribuer(n); }
+      if (t.dataset.dptel) { const n = t.dataset.dptel, c = dpCh(n); const v = prompt("Numéro de " + n + " ?", c && c.tel ? c.tel : ""); if (v === null) return; dpTel(n, v).then(dpDraw); return; }
+      if (t.dataset.dppay) { dpPay = t.dataset.dppay; return dpPaySheet(); }
+      if (t.dataset.dppar) {
+        const sh = ov.querySelector(".dp-sheet"), par = t.dataset.dppar, p = []; let manque = 0;
+        sh.querySelectorAll("[data-pyr]").forEach(i => { const m = prixChNum(i.value); if (m) p.push([i.dataset.pyr, m]); else manque++; });
+        if (!p.length) { toast("Écris au moins un montant"); return; }
+        const tt = Date.now(); p.forEach(([id, m]) => { const r = reservationsCache.find(x => x.id === id); const u = { paye: { par, montant: m, le: tt }, prixChauffeur: m }; if (r) Object.assign(r, u); updateDoc(doc(db, "reservations", id), u).catch(() => toast("Un paiement pas enregistré, réessaie", 4000)); });
+        toast(`💶 ${eurTxt(p.reduce((a, x) => a + x[1], 0))} payé${p.length > 1 ? "s" : ""} par ${par} à ${dpPay}` + (manque ? ` · ${manque} sans montant laissée${manque > 1 ? "s" : ""} à payer` : ""), 4500);
+        dpPay = null; renderReservations(); dpDraw(); return;
+      }
       if (t.dataset.dpgrp !== undefined) {
         const rs = dpCourses().filter(r => !r.chauffeurNom && !dpNum.has(r.id)), px = (document.getElementById("dp-prix") || {}).value || "";
         let k = Math.max(0, ...dpNum.values()); rs.forEach(r => dpNum.set(r.id, ++k));
@@ -3201,6 +3240,7 @@ function anonymise(title,location){
         return;
       }
     });
+    ov.addEventListener("input", ev => { if (ev.target.id === "dp-nom") { const v = ev.target.value.trim(), c = dpCh(v); document.getElementById("dp-ntel").hidden = !v || !!(c && c.tel); } });
     ov.addEventListener("keydown", ev => { if (ev.key === "Enter" && ev.target.id === "dp-nom") { ev.preventDefault(); ov.querySelector("[data-dpok]").click(); } });
     if (!dpJour || dpJour < todayStr()) { const j = dpCourses().filter(r => !r.chauffeurNom)[0]; dpJour = j ? j.date : ""; }
     dpDraw();
