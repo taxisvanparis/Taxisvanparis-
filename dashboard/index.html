@@ -3104,7 +3104,7 @@ function anonymise(title,location){
 
 
   // ===== 🚖 Mode dispatch : 1) envoyer au groupe  2) « Qui l'a prise ? » sur chaque course  3) elle passe chez son chauffeur =====
-  let dpJour = "", dpTab = "a", dpNum = new Map(), dpCur = null, dpAussi = new Set(), dpNon = new Set(), dpPay = null;
+  let dpJour = "", dpTab = "a", dpNum = new Map(), dpCur = null, dpAussi = new Set(), dpNon = new Set(), dpPay = null, dpCliLang = "";
   const dpCh = nom => chauffeursCache.find(x => (x.nom || "").trim().toLowerCase() === String(nom || "").trim().toLowerCase());
   async function dpTel(nom, tel) { // enregistre le numéro du chauffeur (fiche Chauffeurs)
     tel = String(tel || "").trim(); if (!tel) return;
@@ -3155,6 +3155,7 @@ function anonymise(title,location){
     const toutes = dpCourses().filter(r => r.chauffeurNom === dpConf), rs = toutes.filter(r => !dpNon.has(r.id)), o = dpOpt(), nl = rs.filter(r => r.lienCourse).length, np = rs.filter(r => r.prixChauffeur).length;
     sh.hidden = false; ov.querySelector(".dp-fond").hidden = false;
     sh.innerHTML = `<div class="dp-sh-h"><b>💬 Confirmer à ${esc(dpConf)}</b><button type="button" class="dp-sh-x" data-dpfermer aria-label="Fermer">✕</button></div>
+      <div class="dp-step">Langue du lien client</div><select id="dp-clilang" class="dp-sel" style="font:inherit;padding:8px;border-radius:10px;margin-bottom:8px"><option value="">Auto (langue du client)</option><option value="fr"${dpCliLang === "fr" ? " selected" : ""}>Français</option><option value="en"${dpCliLang === "en" ? " selected" : ""}>English</option></select>
       <div class="dp-step">Courses à envoyer</div>${toutes.map(r => `<div class="dp-opt"><label style="display:flex;gap:8px;flex:1;align-items:center"><input type="checkbox" data-dpwasel="${esc(r.id)}"${dpNon.has(r.id) ? "" : " checked"}><span>${esc(r.heure || "—")} · ${dpNom(r)}<small>${dpTr(r).replace(/<\/?small>/g, " · ").replace(/<[^>]+>/g, "")}</small></span></label><button type="button" class="dp-qui" data-dpcli="${esc(r.id)}"${waNumClient(r.tel) ? "" : " disabled"} title="Envoyer le lien au client">📨 Client</button></div>`).join("")}
       <label class="dp-opt"><input type="checkbox" data-dpopt="lien"${o.lien ? " checked" : ""}><span>🔗 Mettre le lien de la course<small>${nl === rs.length ? "une page par course (chat avec le client, sans son numéro)" : "les liens manquants seront créés automatiquement à l'envoi"}</small></span></label>
       <label class="dp-opt"><input type="checkbox" data-dpopt="prix"${o.prix ? " checked" : ""}${np ? "" : " disabled"}><span>💶 Mettre le prix<small>${np ? "prix chauffeur noté sur " + np + " course" + (np > 1 ? "s" : "") : "aucun prix chauffeur noté"}</small></span></label>
@@ -3273,7 +3274,7 @@ function anonymise(title,location){
         const num = waNumClient(r.tel); if (!num) return toast("Pas de numéro pour ce client", 3500);
         const w = r.lienCourse ? null : window.open("", "_blank");
         const go = () => {
-          const fr = langueClient(r) === "fr", url = mcUrl(r.lienCourse);
+          const fr = (dpCliLang || (langueClient(r) === "fr" ? "fr" : "en")) === "fr", url = mcUrl(r.lienCourse);
           const txt = fr ? `Bonjour, voici le lien de votre course Taxis Van Paris 🚖 (chauffeur, véhicule, point de rendez-vous, chat) :\n${url}`
             : `Hello, here is the link to your Taxis Van Paris ride 🚖 (driver, vehicle, meeting point, chat):\n${url}`;
           if (w) w.location.href = "https://wa.me/" + num + "?text=" + encodeURIComponent(txt); else window.open("https://wa.me/" + num + "?text=" + encodeURIComponent(txt), "_blank");
@@ -3291,7 +3292,7 @@ function anonymise(title,location){
         }).catch(e => { console.error(e); if (w) w.close(); toast("⚠️ Lien pas créé, réessaie", 4000); });
         return;
       }
-      if (t.dataset.dpwa) { dpConf = t.dataset.dpwa; dpNon.clear(); return dpConfSheet(); }
+      if (t.dataset.dpwa) { dpConf = t.dataset.dpwa; dpNon.clear(); dpCliLang = ""; return dpConfSheet(); }
       if (t.dataset.dpenvoi !== undefined) {
         const nom = dpConf, rs = dpCourses().filter(r => r.chauffeurNom === nom && !dpNon.has(r.id)), c = dpCh(nom), num = c && c.tel ? waNumClient(c.tel) : "", o = dpOpt();
         const manque = o.lien ? rs.filter(r => !r.lienCourse) : [];
@@ -3311,7 +3312,7 @@ function anonymise(title,location){
         dpConf = null; return dpSheet();
       }
     });
-    ov.addEventListener("change", ev => { const wid = ev.target.dataset && ev.target.dataset.dpwasel; if (wid) { ev.target.checked ? dpNon.delete(wid) : dpNon.add(wid); return dpConfSheet(); } const k = ev.target.dataset && ev.target.dataset.dpopt; if (!k) return; const o = dpOpt(); o[k] = ev.target.checked; try { localStorage.setItem("tvp_dp_opt", JSON.stringify(o)); } catch (e) {} dpConfSheet(); });
+    ov.addEventListener("change", ev => { if (ev.target.id === "dp-clilang") { dpCliLang = ev.target.value; return; } const wid = ev.target.dataset && ev.target.dataset.dpwasel; if (wid) { ev.target.checked ? dpNon.delete(wid) : dpNon.add(wid); return dpConfSheet(); } const k = ev.target.dataset && ev.target.dataset.dpopt; if (!k) return; const o = dpOpt(); o[k] = ev.target.checked; try { localStorage.setItem("tvp_dp_opt", JSON.stringify(o)); } catch (e) {} dpConfSheet(); });
     ov.addEventListener("change", ev => { const id = ev.target.dataset && ev.target.dataset.dpcpx; if (!id) return; const r = reservationsCache.find(x => x.id === id); if (!r) return; enregistrerPrixCh(r, ev.target.value); ev.target.value = r.prixChauffeur ? String(r.prixChauffeur).replace(".", ",") : ""; toast(r.prixChauffeur ? "💶 " + eurTxt(r.prixChauffeur) + " · " + String(r.nom || "").replace(/^🏨\s*/, "") : "Prix effacé", 2000); renderReservations(); });
     ov.addEventListener("input", ev => { if (ev.target.id === "dp-nom") { const v = ev.target.value.trim(), c = dpCh(v); document.getElementById("dp-ntel").hidden = !v || !!(c && c.tel); } });
     ov.addEventListener("keydown", ev => { if (ev.key === "Enter" && ev.target.id === "dp-nom") { ev.preventDefault(); ov.querySelector("[data-dpok]").click(); } });
