@@ -3134,14 +3134,30 @@ function anonymise(title,location){
       + (o.prix && r.prixChauffeur ? `\n💶 Prix : ${eurTxt(r.prixChauffeur)}` : "") + (o.lien && r.lienCourse ? `\n🔗 Ta page course : ${mcUrl(r.lienCourse)}&d=1` : "")));
     return L.join("\n");
   }
+  // Crée la page « Ma course » d'une course qui n'en a pas encore (comme le bouton Lien, avec le chauffeur choisi)
+  async function dpCreerLien(r, nom, tel) {
+    const m = String(r.date || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    const exp = Math.max(m ? new Date(+m[1], +m[2] - 1, +m[3] + 2, 23, 59).getTime() : 0, Date.now() + 2 * 864e5);
+    const cn = String(r.nom || "").replace(/^🏨\s*/, "").replace(/\s*\(.*\)\s*$/, "").trim().split(/\s+/).filter(x => !/^(m|mr|mme|mlle|monsieur|madame|mrs|ms|miss)\.?$/i.test(x))[0] || "";
+    const lien = { prenom: nom, tel: tel || "", modele: "", plaque: "", rdv: "", point: "" };
+    const data = { type: "course",
+      course: { nom: cn.length > 1 ? cn.charAt(0).toUpperCase() + cn.slice(1) : "", date: r.date || "", heure: r.heure || "", dep: r.dep || "", arr: r.arr || "", pax: r.pax || "", bagages: r.bagages || "", vol: volCode(r) || r.vol || "", arrets: arretsDe(r) ? arretsDe(r).map(a => ({ nom: a.nom || "", adr: a.adr })) : [] },
+      chauffeur: { prenom: nom, tel: String(tel || "").replace(/[^\d+]/g, "").replace(/^0/, "+33") }, vehicule: { modele: "", plaque: "" },
+      rdv: { texte: "", lieu: r.dep || "", point: "", photo: "" }, t: serverTimestamp() };
+    const a = "abcdefghjkmnpqrstuvwxyz23456789", rr = new Uint32Array(14); crypto.getRandomValues(rr); const c = Array.from(rr, x => a[x % a.length]).join("");
+    await setDoc(doc(db, "trad_codes", c), { owner: auth.currentUser.uid, actif: true, exp: Timestamp.fromMillis(exp), t: serverTimestamp() });
+    await setDoc(doc(db, "trad_g", c), { owner: auth.currentUser.uid, langue: null, ...data });
+    await updateDoc(doc(db, "reservations", r.id), { lienCourse: c, lien });
+    r.lienCourse = c; r.lien = lien; return c;
+  }
   function dpConfSheet() {
     const ov = document.getElementById("dp-ov"), sh = ov && ov.querySelector(".dp-sheet"); if (!sh || !dpConf) return;
     const rs = dpCourses().filter(r => r.chauffeurNom === dpConf), o = dpOpt(), nl = rs.filter(r => r.lienCourse).length, np = rs.filter(r => r.prixChauffeur).length;
     sh.hidden = false; ov.querySelector(".dp-fond").hidden = false;
     sh.innerHTML = `<div class="dp-sh-h"><b>💬 Confirmer à ${esc(dpConf)}</b><button type="button" class="dp-sh-x" data-dpfermer aria-label="Fermer">✕</button></div>
-      <label class="dp-opt"><input type="checkbox" data-dpopt="lien"${o.lien ? " checked" : ""}${nl ? "" : " disabled"}><span>🔗 Mettre le lien de la course<small>${nl ? (nl === rs.length ? "pour chaque course" : nl + " course" + (nl > 1 ? "s" : "") + " sur " + rs.length + " ont un lien") : "aucun lien créé pour ses courses (bouton « Lien » de la fiche)"}</small></span></label>
+      <label class="dp-opt"><input type="checkbox" data-dpopt="lien"${o.lien ? " checked" : ""}><span>🔗 Mettre le lien de la course<small>${nl === rs.length ? "une page par course (chat avec le client, sans son numéro)" : "les liens manquants seront créés automatiquement à l'envoi"}</small></span></label>
       <label class="dp-opt"><input type="checkbox" data-dpopt="prix"${o.prix ? " checked" : ""}${np ? "" : " disabled"}><span>💶 Mettre le prix<small>${np ? "prix chauffeur noté sur " + np + " course" + (np > 1 ? "s" : "") : "aucun prix chauffeur noté"}</small></span></label>
-      <div class="dp-step">Aperçu</div><pre class="dp-prev">${esc(dpMsg(dpConf, rs, { lien: o.lien && nl, prix: o.prix && np }))}</pre>
+      <div class="dp-step">Aperçu</div><pre class="dp-prev">${esc(dpMsg(dpConf, rs.map(r => o.lien && !r.lienCourse ? Object.assign({}, r, { lienCourse: "…" }) : r), { lien: o.lien, prix: o.prix && np }))}</pre>
       <button type="button" class="dp-grp" data-dpenvoi>💬 Envoyer sur WhatsApp</button>`;
   }
   const dpJ = d => d === todayStr() ? "Aujourd'hui" : new Date(d + "T12:00").toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short" });
@@ -3254,6 +3270,18 @@ function anonymise(title,location){
       if (t.dataset.dpwa) { dpConf = t.dataset.dpwa; return dpConfSheet(); }
       if (t.dataset.dpenvoi !== undefined) {
         const nom = dpConf, rs = dpCourses().filter(r => r.chauffeurNom === nom), c = dpCh(nom), num = c && c.tel ? waNumClient(c.tel) : "", o = dpOpt();
+        const manque = o.lien ? rs.filter(r => !r.lienCourse) : [];
+        if (manque.length) {
+          const w = window.open("", "_blank"); t.disabled = true; t.textContent = "Création des liens…";
+          Promise.all(manque.map(r => dpCreerLien(r, nom, c && c.tel).catch(e => { console.error(e); return null; }))).then(res => {
+            const ko = res.filter(x => !x).length; if (ko) toast("⚠️ " + ko + " lien(s) pas créé(s)", 4000);
+            const u = (num ? "https://wa.me/" + num : "https://wa.me/") + "?text=" + encodeURIComponent(dpMsg(nom, rs, o));
+            if (w) w.location.href = u; else window.open(u, "_blank");
+            if (!num) toast("Choisis " + nom + " dans WhatsApp", 3500);
+            dpConf = null; dpSheet(); renderReservations();
+          });
+          return;
+        }
         window.open((num ? "https://wa.me/" + num : "https://wa.me/") + "?text=" + encodeURIComponent(dpMsg(nom, rs, o)), "_blank");
         if (!num) toast("Choisis " + nom + " dans WhatsApp", 3500);
         dpConf = null; return dpSheet();
