@@ -516,6 +516,7 @@
 .tf-bd.g{background:var(--green-bg);color:var(--green)}.tf-bd.m{background:var(--soft);color:var(--muted)}
 .tf-x{position:absolute;right:14px;top:12px;border:0;background:var(--soft);border-radius:50%;width:32px;height:32px;font-size:15px;cursor:pointer;color:var(--text)}
 .tb-rc span.tb-nm{display:flex;align-items:center;gap:6px;margin:0;padding:0;min-width:0;overflow:visible;color:var(--text)}.tb-rc .tb-nm b{flex:0 1 auto;min-width:0;color:var(--text)}.tb-rc .tb-nm .tb-src{flex:none;margin:0;padding:0 5px;font-size:12px;line-height:1.5}.tb-rc span.tb-rt{display:grid;grid-template-columns:8px 1fr;gap:3px 8px;align-items:center;margin-top:6px;white-space:normal;overflow:visible;padding:0;line-height:1.3}.tb-rt>i{width:8px;height:8px;border-radius:50%;border:2px solid var(--mu);box-sizing:border-box}.tb-rt>i.f{background:var(--a,#c9a84c);border-color:var(--a,#c9a84c)}.tb-rc .tb-rt span.tb-lieu{margin:0;padding:0;font-size:13px;color:var(--mu);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.35}.tb-rc .tb-rt span.tb-lieu b{display:inline;color:var(--text);font-size:13.5px;font-weight:700}.fv-ov{position:fixed;inset:0;z-index:2000;background:#e9e5dc;display:flex;flex-direction:column}.fv-bar{display:flex;gap:8px;align-items:center;padding:calc(10px + env(safe-area-inset-top)) 12px 10px;background:var(--bg,#f4f1ea);border-bottom:1px solid var(--border,#ddd)}.fv-bar button{min-height:46px;border-radius:12px;font:inherit;font-weight:800;font-size:15px;cursor:pointer}.fv-x{width:46px;flex:none;border:1px solid var(--border,#ccc);background:var(--card,#fff);color:var(--text,#111);font-size:18px!important}.fv-pdf{flex:1;border:0;background:linear-gradient(180deg,#e2c272,#c9a84c);color:#17120a}.fv-imp{width:52px;flex:none;border:1px solid var(--border,#ccc);background:var(--card,#fff)}.fv-fr{flex:1;width:100%;border:0;background:#fff}
+#modal-export label:not(.imp-tg){display:block;font-weight:700;font-size:13px;color:var(--muted);margin:10px 0 4px}#modal-export input[type=text],#modal-export input[type=date]{display:block;width:100%;box-sizing:border-box;min-height:46px;padding:0 12px;border:1px solid var(--border);border-radius:10px;background:var(--card);color:var(--text);font:inherit;font-size:16px}#modal-export .ex-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}#modal-export .ex-2>div{min-width:0}
 .imp-tg,.tf-tg{display:flex;gap:10px;align-items:center;margin:0 0 10px;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:var(--card);cursor:pointer}.tf-tg{margin:12px 0 0}.imp-tg input,.tf-tg input{width:22px;height:22px;flex:none;accent-color:#b7791f}.imp-tg span,.tf-tg span{font-weight:800;font-size:14px}.imp-tg small,.tf-tg small{display:block;font-weight:500;font-size:12px;color:var(--muted)}
 .tb-pc{display:block;width:fit-content;margin:5px 0 0 auto;font-style:normal;font-size:12px;font-weight:800;color:var(--text);background:var(--soft);border:1px solid var(--border);border-radius:999px;padding:2px 8px;white-space:nowrap;letter-spacing:0;text-transform:none}.tf-pcl{display:flex;align-items:center;gap:10px;margin:12px 0 0;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:var(--card)}.tf-pcl span{flex:1;font-weight:700;font-size:14px}.tf-pcl b{font-size:17px}.tf-pcl button{min-height:38px;padding:0 12px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--text);font:inherit;font-weight:700;cursor:pointer}
 .tb-py{display:block;width:fit-content;margin:5px 0 0 auto;letter-spacing:0;text-transform:none;font-style:normal;font-size:12px;font-weight:800;color:#1f7a45;background:#e3f4ea;border-radius:999px;padding:2px 8px;white-space:nowrap}.tf-py{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:12px 0 4px;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:var(--card)}.tf-py span{flex:1 1 100%;font-weight:700;font-size:14px}.tf-pym{flex:1 1 100%;box-sizing:border-box;min-height:44px;padding:0 12px;border:1px solid var(--border);border-radius:10px;background:var(--bg);color:var(--text);font:inherit;font-size:16px}.tf-py button{flex:1;min-height:42px;border-radius:10px;border:1px solid #1f7a45;background:#e3f4ea;color:#1f7a45;font:inherit;font-weight:800;cursor:pointer}.tf-py button[data-par=""]{flex:0 0 auto;padding:0 14px;border-color:var(--border);background:transparent;color:var(--muted)}
@@ -656,6 +657,7 @@
             <button type="button" class="rchip" data-v="passees" aria-pressed="false">Passées</button>
             <button type="button" class="rchip" data-v="apayer" aria-pressed="false">💶 À payer</button>
             <button type="button" class="rchip" data-v="toutes" aria-pressed="false">Toutes</button>
+            <button type="button" class="rchip" id="btn-export">📄 Export PDF</button>
           </div>
           <select id="filter-statut-resa" hidden><option value=""></option></select>
           <span id="resa-cal-all"></span>
@@ -731,6 +733,17 @@
   <div id="driver-list"></div>
 </div>
 
+<!-- ===================== MODAL EXPORT PDF ===================== -->
+<div class="modal-overlay" id="modal-export">
+  <div class="modal">
+    <h2>📄 Export PDF des courses</h2>
+    <label for="ex-q">Lieu ou client</label><input id="ex-q" type="text" placeholder="ex. Versailles, Guichard, nom du client…" autocomplete="off">
+    <div class="ex-2"><div><label for="ex-du">Du</label><input id="ex-du" type="date"></div><div><label for="ex-au">Au</label><input id="ex-au" type="date"></div></div>
+    <label class="imp-tg"><input type="checkbox" id="ex-tg"><span>🎬 Tournage seulement</span></label>
+    <p class="dictee-aide" id="ex-n" style="margin:4px 0 0"></p>
+    <div class="modal-actions"><button class="btn-ghost" id="ex-annuler">Annuler</button><button class="btn-gold" id="ex-go">Voir le PDF</button></div>
+  </div>
+</div>
 <!-- ===================== MODAL IMPORT PLUSIEURS COURSES ===================== -->
 <div class="modal-overlay" id="modal-import">
   <div class="modal">
@@ -1989,9 +2002,9 @@ function anonymise(title,location){
   }
 
   let resaView = "avenir";
-  document.querySelectorAll("#resa-chips .rchip").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll("#resa-chips .rchip[data-v]").forEach(b => b.addEventListener("click", () => {
     resaView = b.dataset.v;
-    document.querySelectorAll("#resa-chips .rchip").forEach(x => x.setAttribute("aria-pressed", x === b));
+    document.querySelectorAll("#resa-chips .rchip[data-v]").forEach(x => x.setAttribute("aria-pressed", x === b));
     renderReservations();
   }));
   const ST = { "en attente": ["attente", "Nouvelle"], "confirmée": ["confirmee", "Confirmée"], "terminée": ["terminee", "Effectuée"], "annulée": ["annulee", "Annulée"] };
@@ -3043,6 +3056,59 @@ function anonymise(title,location){
   });
 
 
+
+  // ===== 📄 Export PDF : liste des courses (lieu / client / période), avec chauffeur et paiement =====
+  const sansAcc = t => String(t || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  function exListe() {
+    const q = sansAcc(document.getElementById("ex-q").value).trim(), du = document.getElementById("ex-du").value || "0000", au = document.getElementById("ex-au").value || "9999", tg = document.getElementById("ex-tg").checked;
+    return reservationsCache.filter(r => r.statut !== "annulée" && (r.date || "") >= du && (r.date || "") <= au && (!tg || r.tournage) &&
+      (!q || sansAcc([r.dep, r.arr, r.nom, ...(Array.isArray(r.arrets) ? r.arrets.map(a => a.adr + " " + a.nom) : [])].join(" ")).includes(q)))
+      .sort((a, b) => ((a.date || "") + (a.heure || "")).localeCompare((b.date || "") + (b.heure || "")));
+  }
+  function exMaj() { const n = exListe().length; document.getElementById("ex-n").textContent = n ? n + " course" + (n > 1 ? "s" : "") + " trouvée" + (n > 1 ? "s" : "") : "Aucune course trouvée"; document.getElementById("ex-go").disabled = !n; }
+  ["ex-q", "ex-du", "ex-au", "ex-tg"].forEach(id => document.getElementById(id).addEventListener("input", exMaj));
+  document.getElementById("ex-tg").addEventListener("change", exMaj);
+  document.getElementById("btn-export").addEventListener("click", () => {
+    const dates = reservationsCache.map(r => r.date).filter(Boolean).sort();
+    const d = new Date(); d.setDate(1); const debMois = d.toISOString().slice(0, 10);
+    if (!document.getElementById("ex-du").value) document.getElementById("ex-du").value = debMois;
+    if (!document.getElementById("ex-au").value) document.getElementById("ex-au").value = dates.length ? dates[dates.length - 1] : todayStr();
+    exMaj(); document.getElementById("modal-export").classList.add("shown"); setTimeout(() => document.getElementById("ex-q").focus(), 50);
+  });
+  document.getElementById("ex-annuler").addEventListener("click", () => document.getElementById("modal-export").classList.remove("shown"));
+  document.getElementById("ex-go").addEventListener("click", () => {
+    const L = exListe(); if (!L.length) return;
+    const q = document.getElementById("ex-q").value.trim(), du = document.getElementById("ex-du").value, au = document.getElementById("ex-au").value, tg = document.getElementById("ex-tg").checked;
+    const fr = d => { const p = String(d || "").split("-"); return p.length === 3 ? p[2] + "/" + p[1] + "/" + p[0] : "—"; };
+    const jour = d => new Date(d + "T12:00").toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+    const e2 = n => n ? n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €" : "—";
+    const pc = r => Number(r.paye && r.paye.montant) || Number(r.prixChauffeur) || 0;
+    const pay = L.filter(r => r.paye && Number(r.paye.montant) > 0), sm = a => a.reduce((s, r) => s + pc(r), 0);
+    const pA = pay.filter(r => r.paye.par === "A"), pB = pay.filter(r => r.paye.par === "B"), np = L.filter(r => !(r.paye && Number(r.paye.montant) > 0));
+    let rows = "", last = "";
+    L.forEach(r => {
+      if (r.date !== last) { last = r.date; rows += `<tr class="j"><td colspan="6">${esc(jour(r.date))}</td></tr>`; }
+      const tr = arretsDe(r) ? esc(r.dep || "?") + arretsDe(r).map(a => "<br>→ " + esc((a.nom ? a.nom + " — " : "") + a.adr)).join("") : esc(r.dep || "?") + "<br>→ " + esc(r.arr || "?");
+      const p = r.paye && Number(r.paye.montant) > 0;
+      rows += `<tr><td class="h">${esc(r.heure || "")}</td><td><b>${esc(String(r.nom || "").replace(/^🏨\s*/, ""))}</b>${r.tournage ? " 🎬" : ""}</td><td class="t">${tr}</td><td>${esc(r.chauffeurNom || "—")}</td><td class="n">${e2(pc(r))}</td><td class="${p ? "ok" : "ko"}">${p ? "✓ Payé " + esc(r.paye.par) : "À payer"}</td></tr>`;
+    });
+    const titre = "Courses" + (q ? " — " + q.charAt(0).toUpperCase() + q.slice(1) : "") + (tg ? " — Tournage" : "");
+    const html = `<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(titre)}</title><style>
+body{font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#1b1a17;margin:0;padding:24px;font-size:12px}
+h1{font-size:22px;margin:0}.sub{color:#7c7568;margin:4px 0 16px}
+.tot{display:flex;gap:10px;margin:0 0 16px;flex-wrap:wrap}.tot div{border:1px solid #e4ded2;border-radius:10px;padding:8px 12px;min-width:120px}.tot b{display:block;font-size:16px}.tot span{color:#7c7568;font-size:11px}
+table{width:100%;border-collapse:collapse}th{text-align:left;font-size:10px;text-transform:uppercase;color:#7c7568;border-bottom:2px solid #1b1a17;padding:6px 4px}
+td{padding:7px 4px;border-bottom:1px solid #eee;vertical-align:top}tr.j td{background:#f3f0e8;font-weight:800;text-transform:capitalize;padding:6px 8px}
+td.h{font-weight:800;white-space:nowrap}td.t{color:#444;line-height:1.35}td.n{white-space:nowrap;text-align:right;font-weight:700}td.ok{color:#1f7a45;font-weight:800;white-space:nowrap}td.ko{color:#c7731a;font-weight:800;white-space:nowrap}
+.foot{margin-top:14px;color:#7c7568;font-size:10px}</style></head><body>
+<h1>${esc(titre)}</h1><div class="sub">Du ${fr(du)} au ${fr(au)} · ${L.length} course${L.length > 1 ? "s" : ""} · Taxis Van Paris</div>
+<div class="tot"><div><span>Prix chauffeurs</span><b>${e2(sm(L))}</b></div><div><span>Payé par A</span><b>${e2(sm(pA))}</b></div><div><span>Payé par B</span><b>${e2(sm(pB))}</b></div><div><span>Reste à payer (${np.length})</span><b>${e2(sm(np))}</b></div></div>
+<table><thead><tr><th>Heure</th><th>Client</th><th>Trajet</th><th>Chauffeur</th><th style="text-align:right">Prix chauffeur</th><th>Paiement</th></tr></thead><tbody>${rows}</tbody></table>
+<div class="foot">Édité le ${new Date().toLocaleDateString("fr-FR")} depuis le tableau de bord Taxis Van Paris.</div></body></html>`;
+    document.getElementById("modal-export").classList.remove("shown");
+    voirDoc(html, (titre.replace(/[^\wÀ-ÿ]+/g, "-") + "-" + (du || "") + "_" + (au || "")).replace(/-+/g, "-") + ".pdf");
+  });
+
   // ===== Import de plusieurs courses (texte rangé par Claude, lu sans IA) =====
   const impCles = [
     ["nom", /^(client|nom|name)$/], ["tel", /^(t[ée]l[ée]phone|t[ée]l|num[ée]ro|phone)$/], ["email", /^(e-?mail|mail)$/],
@@ -3208,6 +3274,9 @@ function anonymise(title,location){
   function ouvrirFacture(f, w) {
     if (w && !w.closed) try { w.close(); } catch (e) {}
     const html = window.factureHTML(f, reglagesFacture), nom = `Facture-${f.numero || ""}${(f.societe || f.client) ? "-" + String(f.societe || f.client).replace(/[^\wÀ-ÿ-]+/g, "-") : ""}.pdf`;
+    voirDoc(html, nom);
+  }
+  function voirDoc(html, nom) {
     const ov = document.createElement("div");
     ov.className = "fv-ov";
     ov.innerHTML = `<div class="fv-bar"><button type="button" class="fv-x" aria-label="Fermer">✕</button><button type="button" class="fv-b fv-pdf">📤 Envoyer / Enregistrer le PDF</button><button type="button" class="fv-b fv-imp" title="Imprimer">🖨️</button></div><iframe class="fv-fr" title="Facture"></iframe>`;
