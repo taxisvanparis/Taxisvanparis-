@@ -93,6 +93,9 @@ label{display:block;color:var(--mut);font-size:13px;text-transform:uppercase;let
 .pc-seg button{border:0;background:none;color:var(--mut);font-weight:800;padding:10px 0;border-radius:10px;font-size:15px}.pc-seg button.on{background:var(--gold);color:#111}
 .pc-ab{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.pc-ab div{border-radius:12px;padding:12px;border:1px solid #5a4a20;background:#1a1608}.pc-ab div.A{border-color:#2f4b78;background:#0d1626}
 .pc-ab b{display:block;font-size:22px;margin-top:2px;color:var(--gold)}.pc-ab div.A b{color:#6ea8ff}.pc-ab span{font-size:12px;color:var(--mut)}
+.pc-todo{margin-top:12px;border:2px solid var(--gold);border-radius:16px;padding:12px;background:#0f0c04}.pc-th{font-weight:800;font-size:16px;margin-bottom:8px}.pc-th span{color:var(--mut);font-weight:600;font-size:13px;margin-left:6px}
+.pc-tc{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:8px}.pc-tt{display:flex;flex-direction:column;gap:2px}.pc-tt span{font-size:12px;color:var(--mut)}
+.pc-tf{display:grid;grid-template-columns:1fr auto auto;gap:6px;margin-top:8px}.pc-tf input{min-width:0;font-size:17px;padding:10px}.pc-tf button{border:1px solid #5a4a20;background:#1a1608;color:var(--gold);border-radius:10px;font-weight:800;padding:0 14px;min-height:46px}.pc-tf button.A{border-color:#2f4b78;background:#0d1626;color:#6ea8ff}
 .pc-day{display:flex;justify-content:space-between;color:var(--mut);font-size:13px;font-weight:700;margin:16px 2px 6px}.pc-day span:first-child::first-letter{text-transform:uppercase}
 #pcPer{text-transform:none;font-size:16px;text-align:center}#pcPer::first-letter{text-transform:uppercase}#pcRange>div{min-width:0}#pcRange input{min-width:0;width:100%;font-size:16px}
 .pc-it{display:grid;grid-template-columns:36px 1fr auto;gap:10px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:6px}
@@ -236,6 +239,7 @@ label{display:block;color:var(--mut);font-size:13px;text-transform:uppercase;let
   <div class="pc-seg" id="pcSeg"><button type="button" data-m="jour">Jour</button><button type="button" data-m="plage">Plusieurs jours</button><button type="button" data-m="mois">Mois</button></div>
   <div class="month" style="margin-top:10px"><button type="button" id="pcPrev" aria-label="Avant">‹</button><span id="pcPer"></span><button type="button" id="pcNext" aria-label="Après">›</button></div>
   <div class="two" id="pcRange" hidden style="margin-top:10px"><div><label for="pcDu">Du</label><input id="pcDu" type="date"></div><div><label for="pcAu">Au</label><input id="pcAu" type="date"></div></div>
+  <div id="pcTodo"></div>
   <div class="card" style="margin-top:12px"><div class="lbl">Total payé aux chauffeurs</div><div class="big" id="pcBig">0,00 €</div><div class="pc-ab" id="pcAB"></div></div>
   <div id="pcList"></div>
   <p class="note">Visible par toi et ton associé · rempli tout seul depuis « Par A / Par B » du tableau de bord.</p>
@@ -544,7 +548,7 @@ const shift=(m,n)=>{const [y,mo]=m.split('-').map(Number);const d=new Date(y,mo-
 const mName=m=>{const [y,mo]=m.split('-');return new Date(+y,+mo-1,1).toLocaleDateString('fr-FR',{month:'long',year:'numeric'})};
 const toast=t=>{const e=$('toast');e.textContent=t;e.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>e.hidden=true,2600)};
 const CATS=['Carburant','Péage','Entretien','Lavage','Parking','Assurance','Autre'];
-let user=null,people=[],all=[],regles={},fm=today().slice(0,7),unsub=[],fromCache=false,pcAll=[],pcMode='jour',pcD=today(),pcDu=today(),pcAu=today();
+let user=null,people=[],all=[],regles={},fm=today().slice(0,7),unsub=[],fromCache=false,pcAll=[],pcTg=[],pcMode='jour',pcD=today(),pcDu=today(),pcAu=today();
 const MAX=5000;
 const locked=m=>!!(regles[m]&&regles[m].regle);
 const FLAG={A:'A',B:'B'};
@@ -574,7 +578,8 @@ onAuthStateChanged(auth,async u=>{
     if(n){save();render();toast(n>1?n+' factures ajoutées dans « À recevoir »':'Facture ajoutée dans « À recevoir »')}
   },()=>{}));
   // Paiements chauffeurs (commun A/B) : courses du tableau de bord marquées « Par A / Par B »
-  unsub.push(onSnapshot(query(collection(db,'reservations'),where('paye.montant','>',0)),s=>{pcAll=s.docs.map(d=>({id:d.id,...d.data()}));pcDraw()},e=>{console.error(e)}));
+  unsub.push(onSnapshot(query(collection(db,'reservations'),where('tournage','==',true)),s=>{pcTg=s.docs.map(d=>({id:d.id,...d.data()})).filter(r=>r.tournage===true);pcDraw()},e=>{console.error(e)}));
+  unsub.push(onSnapshot(query(collection(db,'reservations'),where('paye.montant','>',0)),s=>{pcAll=s.docs.map(d=>({id:d.id,...d.data()})).filter(r=>r.paye&&Number(r.paye.montant)>0);pcDraw()},e=>{console.error(e)}));
   unsub.push(onSnapshot(collection(db,'frais_communs_mois'),s=>{regles={};s.docs.forEach(d=>regles[d.id]=d.data());draw()},()=>{}));
 });
 function draw(){
@@ -621,7 +626,10 @@ function pcDraw(){
   const mt=r=>Math.round((Number(r.paye&&r.paye.montant)||0)*100)/100;
   const moisCour=today().slice(0,7),moisTot=pcAll.filter(r=>String(r.date||'').slice(0,7)===moisCour).reduce((s,r)=>s+mt(r),0);
   $('pcTot').textContent=user&&moisTot?eur(moisTot):'';$('pcSub').textContent=user?(moisTot?'Ce mois-ci · A et B':'Payés par A et B, au jour ou au mois'):'Connecte-toi d\'abord dans Frais communs';
+  const todo=pcTg.filter(r=>r.statut!=='annulée'&&!(r.paye&&Number(r.paye.montant)>0)).sort((a,b)=>((a.date||'')+(a.heure||'')).localeCompare((b.date||'')+(b.heure||'')));
+  if(user&&todo.length){$('pcTot').textContent='🎬 '+todo.length+' à payer';$('pcSub').textContent='Courses de tournage à payer au chauffeur'}
   if($('dPC').hidden)return;
+  $('pcTodo').innerHTML=todo.length?`<div class="pc-todo"><div class="pc-th">🎬 À payer <span>${todo.length} course${todo.length>1?'s':''} de tournage</span></div>`+todo.map(r=>`<div class="pc-tc" data-r="${esc(r.id)}"><div class="pc-tt"><b>${esc(r.chauffeurNom||'Chauffeur ?')}</b><span>${esc(r.date?dShort(r.date):'')} ${esc(r.heure||'')} · ${esc(String(r.nom||'').replace(/^🏨\s*/,''))}</span><span>${esc([r.dep,r.arr].map(x=>String(x||'?').split(',')[0]).join(' → '))}</span></div><div class="pc-tf"><input inputmode="decimal" placeholder="Tarif €" value="${r.prixChauffeur?String(r.prixChauffeur).replace('.',','):''}"><button type="button" data-p="A" class="A">Par A</button><button type="button" data-p="B">Par B</button></div></div>`).join('')+'</div>':'';
   const [du,au]=pcBornes();
   $('pcSeg').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.m===pcMode));
   $('pcRange').hidden=pcMode!=='plage';$('pcDu').value=du;$('pcAu').value=au;
@@ -639,6 +647,10 @@ function pcDraw(){
 }
 $('pcOpen').onclick=()=>{if(!user){toast('Connecte-toi d\'abord dans Frais communs');$('dFC').hidden=false;return}pcD=today();$('dPC').hidden=false;pcDraw()};
 $('pcClose').onclick=()=>$('dPC').hidden=true;
+$('pcTodo').onclick=async e=>{const b=e.target.closest('[data-p]');if(!b)return;const c=b.closest('[data-r]'),r=pcTg.find(x=>x.id===c.dataset.r);if(!r)return;
+  const m=Math.round(num(c.querySelector('input').value)*100)/100;if(!(m>0)){toast('Écris d\'abord le tarif payé au chauffeur');c.querySelector('input').focus();return}
+  const p=people.find(x=>x.lettre===b.dataset.p);b.disabled=true;
+  try{await updateDoc(doc(db,'reservations',r.id),{paye:{par:b.dataset.p,montant:m,le:Date.now(),uid:p?p.uid:''},prixChauffeur:m});toast('💶 '+eur(m)+' payé par '+b.dataset.p)}catch(err){console.error(err);toast('Pas enregistré, réessaie');b.disabled=false}};
 $('pcSeg').onclick=e=>{const b=e.target.closest('[data-m]');if(!b)return;pcMode=b.dataset.m;if(pcMode==='plage'){pcAu=today();pcDu=addDays(pcAu,-6)}pcDraw()};
 $('pcPrev').onclick=()=>pcNav(-1);$('pcNext').onclick=()=>pcNav(1);
 function pcNav(n){if(pcMode==='jour')pcD=addDays(pcD,n);else if(pcMode==='mois')pcD=shift(pcD.slice(0,7),n)+'-01';else{const [du,au]=pcBornes();const k=Math.round((new Date(au)-new Date(du))/864e5)+1;pcDu=addDays(du,n*k);pcAu=addDays(au,n*k)}pcDraw()}

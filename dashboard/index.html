@@ -516,6 +516,7 @@
 .tf-bd.g{background:var(--green-bg);color:var(--green)}.tf-bd.m{background:var(--soft);color:var(--muted)}
 .tf-x{position:absolute;right:14px;top:12px;border:0;background:var(--soft);border-radius:50%;width:32px;height:32px;font-size:15px;cursor:pointer;color:var(--text)}
 .tb-rc span.tb-nm{display:flex;align-items:center;gap:6px;margin:0;padding:0;min-width:0;overflow:visible;color:var(--text)}.tb-rc .tb-nm b{flex:0 1 auto;min-width:0;color:var(--text)}.tb-rc .tb-nm .tb-src{flex:none;margin:0;padding:0 5px;font-size:12px;line-height:1.5}.tb-rc span.tb-rt{display:grid;grid-template-columns:8px 1fr;gap:3px 8px;align-items:center;margin-top:6px;white-space:normal;overflow:visible;padding:0;line-height:1.3}.tb-rt>i{width:8px;height:8px;border-radius:50%;border:2px solid var(--mu);box-sizing:border-box}.tb-rt>i.f{background:var(--a,#c9a84c);border-color:var(--a,#c9a84c)}.tb-rc .tb-rt span.tb-lieu{margin:0;padding:0;font-size:13px;color:var(--mu);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.35}.tb-rc .tb-rt span.tb-lieu b{display:inline;color:var(--text);font-size:13.5px;font-weight:700}.fv-ov{position:fixed;inset:0;z-index:2000;background:#e9e5dc;display:flex;flex-direction:column}.fv-bar{display:flex;gap:8px;align-items:center;padding:calc(10px + env(safe-area-inset-top)) 12px 10px;background:var(--bg,#f4f1ea);border-bottom:1px solid var(--border,#ddd)}.fv-bar button{min-height:46px;border-radius:12px;font:inherit;font-weight:800;font-size:15px;cursor:pointer}.fv-x{width:46px;flex:none;border:1px solid var(--border,#ccc);background:var(--card,#fff);color:var(--text,#111);font-size:18px!important}.fv-pdf{flex:1;border:0;background:linear-gradient(180deg,#e2c272,#c9a84c);color:#17120a}.fv-imp{width:52px;flex:none;border:1px solid var(--border,#ccc);background:var(--card,#fff)}.fv-fr{flex:1;width:100%;border:0;background:#fff}
+.imp-tg,.tf-tg{display:flex;gap:10px;align-items:center;margin:0 0 10px;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:var(--card);cursor:pointer}.tf-tg{margin:12px 0 0}.imp-tg input,.tf-tg input{width:22px;height:22px;flex:none;accent-color:#b7791f}.imp-tg span,.tf-tg span{font-weight:800;font-size:14px}.imp-tg small,.tf-tg small{display:block;font-weight:500;font-size:12px;color:var(--muted)}
 .tb-pc{display:block;width:fit-content;margin:5px 0 0 auto;font-style:normal;font-size:12px;font-weight:800;color:var(--text);background:var(--soft);border:1px solid var(--border);border-radius:999px;padding:2px 8px;white-space:nowrap;letter-spacing:0;text-transform:none}.tf-pcl{display:flex;align-items:center;gap:10px;margin:12px 0 0;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:var(--card)}.tf-pcl span{flex:1;font-weight:700;font-size:14px}.tf-pcl b{font-size:17px}.tf-pcl button{min-height:38px;padding:0 12px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--text);font:inherit;font-weight:700;cursor:pointer}
 .tb-py{display:block;width:fit-content;margin:5px 0 0 auto;letter-spacing:0;text-transform:none;font-style:normal;font-size:12px;font-weight:800;color:#1f7a45;background:#e3f4ea;border-radius:999px;padding:2px 8px;white-space:nowrap}.tf-py{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:12px 0 4px;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:var(--card)}.tf-py span{flex:1 1 100%;font-weight:700;font-size:14px}.tf-pym{flex:1 1 100%;box-sizing:border-box;min-height:44px;padding:0 12px;border:1px solid var(--border);border-radius:10px;background:var(--bg);color:var(--text);font:inherit;font-size:16px}.tf-py button{flex:1;min-height:42px;border-radius:10px;border:1px solid #1f7a45;background:#e3f4ea;color:#1f7a45;font:inherit;font-weight:800;cursor:pointer}.tf-py button[data-par=""]{flex:0 0 auto;padding:0 14px;border-color:var(--border);background:transparent;color:var(--muted)}
 .tb-rc span.tb-dp{color:#b7791f;font-weight:700;margin-top:0}.tf-rt p small{display:block;font-size:12px;font-weight:700;color:#b7791f}
@@ -736,6 +737,7 @@
     <h2>📥 Importer plusieurs courses</h2>
     <div id="imp-etape1">
       <p class="dictee-aide" style="margin:0 0 8px">Colle ici le texte rangé par Claude (une course par bloc « Nouvelle réservation »).</p>
+      <label class="imp-tg"><input type="checkbox" id="imp-tournage"><span>🎬 Courses de tournage<small>Elles iront dans « À payer » des Paiements chauffeurs</small></span></label>
       <textarea id="imp-txt" rows="10" placeholder="Nouvelle réservation&#10;Client : Client 1&#10;Téléphone : +33 6 00 00 00 00&#10;Date : 28/11/2026&#10;Heure : 08:30&#10;Départ : …&#10;Arrivée : …&#10;Prix : 85 €" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--text);font:inherit;font-size:14px;resize:vertical"></textarea>
       <div class="modal-actions"><button class="btn-ghost" id="imp-annuler">Annuler</button><button class="btn-ghost" id="imp-coller">📋 Coller</button><button class="btn-gold" id="imp-lire">Lire les courses</button></div>
     </div>
@@ -2525,6 +2527,11 @@ function anonymise(title,location){
       toast(donner ? "📲 Numéro visible sur la page du chauffeur" : "🔒 Numéro retiré de la page du chauffeur");
     } catch (e) { toast("Pas enregistré : " + ((e && e.code) || "erreur"), 5000); }
   });
+  document.addEventListener("change", ev => {
+    const c = ev.target.closest && ev.target.closest("[data-tournage]"); if (!c) return;
+    const r = reservationsCache.find(x => x.id === c.dataset.tournage); if (!r) return;
+    r.tournage = c.checked; updateDoc(doc(db, "reservations", r.id), { tournage: c.checked }).then(() => { renderReservations(); toast(c.checked ? "🎬 Marquée tournage" : "Plus marquée tournage"); }).catch(() => toast("Pas enregistré, réessaie.", 4000));
+  });
   document.addEventListener("click", ev => {
     const b = ev.target.closest && ev.target.closest("[data-prixch]"); if (!b) return;
     const r = reservationsCache.find(x => x.id === b.dataset.prixch); if (!r) return;
@@ -2618,7 +2625,7 @@ function anonymise(title,location){
     rows.forEach(r => {
       if ((r.date || "") !== jour) { jour = r.date || ""; const n = nbJour[jour], jt = jourTitre(jour); html += `<div class="tb-day">${esc(jt.charAt(0).toUpperCase() + jt.slice(1))}<span>${n} course${n > 1 ? "s" : ""}</span></div>`; }
       const [st, cl] = statutTb(r), passe = groupOf(r) !== 0;
-      html += `<button type="button" class="tb-row" data-fiche="${esc(r.id)}"><span class="tb-t${passe ? " dim" : ""}">${esc(r.heure || "—")}</span><span class="tb-rc"><span class="tb-nm"><b>${estNouvelle(r) ? "🆕 " : ""}${esc(r.nom || "—")}</b>${srcTb(r).replace(/>(\S+)\s[^<]*</, (m, e) => ">" + e + "<")}</span><span class="tb-rt"><i></i><span class="tb-lieu">${lieuListe(r.dep)}</span><i class="f"></i><span class="tb-lieu">${lieuListe(r.arr)}</span></span>${arretsDe(r) ? `<span class="tb-dp">🛑 ${arretsDe(r).length} déposes : ${esc(arretsDe(r).map(a => a.nom || lieuCourt(a.adr)).join(" → "))}</span>` : ""}</span><span class="tb-s ${cl}">${st}${chTb(r)}${prixChTb(r)}${payTb(r)}</span></button>`;
+      html += `<button type="button" class="tb-row" data-fiche="${esc(r.id)}"><span class="tb-t${passe ? " dim" : ""}">${esc(r.heure || "—")}</span><span class="tb-rc"><span class="tb-nm"><b>${estNouvelle(r) ? "🆕 " : ""}${esc(r.nom || "—")}</b>${srcTb(r).replace(/>(\S+)\s[^<]*</, (m, e) => ">" + e + "<")}${r.tournage ? `<i class="tb-src tg" title="Tournage">🎬</i>` : ""}</span><span class="tb-rt"><i></i><span class="tb-lieu">${lieuListe(r.dep)}</span><i class="f"></i><span class="tb-lieu">${lieuListe(r.arr)}</span></span>${arretsDe(r) ? `<span class="tb-dp">🛑 ${arretsDe(r).length} déposes : ${esc(arretsDe(r).map(a => a.nom || lieuCourt(a.adr)).join(" → "))}</span>` : ""}</span><span class="tb-s ${cl}">${st}${chTb(r)}${prixChTb(r)}${payTb(r)}</span></button>`;
     });
     return html + `</div>`;
   }
@@ -2665,6 +2672,7 @@ function anonymise(title,location){
       <div class="tf-q">${tel}${wa}${r.dep && r.arr ? `<button type="button" data-carte="${id}"><b>🗺️</b>Carte</button>` : `<span class="off"><b>🗺️</b>Carte</span>`}<button type="button" data-edit="${id}"><b>✏️</b>Modifier</button></div>
       ${r.dep || r.arr ? `<div class="tf-h">🚕 Commander un G7</div><div class="tf-g7"><a data-g7copie="dep" data-id="${id}" href="${G7_URL}"${ANDROID ? "" : ' target="_blank" rel="noopener"'}>1. 📋 Départ + ouvrir G7</a><button type="button" data-g7copie="arr" data-id="${id}">2. 📋 Arrivée</button></div><p class="tf-g7i">Dans G7 : appui long sur la case → Coller.</p>` : ""}
       ${(() => { const c = etapeCourante(r), pv = c === -1 ? 4 : c - 1; return r.statut !== "annulée" && pv >= 1 ? `<button type="button" class="tf-back" data-retour="${esc(r.id)}" data-pv="${pv}">↩️ Annuler l'étape « ${["", "Confirmée", "Chauffeur", "Liens", "Terminée"][pv]} »</button>` : ""; })()}
+      <label class="tf-tg"><input type="checkbox" data-tournage="${id}"${r.tournage ? " checked" : ""}><span>🎬 Course de tournage<small>dans « À payer » des Paiements chauffeurs</small></span></label>
       ${r.statut !== "annulée" ? `<div class="tf-pcl"><span>🚖 Prix chauffeur</span><b>${r.prixChauffeur ? eurTxt(r.prixChauffeur) : "—"}</b><button type="button" data-prixch="${id}">${r.prixChauffeur ? "Modifier" : "Ajouter"}</button></div>` : ""}
       ${r.statut !== "annulée" ? `<div class="tf-py">${r.paye && r.paye.par ? `<span>💶 Chauffeur payé par <b>${esc(r.paye.par)}</b>${r.paye.montant ? " · <b>" + esc(String(r.paye.montant).replace(".", ",")) + " €</b>" : ""}${r.paye.le ? " · " + esc(new Date(r.paye.le).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })) : ""}</span><button type="button" data-paye="${id}" data-par="">Annuler</button>` : `<span>💶 Chauffeur payé ?</span><input type="text" inputmode="decimal" class="tf-pym" id="pym-${id}" placeholder="Montant payé (€)" value="${r.prixChauffeur ? String(r.prixChauffeur).replace(".", ",") : ""}">${PAYEURS.map(p => `<button type="button" data-paye="${id}" data-par="${p}">Par ${p}</button>`).join("")}`}</div>` : ""}
       <div class="tf-h">Autres actions</div><div class="tf-ac">${acts ? acts.innerHTML : ""}</div>`;
@@ -3041,7 +3049,7 @@ function anonymise(title,location){
     ["date", /^(date|jour)$/], ["heure", /^(heure|horaire)$/], ["dep", /^(d[ée]part|prise en charge)$/], ["arr", /^(arriv[ée]e|destination)$/],
     ["vol", /^(vol|train|n° de vol)$/], ["vehicule", /^(v[ée]hicule)$/], ["pax", /^(passagers?|pax|personnes?)$/], ["bagages", /^(bagages?|valises?)$/],
     ["siege", /^(si[èe]ges? (b[ée]b[ée]|enfant)|rehausseur)$/], ["prix", /^(prix|tarif|montant)$/], ["paiement", /^(paiement)$/], ["langue", /^(langue( client)?)$/],
-    ["chauffeur", /^(chauffeur)$/], ["depose", /^(d[ée]pose|arr[êe]t|[ée]tape)\s*\d*$/], ["statut", /^(statut)$/], ["note", /^(note|infos?|remarques?)$/]
+    ["chauffeur", /^(chauffeur)$/], ["depose", /^(d[ée]pose|arr[êe]t|[ée]tape)\s*\d*$/], ["statut", /^(statut)$/], ["note", /^(note|infos?|remarques?)$/], ["tournage", /^(tournage)$/]
   ];
   function impDate(v) {
     v = String(v || "").toLowerCase();
@@ -3085,7 +3093,8 @@ function anonymise(title,location){
         langueMsg: /angl|engl/.test(lg) ? "en" : /espa/.test(lg) ? "es" : /ital/.test(lg) ? "it" : /portu/.test(lg) ? "pt" : /allem|deut/.test(lg) ? "de" : /fran/.test(lg) ? "fr" : "",
         prix: impNum(b.prix), vol: ((String(b.vol || "").toUpperCase().match(/\b([A-Z0-9]{2,3})\s?(\d{1,4}[A-Z]?)\b/) || []).slice(1).join("")),
         chauffeurUid: chObj && chObj.uid ? chObj.uid : "", chauffeurNom: ch && !/^(non|aucun|-)$/i.test(ch) ? (chObj ? chObj.nom : ch) : "",
-        statut: /termin|effectu/.test(st) ? "terminée" : /confirm/.test(st) ? "confirmée" : /annul/.test(st) ? "annulée" : "en attente"
+        statut: /termin|effectu/.test(st) ? "terminée" : /confirm/.test(st) ? "confirmée" : /annul/.test(st) ? "annulée" : "en attente",
+        tournage: !!(document.getElementById("imp-tournage") && document.getElementById("imp-tournage").checked) || /^(oui|yes|1|x)/i.test(String(b.tournage || "").trim())
       };
       if (b.deposes && b.deposes.length) {
         r.arrets = b.deposes.map(d => { const m = d.match(/^(.{1,40}?)\s+[—–-]\s+(.+)$/); return m ? { nom: m[1].trim(), adr: m[2].trim() } : { nom: "", adr: d }; });
@@ -3105,7 +3114,7 @@ function anonymise(title,location){
   function impEtape(n) { $imp("imp-etape1").hidden = n !== 1; $imp("imp-etape2").hidden = n !== 2; }
   function impRendu() {
     const fr = d => { const p = (d || "").split("-"); return p.length === 3 ? p[2] + "/" + p[1] + "/" + p[0] : "?"; };
-    $imp("imp-liste").innerHTML = impCourses.map((c, i) => `<label class="imp-c${c.pb.length ? " err" : ""}${c.ok ? "" : " off"}"><input type="checkbox" data-i="${i}"${c.ok ? " checked" : ""}><div><b>${esc(fr(c.r.date))} · ${esc(c.r.heure || "--:--")} · ${esc(c.r.nom || "?")}</b><br>📍 ${esc(c.r.dep || "?")}${c.r.arrets ? c.r.arrets.map((a, j) => `<br>🛑 ${j + 1}. ${esc(a.nom ? a.nom + " — " : "")}${esc(a.adr)}`).join("") : `<br>🏁 ${esc(c.r.arr || "?")}`}<br>${esc(c.r.vehicule)} · ${c.r.pax} pers. · <b>${c.r.prix} €</b>${c.r.vol ? " · ✈️ " + esc(c.r.vol) : ""}${c.r.chauffeurNom ? " · 🚖 " + esc(c.r.chauffeurNom) : ""} · ${esc(c.r.statut)}${c.pb.length ? `<br><span class="imp-x">⚠️ ${esc(c.pb.join(", "))}</span>` : ""}</div></label>`).join("");
+    $imp("imp-liste").innerHTML = impCourses.map((c, i) => `<label class="imp-c${c.pb.length ? " err" : ""}${c.ok ? "" : " off"}"><input type="checkbox" data-i="${i}"${c.ok ? " checked" : ""}><div><b>${esc(fr(c.r.date))} · ${esc(c.r.heure || "--:--")} · ${esc(c.r.nom || "?")}</b><br>📍 ${esc(c.r.dep || "?")}${c.r.arrets ? c.r.arrets.map((a, j) => `<br>🛑 ${j + 1}. ${esc(a.nom ? a.nom + " — " : "")}${esc(a.adr)}`).join("") : `<br>🏁 ${esc(c.r.arr || "?")}`}<br>${esc(c.r.vehicule)} · ${c.r.pax} pers. · <b>${c.r.prix} €</b>${c.r.vol ? " · ✈️ " + esc(c.r.vol) : ""}${c.r.tournage ? " · 🎬" : ""}${c.r.chauffeurNom ? " · 🚖 " + esc(c.r.chauffeurNom) : ""} · ${esc(c.r.statut)}${c.pb.length ? `<br><span class="imp-x">⚠️ ${esc(c.pb.join(", "))}</span>` : ""}</div></label>`).join("");
     $imp("imp-liste").querySelectorAll("input[data-i]").forEach(cb => cb.addEventListener("change", () => { impCourses[+cb.dataset.i].ok = cb.checked; cb.closest(".imp-c").classList.toggle("off", !cb.checked); impCompte(); }));
     impCompte();
   }
@@ -3117,7 +3126,7 @@ function anonymise(title,location){
   }
   $imp("btn-import").addEventListener("click", () => {
     document.getElementById("modal-reservation").classList.remove("shown");
-    $imp("imp-txt").value = ""; impEtape(1); $imp("modal-import").classList.add("shown");
+    $imp("imp-txt").value = ""; $imp("imp-tournage").checked = false; impEtape(1); $imp("modal-import").classList.add("shown");
   });
   $imp("imp-annuler").addEventListener("click", () => $imp("modal-import").classList.remove("shown"));
   $imp("imp-retour").addEventListener("click", () => impEtape(1));
