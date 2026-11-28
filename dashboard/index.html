@@ -3155,7 +3155,7 @@ function anonymise(title,location){
     const toutes = dpCourses().filter(r => r.chauffeurNom === dpConf), rs = toutes.filter(r => !dpNon.has(r.id)), o = dpOpt(), nl = rs.filter(r => r.lienCourse).length, np = rs.filter(r => r.prixChauffeur).length;
     sh.hidden = false; ov.querySelector(".dp-fond").hidden = false;
     sh.innerHTML = `<div class="dp-sh-h"><b>💬 Confirmer à ${esc(dpConf)}</b><button type="button" class="dp-sh-x" data-dpfermer aria-label="Fermer">✕</button></div>
-      <div class="dp-step">Courses à envoyer</div>${toutes.map(r => `<label class="dp-opt"><input type="checkbox" data-dpwasel="${esc(r.id)}"${dpNon.has(r.id) ? "" : " checked"}><span>${esc(r.heure || "—")} · ${dpNom(r)}<small>${dpTr(r).replace(/<\/?small>/g, " · ").replace(/<[^>]+>/g, "")}</small></span></label>`).join("")}
+      <div class="dp-step">Courses à envoyer</div>${toutes.map(r => `<div class="dp-opt"><label style="display:flex;gap:8px;flex:1;align-items:center"><input type="checkbox" data-dpwasel="${esc(r.id)}"${dpNon.has(r.id) ? "" : " checked"}><span>${esc(r.heure || "—")} · ${dpNom(r)}<small>${dpTr(r).replace(/<\/?small>/g, " · ").replace(/<[^>]+>/g, "")}</small></span></label><button type="button" class="dp-qui" data-dpcli="${esc(r.id)}"${waNumClient(r.tel) ? "" : " disabled"} title="Envoyer le lien au client">📨 Client</button></div>`).join("")}
       <label class="dp-opt"><input type="checkbox" data-dpopt="lien"${o.lien ? " checked" : ""}><span>🔗 Mettre le lien de la course<small>${nl === rs.length ? "une page par course (chat avec le client, sans son numéro)" : "les liens manquants seront créés automatiquement à l'envoi"}</small></span></label>
       <label class="dp-opt"><input type="checkbox" data-dpopt="prix"${o.prix ? " checked" : ""}${np ? "" : " disabled"}><span>💶 Mettre le prix<small>${np ? "prix chauffeur noté sur " + np + " course" + (np > 1 ? "s" : "") : "aucun prix chauffeur noté"}</small></span></label>
       <div class="dp-step">Aperçu</div><pre class="dp-prev">${esc(dpMsg(dpConf, rs.map(r => o.lien && !r.lienCourse ? Object.assign({}, r, { lienCourse: "…" }) : r), { lien: o.lien, prix: o.prix && np }))}</pre>
@@ -3268,6 +3268,17 @@ function anonymise(title,location){
         return dpDraw();
       }
       if (t.dataset.dpx) { const r = reservationsCache.find(x => x.id === t.dataset.dpx); if (!r) return; const n = r.chauffeurNom; Object.assign(r, { chauffeurNom: null, chauffeurUid: null }); dpDraw(); renderReservations(); updateDoc(doc(db, "reservations", r.id), { chauffeurNom: null, chauffeurUid: null, dispatchEnvoye: null }).then(() => toast("↩︎ Retirée de " + n)).catch(() => toast("Pas enregistré, réessaie", 4000)); return; }
+      if (t.dataset.dpcli !== undefined) {
+        const r = reservationsCache.find(x => x.id === t.dataset.dpcli); if (!r) return;
+        const ouvrir = () => { const x = relanceClient(r); window.open(x.wa, "_blank"); };
+        if (r.lienCourse) return ouvrir();
+        const w = window.open("", "_blank"), c = dpCh(r.chauffeurNom);
+        dpCreerLien(r, r.chauffeurNom, c && c.tel).then(code => {
+          if (!code) { if (w) w.close(); return toast("⚠️ Lien pas créé, réessaie", 4000); }
+          const x = relanceClient(r); if (w) w.location.href = x.wa; else window.open(x.wa, "_blank");
+        }).catch(e => { console.error(e); if (w) w.close(); toast("⚠️ Lien pas créé, réessaie", 4000); });
+        return;
+      }
       if (t.dataset.dpwa) { dpConf = t.dataset.dpwa; dpNon.clear(); return dpConfSheet(); }
       if (t.dataset.dpenvoi !== undefined) {
         const nom = dpConf, rs = dpCourses().filter(r => r.chauffeurNom === nom && !dpNon.has(r.id)), c = dpCh(nom), num = c && c.tel ? waNumClient(c.tel) : "", o = dpOpt();
