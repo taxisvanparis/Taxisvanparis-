@@ -95,6 +95,7 @@ label{display:block;color:var(--mut);font-size:13px;text-transform:uppercase;let
 .pc-ab b{display:block;font-size:22px;margin-top:2px;color:var(--gold)}.pc-ab div.A b{color:#6ea8ff}.pc-ab span{font-size:12px;color:var(--mut)}
 .pc-todo{margin-top:12px;border:2px solid var(--gold);border-radius:16px;padding:12px;background:#0f0c04}.pc-th{font-weight:800;font-size:16px;margin-bottom:8px}.pc-th span{color:var(--mut);font-weight:600;font-size:13px;margin-left:6px}
 .pc-tc{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:8px}.pc-tt{display:flex;flex-direction:column;gap:2px}.pc-tt span{font-size:12px;color:var(--mut)}
+.pc-tc.ok{border-color:#1f5a38;background:#0b1a11}.pc-paid{margin-top:8px;font-weight:800;color:var(--green)}
 .pc-tf{display:grid;grid-template-columns:1fr auto auto;gap:6px;margin-top:8px}.pc-tf input{min-width:0;font-size:17px;padding:10px}.pc-tf button{border:1px solid #5a4a20;background:#1a1608;color:var(--gold);border-radius:10px;font-weight:800;padding:0 14px;min-height:46px}.pc-tf button.A{border-color:#2f4b78;background:#0d1626;color:#6ea8ff}
 .pc-day{display:flex;justify-content:space-between;color:var(--mut);font-size:13px;font-weight:700;margin:16px 2px 6px}.pc-day span:first-child::first-letter{text-transform:uppercase}
 #pcPer{text-transform:none;font-size:16px;text-align:center}#pcPer::first-letter{text-transform:uppercase}#pcRange>div{min-width:0}#pcRange input{min-width:0;width:100%;font-size:16px}
@@ -629,8 +630,13 @@ function pcDraw(){
   const todo=pcTg.filter(r=>r.statut!=='annulée'&&!(r.paye&&Number(r.paye.montant)>0)).sort((a,b)=>((a.date||'')+(a.heure||'')).localeCompare((b.date||'')+(b.heure||'')));
   if(user&&todo.length){$('pcTot').textContent='🎬 '+todo.length+' à payer';$('pcSub').textContent='Courses de tournage à payer au chauffeur'}
   if($('dPC').hidden)return;
-  $('pcTodo').innerHTML=todo.length?`<div class="pc-todo"><div class="pc-th">🎬 À payer <span>${todo.length} course${todo.length>1?'s':''} de tournage</span></div>`+todo.map(r=>`<div class="pc-tc" data-r="${esc(r.id)}"><div class="pc-tt"><b>${esc(r.chauffeurNom||'Chauffeur ?')}</b><span>${esc(r.date?dShort(r.date):'')} ${esc(r.heure||'')} · ${esc(String(r.nom||'').replace(/^🏨\s*/,''))}</span><span>${esc([r.dep,r.arr].map(x=>String(x||'?').split(',')[0]).join(' → '))}</span></div><div class="pc-tf"><input inputmode="decimal" placeholder="Tarif €" value="${r.prixChauffeur?String(r.prixChauffeur).replace('.',','):''}"><button type="button" data-p="A" class="A">Par A</button><button type="button" data-p="B">Par B</button></div></div>`).join('')+'</div>':'';
   const [du,au]=pcBornes();
+  const tg=pcTg.filter(r=>r.statut!=='annulée'&&r.date>=du&&r.date<=au).sort((a,b)=>((a.date||'')+(a.heure||'')).localeCompare((b.date||'')+(b.heure||'')));
+  const nPay=tg.filter(r=>r.paye&&Number(r.paye.montant)>0).length,hors=todo.filter(r=>!(r.date>=du&&r.date<=au)).length;
+  $('pcTodo').innerHTML=tg.length||hors?`<div class="pc-todo"><div class="pc-th">🎬 Tournage <span>${tg.length} course${tg.length>1?'s':''} · ${nPay} payée${nPay>1?'s':''}</span></div>`+tg.map(r=>{const pd=r.paye&&Number(r.paye.montant)>0;
+    return `<div class="pc-tc${pd?' ok':''}" data-r="${esc(r.id)}"><div class="pc-tt"><b>${esc(r.chauffeurNom||'Chauffeur ?')}</b><span>${esc(r.date?dShort(r.date):'')} ${esc(r.heure||'')} · ${esc(String(r.nom||'').replace(/^🏨\s*/,''))}</span><span>${esc([r.dep,r.arr].map(x=>String(x||'?').split(',')[0]).join(' → '))}</span></div>`+
+    (pd?`<div class="pc-paid">✓ Payé par ${esc(r.paye.par)} · ${eur(Number(r.paye.montant))}</div>`:`<div class="pc-tf"><input inputmode="decimal" placeholder="Tarif €" value="${r.prixChauffeur?String(r.prixChauffeur).replace('.',','):''}"><button type="button" data-p="A" class="A">Par A</button><button type="button" data-p="B">Par B</button></div>`)+'</div>'}).join('')+
+    (hors?`<p class="mut" style="margin:8px 2px 0;font-size:13px">+ ${hors} course${hors>1?'s':''} tournage à payer en dehors de cette période</p>`:'')+'</div>':'';
   $('pcSeg').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.m===pcMode));
   $('pcRange').hidden=pcMode!=='plage';$('pcDu').value=du;$('pcAu').value=au;
   $('pcPer').textContent=pcMode==='jour'?(pcD===today()?"Aujourd'hui":dLong(pcD)):pcMode==='mois'?mName(pcD.slice(0,7)):'Du '+dShort(du)+' au '+dShort(au);
