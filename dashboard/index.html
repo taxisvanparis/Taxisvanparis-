@@ -3120,7 +3120,7 @@ function anonymise(title,location){
   function dpCarte(r, gauche) {
     const no = dpNum.get(r.id);
     return `<div class="dp-c${gauche ? " g" : ""}" data-dpc="${esc(r.id)}">${no ? `<span class="dp-no">N°${no}</span>` : ""}<span class="dp-h">${esc(r.heure || "—")}${dpJour ? "" : `<small>${esc(dpJ(r.date))}</small>`}</span>
-      <span class="dp-t"><b>${dpNom(r)}${r.tournage ? " 🎬" : ""}${!gauche && r.prixChauffeur ? ` <em class="dp-pz">${eurTxt(r.prixChauffeur)}</em>` : ""}</b><small>${dpTr(r)}</small>${gauche && r.dispatchEnvoye && !no ? `<small class="dp-env">📤 déjà envoyée au groupe</small>` : ""}${!gauche && reservationsCache.some(x => x.id !== r.id && x.chauffeurNom === r.chauffeurNom && x.statut !== "annulée" && dpConflit(x, r)) ? `<small class="dp-w">⚠️ Une autre course à la même heure</small>` : ""}</span>
+      <span class="dp-t"><b>${dpNom(r)}${r.tournage ? " 🎬" : ""}${!gauche && r.prixChauffeur ? ` <em class="dp-pz">${eurTxt(r.prixChauffeur)}</em>` : ""}</b><small>${dpTr(r)}</small>${gauche && r.dispatchEnvoye && !no ? `<small class="dp-env">📤 déjà envoyée au groupe</small>` : ""}</span>
       ${gauche ? `<button type="button" class="dp-qui" data-dpqui="${esc(r.id)}">👤 Qui l'a prise ?</button>` : `<button type="button" class="dp-x" data-dpx="${esc(r.id)}" title="Remettre à attribuer">↩︎</button>`}</div>`;
   }
   function dpDraw() {
@@ -3146,8 +3146,7 @@ function anonymise(title,location){
     if (!r || r.chauffeurNom) { sh.hidden = true; ov.querySelector(".dp-fond").hidden = true; return; }
     sh.hidden = false; ov.querySelector(".dp-fond").hidden = false;
     const autres = dpCourses().filter(x => !x.chauffeurNom && x.id !== r.id && x.date === r.date);
-    const sel = [r, ...autres.filter(x => dpAussi.has(x.id))];
-    const etat = nm => { const mes = reservationsCache.filter(x => x.chauffeurNom === nm && x.statut !== "annulée"); const o = mes.find(x => sel.some(y => dpConflit(x, y))); if (o) return ["busy", "⚠️ pris à " + o.heure]; const gr = mes.filter(x => sel.some(y => y.date === x.date && dpMin(y) === dpMin(x) && dpLieu(y.dep) === dpLieu(x.dep))).length; return gr ? ["grp", "🚐 déjà " + gr + " au même départ"] : ["", mes.filter(x => x.date === r.date).length ? mes.filter(x => x.date === r.date).length + " course(s) ce jour" : "libre"]; };
+    const etat = nm => { const k = reservationsCache.filter(x => x.chauffeurNom === nm && x.statut !== "annulée" && x.date === r.date).length; return ["", k ? k + " course" + (k > 1 ? "s" : "") + " ce jour" : "libre"]; };
     sh.innerHTML = `<div class="dp-sh-h"><b>${dpNum.get(r.id) ? "N°" + dpNum.get(r.id) + " · " : ""}${esc(r.heure || "")} · ${dpNom(r)}</b><button type="button" class="dp-sh-x" data-dpfermer aria-label="Fermer">✕</button></div>
       <div class="dp-sh-tr"><small>${dpTr(r)}</small></div>
       <div class="dp-step">Qui l'a prise ?</div>
@@ -3159,9 +3158,6 @@ function anonymise(title,location){
   async function dpAttribuer(nom) {
     const r0 = reservationsCache.find(x => x.id === dpCur); if (!r0) return;
     const ids = [r0.id, ...[...dpAussi].filter(id => { const x = reservationsCache.find(y => y.id === id); return x && !x.chauffeurNom; })];
-    const sel = ids.map(id => reservationsCache.find(x => x.id === id));
-    const o = reservationsCache.filter(x => x.chauffeurNom === nom && x.statut !== "annulée").find(x => sel.some(y => dpConflit(x, y)));
-    if (o && !confirm(nom + " a déjà une course à " + o.heure + ". Lui donner quand même ?")) return;
     const c = chauffeursCache.find(x => (x.nom || "").trim() === nom), px = prixChNum((document.getElementById("dp-pxc") || {}).value);
     const maj = { chauffeurNom: nom, chauffeurUid: c && c.uid ? c.uid : "" }; if (px) maj.prixChauffeur = px;
     ids.forEach(id => { const r = reservationsCache.find(x => x.id === id); if (r) Object.assign(r, maj); dpNum.delete(id); });
