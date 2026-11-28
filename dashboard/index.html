@@ -533,6 +533,7 @@
 .dp-no{flex:none;font-weight:800;font-size:13px;background:#25d366;color:#08240f;border-radius:8px;padding:3px 7px}
 .dp-h{font-weight:800;font-size:18px;min-width:52px}.dp-h small{display:block;font-size:11px;font-weight:700;color:var(--muted)}
 .dp-t{flex:1;min-width:0}.dp-t b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dp-t small{display:block;color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dp-cpx{flex:none;display:flex;align-items:center;gap:4px;border:1px solid var(--border);border-radius:12px;padding:0 8px;min-height:44px;background:var(--card);font-weight:700}.dp-cpx input{width:58px;border:0;background:transparent;color:var(--text);font:inherit;font-size:16px;font-weight:800;text-align:right;outline:none}.dp-cpx span{color:var(--muted)}
 .dp-qui{flex:none;min-height:44px;border:2px solid #c9a84c;border-radius:12px;background:rgba(201,168,76,.12);color:var(--text);font:inherit;font-weight:800;font-size:14px;padding:0 12px;cursor:pointer}
 .dp-x{flex:none;width:40px;height:40px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-size:18px;cursor:pointer}
 .dp-env{color:#1f7a45!important;font-weight:700}.dp-w{color:#c4352b!important;font-weight:700}
@@ -546,6 +547,9 @@
 .dp-ntel{min-height:46px;border:1px solid var(--border);border-radius:12px;padding:0 12px;background:var(--bg);color:var(--text);font:inherit;font-size:16px}.dp-ntel[hidden]{display:none}
 .dp-pr{display:flex;align-items:center;gap:10px;border:1px solid var(--border);border-radius:12px;padding:8px 10px}.dp-pr span{flex:1;min-width:0}.dp-pr span::first-letter{text-transform:uppercase}.dp-pr small{display:block;color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dp-pr input{width:86px;flex:none;min-height:42px;border:1px solid var(--border);border-radius:10px;padding:0 8px;background:var(--bg);color:var(--text);font:inherit;font-size:16px;text-align:right}
 .dp-ptot{text-align:right;font-size:16px}.dp-pab{display:grid;grid-template-columns:1fr 1fr;gap:8px}.dp-pab button{min-height:50px;border-radius:12px;border:2px solid #b7791f;background:rgba(201,168,76,.15);color:var(--text);font:inherit;font-weight:800;font-size:16px;cursor:pointer}.dp-pab button.A{border-color:#2f5fb3;background:rgba(47,95,179,.1)}.dp-pn{color:var(--muted);text-align:center}
+.dp-opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--border);border-radius:12px;padding:10px 12px;cursor:pointer}.dp-opt input{width:22px;height:22px;flex:none;margin-top:1px;accent-color:#1f7a45}.dp-opt span{font-weight:800}.dp-opt small{display:block;font-weight:500;color:var(--muted);font-size:12px}.dp-opt:has(input:disabled){opacity:.55}
+.dp-grp{min-height:50px;flex:none;border:0;border-radius:12px;background:#25d366;color:#08240f;font:inherit;font-weight:800;font-size:16px;cursor:pointer}
+.dp-prev{overflow-wrap:anywhere;white-space:pre-wrap;font:inherit;font-size:13px;line-height:1.4;background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:10px;max-height:34vh;overflow:auto;margin:0}
 .dp-fond{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:2001}.dp-fond[hidden],.dp-sheet[hidden]{display:none}
 .dp-sheet{position:fixed;z-index:2002;left:50%;bottom:0;transform:translateX(-50%);width:min(560px,100%);max-height:88vh;overflow:auto;background:var(--card);border-radius:20px 20px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom));box-shadow:0 -10px 40px rgba(0,0,0,.2);display:flex;flex-direction:column;gap:10px}
 .dp-sh-h{display:flex;align-items:center;gap:10px}.dp-sh-h b{flex:1;font-size:18px}.dp-sh-x{width:40px;height:40px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);cursor:pointer}
@@ -555,7 +559,7 @@
 .dp-in{display:flex;gap:6px}.dp-in input{flex:1;min-width:0;min-height:48px;border:2px solid #c9a84c;border-radius:12px;padding:0 12px;background:var(--bg);color:var(--text);font:inherit;font-size:16px}.dp-in button{flex:none;width:56px;border:0;border-radius:12px;background:#1f7a45;color:#fff;font-size:20px;font-weight:800;cursor:pointer}
 .dp-px{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px}.dp-px input{flex:1;min-width:0;min-height:44px;border:1px solid var(--border);border-radius:10px;padding:0 10px;background:var(--bg);color:var(--text);font:inherit;font-size:16px}
 .dp-aussi{display:flex;flex-wrap:wrap;gap:6px}.dp-aussi button{border:1px solid var(--border);border-radius:999px;background:var(--bg);color:var(--text);font:inherit;font-weight:700;font-size:13px;padding:8px 12px;cursor:pointer}.dp-aussi button.on{background:#c9a84c;border-color:#c9a84c;color:#17120a}
-@media (max-width:820px){.dp-tabs{display:flex}.dp-cols{grid-template-columns:1fr}.dp-cols[data-tab="a"] .dp-b,.dp-cols[data-tab="b"] .dp-a{display:none}.dp-cols h3{display:none}.dp-prog{min-width:90px}.dp-c{flex-wrap:wrap;padding:8px}.dp-c.g .dp-qui{flex:1 1 100%}.dp-h{font-size:16px;min-width:44px}}
+@media (max-width:820px){.dp-tabs{display:flex}.dp-cols{grid-template-columns:1fr}.dp-cols[data-tab="a"] .dp-b,.dp-cols[data-tab="b"] .dp-a{display:none}.dp-cols h3{display:none}.dp-prog{min-width:90px}.dp-c{flex-wrap:wrap;padding:8px}.dp-c.g .dp-cpx{flex:0 0 auto}.dp-c.g .dp-qui{flex:1 1 0}.dp-c.g .dp-t{flex:1 1 60%}.dp-h{font-size:16px;min-width:44px}}
 .imp-tg,.tf-tg{display:flex;gap:10px;align-items:center;margin:0 0 10px;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:var(--card);cursor:pointer}.tf-tg{margin:12px 0 0}.imp-tg input,.tf-tg input{width:22px;height:22px;flex:none;accent-color:#b7791f}.imp-tg span,.tf-tg span{font-weight:800;font-size:14px}.imp-tg small,.tf-tg small{display:block;font-weight:500;font-size:12px;color:var(--muted)}
 .tb-pc{display:block;width:fit-content;margin:5px 0 0 auto;font-style:normal;font-size:12px;font-weight:800;color:var(--text);background:var(--soft);border:1px solid var(--border);border-radius:999px;padding:2px 8px;white-space:nowrap;letter-spacing:0;text-transform:none}.tf-pcl{display:flex;align-items:center;gap:10px;margin:12px 0 0;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:var(--card)}.tf-pcl span{flex:1;font-weight:700;font-size:14px}.tf-pcl b{font-size:17px}.tf-pcl button{min-height:38px;padding:0 12px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--text);font:inherit;font-weight:700;cursor:pointer}
 .tb-py{display:block;width:fit-content;margin:5px 0 0 auto;letter-spacing:0;text-transform:none;font-style:normal;font-size:12px;font-weight:800;color:#1f7a45;background:#e3f4ea;border-radius:999px;padding:2px 8px;white-space:nowrap}.tf-py{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:12px 0 4px;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:var(--card)}.tf-py span{flex:1 1 100%;font-weight:700;font-size:14px}.tf-pym{flex:1 1 100%;box-sizing:border-box;min-height:44px;padding:0 12px;border:1px solid var(--border);border-radius:10px;background:var(--bg);color:var(--text);font:inherit;font-size:16px}.tf-py button{flex:1;min-height:42px;border-radius:10px;border:1px solid #1f7a45;background:#e3f4ea;color:#1f7a45;font:inherit;font-weight:800;cursor:pointer}.tf-py button[data-par=""]{flex:0 0 auto;padding:0 14px;border-color:var(--border);background:transparent;color:var(--muted)}
@@ -3121,10 +3125,24 @@ function anonymise(title,location){
   // Conflit = même chauffeur, moins d'1 h d'écart, départs différents (même départ + même heure = courses regroupées)
   const dpConflit = (a, b) => a.date === b.date && dpMin(a) != null && dpMin(b) != null && Math.abs(dpMin(a) - dpMin(b)) < 60 && !(dpMin(a) === dpMin(b) && dpLieu(a.dep) === dpLieu(b.dep));
   const NUMS = ["1️⃣","2️⃣","3️⃣","4️⃣","5️⃣","6️⃣","7️⃣","8️⃣","9️⃣","🔟"];
-  function dpMsg(nom, rs) {
+  let dpConf = null; // chauffeur dont on prépare le message de confirmation
+  const dpOpt = () => { try { return Object.assign({ lien: true, prix: true }, JSON.parse(localStorage.getItem("tvp_dp_opt") || "{}")); } catch (e) { return { lien: true, prix: true }; } };
+  function dpMsg(nom, rs, o) {
+    o = o || dpOpt();
     const L = [`🚖 *${nom} — ${rs.length} course${rs.length > 1 ? "s" : ""}*`];
-    rs.forEach((r, i) => L.push("", (NUMS[i] || (i + 1) + ".") + " " + messageChauffeur(r).replace(/^🚖 \*COURSE ATTRIBUÉE\*\n(Chauffeur : .*\n)?\n?/, "") + (r.prixChauffeur ? `\n💶 Prix chauffeur : ${eurTxt(r.prixChauffeur)}` : "")));
+    rs.forEach((r, i) => L.push("", (rs.length > 1 ? (NUMS[i] || (i + 1) + ".") + " " : "") + messageChauffeur(r).replace(/^🚖 \*COURSE ATTRIBUÉE\*\n(Chauffeur : .*\n)?\n?/, "")
+      + (o.prix && r.prixChauffeur ? `\n💶 Prix : ${eurTxt(r.prixChauffeur)}` : "") + (o.lien && r.lienCourse ? `\n🔗 Ta page course : ${mcUrl(r.lienCourse)}&d=1` : "")));
     return L.join("\n");
+  }
+  function dpConfSheet() {
+    const ov = document.getElementById("dp-ov"), sh = ov && ov.querySelector(".dp-sheet"); if (!sh || !dpConf) return;
+    const rs = dpCourses().filter(r => r.chauffeurNom === dpConf), o = dpOpt(), nl = rs.filter(r => r.lienCourse).length, np = rs.filter(r => r.prixChauffeur).length;
+    sh.hidden = false; ov.querySelector(".dp-fond").hidden = false;
+    sh.innerHTML = `<div class="dp-sh-h"><b>💬 Confirmer à ${esc(dpConf)}</b><button type="button" class="dp-sh-x" data-dpfermer aria-label="Fermer">✕</button></div>
+      <label class="dp-opt"><input type="checkbox" data-dpopt="lien"${o.lien ? " checked" : ""}${nl ? "" : " disabled"}><span>🔗 Mettre le lien de la course<small>${nl ? (nl === rs.length ? "pour chaque course" : nl + " course" + (nl > 1 ? "s" : "") + " sur " + rs.length + " ont un lien") : "aucun lien créé pour ses courses (bouton « Lien » de la fiche)"}</small></span></label>
+      <label class="dp-opt"><input type="checkbox" data-dpopt="prix"${o.prix ? " checked" : ""}${np ? "" : " disabled"}><span>💶 Mettre le prix<small>${np ? "prix chauffeur noté sur " + np + " course" + (np > 1 ? "s" : "") : "aucun prix chauffeur noté"}</small></span></label>
+      <div class="dp-step">Aperçu</div><pre class="dp-prev">${esc(dpMsg(dpConf, rs, { lien: o.lien && nl, prix: o.prix && np }))}</pre>
+      <button type="button" class="dp-grp" data-dpenvoi>💬 Envoyer sur WhatsApp</button>`;
   }
   const dpJ = d => d === todayStr() ? "Aujourd'hui" : new Date(d + "T12:00").toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short" });
   const dpNom = r => esc(String(r.nom || "—").replace(/^🏨\s*/, ""));
@@ -3133,7 +3151,7 @@ function anonymise(title,location){
     const no = dpNum.get(r.id);
     return `<div class="dp-c${gauche ? " g" : ""}" data-dpc="${esc(r.id)}">${no ? `<span class="dp-no">N°${no}</span>` : ""}<span class="dp-h">${esc(r.heure || "—")}${dpJour ? "" : `<small>${esc(dpJ(r.date))}</small>`}</span>
       <span class="dp-t"><b>${dpNom(r)}${r.tournage ? " 🎬" : ""}${!gauche && r.prixChauffeur ? ` <em class="dp-pz">${eurTxt(r.prixChauffeur)}</em>` : ""}</b><small>${dpTr(r)}</small>${gauche && r.dispatchEnvoye && !no ? `<small class="dp-env">📤 déjà envoyée au groupe</small>` : ""}</span>
-      ${gauche ? `<button type="button" class="dp-qui" data-dpqui="${esc(r.id)}">👤 Qui l'a prise ?</button>` : `<button type="button" class="dp-x" data-dpx="${esc(r.id)}" title="Remettre à attribuer">↩︎</button>`}</div>`;
+      ${gauche ? `<label class="dp-cpx">💶<input inputmode="decimal" data-dpcpx="${esc(r.id)}" placeholder="Prix" value="${r.prixChauffeur ? String(r.prixChauffeur).replace(".", ",") : ""}"><span>€</span></label><button type="button" class="dp-qui" data-dpqui="${esc(r.id)}">👤 Qui l'a prise ?</button>` : `<button type="button" class="dp-x" data-dpx="${esc(r.id)}" title="Remettre à attribuer">↩︎</button>`}</div>`;
   }
   function dpDraw() {
     const ov = document.getElementById("dp-ov"); if (!ov) return;
@@ -3145,7 +3163,7 @@ function anonymise(title,location){
     ov.querySelectorAll("[data-dptab]").forEach(b => b.classList.toggle("on", b.dataset.dptab === dpTab)); ov.querySelector(".dp-cols").dataset.tab = dpTab;
     const nonEnv = A.filter(r => !dpNum.has(r.id));
     ov.querySelector(".dp-a .dp-l").innerHTML = A.length
-      ? (nonEnv.length ? `<div class="dp-send"><div class="dp-step">① Envoie au groupe</div><div class="dp-sr"><input id="dp-prix" inputmode="decimal" placeholder="💶 Prix chauffeur (facultatif)"><button type="button" data-dpgrp>📤 Envoyer ${nonEnv.length === A.length ? "les " : ""}${nonEnv.length} course${nonEnv.length > 1 ? "s" : ""} au groupe</button></div></div>` : "")
+      ? (nonEnv.length ? `<div class="dp-send"><div class="dp-step">① Envoie au groupe</div><div class="dp-sr"><input id="dp-prix" inputmode="decimal" placeholder="💶 Même prix pour toutes (facultatif)"><button type="button" data-dpgrp>📤 Envoyer ${nonEnv.length === A.length ? "les " : ""}${nonEnv.length} course${nonEnv.length > 1 ? "s" : ""} au groupe</button></div></div>` : "")
         + `<div class="dp-step">② Quand un chauffeur répond, touche « Qui l'a prise ? »</div>` + A.map(r => dpCarte(r, true)).join("")
       : `<p class="dp-vide">✓ Toutes les courses ont un chauffeur 👍</p>`;
     const g = new Map(); B.forEach(r => { const n = r.chauffeurNom; if (!g.has(n)) g.set(n, []); g.get(n).push(r); });
@@ -3170,6 +3188,7 @@ function anonymise(title,location){
   function dpSheet() {
     const ov = document.getElementById("dp-ov"), sh = ov && ov.querySelector(".dp-sheet"); if (!sh) return;
     if (dpPay) return dpPaySheet();
+    if (dpConf) return dpConfSheet();
     const r = dpCur && reservationsCache.find(x => x.id === dpCur);
     if (!r || r.chauffeurNom) { sh.hidden = true; ov.querySelector(".dp-fond").hidden = true; return; }
     sh.hidden = false; ov.querySelector(".dp-fond").hidden = false;
@@ -3205,7 +3224,7 @@ function anonymise(title,location){
     ov.addEventListener("click", ev => {
       const t = ev.target.closest("button,[data-dpfermer]"); if (!t) return;
       if (t.classList.contains("dp-close")) { ov.remove(); document.body.style.overflow = ""; return; }
-      if (t.dataset.dpfermer !== undefined) { dpCur = null; dpPay = null; dpAussi.clear(); return dpSheet(); }
+      if (t.dataset.dpfermer !== undefined) { dpCur = null; dpPay = null; dpConf = null; dpAussi.clear(); return dpSheet(); }
       if (t.dataset.dpj !== undefined) { dpJour = t.dataset.dpj; return dpDraw(); }
       if (t.dataset.dptab) { dpTab = t.dataset.dptab; return dpDraw(); }
       if (t.dataset.dpqui) { dpCur = t.dataset.dpqui; dpAussi.clear(); dpSheet(); setTimeout(() => { const s = ov.querySelector(".dp-sheet"); if (s) s.scrollTop = 0; }, 0); return; }
@@ -3225,21 +3244,23 @@ function anonymise(title,location){
       if (t.dataset.dpgrp !== undefined) {
         const rs = dpCourses().filter(r => !r.chauffeurNom && !dpNum.has(r.id)), px = (document.getElementById("dp-prix") || {}).value || "";
         let k = Math.max(0, ...dpNum.values()); rs.forEach(r => dpNum.set(r.id, ++k));
-        const m = rs.map(r => { const it = Object.assign(shareItem(r), { prixCh: px.trim() || (r.prixChauffeur ? String(r.prixChauffeur) : "") }); const n = dpNum.get(r.id); return shareMessage(it).replace("🚖 *COURSE DISPONIBLE*", `${NUMS[n - 1] || "🚖"} *COURSE N°${n}*`); }).join("\n\n");
+        const m = rs.map(r => { const it = Object.assign(shareItem(r), { prixCh: r.prixChauffeur ? String(r.prixChauffeur).replace(".", ",") : px.trim() }); const n = dpNum.get(r.id); return shareMessage(it).replace("🚖 *COURSE DISPONIBLE*", `${NUMS[n - 1] || "🚖"} *COURSE N°${n}*`); }).join("\n\n");
         window.open(waLink(m), "_blank");
-        const tt = Date.now(), pn = prixChNum(px); rs.forEach(r => { const u = { dispatchEnvoye: tt }; if (pn) u.prixChauffeur = pn; Object.assign(r, u); updateDoc(doc(db, "reservations", r.id), u).catch(() => {}); });
+        const tt = Date.now(), pn = prixChNum(px); rs.forEach(r => { const u = { dispatchEnvoye: tt }; if (pn && !r.prixChauffeur) u.prixChauffeur = pn; Object.assign(r, u); updateDoc(doc(db, "reservations", r.id), u).catch(() => {}); });
         toast("📤 Envoyé — quand un chauffeur répond « je prends la 2 », touche « Qui l'a prise ? » sur la N°2", 5000);
         return dpDraw();
       }
       if (t.dataset.dpx) { const r = reservationsCache.find(x => x.id === t.dataset.dpx); if (!r) return; const n = r.chauffeurNom; Object.assign(r, { chauffeurNom: null, chauffeurUid: null }); dpDraw(); renderReservations(); updateDoc(doc(db, "reservations", r.id), { chauffeurNom: null, chauffeurUid: null, dispatchEnvoye: null }).then(() => toast("↩︎ Retirée de " + n)).catch(() => toast("Pas enregistré, réessaie", 4000)); return; }
-      if (t.dataset.dpwa) {
-        const nom = t.dataset.dpwa, rs = dpCourses().filter(r => r.chauffeurNom === nom), c = chauffeursCache.find(x => (x.nom || "").trim() === nom);
-        const num = c && c.tel ? waNumClient(c.tel) : "";
-        window.open((num ? "https://wa.me/" + num : "https://wa.me/") + "?text=" + encodeURIComponent(dpMsg(nom, rs)), "_blank");
+      if (t.dataset.dpwa) { dpConf = t.dataset.dpwa; return dpConfSheet(); }
+      if (t.dataset.dpenvoi !== undefined) {
+        const nom = dpConf, rs = dpCourses().filter(r => r.chauffeurNom === nom), c = dpCh(nom), num = c && c.tel ? waNumClient(c.tel) : "", o = dpOpt();
+        window.open((num ? "https://wa.me/" + num : "https://wa.me/") + "?text=" + encodeURIComponent(dpMsg(nom, rs, o)), "_blank");
         if (!num) toast("Choisis " + nom + " dans WhatsApp", 3500);
-        return;
+        dpConf = null; return dpSheet();
       }
     });
+    ov.addEventListener("change", ev => { const k = ev.target.dataset && ev.target.dataset.dpopt; if (!k) return; const o = dpOpt(); o[k] = ev.target.checked; try { localStorage.setItem("tvp_dp_opt", JSON.stringify(o)); } catch (e) {} dpConfSheet(); });
+    ov.addEventListener("change", ev => { const id = ev.target.dataset && ev.target.dataset.dpcpx; if (!id) return; const r = reservationsCache.find(x => x.id === id); if (!r) return; enregistrerPrixCh(r, ev.target.value); ev.target.value = r.prixChauffeur ? String(r.prixChauffeur).replace(".", ",") : ""; toast(r.prixChauffeur ? "💶 " + eurTxt(r.prixChauffeur) + " · " + String(r.nom || "").replace(/^🏨\s*/, "") : "Prix effacé", 2000); renderReservations(); });
     ov.addEventListener("input", ev => { if (ev.target.id === "dp-nom") { const v = ev.target.value.trim(), c = dpCh(v); document.getElementById("dp-ntel").hidden = !v || !!(c && c.tel); } });
     ov.addEventListener("keydown", ev => { if (ev.key === "Enter" && ev.target.id === "dp-nom") { ev.preventDefault(); ov.querySelector("[data-dpok]").click(); } });
     if (!dpJour || dpJour < todayStr()) { const j = dpCourses().filter(r => !r.chauffeurNom)[0]; dpJour = j ? j.date : ""; }
