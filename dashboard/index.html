@@ -3168,7 +3168,7 @@ function anonymise(title,location){
   function dpCarte(r, gauche) {
     const no = dpNum.get(r.id);
     return `<div class="dp-c${gauche ? " g" : ""}" data-dpc="${esc(r.id)}">${no ? `<span class="dp-no">N°${no}</span>` : ""}<span class="dp-h">${esc(r.heure || "—")}${dpJour ? "" : `<small>${esc(dpJ(r.date))}</small>`}</span>
-      <span class="dp-t"><b>${dpNom(r)}${r.tournage ? " 🎬" : ""}${!gauche && r.prixChauffeur ? ` <em class="dp-pz">${eurTxt(r.prixChauffeur)}</em>` : ""}</b><small>${dpTr(r)}</small>${gauche && r.dispatchEnvoye && !no ? `<small class="dp-env">📤 déjà envoyée au groupe</small>` : ""}</span>
+      <span class="dp-t"><b>${dpNom(r)}${r.tournage ? " 🎬" : ""}${!gauche && r.prixChauffeur ? ` <em class="dp-pz">${eurTxt(r.prixChauffeur)}</em>` : ""}</b><small>${dpTr(r)}</small>${gauche && r.dispatchEnvoye ? `<small class="dp-env">📤 envoyée au groupe</small><button type="button" class="dp-x" data-dpundo="${esc(r.id)}" style="width:auto;padding:4px 10px;font-size:13px;margin-top:4px">↩︎ Annuler l'envoi</button>` : ""}</span>
       ${gauche ? `<label class="dp-cpx">💶<input inputmode="decimal" data-dpcpx="${esc(r.id)}" placeholder="Prix" value="${r.prixChauffeur ? String(r.prixChauffeur).replace(".", ",") : ""}"><span>€</span></label><button type="button" class="dp-qui" data-dpqui="${esc(r.id)}">👤 Qui l'a prise ?</button>` : `<button type="button" class="dp-x" data-dpx="${esc(r.id)}" title="Remettre à attribuer">↩︎</button>`}</div>`;
   }
   function dpDraw() {
@@ -3269,6 +3269,12 @@ function anonymise(title,location){
         dpGrpOff.clear();
         toast("📤 Envoyé — quand un chauffeur répond « je prends la 2 », touche « Qui l'a prise ? » sur la N°2", 5000);
         return dpDraw();
+      }
+      if (t.dataset.dpundo !== undefined) {
+        const r = reservationsCache.find(x => x.id === t.dataset.dpundo); if (!r) return;
+        const old = r.dispatchEnvoye; dpNum.delete(r.id); r.dispatchEnvoye = null; dpDraw(); renderReservations();
+        updateDoc(doc(db, "reservations", r.id), { dispatchEnvoye: null }).then(() => toast("↩︎ Course à renvoyer au groupe", 3500)).catch(() => { r.dispatchEnvoye = old; dpDraw(); toast("Pas enregistré, réessaie", 4000); });
+        return;
       }
       if (t.dataset.dpx) { const r = reservationsCache.find(x => x.id === t.dataset.dpx); if (!r) return; const n = r.chauffeurNom; Object.assign(r, { chauffeurNom: null, chauffeurUid: null }); dpDraw(); renderReservations(); updateDoc(doc(db, "reservations", r.id), { chauffeurNom: null, chauffeurUid: null, dispatchEnvoye: null }).then(() => toast("↩︎ Retirée de " + n)).catch(() => toast("Pas enregistré, réessaie", 4000)); return; }
       if (t.dataset.dpcli !== undefined) {
