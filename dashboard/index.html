@@ -3129,7 +3129,7 @@ function anonymise(title,location){
   const dpOpt = () => { try { return Object.assign({ lien: true, prix: true }, JSON.parse(localStorage.getItem("tvp_dp_opt") || "{}")); } catch (e) { return { lien: true, prix: true }; } };
   function dpMsg(nom, rs, o) {
     o = o || dpOpt();
-    const L = [`🚖 *${nom}*`];
+    const L = ["🚖 *COURSE ATTRIBUÉE*", `Chauffeur : ${nom}`];
     rs.forEach((r, i) => L.push("", (rs.length > 1 ? (NUMS[i] || (i + 1) + ".") + " " : "") + messageChauffeur(r).replace(/^🚖 \*COURSE ATTRIBUÉE\*\n(Chauffeur : .*\n)?\n?/, "")
       + (o.prix && r.prixChauffeur ? `\n💶 Prix : ${eurTxt(r.prixChauffeur)}` : "") + (o.lien && r.lienCourse ? `\n🔗 Ta page course : ${mcUrl(r.lienCourse)}&d=1` : "")));
     return L.join("\n");
