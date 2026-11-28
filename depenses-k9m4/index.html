@@ -89,6 +89,15 @@ label{display:block;color:var(--mut);font-size:13px;text-transform:uppercase;let
 .day .g{color:var(--green);font-weight:700;text-align:right;white-space:nowrap}.day .x{color:var(--mut);font-weight:700;text-align:right;white-space:nowrap}
 .day .r{grid-column:2/4;text-align:right;font-weight:800;font-size:17px;white-space:nowrap}
 .fc-open{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;margin-top:12px;background:var(--card);border:2px solid var(--gold);border-radius:14px;padding:14px 16px;color:var(--ink);font-weight:800;font-size:17px;text-align:left}
+.pc-seg{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:12px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:4px}
+.pc-seg button{border:0;background:none;color:var(--mut);font-weight:800;padding:10px 0;border-radius:10px;font-size:15px}.pc-seg button.on{background:var(--gold);color:#111}
+.pc-ab{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.pc-ab div{border-radius:12px;padding:12px;border:1px solid #5a4a20;background:#1a1608}.pc-ab div.A{border-color:#2f4b78;background:#0d1626}
+.pc-ab b{display:block;font-size:22px;margin-top:2px;color:var(--gold)}.pc-ab div.A b{color:#6ea8ff}.pc-ab span{font-size:12px;color:var(--mut)}
+.pc-day{display:flex;justify-content:space-between;color:var(--mut);font-size:13px;font-weight:700;margin:16px 2px 6px}.pc-day span:first-child::first-letter{text-transform:uppercase}
+#pcPer{text-transform:none;font-size:16px;text-align:center}#pcPer::first-letter{text-transform:uppercase}#pcRange>div{min-width:0}#pcRange input{min-width:0;width:100%;font-size:16px}
+.pc-it{display:grid;grid-template-columns:36px 1fr auto;gap:10px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:6px}
+.pc-it .ic{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;font-weight:800;background:#1a1608;color:var(--gold);border:1px solid #5a4a20}.pc-it .ic.A{background:#0d1626;color:#6ea8ff;border-color:#2f4b78}
+.pc-it .t{font-weight:700}.pc-it .s{font-size:12px;color:var(--mut)}.pc-it .m{font-weight:800}
 .fc-open small{display:block;color:var(--mut);font-weight:600;font-size:13px;margin-top:2px}
 .fc-open b{color:var(--gold);white-space:nowrap}
 .fc-who{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
@@ -157,6 +166,7 @@ label{display:block;color:var(--mut);font-size:13px;text-transform:uppercase;let
   </section>
 
   <button type="button" class="fc-open" id="fcOpen"><span>🤝 Frais communs<small id="fcSub">Frais taxi partagés, comptes en fin de mois</small></span><b id="fcTot"></b></button>
+  <button type="button" class="fc-open" id="pcOpen"><span>🚖 Paiements chauffeurs<small id="pcSub">Payés par A et B, au jour ou au mois</small></span><b id="pcTot"></b></button>
 
   <section class="card" id="days" hidden></section>
 
@@ -221,6 +231,16 @@ label{display:block;color:var(--mut);font-size:13px;text-transform:uppercase;let
   <button class="btn small" id="mClose" style="width:100%;margin-top:16px;background:#222;color:#fff">Fermer</button>
 </div></div>
 
+<div class="dlg" id="dPC" hidden><div class="sheet" style="max-height:96vh">
+  <div class="row"><h2>🚖 Paiements chauffeurs</h2><button type="button" class="btn small" id="pcClose" style="background:#222;color:#fff">Fermer</button></div>
+  <div class="pc-seg" id="pcSeg"><button type="button" data-m="jour">Jour</button><button type="button" data-m="plage">Plusieurs jours</button><button type="button" data-m="mois">Mois</button></div>
+  <div class="month" style="margin-top:10px"><button type="button" id="pcPrev" aria-label="Avant">‹</button><span id="pcPer"></span><button type="button" id="pcNext" aria-label="Après">›</button></div>
+  <div class="two" id="pcRange" hidden style="margin-top:10px"><div><label for="pcDu">Du</label><input id="pcDu" type="date"></div><div><label for="pcAu">Au</label><input id="pcAu" type="date"></div></div>
+  <div class="card" style="margin-top:12px"><div class="lbl">Total payé aux chauffeurs</div><div class="big" id="pcBig">0,00 €</div><div class="pc-ab" id="pcAB"></div></div>
+  <div id="pcList"></div>
+  <p class="note">Visible par toi et ton associé · rempli tout seul depuis « Par A / Par B » du tableau de bord.</p>
+</div></div>
+
 <div class="dlg" id="dFC" hidden><div class="sheet" style="max-height:96vh">
   <div class="row"><h2>🤝 Frais communs</h2><button type="button" class="btn small" id="fcClose" style="background:#222;color:#fff">Fermer</button></div>
   <div id="fcLogin" hidden>
@@ -267,10 +287,11 @@ label{display:block;color:var(--mut);font-size:13px;text-transform:uppercase;let
 
 <script>
 const $=id=>document.getElementById(id);
-const CATS=['Carburant','Péage','Entretien','Lavage','Parking','Téléphone','Chauffeur','Autre'];
+const CATS=['Carburant','Péage','Entretien','Lavage','Parking','Téléphone','Autre'];
 const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}}};
 let items=store.get('dep-items',[]);   // {id,cat,amt,tva,date,note,photo:bool}
 let recs=store.get('dep-rec',[]);
+if(items.some(i=>i.pid)){items=items.filter(i=>!i.pid);try{localStorage.setItem('dep-items',JSON.stringify(items))}catch(e){}}
 if(recs.some(r=>r.src==='Autre prestataire')){recs.forEach(r=>{if(r.src==='Autre prestataire')r.src='En compte'});store.set('dep-rec',recs)}       // {id,src,amt,date,nb,name,phone,paid,note}
 const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 let cur=today().slice(0,7);
@@ -523,7 +544,7 @@ const shift=(m,n)=>{const [y,mo]=m.split('-').map(Number);const d=new Date(y,mo-
 const mName=m=>{const [y,mo]=m.split('-');return new Date(+y,+mo-1,1).toLocaleDateString('fr-FR',{month:'long',year:'numeric'})};
 const toast=t=>{const e=$('toast');e.textContent=t;e.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>e.hidden=true,2600)};
 const CATS=['Carburant','Péage','Entretien','Lavage','Parking','Assurance','Autre'];
-let user=null,people=[],all=[],regles={},fm=today().slice(0,7),unsub=[],fromCache=false;
+let user=null,people=[],all=[],regles={},fm=today().slice(0,7),unsub=[],fromCache=false,pcAll=[],pcMode='jour',pcD=today(),pcDu=today(),pcAu=today();
 const MAX=5000;
 const locked=m=>!!(regles[m]&&regles[m].regle);
 const FLAG={A:'A',B:'B'};
@@ -552,20 +573,8 @@ onAuthStateChanged(auth,async u=>{
       n++;updateDoc(doc(db,'factures',d.id),{depensesImporte:true}).catch(()=>{});});
     if(n){save();render();toast(n>1?n+' factures ajoutées dans « À recevoir »':'Facture ajoutée dans « À recevoir »')}
   },()=>{}));
-  // Chauffeurs payés depuis le tableau de bord par CE compte → dépenses « Chauffeur » (retirées si le paiement est annulé)
-  unsub.push(onSnapshot(query(collection(db,'reservations'),where('paye.uid','==',u.uid)),s=>{
-    if(s.metadata&&s.metadata.fromCache)return;
-    const vus=new Set();let n=0,ch=false;
-    s.docs.forEach(d=>{const r=d.data(),p=r.paye||{};const amt=Math.round((Number(p.montant)||0)*100)/100;if(!amt)return;vus.add(d.id);
-      const note=[r.chauffeurNom,String(r.nom||'').replace(/^🏨\s*/,'')].filter(Boolean).join(' · ').slice(0,80);
-      const date=/^\d{4}-\d{2}-\d{2}$/.test(r.date||'')?r.date:today();
-      const it=items.find(i=>i.pid===d.id);
-      if(!it){items.push({id:Date.now()+n,cat:'Chauffeur',amt,tva:0,date,note,photo:false,pid:d.id});n++;ch=true}
-      else if(it.amt!==amt||it.date!==date){it.amt=amt;it.date=date;ch=true}});
-    const av=items.length;items=items.filter(i=>!i.pid||vus.has(i.pid));if(items.length!==av)ch=true;
-    if(ch){save();render()}
-    if(n)toast(n>1?n+' paiements chauffeur ajoutés':'Paiement chauffeur ajouté');
-  },()=>{}));
+  // Paiements chauffeurs (commun A/B) : courses du tableau de bord marquées « Par A / Par B »
+  unsub.push(onSnapshot(query(collection(db,'reservations'),where('paye.montant','>',0)),s=>{pcAll=s.docs.map(d=>({id:d.id,...d.data()}));pcDraw()},e=>{console.error(e)}));
   unsub.push(onSnapshot(collection(db,'frais_communs_mois'),s=>{regles={};s.docs.forEach(d=>regles[d.id]=d.data());draw()},()=>{}));
 });
 function draw(){
@@ -602,6 +611,38 @@ function draw(){
   const lk=locked(fm);$('fcLock').hidden=!lk;$('fcAdd').hidden=lk;$('fcCsv').disabled=!M.length;
 }
 addEventListener('online',()=>user&&draw());addEventListener('offline',()=>user&&draw());
+/* 🚖 Paiements chauffeurs */
+const addDays=(d,n)=>{const x=new Date(d+'T12:00');x.setDate(x.getDate()+n);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')};
+const dLong=d=>new Date(d+'T12:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+const dShort=d=>new Date(d+'T12:00').toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'});
+function pcBornes(){if(pcMode==='jour')return[pcD,pcD];if(pcMode==='mois'){const m=pcD.slice(0,7);return[m+'-01',addDays(shift(m,1)+'-01',-1)]}return pcDu<=pcAu?[pcDu,pcAu]:[pcAu,pcDu]}
+function pcDraw(){
+  const nomL=L=>{const p=people.find(x=>x.lettre===L);return p&&p.nom&&p.nom!=='Moi'?' ('+p.nom+')':''};
+  const mt=r=>Math.round((Number(r.paye&&r.paye.montant)||0)*100)/100;
+  const moisCour=today().slice(0,7),moisTot=pcAll.filter(r=>String(r.date||'').slice(0,7)===moisCour).reduce((s,r)=>s+mt(r),0);
+  $('pcTot').textContent=user&&moisTot?eur(moisTot):'';$('pcSub').textContent=user?(moisTot?'Ce mois-ci · A et B':'Payés par A et B, au jour ou au mois'):'Connecte-toi d\'abord dans Frais communs';
+  if($('dPC').hidden)return;
+  const [du,au]=pcBornes();
+  $('pcSeg').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.m===pcMode));
+  $('pcRange').hidden=pcMode!=='plage';$('pcDu').value=du;$('pcAu').value=au;
+  $('pcPer').textContent=pcMode==='jour'?(pcD===today()?"Aujourd'hui":dLong(pcD)):pcMode==='mois'?mName(pcD.slice(0,7)):'Du '+dShort(du)+' au '+dShort(au);
+  const L=pcAll.filter(r=>r.date>=du&&r.date<=au).sort((a,b)=>(b.date+(b.heure||'')).localeCompare(a.date+(a.heure||'')));
+  const tA=L.filter(r=>r.paye.par==='A'),tB=L.filter(r=>r.paye.par==='B'),sm=a=>a.reduce((s,r)=>s+mt(r),0);
+  $('pcBig').textContent=eur(sm(L));
+  $('pcAB').innerHTML=`<div class="A"><span>Payé par A${esc(nomL('A'))}</span><b>${eur(sm(tA))}</b><span>${tA.length} course${tA.length>1?'s':''}</span></div><div class="B"><span>Payé par B${esc(nomL('B'))}</span><b>${eur(sm(tB))}</b><span>${tB.length} course${tB.length>1?'s':''}</span></div>`;
+  if(!L.length){$('pcList').innerHTML='<p class="mut" style="text-align:center;margin:20px 0">Aucun paiement chauffeur sur cette période.</p>';return}
+  let h='',last='';
+  L.forEach(r=>{if(r.date!==last){last=r.date;const j=L.filter(x=>x.date===r.date);h+=`<div class="pc-day"><span>${esc(dLong(r.date))}</span><span>A ${eur(sm(j.filter(x=>x.paye.par==='A')))} · B ${eur(sm(j.filter(x=>x.paye.par==='B')))}</span></div>`}
+    const tr=[r.dep,r.arr].map(x=>String(x||'?').split(',')[0]).join(' → ');
+    h+=`<div class="pc-it"><span class="ic ${r.paye.par==='A'?'A':'B'}">${esc(r.paye.par||'?')}</span><span><span class="t">${esc(r.chauffeurNom||'Chauffeur')}</span><div class="s">${esc(r.heure||'')} · ${esc(String(r.nom||'').replace(/^🏨\s*/,''))} · ${esc(tr)}</div></span><span class="m">${eur(mt(r))}</span></div>`});
+  $('pcList').innerHTML=h;
+}
+$('pcOpen').onclick=()=>{if(!user){toast('Connecte-toi d\'abord dans Frais communs');$('dFC').hidden=false;return}pcD=today();$('dPC').hidden=false;pcDraw()};
+$('pcClose').onclick=()=>$('dPC').hidden=true;
+$('pcSeg').onclick=e=>{const b=e.target.closest('[data-m]');if(!b)return;pcMode=b.dataset.m;if(pcMode==='plage'){pcAu=today();pcDu=addDays(pcAu,-6)}pcDraw()};
+$('pcPrev').onclick=()=>pcNav(-1);$('pcNext').onclick=()=>pcNav(1);
+function pcNav(n){if(pcMode==='jour')pcD=addDays(pcD,n);else if(pcMode==='mois')pcD=shift(pcD.slice(0,7),n)+'-01';else{const [du,au]=pcBornes();const k=Math.round((new Date(au)-new Date(du))/864e5)+1;pcDu=addDays(du,n*k);pcAu=addDays(au,n*k)}pcDraw()}
+$('pcDu').onchange=e=>{if(e.target.value){pcDu=e.target.value;pcDraw()}};$('pcAu').onchange=e=>{if(e.target.value){pcAu=e.target.value;pcDraw()}};
 $('fcOpen').onclick=()=>{fm=today().slice(0,7);$('dFC').hidden=false;if(user)draw()};
 $('fcClose').onclick=()=>$('dFC').hidden=true;
 $('fcPrev').onclick=()=>{fm=shift(fm,-1);draw()};$('fcNext').onclick=()=>{fm=shift(fm,1);draw()};
