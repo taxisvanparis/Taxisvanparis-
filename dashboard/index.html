@@ -3104,7 +3104,7 @@ function anonymise(title,location){
 
 
   // ===== 🚖 Mode dispatch : 1) envoyer au groupe  2) « Qui l'a prise ? » sur chaque course  3) elle passe chez son chauffeur =====
-  let dpJour = "", dpTab = "a", dpNum = new Map(), dpCur = null, dpAussi = new Set(), dpNon = new Set(), dpPay = null, dpCliLang = "";
+  let dpJour = "", dpTab = "a", dpNum = new Map(), dpCur = null, dpAussi = new Set(), dpNon = new Set(), dpGrpOff = new Set(), dpPay = null, dpCliLang = "";
   const dpCh = nom => chauffeursCache.find(x => (x.nom || "").trim().toLowerCase() === String(nom || "").trim().toLowerCase());
   async function dpTel(nom, tel) { // enregistre le numéro du chauffeur (fiche Chauffeurs)
     tel = String(tel || "").trim(); if (!tel) return;
@@ -3181,7 +3181,7 @@ function anonymise(title,location){
     ov.querySelectorAll("[data-dptab]").forEach(b => b.classList.toggle("on", b.dataset.dptab === dpTab)); ov.querySelector(".dp-cols").dataset.tab = dpTab;
     const nonEnv = A.filter(r => !dpNum.has(r.id));
     ov.querySelector(".dp-a .dp-l").innerHTML = A.length
-      ? (nonEnv.length ? `<div class="dp-send"><div class="dp-step">① Envoie au groupe</div><div class="dp-sr"><input id="dp-prix" inputmode="decimal" placeholder="💶 Même prix pour toutes (facultatif)"><button type="button" data-dpgrp>📤 Envoyer ${nonEnv.length === A.length ? "les " : ""}${nonEnv.length} course${nonEnv.length > 1 ? "s" : ""} au groupe</button></div></div>` : "")
+      ? (nonEnv.length ? (() => { const sel = nonEnv.filter(r => !dpGrpOff.has(r.id)).length; return `<div class="dp-send"><div class="dp-step">① Choisis les courses à envoyer au groupe</div>${nonEnv.map(r => `<label class="dp-opt"><input type="checkbox" data-dpgrpsel="${esc(r.id)}"${dpGrpOff.has(r.id) ? "" : " checked"}><span>${esc(r.heure || "—")} · ${dpNom(r)}<small>${dpTr(r).replace(/<\/?small>/g, " · ").replace(/<[^>]+>/g, "")}</small></span></label>`).join("")}<div class="dp-sr"><input id="dp-prix" inputmode="decimal" placeholder="💶 Même prix pour toutes (facultatif)"><button type="button" data-dpgrp${sel ? "" : " disabled"}>📤 Envoyer ${sel} course${sel > 1 ? "s" : ""} au groupe</button></div></div>`; })() : "")
         + `<div class="dp-step">② Quand un chauffeur répond, touche « Qui l'a prise ? »</div>` + A.map(r => dpCarte(r, true)).join("")
       : `<p class="dp-vide">✓ Toutes les courses ont un chauffeur 👍</p>`;
     const g = new Map(); B.forEach(r => { const n = r.chauffeurNom; if (!g.has(n)) g.set(n, []); g.get(n).push(r); });
@@ -3260,11 +3260,13 @@ function anonymise(title,location){
         dpPay = null; renderReservations(); dpDraw(); return;
       }
       if (t.dataset.dpgrp !== undefined) {
-        const rs = dpCourses().filter(r => !r.chauffeurNom && !dpNum.has(r.id)), px = (document.getElementById("dp-prix") || {}).value || "";
+        const rs = dpCourses().filter(r => !r.chauffeurNom && !dpNum.has(r.id) && !dpGrpOff.has(r.id)), px = (document.getElementById("dp-prix") || {}).value || "";
+        if (!rs.length) return;
         let k = Math.max(0, ...dpNum.values()); rs.forEach(r => dpNum.set(r.id, ++k));
         const m = rs.map(r => { const it = Object.assign(shareItem(r), { prixCh: r.prixChauffeur ? String(r.prixChauffeur).replace(".", ",") : px.trim() }); const n = dpNum.get(r.id); return shareMessage(it).replace("🚖 *COURSE DISPONIBLE*", `${NUMS[n - 1] || "🚖"} *COURSE N°${n}*`); }).join("\n\n");
         window.open(waLink(m), "_blank");
         const tt = Date.now(), pn = prixChNum(px); rs.forEach(r => { const u = { dispatchEnvoye: tt }; if (pn && !r.prixChauffeur) u.prixChauffeur = pn; Object.assign(r, u); updateDoc(doc(db, "reservations", r.id), u).catch(() => {}); });
+        dpGrpOff.clear();
         toast("📤 Envoyé — quand un chauffeur répond « je prends la 2 », touche « Qui l'a prise ? » sur la N°2", 5000);
         return dpDraw();
       }
@@ -3312,7 +3314,7 @@ function anonymise(title,location){
         dpConf = null; return dpSheet();
       }
     });
-    ov.addEventListener("change", ev => { if (ev.target.id === "dp-clilang") { dpCliLang = ev.target.value; return; } const wid = ev.target.dataset && ev.target.dataset.dpwasel; if (wid) { ev.target.checked ? dpNon.delete(wid) : dpNon.add(wid); return dpConfSheet(); } const k = ev.target.dataset && ev.target.dataset.dpopt; if (!k) return; const o = dpOpt(); o[k] = ev.target.checked; try { localStorage.setItem("tvp_dp_opt", JSON.stringify(o)); } catch (e) {} dpConfSheet(); });
+    ov.addEventListener("change", ev => { const gid = ev.target.dataset && ev.target.dataset.dpgrpsel; if (gid) { ev.target.checked ? dpGrpOff.delete(gid) : dpGrpOff.add(gid); return dpDraw(); } if (ev.target.id === "dp-clilang") { dpCliLang = ev.target.value; return; } const wid = ev.target.dataset && ev.target.dataset.dpwasel; if (wid) { ev.target.checked ? dpNon.delete(wid) : dpNon.add(wid); return dpConfSheet(); } const k = ev.target.dataset && ev.target.dataset.dpopt; if (!k) return; const o = dpOpt(); o[k] = ev.target.checked; try { localStorage.setItem("tvp_dp_opt", JSON.stringify(o)); } catch (e) {} dpConfSheet(); });
     ov.addEventListener("change", ev => { const id = ev.target.dataset && ev.target.dataset.dpcpx; if (!id) return; const r = reservationsCache.find(x => x.id === id); if (!r) return; enregistrerPrixCh(r, ev.target.value); ev.target.value = r.prixChauffeur ? String(r.prixChauffeur).replace(".", ",") : ""; toast(r.prixChauffeur ? "💶 " + eurTxt(r.prixChauffeur) + " · " + String(r.nom || "").replace(/^🏨\s*/, "") : "Prix effacé", 2000); renderReservations(); });
     ov.addEventListener("input", ev => { if (ev.target.id === "dp-nom") { const v = ev.target.value.trim(), c = dpCh(v); document.getElementById("dp-ntel").hidden = !v || !!(c && c.tel); } });
     ov.addEventListener("keydown", ev => { if (ev.key === "Enter" && ev.target.id === "dp-nom") { ev.preventDefault(); ov.querySelector("[data-dpok]").click(); } });
