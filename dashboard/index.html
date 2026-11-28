@@ -538,12 +538,17 @@
 .dp-pz{font-style:normal;font-size:12px;font-weight:800;background:var(--soft,#f3f0e8);border:1px solid var(--border);border-radius:999px;padding:0 7px;margin-left:4px}.dp-w{color:#c4352b!important;font-weight:700}
 .dp-chs button.grp{border-color:#9fd3b2!important}.dp-chs button.grp small{color:#1f7a45}
 .dp-chs button.busy{border-color:#e9a39b!important;background:rgba(196,53,43,.06)}.dp-chs button.busy small{color:#c4352b}
+.dp-act{display:flex;flex-direction:column;gap:8px}.dp-act[hidden]{display:none}
+.dp-grp{min-height:48px;border:0;border-radius:12px;background:#25d366;color:#08240f;font:inherit;font-weight:800;font-size:15px;cursor:pointer}
+.dp-qui{border-top:1px dashed var(--border);padding-top:8px}.dp-qui>b{display:block;font-size:14px;margin-bottom:6px}
+.dp-in{display:flex;gap:6px;margin-bottom:8px}.dp-in input{flex:1;min-width:0;min-height:44px;border:2px solid #c9a84c;border-radius:10px;padding:0 10px;background:var(--bg);color:var(--text);font:inherit;font-size:16px}.dp-in button{flex:none;border:0;border-radius:10px;background:#1f7a45;color:#fff;font:inherit;font-weight:800;padding:0 14px;cursor:pointer}
+.dp-no{flex:none;font-weight:800;font-size:13px;background:#25d366;color:#08240f;border-radius:8px;padding:3px 7px}.dp-env{color:#1f7a45!important;font-weight:700}
 .dp-px{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;margin-bottom:8px}.dp-px input{flex:1;min-width:0;min-height:40px;border:1px solid var(--border);border-radius:10px;padding:0 10px;background:var(--bg);color:var(--text);font:inherit;font-size:16px}
 .dp-vide{color:var(--muted);text-align:center;margin:24px 0;font-weight:700}
 .dp-bar{border-top:1px solid var(--border);padding:10px;background:var(--card)}.dp-bh{font-weight:800;font-size:14px;margin-bottom:8px;color:var(--muted)}.dp-bar.arm .dp-bh{color:#b7791f}
-.dp-chs{display:flex;flex-wrap:wrap;gap:8px;max-height:150px;overflow-y:auto}.dp-chs button{flex:none;min-width:100px;text-align:left;border:2px solid var(--border);background:var(--bg);color:var(--text);border-radius:12px;padding:8px 12px;font:inherit;cursor:pointer}.dp-chs b{display:block}.dp-chs small{color:#1f7a45;font-weight:700}
+.dp-chs{display:flex;flex-wrap:wrap;gap:6px;max-height:120px;overflow-y:auto}.dp-chs button{min-width:0!important;padding:6px 10px!important}.dp-chs button{flex:none;min-width:100px;text-align:left;border:2px solid var(--border);background:var(--bg);color:var(--text);border-radius:12px;padding:8px 12px;font:inherit;cursor:pointer}.dp-chs b{display:block}.dp-chs small{color:#1f7a45;font-weight:700}
 .dp-bar.arm .dp-chs button{border-color:#c9a84c}
-@media (max-width:820px){.dp-tabs{display:flex}.dp-cols{grid-template-columns:1fr}.dp-cols[data-tab="a"] .dp-b,.dp-cols[data-tab="b"] .dp-a{display:none}.dp-cols h3{display:none}.dp-prog{min-width:90px}}
+@media (max-width:820px){.dp-bar{padding:8px}.dp-act{gap:6px}.dp-px input{min-height:36px}.dp-grp{min-height:42px}.dp-chs{flex-wrap:nowrap;overflow-x:auto;max-height:none}.dp-chs button{flex:none}.dp-qui>b{display:none}.dp-c{padding:8px}.dp-h{font-size:16px;min-width:44px}.dp-tabs{display:flex}.dp-cols{grid-template-columns:1fr}.dp-cols[data-tab="a"] .dp-b,.dp-cols[data-tab="b"] .dp-a{display:none}.dp-cols h3{display:none}.dp-prog{min-width:90px}}
 .imp-tg,.tf-tg{display:flex;gap:10px;align-items:center;margin:0 0 10px;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:var(--card);cursor:pointer}.tf-tg{margin:12px 0 0}.imp-tg input,.tf-tg input{width:22px;height:22px;flex:none;accent-color:#b7791f}.imp-tg span,.tf-tg span{font-weight:800;font-size:14px}.imp-tg small,.tf-tg small{display:block;font-weight:500;font-size:12px;color:var(--muted)}
 .tb-pc{display:block;width:fit-content;margin:5px 0 0 auto;font-style:normal;font-size:12px;font-weight:800;color:var(--text);background:var(--soft);border:1px solid var(--border);border-radius:999px;padding:2px 8px;white-space:nowrap;letter-spacing:0;text-transform:none}.tf-pcl{display:flex;align-items:center;gap:10px;margin:12px 0 0;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:var(--card)}.tf-pcl span{flex:1;font-weight:700;font-size:14px}.tf-pcl b{font-size:17px}.tf-pcl button{min-height:38px;padding:0 12px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--text);font:inherit;font-weight:700;cursor:pointer}
 .tb-py{display:block;width:fit-content;margin:5px 0 0 auto;letter-spacing:0;text-transform:none;font-style:normal;font-size:12px;font-weight:800;color:#1f7a45;background:#e3f4ea;border-radius:999px;padding:2px 8px;white-space:nowrap}.tf-py{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:12px 0 4px;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:var(--card)}.tf-py span{flex:1 1 100%;font-weight:700;font-size:14px}.tf-pym{flex:1 1 100%;box-sizing:border-box;min-height:44px;padding:0 12px;border:1px solid var(--border);border-radius:10px;background:var(--bg);color:var(--text);font:inherit;font-size:16px}.tf-py button{flex:1;min-height:42px;border-radius:10px;border:1px solid #1f7a45;background:#e3f4ea;color:#1f7a45;font:inherit;font-weight:800;cursor:pointer}.tf-py button[data-par=""]{flex:0 0 auto;padding:0 14px;border-color:var(--border);background:transparent;color:var(--muted)}
@@ -3091,12 +3096,13 @@ function anonymise(title,location){
   let dpJour = "", dpSel = new Set(), dpTab = "a";
   const dpCourses = () => reservationsCache.filter(r => r.statut !== "annulée" && r.statut !== "terminée" && (r.date || "") >= todayStr() && (!dpJour || r.date === dpJour))
     .sort((a, b) => ((a.date || "") + (a.heure || "")).localeCompare((b.date || "") + (b.heure || "")));
+  // Noms des chauffeurs déjà utilisés (les plus fréquents des 60 derniers jours d'abord) — pas besoin d'une liste toute faite
   function dpChauffeurs() {
-    const m = new Map();
-    chauffeursCache.forEach(c => c.nom && m.set(c.nom.trim(), c));
-    reservationsCache.forEach(r => { const n = String(r.chauffeurNom || "").trim(); if (n && !m.has(n)) m.set(n, { nom: n }); });
-    return [...m.values()].sort((a, b) => a.nom.localeCompare(b.nom, "fr"));
+    const lim = new Date(Date.now() - 60 * 864e5).toISOString().slice(0, 10), f = new Map();
+    reservationsCache.forEach(r => { const n = String(r.chauffeurNom || "").trim(); if (n && (r.date || "") >= lim) f.set(n, (f.get(n) || 0) + 1); });
+    return [...f.entries()].sort((x, y) => y[1] - x[1] || x[0].localeCompare(y[0], "fr")).map(([nom]) => ({ nom }));
   }
+  let dpNum = new Map(); // n° donnés dans le dernier message au groupe
   const dpMin = r => { const m = String(r.heure || "").match(/(\d{1,2}):(\d{2})/); return m ? +m[1] * 60 + +m[2] : null; };
   const dpLieu = a => sansAcc(a).replace(/[^a-z0-9]/g, "");
   // Conflit = même chauffeur, moins d'1 h d'écart, départs différents (même départ + même heure = courses regroupées, pas un conflit)
@@ -3109,7 +3115,7 @@ function anonymise(title,location){
   const dpJ = d => d === todayStr() ? "Aujourd'hui" : new Date(d + "T12:00").toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short" });
   function dpCarte(r, gauche) {
     const tr = "📍 " + esc(lieuListe(r.dep).replace(/<[^>]+>/g, "")) + "</small><small>🏁 " + esc(arretsDe(r) ? "🛑 " + arretsDe(r).length + " déposes" : lieuListe(r.arr).replace(/<[^>]+>/g, ""));
-    return `<div class="dp-c${gauche && dpSel.has(r.id) ? " on" : ""}" data-dpc="${esc(r.id)}">${gauche ? `<span class="dp-cb">${dpSel.has(r.id) ? "✓" : ""}</span>` : ""}<span class="dp-h">${esc(r.heure || "—")}${dpJour ? "" : `<small>${esc(dpJ(r.date))}</small>`}</span><span class="dp-t"><b>${esc(String(r.nom || "—").replace(/^🏨\s*/, ""))}${r.tournage ? " 🎬" : ""}${!gauche && r.prixChauffeur ? ` <em class="dp-pz">${eurTxt(r.prixChauffeur)}</em>` : ""}</b><small>${tr}</small>${!gauche && reservationsCache.some(x => x.id !== r.id && x.chauffeurNom === r.chauffeurNom && x.statut !== "annulée" && dpConflit(x, r)) ? `<small class="dp-w">⚠️ Une autre course à la même heure</small>` : ""}</span>${gauche ? "" : `<button type="button" class="dp-x" data-dpx="${esc(r.id)}" title="Retirer le chauffeur">↩︎</button>`}</div>`;
+    return `<div class="dp-c${gauche && dpSel.has(r.id) ? " on" : ""}" data-dpc="${esc(r.id)}">${gauche ? `<span class="dp-cb">${dpSel.has(r.id) ? "✓" : ""}</span>` : ""}${gauche && dpNum.has(r.id) ? `<span class="dp-no">N°${dpNum.get(r.id)}</span>` : ""}<span class="dp-h">${esc(r.heure || "—")}${dpJour ? "" : `<small>${esc(dpJ(r.date))}</small>`}</span><span class="dp-t"><b>${esc(String(r.nom || "—").replace(/^🏨\s*/, ""))}${r.tournage ? " 🎬" : ""}${!gauche && r.prixChauffeur ? ` <em class="dp-pz">${eurTxt(r.prixChauffeur)}</em>` : ""}</b><small>${tr}</small>${gauche && r.dispatchEnvoye && !dpNum.has(r.id) ? `<small class="dp-env">📤 déjà envoyée au groupe</small>` : ""}${!gauche && reservationsCache.some(x => x.id !== r.id && x.chauffeurNom === r.chauffeurNom && x.statut !== "annulée" && dpConflit(x, r)) ? `<small class="dp-w">⚠️ Une autre course à la même heure</small>` : ""}</span>${gauche ? "" : `<button type="button" class="dp-x" data-dpx="${esc(r.id)}" title="Retirer le chauffeur">↩︎</button>`}</div>`;
   }
   function dpDraw() {
     const ov = document.getElementById("dp-ov"); if (!ov) return;
@@ -3122,16 +3128,18 @@ function anonymise(title,location){
     ov.querySelectorAll("[data-dptab]").forEach(b => b.classList.toggle("on", b.dataset.dptab === dpTab)); ov.querySelector(".dp-cols").dataset.tab = dpTab;
     ov.querySelector(".dp-a .dp-l").innerHTML = A.length ? `<button type="button" class="dp-all" data-dpall>${A.every(r => dpSel.has(r.id)) ? "Tout décocher" : "Tout cocher (" + A.length + ")"}</button>` + A.map(r => dpCarte(r, true)).join("") : `<p class="dp-vide">✓ Toutes les courses ont un chauffeur 👍</p>`;
     const g = new Map(); B.forEach(r => { const n = r.chauffeurNom; if (!g.has(n)) g.set(n, []); g.get(n).push(r); });
-    ov.querySelector(".dp-b .dp-l").innerHTML = B.length ? [...g.entries()].sort((x, y) => x[0].localeCompare(y[0], "fr")).map(([n, rs]) => `<div class="dp-g"><div class="dp-gh"><span>🚖 ${esc(n)} <i>${rs.length}</i>${rs.every(r => r.dispatchEnvoye) ? ' <small class="dp-ok">✓ envoyé</small>' : ""}</span><button type="button" class="dp-wa" data-dpwa="${esc(n)}">💬 Envoyer ses courses</button></div>${rs.map(r => dpCarte(r, false)).join("")}</div>`).join("") : `<p class="dp-vide">Aucune course attribuée pour l'instant.</p>`;
+    ov.querySelector(".dp-b .dp-l").innerHTML = B.length ? [...g.entries()].sort((x, y) => x[0].localeCompare(y[0], "fr")).map(([n, rs]) => `<div class="dp-g"><div class="dp-gh"><span>🚖 ${esc(n)} <i>${rs.length}</i>${rs.every(r => r.dispatchEnvoye) ? ' <small class="dp-ok">✓ envoyé</small>' : ""}</span><button type="button" class="dp-wa" data-dpwa="${esc(n)}">💬 Lui confirmer</button></div>${rs.map(r => dpCarte(r, false)).join("")}</div>`).join("") : `<p class="dp-vide">Aucune course attribuée pour l'instant.</p>`;
     const n = dpSel.size, cnt = nm => L.filter(r => r.chauffeurNom === nm).length;
-    ov.querySelector(".dp-bar").classList.toggle("arm", n > 0); ov.querySelector(".dp-px").hidden = !n;
-    ov.querySelector(".dp-bh").textContent = n ? `Donner ${n} course${n > 1 ? "s" : ""} à :` : "Coche une ou plusieurs courses, puis touche un chauffeur";
+    ov.querySelector(".dp-bar").classList.toggle("arm", n > 0); ov.querySelector(".dp-act").hidden = !n;
+    ov.querySelector(".dp-bh").textContent = n ? `${n} course${n > 1 ? "s" : ""} cochée${n > 1 ? "s" : ""}` : "Coche les courses à envoyer au groupe, ou celles qu'un chauffeur a prises";
+    const noms = dpChauffeurs(); ov.querySelector("#dp-noms").innerHTML = noms.map(c => `<option value="${esc(c.nom)}">`).join("");
     const selR = [...dpSel].map(id => reservationsCache.find(x => x.id === id)).filter(Boolean);
     const occ = nm => reservationsCache.filter(x => x.chauffeurNom === nm && x.statut !== "annulée").find(x => selR.some(y => dpConflit(x, y)));
-    ov.querySelector(".dp-chs").innerHTML = dpChauffeurs().map(c => { const o = n ? occ(c.nom) : null, gr = n && !o ? reservationsCache.filter(x => x.chauffeurNom === c.nom && x.statut !== "annulée" && selR.some(y => y.date === x.date && dpMin(y) === dpMin(x) && dpLieu(y.dep) === dpLieu(x.dep))).length : 0; return `<button type="button" data-dpch="${esc(c.nom)}"${o ? ' class="busy"' : gr ? ' class="grp"' : ""}><b>${esc(c.nom)}</b><small>${o ? "⚠️ pris à " + esc(o.heure) : gr ? "🚐 déjà " + gr + " au même départ" : cnt(c.nom) ? cnt(c.nom) + " course" + (cnt(c.nom) > 1 ? "s" : "") : "libre"}</small></button>`; }).join("") + `<button type="button" data-dpch=""><b>+ Autre</b><small>nouveau nom</small></button>`;
+    ov.querySelector(".dp-chs").innerHTML = noms.slice(0, 8).map(c => { const o = n ? occ(c.nom) : null, gr = n && !o ? reservationsCache.filter(x => x.chauffeurNom === c.nom && x.statut !== "annulée" && selR.some(y => y.date === x.date && dpMin(y) === dpMin(x) && dpLieu(y.dep) === dpLieu(x.dep))).length : 0; return `<button type="button" data-dpch="${esc(c.nom)}"${o ? ' class="busy"' : gr ? ' class="grp"' : ""}><b>${esc(c.nom)}</b><small>${o ? "⚠️ pris à " + esc(o.heure) : gr ? "🚐 déjà " + gr + " au même départ" : cnt(c.nom) ? cnt(c.nom) + " course" + (cnt(c.nom) > 1 ? "s" : "") : "libre"}</small></button>`; }).join("");
   }
   async function dpAttribuer(nom) {
     const c = chauffeursCache.find(x => (x.nom || "").trim() === nom), ids = [...dpSel];
+    ids.forEach(id => dpNum.delete(id));
     const maj = { chauffeurNom: nom, chauffeurUid: c && c.uid ? c.uid : "" }, px = prixChNum(document.getElementById("dp-prix").value);
     if (px) maj.prixChauffeur = px; document.getElementById("dp-prix").value = "";
     dpSel.clear();
@@ -3145,7 +3153,9 @@ function anonymise(title,location){
     const ov = document.createElement("div"); ov.id = "dp-ov";
     ov.innerHTML = `<div class="dp-top"><button type="button" class="dp-close" aria-label="Fermer">✕</button><h2>🚖 Dispatch</h2><div class="dp-prog"></div></div>
       <div class="dp-jours"></div><div class="dp-tabs"><button type="button" data-dptab="a"></button><button type="button" data-dptab="b"></button></div>
-      <div class="dp-cols"><section class="dp-a"><h3>⏳ À attribuer</h3><div class="dp-l"></div><div class="dp-bar"><div class="dp-bh"></div><label class="dp-px">💶 Prix chauffeur <input id="dp-prix" inputmode="decimal" placeholder="€ (facultatif)"></label><div class="dp-chs"></div></div></section><section class="dp-b"><h3>✓ Attribuées, par chauffeur</h3><div class="dp-l"></div></section></div>`;
+      <div class="dp-cols"><section class="dp-a"><h3>⏳ À attribuer</h3><div class="dp-l"></div><div class="dp-bar"><div class="dp-bh"></div><div class="dp-act"><label class="dp-px">💶 Prix chauffeur <input id="dp-prix" inputmode="decimal" placeholder="€ (facultatif)"></label>
+      <button type="button" class="dp-grp" data-dpgrp>📤 Envoyer au groupe WhatsApp</button>
+      <div class="dp-qui"><b>Qui l'a prise ?</b><div class="dp-in"><input id="dp-nom" list="dp-noms" placeholder="Nom du chauffeur" autocomplete="off"><button type="button" data-dpok>✓ Attribuer</button></div><datalist id="dp-noms"></datalist><div class="dp-chs"></div></div></div></div></section><section class="dp-b"><h3>✓ Attribuées, par chauffeur</h3><div class="dp-l"></div></section></div>`;
     document.body.appendChild(ov); document.body.style.overflow = "hidden";
     ov.addEventListener("click", ev => {
       const t = ev.target.closest("button,[data-dpc]"); if (!t) return;
@@ -3154,6 +3164,23 @@ function anonymise(title,location){
       if (t.dataset.dptab) { dpTab = t.dataset.dptab; return dpDraw(); }
       if (t.dataset.dpall !== undefined) { const A = dpCourses().filter(r => !r.chauffeurNom); if (A.every(r => dpSel.has(r.id))) dpSel.clear(); else A.forEach(r => dpSel.add(r.id)); return dpDraw(); }
       if (t.dataset.dpx) { const r = reservationsCache.find(x => x.id === t.dataset.dpx); if (!r) return; Object.assign(r, { chauffeurNom: null, chauffeurUid: null }); dpDraw(); renderReservations(); updateDoc(doc(db, "reservations", r.id), { chauffeurNom: null, chauffeurUid: null, dispatchEnvoye: null }).then(() => toast("↩︎ Retirée de " + (t.closest(".dp-g")?.querySelector(".dp-gh")?.textContent.replace(/^🚖\s*|\s*\d+$/g, "") || "ce chauffeur"))).catch(() => toast("Pas enregistré, réessaie", 4000)); return; }
+      if (t.dataset.dpgrp !== undefined) {
+        const rs = dpCourses().filter(r => dpSel.has(r.id)), px = document.getElementById("dp-prix").value.trim(), NUMS = ["1️⃣","2️⃣","3️⃣","4️⃣","5️⃣","6️⃣","7️⃣","8️⃣","9️⃣","🔟"];
+        dpNum = new Map(); rs.forEach((r, k) => dpNum.set(r.id, k + 1));
+        const m = rs.map((r, k) => { const it = Object.assign(shareItem(r), { prixCh: px || (r.prixChauffeur ? String(r.prixChauffeur) : "") }); const x = shareMessage(it); return rs.length > 1 ? x.replace("🚖 *COURSE DISPONIBLE*", `${NUMS[k] || "🚖"} *COURSE N°${k + 1}*`) : x; }).join("\n\n");
+        window.open(waLink(m), "_blank");
+        const tt = Date.now(), pn = prixChNum(px); rs.forEach(r => { const u = { dispatchEnvoye: tt }; if (pn) u.prixChauffeur = pn; Object.assign(r, u); updateDoc(doc(db, "reservations", r.id), u).catch(() => {}); });
+        dpSel.clear(); toast("📤 Envoyé au groupe — quand un chauffeur répond, coche ses N° et écris son nom", 5000);
+        return dpDraw();
+      }
+      if (t.dataset.dpok !== undefined) {
+        if (!dpSel.size) { toast("Coche d'abord les courses qu'il a prises"); return; }
+        const nom = document.getElementById("dp-nom").value.trim(); if (!nom) { toast("Écris le nom du chauffeur"); document.getElementById("dp-nom").focus(); return; }
+        const selR = [...dpSel].map(id => reservationsCache.find(x => x.id === id)).filter(Boolean);
+        const o = reservationsCache.filter(x => x.chauffeurNom === nom && x.statut !== "annulée").find(x => selR.some(y => dpConflit(x, y)));
+        if (o && !confirm(nom + " a déjà une course à " + o.heure + ". Lui donner quand même ?")) return;
+        document.getElementById("dp-nom").value = ""; return dpAttribuer(nom);
+      }
       if (t.dataset.dpwa) {
         const nom = t.dataset.dpwa, rs = dpCourses().filter(r => r.chauffeurNom === nom), c = chauffeursCache.find(x => (x.nom || "").trim() === nom);
         const num = c && c.tel ? waNumClient(c.tel) : "";
@@ -3164,7 +3191,7 @@ function anonymise(title,location){
       }
       if (t.dataset.dpch !== undefined) {
         if (!dpSel.size) { toast("Coche d'abord une ou plusieurs courses"); return; }
-        let nom = t.dataset.dpch; if (!nom) { nom = (prompt("Nom du chauffeur ?") || "").trim(); if (!nom) return; }
+        const nom = t.dataset.dpch;
         if (t.classList.contains("busy") && !confirm(nom + " a déjà une course à cette heure-là. Lui donner quand même ?")) return;
         return dpAttribuer(nom);
       }
